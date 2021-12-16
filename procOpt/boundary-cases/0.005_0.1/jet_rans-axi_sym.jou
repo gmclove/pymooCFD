@@ -1,0 +1,30 @@
+/file/import ideas-universal jet_rans-axi_sym.unv
+/file/auto-save case-frequency if-case-is-modified
+/file/auto-save data-frequency 1000
+/define/models axisymmetric y
+/define/models/viscous kw-sst y
+/define/models/species species-transport y mixture-template
+/define/materials change-create air scalar n n n n n n n n
+/define/materials change-create mixture-template mixture-template y 2 scalar air 0 0 n n n n n n
+/define/boundary-conditions/modify-zones/zone-type outlet pressure-outlet ;outflow
+/define/boundary-conditions/modify-zones/zone-type coflow velocity-inlet
+/define/boundary-conditions velocity-inlet coflow y y n 0.01 n 0 n 1 n 0 n 300 n n y 5 10 n n 0
+/define/boundary-conditions/modify-zones/zone-type inlet velocity-inlet
+/define/boundary-conditions velocity-inlet inlet n n y y n 0.1 n 0 n 300 n n y 5 10 n n 1
+/define/boundary-conditions/modify-zones/zone-type axis axis
+/solve/initialize/hyb-initialization
+/solve/monitors/residual convergence-criteria 1e-5 1e-6 1e-6 1e-6 1e-6 1e-5 1e-6
+/solve/iterate 1000
+/solve/set discretization-scheme species-0 6
+/solve/set discretization-scheme mom 6
+/solve/set discretization-scheme k 6
+/solve/set discretization-scheme omega 6
+/solve/set discretization-scheme temperature 6
+/define/boundary-conditions velocity-inlet coflow y y n 0.005 n 0 n 1 n 0 n 300 n n y 5 10 n n 0
+/solve/iterate 4000
+/file/export cgns jet_rans-axi_sym.cgns n y velocity-mag scalar q
+OK
+/file write-case-data jet_rans-axi_sym.cgns
+OK
+/exit
+OK

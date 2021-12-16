@@ -1,0 +1,91 @@
+STARTING NEW OPTIMIZATION STUDY
+     START-UP: first generation
+SAVING CHECKPOINT - GENERATION 1
+     mid-generation
+Starting  opt_run/gen1
+EXECUTING BATCH OF SIMULATIONS
+SLURM EXECUTION
+     slurm job IDs:
+		[['6764977' 'opt_run/gen1/ind1']
+		 ['6764978' 'opt_run/gen1/ind2']
+		 ['6764979' 'opt_run/gen1/ind3']]
+
+     sims still running or queued = 3..................................................................................................................
+	['6764977' 'opt_run/gen1/ind1'] complete
+
+	['6764978' 'opt_run/gen1/ind2'] complete
+
+	['6764979' 'opt_run/gen1/ind3'] complete
+.
+     DONE WAITING
+
+BATCH OF SLURM SIMULATIONS COMPLETE
+opt_run/gen1/ind1 :  [1.106757143530679, 832.6107739663162]
+opt_run/gen1/ind2 :  [1.1304711921844426, 8.619768187950772]
+opt_run/gen1/ind3 :  [1.2166007914218182, 343.86329870640856]
+GENERATION 1 COMPLETE
+===========================================================================
+n_gen |  n_eval |  mean obj.1  |  best obj.1  |  mean obj.2  |  best obj.2 
+===========================================================================
+===========================================================================
+n_gen |  n_eval |  mean obj.1  |  best obj.1  |  mean obj.2  |  best obj.2 
+===========================================================================
+    1 |       3 |  1.151276376 |  1.106757144 |  3.95031E+02 |  8.619768188
+SAVING CHECKPOINT - GENERATION 1
+     Updating Pareto front folder: opt_run/gen1/ind1 -> opt_run/pf/opt1
+     Updating Pareto front folder: opt_run/gen1/ind2 -> opt_run/pf/opt2
+     START-UP: new generation
+SAVING CHECKPOINT - GENERATION 2
+Starting  opt_run/gen2
+EXECUTING BATCH OF SIMULATIONS
+SLURM EXECUTION
+     slurm job IDs:
+		[['6764999' 'opt_run/gen2/ind1']
+		 ['6765000' 'opt_run/gen2/ind2']]
+
+     sims still running or queued = 2.................................................................................................................
+	['6764999' 'opt_run/gen2/ind1'] complete
+
+	['6765000' 'opt_run/gen2/ind2'] complete
+.
+     DONE WAITING
+
+BATCH OF SLURM SIMULATIONS COMPLETE
+opt_run/gen2/ind1 :  [1.1031639156175954, 959.162666472781]
+opt_run/gen2/ind2 :  [1.091126283200877, 1372.6525667673359]
+GENERATION 2 COMPLETE
+===========================================================================
+n_gen |  n_eval |  mean obj.1  |  best obj.1  |  mean obj.2  |  best obj.2 
+===========================================================================
+    2 |       5 |  1.109451540 |  1.091126283 |  7.37961E+02 |  8.619768188
+SAVING CHECKPOINT - GENERATION 2
+     Updating Pareto front folder: opt_run/gen2/ind2 -> opt_run/pf/opt1
+     START-UP: new generation
+SAVING CHECKPOINT - GENERATION 3
+Starting  opt_run/gen3
+removing opt_run/gen2..
+opt_run/gen2 removed successfully
+EXECUTING BATCH OF SIMULATIONS
+SLURM EXECUTION
+     slurm job IDs:
+		[['6767013' 'opt_run/gen3/ind1']
+		 ['6767014' 'opt_run/gen3/ind2']]
+
+     sims still running or queued = 2...................................................................................................................
+	['6767013' 'opt_run/gen3/ind1'] complete
+
+	['6767014' 'opt_run/gen3/ind2'] complete
+.
+     DONE WAITING
+
+BATCH OF SLURM SIMULATIONS COMPLETE
+opt_run/gen3/ind1 :  [1.1388993028250272, 5.9323339715602295]
+opt_run/gen3/ind2 :  [1.0992062358503945, 1329.721028485405]
+GENERATION 3 COMPLETE
+===========================================================================
+n_gen |  n_eval |  mean obj.1  |  best obj.1  |  mean obj.2  |  best obj.2 
+===========================================================================
+    3 |       7 |  1.112260910 |  1.091126283 |  7.37065E+02 |  5.932333972
+SAVING CHECKPOINT - GENERATION 3
+     Updating Pareto front folder: opt_run/gen3/ind1 -> opt_run/pf/opt2
+hash 2214.5324574347687
