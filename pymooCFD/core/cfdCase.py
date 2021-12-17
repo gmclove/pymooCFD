@@ -371,7 +371,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
         self._preProc()
         pass
 
-    def _execComplete(self):
+    def _isExecDone(self):
         return True
 
     def _postProc(self):

@@ -14,10 +14,10 @@ def main():
     '''
     ### Pre-Proccess ###
     # optStudy.preProc()
-    # optStudy.runTestCase()
-    # optStudy.testCase.meshStudy()
-    # optStudy.runBndCases(1, getDiags=False, doMeshStudy=True)
-    # optStudy.runGen1()
+    optStudy.runTestCase()
+    optStudy.testCase.meshStudy()
+    optStudy.runBndCases(1, getDiags=False, doMeshStudy=True)
+    optStudy.runGen1()
     # optStudy.meshStudy(optStudy.gen1Pop)
 
     ### Execute Study ###

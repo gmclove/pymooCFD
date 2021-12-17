@@ -166,7 +166,6 @@ class OptStudy:
         alg = copy.deepcopy(self.algorithm)
         alg.setup(self.problem, ('n_gen', 1))
         alg.next()
-        pass
 
     ####################
     #    MESH STUDY    #
@@ -253,11 +252,13 @@ class OptStudy:
         return out
     def runPop(self, cases):
         self.preProcPop(cases)
-        self.execute(cases)
+        self.execPop(cases)
         self.postProcPop(cases)
     def preProcPop(self, cases):
         for case in cases:
             case.preProc()
+    def execPop(self, cases):
+        self._execPop(cases)
     def postProcPop(self, cases):
         for case in cases:
             case.postProc()
@@ -312,8 +313,8 @@ class OptStudy:
                 with np.printoptions(precision=3, suppress=True, formatter={'all':lambda x: '%.3g' % x}):
                     caseName = str(perm).replace('[', '').replace(']', '').replace(' ', '_')
                 cornerCaseDir = os.path.join(self.procOptDir, 'corner-cases', caseName)
-                cornerCase = self.BaseCase(baseCaseDir, cornerCaseDir, perm)
-                conerCases.append(cornerCase)
+                cornerCase = self.BaseCase(self.baseCaseDir, cornerCaseDir, perm)
+                cornerCases.append(cornerCase)
         self.runPop(cornerCases)
 
     def runBndCases(self, n_pts, getDiags = False, doMeshStudy = False):
@@ -322,7 +323,6 @@ class OptStudy:
         if doMeshStudy:
             for case in self.bndCases:
                 case.meshStudy()
-        return dirs, bndPts
 
     def genBndCases(self, n_pts, getDiags = False):
         bndPts = self.getBndPts(n_pts, getDiags=getDiags)
@@ -398,7 +398,7 @@ class OptStudy:
                 # if simulation is no longer in squeue
                 if count[bID_i] != prev_count[bID_i]:
                     ### check if simulation failed
-                    complete = bID[1]._execComplete()
+                    complete = bID[1]._isExecDone()
                     ## if failed launch slurmExec as subprocess
                     if not complete:
                         print(f'\n\tJob ID: {bID[0]} | {bID[1]} INCOMPLETE')
@@ -488,6 +488,9 @@ class OptStudy:
     # ==========================================================================
     # TO BE OVERWRITTEN
     # ==========================================================================
+    def _execPop(self, cases):
+        pass
+
     def _meshStudy(self):
         pass
 
