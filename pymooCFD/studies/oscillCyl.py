@@ -124,6 +124,7 @@ class OscillCylinderOpt(OptStudy):
                 *args, **kwargs):
         super().__init__(algorithm, problem, baseCase,
                         baseCaseDir = 'osc-cyl_base',
+                        optDatDir = 'cyl-opt_run',
                         *args, **kwargs)
 
     def execute(self, cases):

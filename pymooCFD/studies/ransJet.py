@@ -396,6 +396,8 @@ class RANSJetOpt(OptStudy):
     def __init__(self, algorithm, problem, baseCase,
                 *args, **kwargs):
         super().__init__(algorithm, problem, baseCase,
+                        baseCaseDir = 'rans-jet_base',
+                        optDatDir = 'jet-opt_run',
                         *args, **kwargs)
 
     def execute(self, cases):

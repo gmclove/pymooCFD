@@ -1,7 +1,7 @@
 # @Author: glove
 # @Date:   2021-12-10T10:32:00-05:00
 # @Last modified by:   glove
-# @Last modified time: 2021-12-14T16:23:28-05:00
+# @Last modified time: 2021-12-16T10:15:25-05:00
 from myStudy import BaseCase, MyOptStudy
 #####################################
 #### Genetic Algorithm Criteria #####
