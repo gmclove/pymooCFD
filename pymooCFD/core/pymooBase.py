@@ -1,14 +1,8 @@
-# @Author: glove
-# @Date:   2021-12-10T10:32:00-05:00
-# @Last modified by:   glove
-# @Last modified time: 2021-12-16T10:15:25-05:00
-from myStudy import BaseCase, MyOptStudy
-#####################################
 #### Genetic Algorithm Criteria #####
 #####################################
-n_gen = 25
-pop_size = 50
-n_offsprings = int(pop_size * (2 / 3))  # = num. of evaluations each generation
+n_gen = 2
+pop_size = 2
+n_offsprings = int(pop_size * (2 / 3)) # = number of evaluations each generation
 
 #################
 #    PROBLEM    #
@@ -139,10 +133,3 @@ algorithm.save_history = True
 algorithm.seed = 1
 algorithm.return_least_infeasible = True
 algorithm.verbose = True
-
-################################################################################
-########  Optimization Study Object Initialization ##########
-optStudy = MyOptStudy(algorithm, problem, BaseCase,
-                    var_labels = BaseCase.var_labels,
-                    obj_labels = BaseCase.obj_labels,
-                    procLim = 64)

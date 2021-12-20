@@ -2,24 +2,64 @@
 # @Date:   2021-12-10T11:22:40-05:00
 # @Last modified by:   glove
 # @Last modified time: 2021-12-14T15:45:19-05:00
+
+import os
 import numpy as np
-class Test:
-    def __init__(self):
-        self.l = np.array([0.006599578695870828, 0.35595787774394816])
-    def __str__(self):
-        return f'{self.l}'
-# l = [0.006599578695870828, 0.35595787774394816]
-test = Test()
-print(test.l[0])
-# print(test.l)
-# print(f'{test.l}')
-print(test)
-print(f'{test}')
-print(type(test.l))
-# with np.printoptions(suppress=True):
-#     print(test.l)
+print('scratch.py')
 
 
+
+# # def loadCases(directory):
+# directory = os.path.join('opt_run', 'gen1')
+# print(os.listdir(directory))
+# cases = []
+# ents = os.listdir(directory)
+# for ent in ents:
+#     ent_path = os.path.join(directory, ent)
+#     if os.path.isdir(ent_path):
+#         for e in os.listdir(ent_path):
+#             caseCP = os.path.join(ent_path, 'case.npy')
+#             if os.path.exists(caseCP):
+#                 case, = np.load(caseCP, allow_pickle=True).flatten()
+#                 cases.append(case)
+# # return cases
+# # loadCases('opt_run/gen1')
+
+
+# import numpy as np
+# class Test:
+#     var = 1
+#     def func(self):
+#         print(self.var)
+#     def __str__(self):
+#         return 'TEST'
+#
+# test1 = Test()
+# test2 = Test()
+# l = np.array([test1, test2])
+# np.save('cpTest.npy', l, allow_pickle=True)
+# print(l)
+# list = np.load('cpTest.npy', allow_pickle=True).flatten()
+# print(list)
+
+
+
+# import numpy as np
+# class Test:
+#     def __init__(self):
+#         self.l = np.array([0.006599578695870828, 0.35595787774394816])
+#     def __str__(self):
+#         return f'{self.l}'
+# # l = [0.006599578695870828, 0.35595787774394816]
+# test = Test()
+# print(test.l[0])
+# # print(test.l)
+# # print(f'{test.l}')
+# print(test)
+# print(f'{test}')
+# print(type(test.l))
+# # with np.printoptions(suppress=True):
+# #     print(test.l)
 
 
 # class Test:

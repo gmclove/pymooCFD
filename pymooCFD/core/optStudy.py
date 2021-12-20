@@ -16,15 +16,15 @@ from pymooCFD.util.sysTools import emptyDir, copy_and_overwrite
 
 class OptStudy:
     def __init__(self, algorithm, problem, BaseCase,
-                 archiveDir = 'archive', n_CP = 10, n_opt = 20,
-                 optDatDir = 'opt_run', CP_fName = 'checkpoint.npy',
-                 pfDir = 'pareto_front', baseCaseDir = 'base_case',
-                 procOptDir = 'procOpt', plotsDir = 'plots',
-                 mapGen1Dir = 'mapGen1', meshStudyDir = 'meshStudy',
-                 meshSFs = np.arange(0.5, 1.5, 0.1),
-                 procLim = os.cpu_count(),
-                 var_labels = None, obj_labels = None,
-                 client = None,
+                 archiveDir='archive', n_CP=10, n_opt=20,
+                 optDatDir='opt_run', CP_fName='checkpoint.npy',
+                 pfDir='pareto_front', baseCaseDir='base_case',
+                 procOptDir='procOpt', plotsDir='plots',
+                 mapGen1Dir='mapGen1', meshStudyDir='meshStudy',
+                 meshSFs=np.arange(0.5, 1.5, 0.1),
+                 procLim=os.cpu_count(),
+                 var_labels=None, obj_labels=None,
+                 client=None,
                  *args, **kwargs
                  ):
         super().__init__()
@@ -85,7 +85,7 @@ class OptStudy:
         self.bndCases = None
         self.genTestCase()
 
-    def run(self, restart = True):
+    def run(self, restart=True):
         if restart:
             self.loadCP()
             print("Loaded Checkpoint:", self.algorithm)
@@ -484,6 +484,32 @@ class OptStudy:
             case = self.BaseCase(self.baseCaseDir, paths[x_i], x)
             cases.append(case)
         return cases
+
+    def loadCases(directory):
+        cases = []
+        ents = os.listdir(directory)
+        for ent in ents:
+            ent_path = os.path.join(directory, ent)
+            if os.path.isdir(ent_path):
+                for e in os.listdir(ent_path):
+                    caseCP = os.path.join(ent_path, 'case.npy')
+                    if os.path.exists(caseCP):
+                        case, = np.load(caseCP, allow_pickle=True).flatten()
+                        cases.append(case)
+        return cases
+
+    #####################
+    #     PROPERTIES    #
+    #####################
+    @property
+    def gen1Pop(self):
+        path = os.path.join(self.optDatDir, 'gen1Pop.npy')
+        gen1Pop = np.load(path, allow_pickle=True).flatten()
+        return gen1Pop
+    @gen1Pop.setter
+    def gen1Pop(self, cases):
+        path = os.path.join(self.optDatDir, 'gen1Pop.npy')
+        np.save(path, cases, allow_pickle=True)
 
     # ==========================================================================
     # TO BE OVERWRITTEN

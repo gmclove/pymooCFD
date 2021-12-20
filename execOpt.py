@@ -17,7 +17,8 @@ def main():
     optStudy.runTestCase()
     optStudy.testCase.meshStudy()
     optStudy.runBndCases(1, getDiags=False, doMeshStudy=True)
-    optStudy.runGen1()
+    # optStudy.runGen1()
+    optStudy.run(restart=False)
     # optStudy.meshStudy(optStudy.gen1Pop)
 
     ### Execute Study ###
