@@ -228,12 +228,13 @@ class OptStudy:
         self.testCase = self.BaseCase(self.baseCaseDir, testCaseDir, x_mid)
 
     def runTestCase(self):
+        print('TEST CASE RUNNING')
         self.genTestCase()
         obj = self.testCase.run()
         print('Parameters:', self.testCase.x)
         print('Objectives:', obj)
+        print('TEST CASE COMPLETE ')
         return self.testCase
-
 
     #################################
     #    RUN POPULATION OF CASES    #
@@ -262,8 +263,6 @@ class OptStudy:
     def postProcPop(self, cases):
         for case in cases:
             case.postProc()
-
-
 
     ########################
     #    BOUNDARY CASES    #
