@@ -8,8 +8,8 @@ import numpy as np
 import subprocess
 from threading import Thread
 import copy
+import shutil
 # import h5py
-# import shutil
 # import matplotlib.pyplot as plt
 
 from pymooCFD.util.sysTools import emptyDir, copy_and_overwrite
