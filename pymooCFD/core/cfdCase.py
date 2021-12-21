@@ -41,11 +41,12 @@ class CFDCase: #(PreProcCase, PostProcCase)
                  *args, **kwargs
                  ):
         ### Required Arguments -> Attributes
-        self.caseDir = caseDir
-        self.x = x
-        self.logger = self.getLogger()
-        ### Default Attributes
         self.baseCaseDir = baseCaseDir
+        self.caseDir = caseDir
+        self.logger = self.getLogger()
+        self.copy() # create directory before start
+        self.x = x
+        ### Default Attributes
         # os.makedirs(self.baseCaseDir, exist_ok=True)
         self.meshSF = meshSF
         self.meshSFs = meshSFs
@@ -84,8 +85,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
         self.preProcComplete = False
         self.postProcComplete = False
         self.execComplete = False
-        ### Copy base case to case directory ###
-        self.copy()
+
         ### Save Checkpoint ###
         # _, tail = os.path.split(caseDir)
         # self.cpPath = os.path.join(caseDir, tail+'.npy')
