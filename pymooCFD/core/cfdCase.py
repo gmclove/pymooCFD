@@ -348,7 +348,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
     # __repr__ = __str__
 
     def __deepcopy__(self, memo):
-        shutil.copytree(self.baseCaseDir, self.caseDir)
+        shutil.copytree(self.baseCaseDir, self.caseDir, exist_ok=True)
         print('COPIED:', self.baseCaseDir, '->', self.caseDir)
         cls = self.__class__
         result = cls.__new__(cls)
