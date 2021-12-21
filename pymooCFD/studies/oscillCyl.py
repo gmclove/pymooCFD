@@ -31,10 +31,10 @@ class OscillCylinder(CFDCase):
 
     def __init__(self, baseCaseDir, caseDir, x):
         super().__init__(baseCaseDir, caseDir, x,
-                         meshFile = '2D_cylinder.msh22',
-                         datFile = 'ics_temporals.txt',
-                         jobFile = 'jobslurm.sh',
-                         inputFile = '2D_cylinder.in',
+                         meshFile='2D_cylinder.msh22',
+                         datFile='ics_temporals.txt',
+                         jobFile='jobslurm.sh',
+                         inputFile='2D_cylinder.in',
                          )
 
     def _preProc_restart(self):
@@ -149,11 +149,11 @@ class OscillCylinder(CFDCase):
         topPt = gmsh.model.occ.addPoint(0, dom_D/2, 0)
         inlet = gmsh.model.occ.addCircleArc(botPt, centPt, topPt)
         outlet = gmsh.model.occ.addCircleArc(topPt, centPt, botPt)
-        domLoop = gmsh.model.occ.addCurveLoop([inlet, outlet]) # creates 2-D entity
+        domLoop = gmsh.model.occ.addCurveLoop([inlet, outlet])  # creates 2-D entity
         # add circle to rectangular domain to represent cylinder
         cylCir = gmsh.model.occ.addCircle(0, 0, 0, cylD/2)  # 1-dim. entity
         # use 1-D circle to create curve loop entity
-        cylLoop = gmsh.model.occ.addCurveLoop([cylCir]) # creates 2-D entity
+        cylLoop = gmsh.model.occ.addCurveLoop([cylCir])  # creates 2-D entity
         # create plane surface between rectangle and circle
         dom = gmsh.model.occ.addPlaneSurface([domLoop, cylLoop])
         # We finish by synchronizing the data from OpenCASCADE CAD kernel with the Gmsh model:
