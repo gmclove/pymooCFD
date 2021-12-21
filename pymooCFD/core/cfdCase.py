@@ -40,7 +40,6 @@ class CFDCase: #(PreProcCase, PostProcCase)
                 restart = False,
                 *args, **kwargs
                 ):
-        shutil.copytree(baseCaseDir, caseDir, dirs_exist_ok=True)
         ### Required Arguments -> Attributes
         self.caseDir = caseDir
         self.x = x
@@ -85,6 +84,8 @@ class CFDCase: #(PreProcCase, PostProcCase)
         self.preProcComplete = False
         self.postProcComplete = False
         self.execComplete = False
+        ### Copy base case to case directory ###
+        self.copy()
         ### Save Checkpoint ###
         # _, tail = os.path.split(caseDir)
         # self.cpPath = os.path.join(caseDir, tail+'.npy')
@@ -153,6 +154,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
             msCase.meshStudyDir = None
             msCase.caseDir = os.path.join(self.meshStudyDir, f'meshSF-{sf}')
             msCase.meshSF = sf
+            msCase.copy()
             ### only pre-processing needed is generating mesh
             msCase.genMesh()
             a_numElem.append(msCase.numElem)
@@ -193,6 +195,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
         #     meshSFs = self.meshSFs
         self.genMeshStudy()
         procs = [case.solve() for case in self.msCases]
+        print('\tWAITING')
         for proc in procs: proc.wait()
         for case in self.msCases: case.postProc()
         self.plotMeshStudy()
@@ -299,6 +302,12 @@ class CFDCase: #(PreProcCase, PostProcCase)
     ########################
     #    HELPER METHODS    #
     ########################
+    def copy(self):
+        if os.path.exists(self.caseDir):
+            self.logger.warning('CASE OVERRIDE - self.caseDir already existed')
+        shutil.copytree(self.baseCaseDir, self.caseDir, dirs_exist_ok=True)
+        self.logger.info(f'COPIED: {self.baseCaseDir} -> {self.caseDir}')
+
     def findKeywordLine(self, kw, file_lines):
         kw_line = -1
         kw_line_i = -1
@@ -347,15 +356,15 @@ class CFDCase: #(PreProcCase, PostProcCase)
         return f'Directory: {self.caseDir} | Parameters: {self.x}'
     # __repr__ = __str__
 
-    def __deepcopy__(self, memo):
-        shutil.copytree(self.baseCaseDir, self.caseDir, exist_ok=True)
-        print('COPIED:', self.baseCaseDir, '->', self.caseDir)
-        cls = self.__class__
-        result = cls.__new__(cls)
-        memo[id(self)] = result
-        for k, v in self.__dict__.items():
-            setattr(result, k, copy.deepcopy(v, memo))
-        return result
+    # def __deepcopy__(self, memo):
+    #     # shutil.copytree(self.baseCaseDir, self.caseDir, dirs_exist_ok=True)
+    #     # print('COPIED:', self.baseCaseDir, '->', self.caseDir)
+    #     cls = self.__class__
+    #     result = cls.__new__(cls)
+    #     memo[id(self)] = result
+    #     for k, v in self.__dict__.items():
+    #         setattr(result, k, copy.deepcopy(v, memo))
+    #     return result
     ### Calling destructor
     # def __del__(self):
     #     shutil.rmtree(caseDir)
