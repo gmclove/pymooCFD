@@ -132,7 +132,7 @@ class OscillCylinder(CFDCase):
         gmsh.option.setNumber("General.Terminal", 0)
         gmsh.clear()
         gmsh.model.add(projName)
-        gmsh.model.setNumber('Mesh.MeshSizeFactor', self.meshSF)
+        gmsh.option.setNumber('Mesh.MeshSizeFactor', self.meshSF)
         #################################
         #      YALES2 Requirements      #
         #################################
