@@ -40,11 +40,14 @@ class CFDCase: #(PreProcCase, PostProcCase)
                  restart=False,
                  *args, **kwargs
                  ):
+        if not os.path.exists(caseDir):
+            os.makedirs(caseDir)
+            print('NEW CASE')
         ### Required Arguments -> Attributes
         self.baseCaseDir = baseCaseDir
         self.caseDir = caseDir
         self.logger = self.getLogger()
-        self.copy() # create directory before start
+        self.copy()  # create directory before start
         self.x = x
         ### Default Attributes
         # os.makedirs(self.baseCaseDir, exist_ok=True)
