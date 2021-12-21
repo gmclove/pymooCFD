@@ -102,8 +102,8 @@ class OscillCylinder(CFDCase):
         C_drag = F_drag/((1/2)*rho*U**2*D**2)
 
         ### Objective 2 ###
-        # Objective 2: Power consumed by rotating cylinder
-        t = 1  # [sec]
+        ## Objective 2: Power consumed by rotating cylinder
+        # t = 1  # [sec]
         D = 1  # [m] cylinder diameter
         th = 0.1  # [m] thickness of cylinder wall
         r_o = D/2  # [m] outer radius
@@ -113,8 +113,8 @@ class OscillCylinder(CFDCase):
         V = L*np.pi*(r_o**2-r_i**2)  # [m^3] volume of cylinder
         m = d*V  # [kg] mass of cylinder
         I = 0.5*m*(r_i**2+r_o**2)  # [kg m^2] moment of inertia of a hollow cylinder
-        KE_consu = 0.5*I*omega**2*quad(lambda t: abs(np.sin(2*np.pi*freq*t)**2)[0],
-                                       0, 1)
+        KE_consu = 0.5*I*omega**2*4*np.pi*freq*quad(lambda t:
+                    abs(np.sin(2*np.pi*freq*t)*np.cos(2*np.pi*freq*t))[0], 0, 1)
         obj = [C_drag, KE_consu]
         self.logger.info(f'{self.caseDir}: {obj}')
         return obj
