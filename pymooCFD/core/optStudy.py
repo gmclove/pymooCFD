@@ -14,6 +14,7 @@ import copy
 
 from pymooCFD.util.sysTools import emptyDir, copy_and_overwrite
 
+
 class OptStudy:
     def __init__(self, algorithm, problem, BaseCase,
                  archiveDir='archive', n_CP=10, n_opt=20,
@@ -83,6 +84,8 @@ class OptStudy:
         self.gen1Pop = None
         self.cornerCases = None
         self.bndCases = None
+        ### Test Case ###
+        self.testCase = None
         self.genTestCase()
 
     def run(self, restart=True):
@@ -222,10 +225,14 @@ class OptStudy:
     #    TEST CASE    #
     ###################
     def genTestCase(self, testCaseDir='test_case'):
-        xl = self.problem.xl
-        xu = self.problem.xu
-        x_mid = [xl[x_i]+(xu[x_i]-xl[x_i])/2 for x_i in range(self.problem.n_var)]
-        self.testCase = self.BaseCase(self.baseCaseDir, testCaseDir, x_mid)
+        if self.testCase is None:
+            shutil.rmtree('test_case', ignore_errors=True)
+            xl = self.problem.xl
+            xu = self.problem.xu
+            x_mid = [xl[x_i]+(xu[x_i]-xl[x_i])/2 for x_i in range(self.problem.n_var)]
+            self.testCase = self.BaseCase(self.baseCaseDir, testCaseDir, x_mid)
+        else:
+            print('TEST CASE ALREADY EXISTS')
 
     def runTestCase(self):
         print('TEST CASE RUNNING')
