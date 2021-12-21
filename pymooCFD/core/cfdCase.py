@@ -21,7 +21,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
     # if not len(xl) == len(xu) and len(xu) == len(var_labels) and len(var_labels) == n_var:
     #     raise Exception("Design Space Definition Incorrect")
     ####### Define Objective Space ########
-    obj_labels = ['Velocity Field Error', 'Particle Concentration Error']
+    obj_labels = None
     n_obj = None
     ####### Define Constraints #########
     n_constr = None
@@ -31,15 +31,15 @@ class CFDCase: #(PreProcCase, PostProcCase)
 
 
     def __init__(self, baseCaseDir, caseDir, x,
-                meshSF = 1, meshSFs = np.arange(0.5, 1.5, 0.1),
-                # var_labels = None, obj_labels = None,
-                meshFile = None, #meshLines = None,
-                jobFile = None, #jobLines = None,
-                inputFile = None, #inputLines = None,
-                datFile = None,
-                restart = False,
-                *args, **kwargs
-                ):
+                 meshSF=1, meshSFs=np.arange(0.5, 1.5, 0.1),
+                 # var_labels = None, obj_labels = None,
+                 meshFile=None, #meshLines = None,
+                 jobFile=None, #jobLines = None,
+                 inputFile=None, #inputLines = None,
+                 datFile=None,
+                 restart=False,
+                 *args, **kwargs
+                 ):
         ### Required Arguments -> Attributes
         self.caseDir = caseDir
         self.x = x

@@ -9,19 +9,15 @@ from pymooCFD.core.cfdCase import CFDCase
 class RANSJet(CFDCase):
     ####### Define Design Space #########
     n_var = 2
-    var_labels = ['Mouth Diameter', 'Breath Velocity']
+    var_labels = ['Mouth Diameter [m]', 'Breath Velocity [m/s]']
     varType =    ["real", "real"]  ## OPTIONS: 'int' or 'real'
     xl =         [0.005, 0.1] ## lower limits of parameters/variables
     xu =         [0.04, 0.4]  ## upper limits of variables
     if not len(xl) == len(xu) and len(xu) == len(var_labels) and len(var_labels) == n_var:
         raise Exception("Design Space Definition Incorrect")
     ####### Define Objective Space ########
-    obj_labels = ['Velocity Field Error', 'Particle Concentration Error']
     n_obj = 2
-    n_constr = 0
-
-    n_obj = 2
-    obj_labels = ['Velocity Field Error', 'Particle Concentration Error']
+    obj_labels = ['Velocity Field Error [m/s]', 'Scalar Concentration Error']
     n_constr = 0
     ##### Local Execution Command #####
     nProc = 8
@@ -186,7 +182,7 @@ class RANSJet(CFDCase):
     def _preProc(self):
         ####### EXTRACT VAR ########
         # Extract parameters for each individual
-        outVel = self.x[self.var_labels.index('Breath Velocity')]
+        outVel = self.x[self.var_labels.index('Breath Velocity [m/s]')]
         # outD = var[var_labels.index('Mouth Diameter')]
         ##### Generate New Mesh ######
         self.genMesh()
@@ -242,17 +238,17 @@ class RANSJet(CFDCase):
         self.inputLines = lines
         ####### Slurm Job Lines #########
         lines = ['#!/bin/bash',
-                "#SBATCH --partition=ib --constraint='ib&haswell_1'",
-                '#SBATCH --nodes=1',
-                '#SBATCH --ntasks=20',
-                '#SBATCH --time=00:20:00',
-                '#SBATCH --mem-per-cpu=2G',
-                '#SBATCH --job-name=jet_rans',
-                '#SBATCH --output=slurm.out',
-                'module load ansys/fluent-21.2.0',
-                'cd $SLURM_SUBMIT_DIR',
-                'time fluent 2ddp -g -pdefault -t$SLURM_NTASKS -slurm -i jet_rans-axi_sym.jou > run.out'
-                ]
+                 "#SBATCH --partition=ib --constraint='ib&haswell_1'",
+                 '#SBATCH --nodes=1',
+                 '#SBATCH --ntasks=20',
+                 '#SBATCH --time=00:20:00',
+                 '#SBATCH --mem-per-cpu=2G',
+                 '#SBATCH --job-name=jet_rans',
+                 '#SBATCH --output=slurm.out',
+                 'module load ansys/fluent-21.2.0',
+                 'cd $SLURM_SUBMIT_DIR',
+                 'time fluent 2ddp -g -pdefault -t$SLURM_NTASKS -slurm -i jet_rans-axi_sym.jou > run.out'
+                 ]
         self.jobLines = lines
 
     def _preProc_restart(self):
