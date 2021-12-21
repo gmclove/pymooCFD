@@ -30,11 +30,11 @@ class OscillCylinder(CFDCase):
 
     def __init__(self, baseCaseDir, caseDir, x):
         super().__init__(baseCaseDir, caseDir, x,
-                        meshFile = '2D_cylinder.msh22',
-                        datFile = 'ics_temporals.txt',
-                        jobFile = 'jobslurm.sh',
-                        inputFile = '2D_cylinder.in',
-                        )
+                         meshFile = '2D_cylinder.msh22',
+                         datFile = 'ics_temporals.txt',
+                         jobFile = 'jobslurm.sh',
+                         inputFile = '2D_cylinder.in',
+                         )
 
     def _preProc_restart(self):
         self._preProc()
@@ -99,7 +99,7 @@ class OscillCylinder(CFDCase):
         tau_intgrl_1 = data[mask, 6]
         F_drag = np.mean(p_over_rho_intgrl_1 - tau_intgrl_1)
         C_drag = F_drag/((1/2)*rho*U**2*D**2)
-        
+
         ### Objective 2 ###
         # Objective 2: Power consumed by rotating cylinder
         t = 1  # [sec]
