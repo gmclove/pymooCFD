@@ -29,7 +29,6 @@ class CFDCase: #(PreProcCase, PostProcCase)
     nProc = None
     solverExecCmd = None
 
-
     def __init__(self, baseCaseDir, caseDir, x,
                  meshSF=1, meshSFs=np.arange(0.5, 1.5, 0.1),
                  # var_labels = None, obj_labels = None,
@@ -118,18 +117,22 @@ class CFDCase: #(PreProcCase, PostProcCase)
         return obj
 
     def solve(self):
+        # if self.f is None: # and not self.restart:
         self.restart = True
         if self.solverExecCmd is None:
-            raise Exception('No external solver execution command give. Please include python CFD solver here or add solverExecCmd to object.')
+            self.logger.error('No external solver execution command give. Please override solve() method with python CFD solver or add solverExecCmd to CFDCase object.')
+            raise Exception('No external solver execution command give. Please override solve() method with python CFD solver or add solverExecCmd to CFDCase object.')
         else:
-            proc = subprocess.Popen(self.solverExecCmd, cwd = self.caseDir,
+            proc = subprocess.Popen(self.solverExecCmd, cwd=self.caseDir,
                                     stdout=subprocess.DEVNULL)
             return proc
+        # else:
+        #     self.logger.warning('SKIPPED SOLVE() METHOD')
 
     def preProc(self):
         if self.restart:
         # self.cpPath = os.path.join
-            self.logger.info('Using self._preProc_restart()')
+            self.logger.info('PRE-PROCESS RESTART - Using self._preProc_restart()')
             self._preProc_restart()
         else:
             self._preProc()
