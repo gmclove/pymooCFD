@@ -14,7 +14,6 @@ wds = ['test_case1', 'test_case2', 'test_case3']
 for wd in wds:
     subprocess.Popen(cmd, cwd=wd)
 
-
 # # def loadCases(directory):
 # directory = os.path.join('opt_run', 'gen1')
 # print(os.listdir(directory))
