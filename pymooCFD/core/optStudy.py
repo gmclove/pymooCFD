@@ -103,11 +103,11 @@ class OptStudy:
             emptyDir(self.optDatDir)
             # load algorithm defined in setupOpt.py module
             self.algorithm.setup(self.problem,
-                                seed=self.algorithm.seed,
-                                verbose=self.algorithm.verbose,
-                                save_history=self.algorithm.save_history,
-                                return_least_infeasible=self.algorithm.return_least_infeasible
-                                )
+                                 seed=self.algorithm.seed,
+                                 verbose=self.algorithm.verbose,
+                                 save_history=self.algorithm.save_history,
+                                 return_least_infeasible=self.algorithm.return_least_infeasible
+                                 )
             # start client if being used
             if self.client is not None:
                 self.client()
@@ -225,18 +225,16 @@ class OptStudy:
     #    TEST CASE    #
     ###################
     def genTestCase(self, testCaseDir='test_case'):
-        if self.testCase is None:
-            shutil.rmtree('test_case', ignore_errors=True)
-            xl = self.problem.xl
-            xu = self.problem.xu
-            x_mid = [xl[x_i]+(xu[x_i]-xl[x_i])/2 for x_i in range(self.problem.n_var)]
-            self.testCase = self.BaseCase(self.baseCaseDir, testCaseDir, x_mid)
-        else:
-            print('TEST CASE ALREADY EXISTS')
+        shutil.rmtree('test_case', ignore_errors=True)
+        xl = self.problem.xl
+        xu = self.problem.xu
+        x_mid = [xl[x_i]+(xu[x_i]-xl[x_i])/2 for x_i in range(self.problem.n_var)]
+        self.testCase = self.BaseCase(self.baseCaseDir, testCaseDir, x_mid)
 
     def runTestCase(self):
         print('TEST CASE RUNNING')
-        self.genTestCase()
+        if self.testCase is None:
+            self.genTestCase()
         obj = self.testCase.run()
         print('Parameters:', self.testCase.x)
         print('Objectives:', obj)
