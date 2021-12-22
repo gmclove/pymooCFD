@@ -157,11 +157,12 @@ class CFDCase: #(PreProcCase, PostProcCase)
 
     def genMesh(self):
         self._genMesh()
+
     ####################
     #    MESH STUDY    #
     ####################
     def genMeshStudy(self):
-        print(f'GENERATING MESH STUDY - {self}')
+        print(f'GENERATING MESH STUDY: {self}')
         print(f'\t{self.meshSFs}')
         ### Pre-Process
         study = []
@@ -217,6 +218,8 @@ class CFDCase: #(PreProcCase, PostProcCase)
     def meshStudy(self, restart=True): #, meshSFs=None):
         # if meshSFs is None:
         #     meshSFs = self.meshSFs
+        # if self.msCases is None:
+        #     self.genMeshStudy()
         if not restart:
             self.genMeshStudy()
         procs = [case.solve() for case in self.msCases]
