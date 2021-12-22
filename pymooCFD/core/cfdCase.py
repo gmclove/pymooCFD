@@ -40,14 +40,30 @@ class CFDCase: #(PreProcCase, PostProcCase)
                  restart=False,
                  *args, **kwargs
                  ):
-        if not os.path.exists(caseDir):
-            os.makedirs(caseDir)
-            print('NEW CASE')
+        self.cpPath = os.path.join(caseDir, 'case.npy')
+        if os.path.exists(caseDir):
+            if os.path.exists(self.cpPath) and restart:
+                self.loadCP()
+                self.logger.info(f'RESTART CASE - restart from {self.cpPath}')
+                return
+            else:
+                self.logger = self.getLogger()
+                self.logger.info(f'OVERRIDE CASE - {caseDir} already exists')
+                self.copy()
+        else:
+            os.makedirs(caseDir, exist_ok=True)
+            self.logger = self.getLogger()
+            self.logger.info(f'NEW CASE - {caseDir} did not exist')
+            self.copy()
+        # if not os.path.exists(caseDir):
+        #     os.makedirs(caseDir)
+        #     msg = f'NEW CASE - {caseDir} did not exist'
+        #     print(msg)
         ### Required Arguments -> Attributes
         self.baseCaseDir = baseCaseDir
         self.caseDir = caseDir
-        self.logger = self.getLogger()
-        self.copy()  # create directory before start
+        # self.logger = self.getLogger()
+        # self.copy()  # create directory before start
         self.x = x
         ### Default Attributes
         # os.makedirs(self.baseCaseDir, exist_ok=True)
@@ -181,6 +197,8 @@ class CFDCase: #(PreProcCase, PostProcCase)
         _, tail = os.path.split(self.caseDir)
         a_numElem = np.array([case.numElem for case in self.msCases])
         msObj = np.array([case.f for case in self.msCases])
+        print(msObj)
+        print(a_numElem)
         ### Plot
         for obj_i, obj_label in enumerate(self.obj_labels):
             plt.plot(a_numElem, msObj[:, obj_i])
@@ -193,10 +211,11 @@ class CFDCase: #(PreProcCase, PostProcCase)
             plt.savefig()
             plt.clf()
 
-    def meshStudy(self): #, meshSFs=None):
+    def meshStudy(self, restart=True): #, meshSFs=None):
         # if meshSFs is None:
         #     meshSFs = self.meshSFs
-        self.genMeshStudy()
+        if not restart:
+            self.genMeshStudy()
         procs = [case.solve() for case in self.msCases]
         print('\tWAITING')
         for proc in procs: proc.wait()
@@ -278,6 +297,13 @@ class CFDCase: #(PreProcCase, PostProcCase)
             path = os.path.join(self.caseDir, 'obj.txt')
             np.savetxt(path, f)
         self._f = f
+
+    # @property
+    # def msCases(self): return self._msCases
+    # @msCases.setter
+    # def msCases(self, cases):
+    #     if cases is not None:
+    #         path = os.path.join(self.caseDir, 'msCases.npy')
 
     ################
     #    LOGGER    #
