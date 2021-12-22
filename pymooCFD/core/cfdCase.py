@@ -32,9 +32,9 @@ class CFDCase: #(PreProcCase, PostProcCase)
     def __init__(self, baseCaseDir, caseDir, x,
                  meshSF=1, meshSFs=np.arange(0.5, 1.5, 0.1),
                  # var_labels = None, obj_labels = None,
-                 meshFile=None, #meshLines = None,
-                 jobFile=None, #jobLines = None,
-                 inputFile=None, #inputLines = None,
+                 meshFile=None,  # meshLines = None,
+                 jobFile=None,  # jobLines = None,
+                 inputFile=None,  # inputLines = None,
                  datFile=None,
                  restart=False,
                  *args, **kwargs
