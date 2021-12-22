@@ -41,6 +41,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
                  ):
         self.baseCaseDir = baseCaseDir
         self.caseDir = caseDir
+        self.logger = self.getLogger()
         self.cpPath = os.path.join(caseDir, 'case.npy')
         if os.path.exists(caseDir):
             if os.path.exists(self.cpPath) and restart:
@@ -48,12 +49,10 @@ class CFDCase: #(PreProcCase, PostProcCase)
                 self.logger.info(f'RESTART CASE - restart from {self.cpPath}')
                 return
             else:
-                self.logger = self.getLogger()
                 self.logger.info(f'OVERRIDE CASE - {caseDir} already exists')
                 self.copy()
         else:
             os.makedirs(caseDir, exist_ok=True)
-            self.logger = self.getLogger()
             self.logger.info(f'NEW CASE - {caseDir} did not exist')
             self.copy()
         # if not os.path.exists(caseDir):
@@ -115,6 +114,12 @@ class CFDCase: #(PreProcCase, PostProcCase)
         proc.wait()
         obj = self.postProc()
         return obj
+
+    def slurmSolve(self):
+        cmd = ['sbatch', '--wait', self.jobFile]
+        proc = subprocess.Popen(cmd, cwd=self.caseDir,
+                                stdout=subprocess.DEVNULL)
+        return proc
 
     def solve(self):
         # if self.f is None: # and not self.restart:
@@ -333,6 +338,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
     def loadCP(self):
         cp, = np.load(self.cpPath, allow_pickle=True).flatten()
         self.__dict__.update(cp.__dict__)
+        self.logger.info('LOADING CHECKPOINT')
 
     ########################
     #    HELPER METHODS    #
