@@ -36,7 +36,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
                  jobFile=None, #jobLines = None,
                  inputFile=None, #inputLines = None,
                  datFile=None,
-                 restart=True,
+                 restart=False,
                  *args, **kwargs
                  ):
         self.baseCaseDir = baseCaseDir
