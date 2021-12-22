@@ -36,7 +36,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
                  jobFile=None, #jobLines = None,
                  inputFile=None, #inputLines = None,
                  datFile=None,
-                 restart=False,
+                 restart=True,
                  *args, **kwargs
                  ):
         self.baseCaseDir = baseCaseDir
@@ -220,7 +220,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
         #     meshSFs = self.meshSFs
         # if self.msCases is None:
         #     self.genMeshStudy()
-        if not restart:
+        if not restart or self.msCases is None:
             self.genMeshStudy()
         procs = [case.solve() for case in self.msCases]
         print('\tWAITING')
