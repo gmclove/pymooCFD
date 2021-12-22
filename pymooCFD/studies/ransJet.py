@@ -19,10 +19,12 @@ class RANSJet(CFDCase):
     n_obj = 2
     obj_labels = ['Velocity Field Error [m/s]', 'Scalar Concentration Error']
     n_constr = 0
+    ##### Execution Command #####
+    solverExecCmd = ['sbatch', '--wait', 'jobslurm.sh']
     ##### Local Execution Command #####
-    nProc = 8
-    solverExecCmd = ['C:\"Program Files"\"Ansys Inc"\v211\fluent\ntbin\win64\fluent.exe',
-    '2ddp', f'-t{nProc}', '-g', '-i', 'jet_rans-axi_sym.jou', '>', 'run.out']
+    # nProc = 8
+    # solverExecCmd = ['C:\"Program Files"\"Ansys Inc"\v211\fluent\ntbin\win64\fluent.exe',
+    # '2ddp', f'-t{nProc}', '-g', '-i', 'jet_rans-axi_sym.jou', '>', 'run.out']
 
     def __init__(self, baseCaseDir, caseDir, x):
         super().__init__(baseCaseDir, caseDir, x,

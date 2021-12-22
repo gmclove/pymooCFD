@@ -115,18 +115,25 @@ class CFDCase: #(PreProcCase, PostProcCase)
         obj = self.postProc()
         return obj
 
-    def slurmSolve(self):
-        cmd = ['sbatch', '--wait', self.jobFile]
-        proc = subprocess.Popen(cmd, cwd=self.caseDir,
-                                stdout=subprocess.DEVNULL)
-        return proc
+    # def solve(self):
+    #     proc = self._solve()
+    #     return proc
+    # def slurmSolve(self):
+    #     cmd = ['sbatch', '--wait', self.jobFile]
+    #     proc = subprocess.Popen(cmd, cwd=self.caseDir,
+    #                             stdout=subprocess.DEVNULL)
+    #     return proc
 
     def solve(self):
         # if self.f is None: # and not self.restart:
         self.restart = True
         if self.solverExecCmd is None:
-            self.logger.error('No external solver execution command give. Please override solve() method with python CFD solver or add solverExecCmd to CFDCase object.')
-            raise Exception('No external solver execution command give. Please override solve() method with python CFD solver or add solverExecCmd to CFDCase object.')
+            self.logger.error('No external solver execution command give. \
+                                Please override solve() method with python CFD \
+                                solver or add solverExecCmd to CFDCase object.')
+            raise Exception('No external solver execution command give. Please \
+                            override solve() method with python CFD solver or \
+                            add solverExecCmd to CFDCase object.')
         else:
             proc = subprocess.Popen(self.solverExecCmd, cwd=self.caseDir,
                                     stdout=subprocess.DEVNULL)
@@ -216,8 +223,8 @@ class CFDCase: #(PreProcCase, PostProcCase)
             plt.xlabel('Number of Elements')
             plt.ylabel(obj_label)
             fName = f'meshStudy_plot-{tail}-{obj_label}.png'
-            os.path.join(self.meshStudyDir, fName)
-            plt.savefig()
+            fPath = os.path.join(self.meshStudyDir, fName)
+            plt.savefig(fPath)
             plt.clf()
 
     def meshStudy(self, restart=True): #, meshSFs=None):
@@ -229,7 +236,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
             self.genMeshStudy()
         procs = [case.solve() for case in self.msCases]
         print('\tWAITING')
-        for proc in procs: proc.wait()
+        for proc in procs: print(proc.wait())
         for case in self.msCases: case.postProc()
         self.plotMeshStudy()
 

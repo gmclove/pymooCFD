@@ -479,6 +479,11 @@ class OptStudy:
     ########################
     #    HELPER METHODS    #
     ########################
+    def execCases(self, cases):
+        procs = [case.solve() for case in cases]
+        for p in procs:
+            print(p.wait())
+
     def genCases(self, paths, X): #, baseCase=None):
         # if baseCase is None:
         #     baseCase = self.BaseCase

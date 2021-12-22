@@ -7,6 +7,12 @@ import os
 import numpy as np
 print('scratch.py')
 
+import subprocess
+cmd = ['mpirun', '2D_cylinder']
+wds = ['test_case1', 'test_case2', 'test_case3']
+
+for wd in wds:
+    subprocess.Popen(cmd, cwd=wd)
 
 
 # # def loadCases(directory):
