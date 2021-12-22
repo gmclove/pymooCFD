@@ -39,6 +39,8 @@ class CFDCase: #(PreProcCase, PostProcCase)
                  restart=False,
                  *args, **kwargs
                  ):
+        self.baseCaseDir = baseCaseDir
+        self.caseDir = caseDir
         self.cpPath = os.path.join(caseDir, 'case.npy')
         if os.path.exists(caseDir):
             if os.path.exists(self.cpPath) and restart:
@@ -59,8 +61,6 @@ class CFDCase: #(PreProcCase, PostProcCase)
         #     msg = f'NEW CASE - {caseDir} did not exist'
         #     print(msg)
         ### Required Arguments -> Attributes
-        self.baseCaseDir = baseCaseDir
-        self.caseDir = caseDir
         # self.logger = self.getLogger()
         # self.copy()  # create directory before start
         self.x = x
