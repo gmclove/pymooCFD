@@ -2,11 +2,11 @@
 # @Date:   2021-12-10T10:31:58-05:00
 # @Last modified by:   glove
 # @Last modified time: 2021-12-16T09:28:45-05:00
-import time
+# import time
 import os
 import numpy as np
-import subprocess
-from threading import Thread
+# import subprocess
+# from threading import Thread
 import multiprocessing as mp
 import copy
 import shutil
@@ -34,7 +34,7 @@ class OptStudy:
         #    Required Attributes    #
         #############################
         self.problem = problem
-        self.algorithm = algorithm #algorithm.setup(problem)
+        self.algorithm = algorithm  # algorithm.setup(problem)
         # initialize baseCase
         self.BaseCase = BaseCase
         self.baseCaseDir = baseCaseDir
@@ -64,8 +64,8 @@ class OptStudy:
         self.procOptDir = procOptDir
         os.makedirs(self.procOptDir, exist_ok=True)
         ### Pareto Front Directory
-        self.pfDir = pfDir # directory to save optimal solutions (a.k.a. Pareto Front)
-        self.n_opt = n_opt # number of optimal points along Pareto front to save
+        self.pfDir = pfDir  # directory to save optimal solutions (a.k.a. Pareto Front)
+        self.n_opt = n_opt  # number of optimal points along Pareto front to save
         ### Plots Directory
         self.plotDir = os.path.join(self.procOptDir, plotsDir)
         os.makedirs(self.plotDir, exist_ok=True)
@@ -219,7 +219,7 @@ class OptStudy:
             genF = alg.pop.get('F')
             with open(f'{self.optDatDir}/gen{gen}F.txt', "w+") as file:  # write file
                 np.savetxt(file, genF)
-        except TypeError: #AttributeError
+        except TypeError:  # AttributeError
             print('     mid-generation')
 
     ###################
@@ -489,7 +489,7 @@ class OptStudy:
     ########################
     #    HELPER METHODS    #
     ########################
-    def genCases(self, paths, X): #, baseCase=None):
+    def genCases(self, paths, X):  #, baseCase=None):
         # if baseCase is None:
         #     baseCase = self.BaseCase
         assert len(paths) == len(X), 'genCases(paths, X): len(paths) == len(X)'
