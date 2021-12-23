@@ -7,12 +7,44 @@ import os
 import numpy as np
 print('scratch.py')
 
-import subprocess
-cmd = ['mpirun', '2D_cylinder']
-wds = ['test_case1', 'test_case2', 'test_case3']
 
-for wd in wds:
-    subprocess.Popen(cmd, cwd=wd)
+import subprocess
+import multiprocessing as mp
+from tqdm import tqdm
+
+wds = ['test_case1', 'test_case2', 'test_case3']
+NUMBER_OF_TASKS = len(wds)
+progress_bar = tqdm(total=NUMBER_OF_TASKS)
+
+
+def work(wd):
+    # command = ['python', 'worker.py', sec_sleep]
+    cmd = ['mpirun', '2D_cylinder']
+    subprocess.run(cmd, cwd=wd)
+
+
+def update_progress_bar(_):
+    progress_bar.update()
+
+
+if __name__ == '__main__':
+    pool = mp.Pool(NUMBER_OF_TASKS)
+
+    # for seconds in [str(x) for x in range(1, NUMBER_OF_TASKS + 1)]:
+    for wd in wds:
+        pool.apply_async(work, (wd,), callback=update_progress_bar)
+
+    pool.close()
+    pool.join()
+
+
+
+# import subprocess
+# cmd = ['mpirun', '2D_cylinder']
+# wds = ['test_case1', 'test_case2', 'test_case3']
+#
+# for wd in wds:
+#     subprocess.Popen(cmd, cwd=wd)
 
 # # def loadCases(directory):
 # directory = os.path.join('opt_run', 'gen1')
