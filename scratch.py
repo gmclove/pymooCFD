@@ -20,7 +20,9 @@ progress_bar = tqdm(total=NUMBER_OF_TASKS)
 def work(wd):
     # command = ['python', 'worker.py', sec_sleep]
     cmd = ['mpirun', '2D_cylinder']
-    subprocess.run(cmd, cwd=wd)
+    print(cmd)
+    print(wd)
+    subprocess.run(cmd, cwd=wd, stdout=subprocess.DEVNULL)
 
 
 def update_progress_bar(_):

@@ -386,17 +386,17 @@ class RANSJetOpt(OptStudy):
         # radial average
         hqGrid_phi = radialAvg(hqGrid_phi_3D, gridInterp3D, gridInterp2D)
         gridInterp2D.plot2DGrid(hqGrid_phi, 'hqGrid_phi_radAvg')
-        #save binary
+        # save binary
         np.save(hqGrid_phi_path, hqGrid_phi)
     else:
         hqGrid_phi = np.load(hqGrid_phi_path)
 
     def __init__(self, algorithm, problem, baseCase,
-                *args, **kwargs):
+                 *args, **kwargs):
         super().__init__(algorithm, problem, baseCase,
-                        baseCaseDir = 'rans-jet_base',
-                        optDatDir = 'jet-opt_run',
-                        *args, **kwargs)
+                         baseCaseDir='rans-jet_base',
+                         optDatDir='jet-opt_run',
+                         *args, **kwargs)
 
     def execute(self, cases):
         self.slurmExec(cases)
