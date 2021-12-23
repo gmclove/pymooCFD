@@ -26,7 +26,7 @@ class OscillCylinder(CFDCase):
     ####### Define Constraints ########
     n_constr = 0
     ##### Local Execution Command #####
-    nProc = 8
+    nProc = 10
     solverExecCmd = ['mpirun', '-np', str(nProc), '2D_cylinder']
 
     def __init__(self, baseCaseDir, caseDir, x):
@@ -226,6 +226,7 @@ class OscillCylinderOpt(OptStudy):
         super().__init__(algorithm, problem, baseCase,
                          baseCaseDir='osc-cyl_base',
                          optDatDir='cyl-opt_run',
+                         procLim=40,
                          *args, **kwargs)
 
     def execute(self, cases):
