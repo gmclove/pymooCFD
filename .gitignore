@@ -1,2 +1,5 @@
 dump/
 base_cases/
+test_case/
+base_case/
+**/__pycache__
