@@ -9,6 +9,7 @@ import shutil
 import logging
 import copy
 import matplotlib.pyplot as plt
+import multiprocessing as mp
 
 
 class CFDCase: #(PreProcCase, PostProcCase)
@@ -108,12 +109,12 @@ class CFDCase: #(PreProcCase, PostProcCase)
         # self.cpPath = os.path.join(caseDir, tail+'.npy')
         self.saveCP()
 
-    def run(self):
-        self.preProc()
-        proc = self.solve()
-        proc.wait()
-        obj = self.postProc()
-        return obj
+    # def run(self):
+    #     self.preProc()
+    #     proc = self.solve()
+    #     proc.wait()
+    #     obj = self.postProc()
+    #     return obj
 
     # def solve(self):
     #     proc = self._solve()
@@ -123,21 +124,44 @@ class CFDCase: #(PreProcCase, PostProcCase)
     #     proc = subprocess.Popen(cmd, cwd=self.caseDir,
     #                             stdout=subprocess.DEVNULL)
     #     return proc
+    def run(self):
+        self.preProc()
+        self.solve()
+        self.postProc()
 
     def solve(self):
-        # if self.f is None: # and not self.restart:
-        self.restart = True
         if self.solverExecCmd is None:
             self.logger.error('No external solver execution command give. \
-                                Please override solve() method with python CFD \
-                                solver or add solverExecCmd to CFDCase object.')
+                               Please override solve() method with python CFD \
+                               solver or add solverExecCmd to CFDCase object.')
             raise Exception('No external solver execution command give. Please \
                             override solve() method with python CFD solver or \
                             add solverExecCmd to CFDCase object.')
         else:
-            proc = subprocess.Popen(self.solverExecCmd, cwd=self.caseDir,
-                                    stdout=subprocess.DEVNULL)
-            return proc
+            subprocess.run(self.solverExecCmd, cwd=self.caseDir,
+                           stdout=subprocess.DEVNULL)
+
+    def execCallback(self):
+        if self._execDone():
+            self.logger.info('RUN COMPLETE')
+        else:
+            self.pool.apply_async(self.solve, (self.caseDir,),
+                                  callback=self.execCallback)
+
+    # def solve(self):
+    #     # if self.f is None: # and not self.restart:
+    #     self.restart = True
+    #     if self.solverExecCmd is None:
+    #         self.logger.error('No external solver execution command give. \
+    #                             Please override solve() method with python CFD \
+    #                             solver or add solverExecCmd to CFDCase object.')
+    #         raise Exception('No external solver execution command give. Please \
+    #                         override solve() method with python CFD solver or \
+    #                         add solverExecCmd to CFDCase object.')
+    #     else:
+    #         proc = subprocess.Popen(self.solverExecCmd, cwd=self.caseDir,
+    #                                 stdout=subprocess.DEVNULL)
+    #         return proc
         # else:
         #     self.logger.warning('SKIPPED SOLVE() METHOD')
 
@@ -150,7 +174,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
             self._preProc()
         # save variables in case directory as text file after completing pre-processing
         # saveTxt(self.caseDir, 'var.txt', self.x)
-        self.restart = True # ??????????????????
+        self.restart = True  # ??????????????????
         self.saveCP()
 
     def postProc(self):
@@ -428,7 +452,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
         self._preProc()
         pass
 
-    def _isExecDone(self):
+    def _execDone(self):
         return True
 
     def _postProc(self):

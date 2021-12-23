@@ -7,6 +7,7 @@ import os
 import numpy as np
 import subprocess
 from threading import Thread
+import multiprocessing as mp
 import copy
 import shutil
 # import h5py
@@ -256,18 +257,26 @@ class OptStudy:
         if gen == 1:
             self.gen1Pop = cases
         return out
+
     def runPop(self, cases):
-        self.preProcPop(cases)
-        self.execPop(cases)
-        self.postProcPop(cases)
-    def preProcPop(self, cases):
+        nTask = int(self.procLim/self.BaseCase.nProc)
+        pool = mp.Pool(nTask)
         for case in cases:
-            case.preProc()
-    def execPop(self, cases):
-        self._execPop(cases)
-    def postProcPop(self, cases):
-        for case in cases:
-            case.postProc()
+            pool.apply_async(case.run(), (), callback=case.execCallback)
+        pool.close()
+        pool.join()
+    # def runPop(self, cases):
+    #     self.preProcPop(cases)
+    #     self.execPop(cases)
+    #     self.postProcPop(cases)
+    # def preProcPop(self, cases):
+    #     for case in cases:
+    #         case.preProc()
+    # def execPop(self, cases):
+    #     self._execPop(cases)
+    # def postProcPop(self, cases):
+    #     for case in cases:
+    #         case.postProc()
 
     ########################
     #    BOUNDARY CASES    #
@@ -321,14 +330,14 @@ class OptStudy:
                 cornerCases.append(cornerCase)
         self.runPop(cornerCases)
 
-    def runBndCases(self, n_pts, getDiags = False, doMeshStudy = False):
-        self.genBndCases(n_pts, getDiags = getDiags)
+    def runBndCases(self, n_pts, getDiags=False, doMeshStudy=False):
+        self.genBndCases(n_pts, getDiags=getDiags)
         self.runPop(self.bndCases)
         if doMeshStudy:
             for case in self.bndCases:
                 case.meshStudy()
 
-    def genBndCases(self, n_pts, getDiags = False):
+    def genBndCases(self, n_pts, getDiags=False):
         bndPts = self.getBndPts(n_pts, getDiags=getDiags)
         dirs = []
         for pt in bndPts:
@@ -338,7 +347,7 @@ class OptStudy:
         cases = self.genCases(dirs, bndPts)
         self.bndCases = cases
 
-    def getBndPts(self, n_pts, getDiags = False):
+    def getBndPts(self, n_pts, getDiags=False):
         xl = self.problem.xl
         xu = self.problem.xu
         diag = np.linspace(xl, xu, n_pts)
@@ -365,116 +374,117 @@ class OptStudy:
     ###################################
     #    EXTERNAL SOLVER EXECUTION    #
     ###################################
-    def slurmExec(self, cases, batchSize=None):
-        print('EXECUTING BATCH OF SIMULATIONS')
-        print('SLURM EXECUTION')
-        if batchSize is not None:
-            print(f'\t### Sending sims in batches of {batchSize}')
-            cases_batches = [cases[i:i + batchSize]
-                                for i in range(0, len(cases), batchSize)]
-            for cases_batch in cases_batches:
-                print(f'     SUB-BATCH: {cases_batch}')
-                self.slurmExec(cases_batch)
-            return
-        # Queue all the individuals in the generation using SLURM
-        batchIDs = []  # collect batch IDs
-        for case in cases:
-            out = subprocess.check_output(['sbatch', case.jobFile], cwd = case.caseDir)
-            # Extract number from following: 'Submitted batch job 1847433'
-            # print(int(out[20:]))
-            batchIDs.append([int(out[20:]), case])
-        # batchIDs = np.array(batchIDs)
-        print('     slurm job IDs:')
-        print('\t\tJob ID')
-        print('\t\t------')
-        for e in batchIDs: print(f'\t\t{e[0]} | {e[1]}')
-        waiting = True
-        count = np.ones(len(batchIDs))
-        prev_count = np.ones(len(batchIDs)) #[0] #count
-        threads = []
-        flag = True # first time through while loop flag
-        while waiting:
-            time.sleep(10)
-            for bID_i, bID in enumerate(batchIDs):
-                # grep for batch ID of each individual
-                out = subprocess.check_output(f'squeue | grep --count {bID[0]} || :', shell=True)  # '|| :' ignores non-zero exit status error
-                count[bID_i] = int(out)
-                # if simulation is no longer in squeue
-                if count[bID_i] != prev_count[bID_i]:
-                    ### check if simulation failed
-                    complete = bID[1]._isExecDone()
-                    ## if failed launch slurmExec as subprocess
-                    if not complete:
-                        print(f'\n\tJob ID: {bID[0]} | {bID[1]} INCOMPLETE')
-                        t = Thread(target=self.slurmExec, args=([bID[1]],))
-                        t.start()
-                        threads.append(t)
-                    else:
-                        print(f'\n\tJobID:{bID[0]} | {bID[1]} COMPLETE', end='')
-            ### update number of jobs waiting display
-            if sum(count) != sum(prev_count) or flag:
-                print(f'\n\tSimulations still running or queued = {int(sum(count))}', end='')
-            else:
-                print(' . ', end='')
-            prev_count = count.copy()
-            flag = False
-            ### check if all batch jobs are done
-            if sum(count) == 0:
-                waiting = False
-                print('\n\tDONE WAITING')
-        ## wait for second run of failed cases to complete
-        for thread in threads:
-            thread.join()
-        print()
-        print('BATCH OF SLURM SIMULATIONS COMPLETE')
 
-    def singleNodeExec(self, cases): #, procLim=procLim, nProc=nProc, solverFile=solverFile):
-        print('EXECUTING BATCH OF SIMULATIONS')
-        print('SINGLE NODE EXECUTION')
-        # All processors will be queued until all are used
-        n = 0
-        currentP = 0
-        procs = []
-        proc_labels = {}
-        n_sims = len(cases)
-
-        while n < n_sims:
-            case = cases[n]
-            caseDir = case.caseDir
-            nProc = case.nProc
-            if currentP + nProc <= self.procLim: # currentP != procLim:
-                print(f'\t## Sending {caseDir} to simulation...')
-                proc = subprocess.Popen(case.solverExecCmd, # '>', 'output.dat'],
-                                       cwd = caseDir, stdout=subprocess.DEVNULL) #stdout=out)
-                # Store the proc of the above process
-                procs.append(proc)
-                # store working directory of process
-                proc_labels[proc.pid] = case.caseDir
-                # counters
-                n += 1
-                currentP = currentP + nProc
-            # Then, wait until completion and fill processors again
-            else:
-                print('\tWAITING')
-                # wait for any processes to complete
-                waiting = True
-                while waiting:
-                    # check all processes for completion every _ seconds
-                    time.sleep(10)
-                    for proc in procs:
-                        if proc.poll() is not None:
-                            # remove completed job from procs list
-                            procs.remove(proc)
-                            # reduce currentP by nProc
-                            currentP -= nProc
-                            # stop waiting
-                            waiting = False
-                            print('\tCOMPLETED: ', proc_labels[proc.pid])
-        # Wait until all PID in the list has been completed
-        print('\tWAITING')
-        for proc in procs:
-            proc.wait()
-        print('BATCH OF SIMULATIONS COMPLETE')
+    # def slurmExec(self, cases, batchSize=None):
+    #     print('EXECUTING BATCH OF SIMULATIONS')
+    #     print('SLURM EXECUTION')
+    #     if batchSize is not None:
+    #         print(f'\t### Sending sims in batches of {batchSize}')
+    #         cases_batches = [cases[i:i + batchSize]
+    #                             for i in range(0, len(cases), batchSize)]
+    #         for cases_batch in cases_batches:
+    #             print(f'     SUB-BATCH: {cases_batch}')
+    #             self.slurmExec(cases_batch)
+    #         return
+    #     # Queue all the individuals in the generation using SLURM
+    #     batchIDs = []  # collect batch IDs
+    #     for case in cases:
+    #         out = subprocess.check_output(['sbatch', case.jobFile], cwd = case.caseDir)
+    #         # Extract number from following: 'Submitted batch job 1847433'
+    #         # print(int(out[20:]))
+    #         batchIDs.append([int(out[20:]), case])
+    #     # batchIDs = np.array(batchIDs)
+    #     print('     slurm job IDs:')
+    #     print('\t\tJob ID')
+    #     print('\t\t------')
+    #     for e in batchIDs: print(f'\t\t{e[0]} | {e[1]}')
+    #     waiting = True
+    #     count = np.ones(len(batchIDs))
+    #     prev_count = np.ones(len(batchIDs)) #[0] #count
+    #     threads = []
+    #     flag = True # first time through while loop flag
+    #     while waiting:
+    #         time.sleep(10)
+    #         for bID_i, bID in enumerate(batchIDs):
+    #             # grep for batch ID of each individual
+    #             out = subprocess.check_output(f'squeue | grep --count {bID[0]} || :', shell=True)  # '|| :' ignores non-zero exit status error
+    #             count[bID_i] = int(out)
+    #             # if simulation is no longer in squeue
+    #             if count[bID_i] != prev_count[bID_i]:
+    #                 ### check if simulation failed
+    #                 complete = bID[1]._isExecDone()
+    #                 ## if failed launch slurmExec as subprocess
+    #                 if not complete:
+    #                     print(f'\n\tJob ID: {bID[0]} | {bID[1]} INCOMPLETE')
+    #                     t = Thread(target=self.slurmExec, args=([bID[1]],))
+    #                     t.start()
+    #                     threads.append(t)
+    #                 else:
+    #                     print(f'\n\tJobID:{bID[0]} | {bID[1]} COMPLETE', end='')
+    #         ### update number of jobs waiting display
+    #         if sum(count) != sum(prev_count) or flag:
+    #             print(f'\n\tSimulations still running or queued = {int(sum(count))}', end='')
+    #         else:
+    #             print(' . ', end='')
+    #         prev_count = count.copy()
+    #         flag = False
+    #         ### check if all batch jobs are done
+    #         if sum(count) == 0:
+    #             waiting = False
+    #             print('\n\tDONE WAITING')
+    #     ## wait for second run of failed cases to complete
+    #     for thread in threads:
+    #         thread.join()
+    #     print()
+    #     print('BATCH OF SLURM SIMULATIONS COMPLETE')
+    #
+    # def singleNodeExec(self, cases): #, procLim=procLim, nProc=nProc, solverFile=solverFile):
+    #     print('EXECUTING BATCH OF SIMULATIONS')
+    #     print('SINGLE NODE EXECUTION')
+    #     # All processors will be queued until all are used
+    #     n = 0
+    #     currentP = 0
+    #     procs = []
+    #     proc_labels = {}
+    #     n_sims = len(cases)
+    #
+    #     while n < n_sims:
+    #         case = cases[n]
+    #         caseDir = case.caseDir
+    #         nProc = case.nProc
+    #         if currentP + nProc <= self.procLim: # currentP != procLim:
+    #             print(f'\t## Sending {caseDir} to simulation...')
+    #             proc = subprocess.Popen(case.solverExecCmd, # '>', 'output.dat'],
+    #                                    cwd = caseDir, stdout=subprocess.DEVNULL) #stdout=out)
+    #             # Store the proc of the above process
+    #             procs.append(proc)
+    #             # store working directory of process
+    #             proc_labels[proc.pid] = case.caseDir
+    #             # counters
+    #             n += 1
+    #             currentP = currentP + nProc
+    #         # Then, wait until completion and fill processors again
+    #         else:
+    #             print('\tWAITING')
+    #             # wait for any processes to complete
+    #             waiting = True
+    #             while waiting:
+    #                 # check all processes for completion every _ seconds
+    #                 time.sleep(10)
+    #                 for proc in procs:
+    #                     if proc.poll() is not None:
+    #                         # remove completed job from procs list
+    #                         procs.remove(proc)
+    #                         # reduce currentP by nProc
+    #                         currentP -= nProc
+    #                         # stop waiting
+    #                         waiting = False
+    #                         print('\tCOMPLETED: ', proc_labels[proc.pid])
+    #     # Wait until all PID in the list has been completed
+    #     print('\tWAITING')
+    #     for proc in procs:
+    #         proc.wait()
+    #     print('BATCH OF SIMULATIONS COMPLETE')
 
     ########################
     #    HELPER METHODS    #
