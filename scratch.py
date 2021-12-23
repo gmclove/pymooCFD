@@ -27,6 +27,7 @@ def work(wd):
     print(cmd)
     print(wd)
     subprocess.run(cmd, cwd=wd, stdout=subprocess.DEVNULL)
+    print('COMPLETE', wd)
 
 
 def update_progress_bar(_):
