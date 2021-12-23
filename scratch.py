@@ -8,14 +8,22 @@ import os
 import numpy as np
 print('scratch.py')
 
-from pymooCFD.studies.oscillCyl import BaseCase
-BaseCase('base_cases/osc-cyl_base', 'test_case', [0,0]).genMesh()
+from pymooCFD.studies.oscillCyl import BaseCase, MyOptStudy
+
+wds = ['test_case1', 'test_case2', 'test_case3']
+X = [[1.5, 0.1], [0.5, 0.2], [1, 0.3]]
+cases = []
+for i, wd in enumerate(wds):
+    cases.append(BaseCase('osc-cyl_base', wd, X[x_i]))
+
+MyOptStudy().execPop(cases)
+
+# BaseCase('base_cases/osc-cyl_base', 'test_case', [0,0]).genMesh()
 
 # import subprocess
 # import multiprocessing as mp
 # from tqdm import tqdm
 #
-# wds = ['test_case1', 'test_case2', 'test_case3']
 # NUMBER_OF_TASKS = len(wds)
 #
 # procLim = 40
