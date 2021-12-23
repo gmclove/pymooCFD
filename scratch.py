@@ -15,8 +15,8 @@ from tqdm import tqdm
 wds = ['test_case1', 'test_case2', 'test_case3']
 NUMBER_OF_TASKS = len(wds)
 
-procLim = 20
-nProc = 10
+procLim = 40
+nProc = 20
 nTask = int(procLim/nProc)
 progress_bar = tqdm(total=nTask)
 
@@ -40,6 +40,10 @@ if __name__ == '__main__':
     # for seconds in [str(x) for x in range(1, NUMBER_OF_TASKS + 1)]:
     for wd in wds:
         pool.apply_async(work, (wd,), callback=update_progress_bar)
+
+    # check if simulation completed correctly
+    # if not self._execDone():
+    #     pass
 
     pool.close()
     pool.join()
