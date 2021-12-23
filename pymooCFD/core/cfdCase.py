@@ -42,7 +42,6 @@ class CFDCase: #(PreProcCase, PostProcCase)
                  ):
         self.baseCaseDir = baseCaseDir
         self.caseDir = caseDir
-        self.logger = self.getLogger()
         self.cpPath = os.path.join(caseDir, 'case.npy')
         if os.path.exists(caseDir):
             if os.path.exists(self.cpPath) and restart:
@@ -50,10 +49,12 @@ class CFDCase: #(PreProcCase, PostProcCase)
                 self.logger.info(f'RESTART CASE - restart from {self.cpPath}')
                 return
             else:
+                self.logger = self.getLogger()
                 self.logger.info(f'OVERRIDE CASE - {caseDir} already exists')
                 self.copy()
         else:
             os.makedirs(caseDir, exist_ok=True)
+            self.logger = self.getLogger()
             self.logger.info(f'NEW CASE - {caseDir} did not exist')
             self.copy()
         # if not os.path.exists(caseDir):
