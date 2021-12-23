@@ -3,52 +3,60 @@
 # @Last modified by:   glove
 # @Last modified time: 2021-12-14T15:45:19-05:00
 
+
 import os
 import numpy as np
 print('scratch.py')
 
+from pymooCFD.studies.oscillCyl import BaseCase
+BaseCase('base_cases/osc-cyl_base', 'test_case', [0,0]).genMesh()
 
-import subprocess
-import multiprocessing as mp
-from tqdm import tqdm
-
-wds = ['test_case1', 'test_case2', 'test_case3']
-NUMBER_OF_TASKS = len(wds)
-
-procLim = 40
-nProc = 20
-nTask = int(procLim/nProc)
-progress_bar = tqdm(total=nTask)
-
-
-def work(wd):
-    # command = ['python', 'worker.py', sec_sleep]
-    cmd = ['mpirun', '-n', str(nProc), '2D_cylinder']
-    print(cmd)
-    print(wd)
-    subprocess.run(cmd, cwd=wd, stdout=subprocess.DEVNULL)
-    print('COMPLETE', wd)
-
-
-def update_progress_bar(_):
-    progress_bar.update()
-
-
-if __name__ == '__main__':
-
-    pool = mp.Pool(nTask)
-
-    # for seconds in [str(x) for x in range(1, NUMBER_OF_TASKS + 1)]:
-    for wd in wds:
-        pool.apply_async(work, (wd,), callback=update_progress_bar)
-
-    # check if simulation completed correctly
-    # if not self._execDone():
-    #     pass
-
-    pool.close()
-    pool.join()
-
+# import subprocess
+# import multiprocessing as mp
+# from tqdm import tqdm
+#
+# wds = ['test_case1', 'test_case2', 'test_case3']
+# NUMBER_OF_TASKS = len(wds)
+#
+# procLim = 40
+# nProc = 20
+# nTask = int(procLim/nProc)
+# progress_bar = tqdm(total=nTask)
+#
+#
+# def solve(wd):
+#     # command = ['python', 'worker.py', sec_sleep]
+#     cmd = ['mpirun', '-n', str(nProc), '2D_cylinder']
+#     print(cmd)
+#     print(wd)
+#     subprocess.run(cmd, cwd=wd, stdout=subprocess.DEVNULL)
+#     print('COMPLETE', wd)
+#
+#
+# def execCallback():
+#     if not _execDone():
+#         pool.apply_async(solve, (wd,), callback=execCallback)
+#
+#
+# def _execDone():
+#     return True
+#     # progress_bar.update()
+#
+#
+# if __name__ == '__main__':
+#
+#     pool = mp.Pool(nTask)
+#
+#     # for seconds in [str(x) for x in range(1, NUMBER_OF_TASKS + 1)]:
+#     for wd in wds:
+#         pool.apply_async(solve, (wd,), callback=execCallback)
+#
+#     # check if simulation completed correctly
+#     # if not self._execDone():
+#     #     pass
+#
+#     pool.close()
+#     pool.join()
 
 
 # import subprocess
