@@ -120,9 +120,9 @@ class OscillCylinder(CFDCase):
 
     def _genMesh(self):
         projName = '2D_cylinder'
-        dom_D = 20
+        dom_dx, dom_dy = 60, 25
         cylD = 1
-        meshSizeMax = 0.2
+        meshSizeMax = 0.5
         #################################
         #          Initialize           #
         #################################
@@ -143,34 +143,38 @@ class OscillCylinder(CFDCase):
         #################################
         #           Geometry            #
         #################################
-        centPt = gmsh.model.occ.addPoint(0, 0, 0)
-        botPt = gmsh.model.occ.addPoint(0, -dom_D/2, 0)
-        topPt = gmsh.model.occ.addPoint(0, dom_D/2, 0)
-        inlet = gmsh.model.occ.addCircleArc(botPt, centPt, topPt)
-        outlet = gmsh.model.occ.addCircleArc(topPt, centPt, botPt)
-        domLoop = gmsh.model.occ.addCurveLoop([inlet, outlet])  # creates 2-D entity
+        rect = gmsh.model.occ.addRectangle(0, 0, 0, dom_dx, dom_dy)
         # add circle to rectangular domain to represent cylinder
-        cylCir = gmsh.model.occ.addCircle(0, 0, 0, cylD/2)  # 1-dim. entity
+        cir = gmsh.model.occ.addCircle(dom_dx/4, dom_dy/2, 0, cylD)
         # use 1-D circle to create curve loop entity
-        cylLoop = gmsh.model.occ.addCurveLoop([cylCir])  # creates 2-D entity
-        # create plane surface between rectangle and circle
-        dom = gmsh.model.occ.addPlaneSurface([domLoop, cylLoop])
-        # We finish by synchronizing the data from OpenCASCADE CAD kernel with the Gmsh model:
+        cir_loop = gmsh.model.occ.addCurveLoop([cir])
+        cir_plane = gmsh.model.occ.addPlaneSurface([cir_loop])  # creates 2-D entity
+        # cut circle out of a rectangle
+        # print(cylLoop)
+        # print(rect)
+        domDimTags, domDimTagsMap = gmsh.model.occ.cut([(2, rect)], [(2, cir_plane)])
+        # dom = domDimTags
+        # We finish by synchronizing the data from OpenCASCADE CAD kernel with
+        # the Gmsh model:
         gmsh.model.occ.synchronize()
         #################################
         #    Physical Group Naming      #
         #################################
-        grpTag = gmsh.model.addPhysicalGroup(2, [inlet])
+        grpTag = gmsh.model.addPhysicalGroup(2, [7])
         gmsh.model.setPhysicalName(1, grpTag, 'x0')
-        grpTag = gmsh.model.addPhysicalGroup(1, [outlet])
+        grpTag = gmsh.model.addPhysicalGroup(1, [8])
         gmsh.model.setPhysicalName(1, grpTag, 'x1')
-        grpTag = gmsh.model.addPhysicalGroup(1, [cylCir])
+        grpTag = gmsh.model.addPhysicalGroup(1, [6])
+        gmsh.model.setPhysicalName(1, grpTag, 'y0')
+        grpTag = gmsh.model.addPhysicalGroup(1, [9])
+        gmsh.model.setPhysicalName(1, grpTag, 'y1')
+        grpTag = gmsh.model.addPhysicalGroup(1, [5])
         gmsh.model.setPhysicalName(1, grpTag, 'cyl')
         #################################
         #           MESHING             #
         #################################
-        # We could also use a `Box' field to impose a step change in element sizes
-        # inside a box
+        ### We could also use a `Box' field to impose a step change in element
+        ## sizes inside a box
         # boxF = gmsh.model.mesh.field.add("Box")
         # gmsh.model.mesh.field.setNumber(boxF, "VIn", meshSizeMax/10)
         # gmsh.model.mesh.field.setNumber(boxF, "VOut", meshSizeMax)
@@ -209,10 +213,8 @@ class OscillCylinder(CFDCase):
         # ... and save it to disk
         gmsh.write(self.meshPath)
         # To visualize the model we can run the graphical user interface with
-        # `gmsh.fltk.run()'. Here we run it only if the "-nopopup" is not provided in
-        # the command line arguments:
-        # if '-nopopup' not in sys.argv:
-        #     gmsh.fltk.run()
+        # `gmsh.fltk.run()'.
+        # gmsh.fltk.run()
         # This should be called when you are done using the Gmsh Python API:
         gmsh.finalize()
 
