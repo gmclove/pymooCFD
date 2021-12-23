@@ -14,12 +14,16 @@ from tqdm import tqdm
 
 wds = ['test_case1', 'test_case2', 'test_case3']
 NUMBER_OF_TASKS = len(wds)
-progress_bar = tqdm(total=NUMBER_OF_TASKS)
+
+procLim = 20
+nProc = 10
+nTask = int(procLim/nProc)
+progress_bar = tqdm(total=nTask)
 
 
 def work(wd):
     # command = ['python', 'worker.py', sec_sleep]
-    cmd = ['mpirun', '2D_cylinder']
+    cmd = ['mpirun', '-n', str(nProc), '2D_cylinder']
     print(cmd)
     print(wd)
     subprocess.run(cmd, cwd=wd, stdout=subprocess.DEVNULL)
@@ -30,7 +34,8 @@ def update_progress_bar(_):
 
 
 if __name__ == '__main__':
-    pool = mp.Pool()
+
+    pool = mp.Pool(nTask)
 
     # for seconds in [str(x) for x in range(1, NUMBER_OF_TASKS + 1)]:
     for wd in wds:
