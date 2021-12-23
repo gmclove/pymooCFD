@@ -17,7 +17,7 @@ for i, wd in enumerate(wds):
     cases.append(BaseCase('osc-cyl_base', wd, X[i]))
 
 from setupOpt import algorithm, problem
-MyOptStudy(algorithm, problem, BaseCase).execPop(cases)
+MyOptStudy(algorithm, problem, BaseCase).runPop(cases)
 
 # BaseCase('base_cases/osc-cyl_base', 'test_case', [0,0]).genMesh()
 
