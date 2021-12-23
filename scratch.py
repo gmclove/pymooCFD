@@ -14,7 +14,7 @@ wds = ['test_case1', 'test_case2', 'test_case3']
 X = [[1.5, 0.1], [0.5, 0.2], [1, 0.3]]
 cases = []
 for i, wd in enumerate(wds):
-    cases.append(BaseCase('osc-cyl_base', wd, X[x_i]))
+    cases.append(BaseCase('osc-cyl_base', wd, X[i]))
 
 MyOptStudy().execPop(cases)
 
