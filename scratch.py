@@ -30,7 +30,7 @@ def update_progress_bar(_):
 
 
 if __name__ == '__main__':
-    pool = mp.Pool(NUMBER_OF_TASKS)
+    pool = mp.Pool()
 
     # for seconds in [str(x) for x in range(1, NUMBER_OF_TASKS + 1)]:
     for wd in wds:
