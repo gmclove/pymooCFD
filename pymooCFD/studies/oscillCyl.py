@@ -11,6 +11,8 @@ from scipy.integrate import quad
 
 from pymooCFD.util.yales2Tools import getLatestXMF
 from pymooCFD.core.cfdCase import CFDCase
+
+
 class OscillCylinder(CFDCase):
     ####### Define Design Space #########
     n_var = 2
@@ -26,7 +28,9 @@ class OscillCylinder(CFDCase):
     ####### Define Constraints ########
     n_constr = 0
     ##### Local Execution Command #####
-    nProc = 8
+    externalSolver = True
+    nProc = 10
+    procLim = 60
     solverExecCmd = ['mpirun', '-np', str(nProc), '2D_cylinder']
 
     def __init__(self, baseCaseDir, caseDir, x):
@@ -224,12 +228,12 @@ class OscillCylinderOpt(OptStudy):
     def __init__(self, algorithm, problem, baseCase,
                  *args, **kwargs):
         super().__init__(algorithm, problem, baseCase,
-                         baseCaseDir='osc-cyl_base',
+                         baseCaseDir='base_cases/osc-cyl_base',
                          optDatDir='cyl-opt_run',
                          *args, **kwargs)
 
-    def execute(self, cases):
-        self.singleNodeExec(cases)
+    # def execute(self, cases):
+    #     self.singleNodeExec(cases)
 
 MyOptStudy = OscillCylinderOpt
 BaseCase = OscillCylinder

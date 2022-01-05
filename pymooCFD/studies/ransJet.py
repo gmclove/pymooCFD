@@ -2,6 +2,12 @@
 # @Date:   2021-12-14T16:17:44-05:00
 # @Last modified by:   glove
 # @Last modified time: 2021-12-15T16:36:59-05:00
+from pymooCFD.core.parallelProc import ParellelProc
+class MyParallelProc(ParallelProc):
+    def __init__(self):
+        super().__init__(externalSolver)
+
+
 
 import gmsh
 import math
@@ -20,7 +26,11 @@ class RANSJet(CFDCase):
     obj_labels = ['Velocity Field Error [m/s]', 'Scalar Concentration Error']
     n_constr = 0
     ##### Execution Command #####
+    externalSolver = True
     solverExecCmd = ['sbatch', '--wait', 'jobslurm.sh']
+    nProc = 8
+    procLim = 64
+
     ##### Local Execution Command #####
     # nProc = 8
     # solverExecCmd = ['C:\"Program Files"\"Ansys Inc"\v211\fluent\ntbin\win64\fluent.exe',
@@ -28,17 +38,16 @@ class RANSJet(CFDCase):
 
     def __init__(self, baseCaseDir, caseDir, x):
         super().__init__(baseCaseDir, caseDir, x,
-                        # var_labels = var_labels,
-                        # obj_labels = obj_labels,
-                        # n_var = n_var,
-                        # n_obj = n_obj,
-                        meshFile = 'jet_rans-axi_sym.unv',
-                        datFile = 'jet_rans-axi_sym.cgns',
-                        jobFile = 'jobslurm.sh',
-                        inputFile = 'jet_rans-axi_sym.jou',
-                        # solverExecCmd = solverExecCmd,
-                        # nProc = nProc
-                        )
+                         # var_labels = var_labels,
+                         # obj_labels = obj_labels,
+                         # n_var = n_var,
+                         # n_obj = n_obj,
+                         meshFile = 'jet_rans-axi_sym.unv',
+                         datFile = 'jet_rans-axi_sym.cgns',
+                         jobFile = 'jobslurm.sh',
+                         inputFile = 'jet_rans-axi_sym.jou',
+                         # nProc = nProc
+                         )
     def _genMesh(self):
         mouthD = self.x[0]
 
@@ -257,7 +266,9 @@ class RANSJet(CFDCase):
         self._preProc()
         outVel = self.x[self.var_labels.index('Breath Velocity')]
         ##### Write Entire Input File #####
-        ### useful if input file is short enough
+        ### useful if input file is short enough                            add solverExecCmd to CFDCase object.')
+        else:
+            subprocess.run(case.solverExecCmd, cwd=case.caseDir,
         coflowVel = 0.005 # outVel*(2/100)
         lines = [
             ## IMPORT
@@ -267,7 +278,9 @@ class RANSJet(CFDCase):
     	    '/file/auto-save data-frequency 1000',
             ## MODEL
             '/define/models axisymmetric y',
-            '/define/models/viscous kw-sst y',
+            '/define/models/viscous kw-                            add solverExecCmd to CFDCase object.')
+        else:
+            subprocess.run(case.solverExecCmd, cwd=case.caseDir,sst y',
             # species
             '/define/models/species species-transport y mixture-template',
             '/define/materials change-create air scalar n n n n n n n n',
@@ -398,8 +411,8 @@ class RANSJetOpt(OptStudy):
                          optDatDir='jet-opt_run',
                          *args, **kwargs)
 
-    def execute(self, cases):
-        self.slurmExec(cases)
+    # def execute(self, cases):
+    #     self.slurmExec(cases)
 
     def preProc(self):
         pass

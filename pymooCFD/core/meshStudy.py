@@ -3,8 +3,6 @@
 # @Last modified by:   glove
 # @Last modified time: 2021-12-16T09:37:22-05:00
 
-
-
 # from pymooCFD.core.cfdCase import CFDCase
 
 class MeshStudy: #(CFDCase):

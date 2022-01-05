@@ -9,6 +9,8 @@ import shutil
 import logging
 import copy
 import matplotlib.pyplot as plt
+import multiprocessing as mp
+import multiprocessing.pool
 
 
 class CFDCase: #(PreProcCase, PostProcCase)
@@ -19,29 +21,34 @@ class CFDCase: #(PreProcCase, PostProcCase)
     xl = None  ## lower limits of parameters/variables
     xu = None  ## upper limits of variables
     # if not len(xl) == len(xu) and len(xu) == len(var_labels) and len(var_labels) == n_var:
-    #     raise Exception("Design Space Definition Incorrect")
+    #     raise ExceptionDesign Space Definition Incorrect")
     ####### Define Objective Space ########
     obj_labels = None
     n_obj = None
     ####### Define Constraints #########
     n_constr = None
-    ##### Local Execution Command #######
+
+    ##### External Solver #######
+    externalSolver = False
+    procLim = None
     nProc = None
     solverExecCmd = None
 
     def __init__(self, baseCaseDir, caseDir, x,
                  meshSF=1, meshSFs=np.arange(0.5, 1.5, 0.1),
+                 # externalSolver=False,
                  # var_labels = None, obj_labels = None,
                  meshFile=None,  # meshLines = None,
                  jobFile=None,  # jobLines = None,
                  inputFile=None,  # inputLines = None,
                  datFile=None,
                  restart=False,
+                 # solverExecCmd=None,
                  *args, **kwargs
                  ):
+        super().__init__()
         self.baseCaseDir = baseCaseDir
         self.caseDir = caseDir
-        self.logger = self.getLogger()
         self.cpPath = os.path.join(caseDir, 'case.npy')
         if os.path.exists(caseDir):
             if os.path.exists(self.cpPath) and restart:
@@ -49,12 +56,23 @@ class CFDCase: #(PreProcCase, PostProcCase)
                 self.logger.info(f'RESTART CASE - restart from {self.cpPath}')
                 return
             else:
+                self.logger = self.getLogger()
                 self.logger.info(f'OVERRIDE CASE - {caseDir} already exists')
                 self.copy()
         else:
             os.makedirs(caseDir, exist_ok=True)
+            self.logger = self.getLogger()
             self.logger.info(f'NEW CASE - {caseDir} did not exist')
             self.copy()
+
+        ### If solverExecCmd is provided use
+        # if self.solverExecCmd is None:
+        #     externalSolver = False
+        # elif self.nProc is not None and self.procLim is not None:
+        #     externalSolver = True
+        self.parallelizeInit(self.externalSolver)
+        # self.externalSolver = externalSolver
+
         # if not os.path.exists(caseDir):
         #     os.makedirs(caseDir)
         #     msg = f'NEW CASE - {caseDir} did not exist'
@@ -108,12 +126,12 @@ class CFDCase: #(PreProcCase, PostProcCase)
         # self.cpPath = os.path.join(caseDir, tail+'.npy')
         self.saveCP()
 
-    def run(self):
-        self.preProc()
-        proc = self.solve()
-        proc.wait()
-        obj = self.postProc()
-        return obj
+    # def run(self):
+    #     self.preProc()
+    #     proc = self.solve()
+    #     proc.wait()
+    #     obj = self.postProc()
+    #     return obj
 
     # def solve(self):
     #     proc = self._solve()
@@ -123,21 +141,73 @@ class CFDCase: #(PreProcCase, PostProcCase)
     #     proc = subprocess.Popen(cmd, cwd=self.caseDir,
     #                             stdout=subprocess.DEVNULL)
     #     return proc
-
-    def solve(self):
-        # if self.f is None: # and not self.restart:
-        self.restart = True
-        if self.solverExecCmd is None:
-            self.logger.error('No external solver execution command give. \
-                                Please override solve() method with python CFD \
-                                solver or add solverExecCmd to CFDCase object.')
-            raise Exception('No external solver execution command give. Please \
-                            override solve() method with python CFD solver or \
-                            add solverExecCmd to CFDCase object.')
+    ###  Parallel Processing  ###
+    @classmethod
+    def parallelizeInit(cls, externalSolver):
+        if cls.procLim is None:
+            nTasks = 1000000
         else:
-            proc = subprocess.Popen(self.solverExecCmd, cwd=self.caseDir,
-                                    stdout=subprocess.DEVNULL)
-            return proc
+            nTasks = int(cls.procLim/cls.nProc)
+        if externalSolver:
+            assert cls.solverExecCmd is not None
+            assert cls.nProc is not None
+            assert cls.procLim is not None
+            cls.solve = cls.solveExternal
+            cls.pool = mp.pool.ThreadPool(nTasks)
+        else:
+            cls.solve = cls._solve
+            cls.pool = cls.Pool(nTasks)
+
+    @classmethod
+    def parallelize(cls, cases):
+        for case in cases:
+            cls.pool.apply_async(case.run, ())
+
+    def solveExternal(self):
+        self.logger.info(f'SOLVING AS SUBPROCESS...')
+        self.logger.info(f'\tcommand: {self.solverExecCmd}')
+        subprocess.run(self.solverExecCmd, cwd=self.caseDir,
+                       stdout=subprocess.DEVNULL)
+
+    def run(self):
+        self.preProc()
+        self.solve()
+        if self._execDone():
+            self.logger.info('RUN COMPLETE')
+        else:
+            self.logger.warning('RUN FAILED TO EXECUTE')
+            self.logger.info('RE-RUNNING')
+            self.run()
+        self.postProc()
+
+    def run(case):
+        case.preProc()
+        case.logger.info('COMPLETED: PRE-PROCESS')
+        case.solve()
+        case.logger.info('COMPLETED: SOLVE')
+        case.postProc()
+        case.logger.info('COMPLETED: POST-PROCESS')
+
+    # def execCallback(self):
+    #     if self._execDone():
+    #         self.logger.info('RUN COMPLETE')
+    #     else:
+    #         self.pool.apply_async(self.solve, (self.caseDir,))
+
+    # def solve(self):
+    #     # if self.f is None: # and not self.restart:
+    #     self.restart = True
+    #     if self.solverExecCmd is None:
+    #         self.logger.error('No external solver execution command give. \
+    #                             Please override solve() method with python CFD \
+    #                             solver or add solverExecCmd to CFDCase object.')
+    #         raise Exception('No external solver execution command give. Please \
+    #                         override solve() method with python CFD solver or \
+    #                         add solverExecCmd to CFDCase object.')
+    #     else:
+    #         proc = subprocess.Popen(self.solverExecCmd, cwd=self.caseDir,
+    #                                 stdout=subprocess.DEVNULL)
+    #         return proc
         # else:
         #     self.logger.warning('SKIPPED SOLVE() METHOD')
 
@@ -150,8 +220,29 @@ class CFDCase: #(PreProcCase, PostProcCase)
             self._preProc()
         # save variables in case directory as text file after completing pre-processing
         # saveTxt(self.caseDir, 'var.txt', self.x)
-        self.restart = True # ??????????????????
+        self.restart = True  # ??????????????????
         self.saveCP()
+
+    def externalSolve(self):
+        self.logger.info(f'SOLVING AS SUBPROCESS...')
+        self.logger.info(f'\tcommand: {self.solverExecCmd}')
+        subprocess.run(self.solverExecCmd, cwd=self.caseDir,
+                       stdout=subprocess.DEVNULL)
+
+    # def pySolve(self):
+    #     self.logger.info('SOLVING . . . ')
+    #     self._pySolve()
+    #     self.logger.info('SOLVED')
+        # if self.solverExecCmd is None:
+        #     self.logger.error('No external solver execution command give. \
+        #                        Please override solve() method with python CFD \
+        #                        solver or add solverExecCmd to CFDCase object.')
+        #     raise Exception('No external solver execution command give. Please \
+        #                     override solve() method with python CFD solver or \
+        #                     add solverExecCmd to CFDCase object.')
+        # else:
+        #     subprocess.run(self.solverExecCmd, cwd=self.caseDir,
+        #                    stdout=subprocess.DEVNULL)
 
     def postProc(self):
         if self.f is None:
@@ -227,6 +318,15 @@ class CFDCase: #(PreProcCase, PostProcCase)
             plt.savefig(fPath)
             plt.clf()
 
+    def execMeshStudy(self):
+        self.parallelize(self.msCases)
+        # nTask = int(self.procLim/self.BaseCase.nProc)
+        # pool = mp.Pool(nTask)
+        # for case in self.msCases:
+        #     pool.apply_async(case.run, ())
+        # pool.close()
+        # pool.join()
+
     def meshStudy(self, restart=True): #, meshSFs=None):
         # if meshSFs is None:
         #     meshSFs = self.meshSFs
@@ -234,16 +334,22 @@ class CFDCase: #(PreProcCase, PostProcCase)
         #     self.genMeshStudy()
         if not restart or self.msCases is None:
             self.genMeshStudy()
-        procs = [case.solve() for case in self.msCases]
-        print('\tWAITING')
-        for proc in procs: print(proc.wait())
-        for case in self.msCases: case.postProc()
+        self.execMeshStudy()
         self.plotMeshStudy()
 
     # @calltracker
     # def postProc(self):
     #     if postProc.complete:
-    #         path = os.path.join(self.caseDir, 'obj.txt')
+    #         path = os.path.join(sel# if self.solverExecCmd is None:
+        #     self.logger.error('No external solver execution command give. \
+        #                        Please override solve() method with python CFD \
+        #                        solver or add solverExecCmd to CFDCase object.')
+        #     raise Exception('No external solver execution command give. Please \
+        #                     override solve() method with python CFD solver or \
+        #                     add solverExecCmd to CFDCase object.')
+        # else:
+        #     subprocess.run(self.solverExecCmd, cwd=self.caseDir,
+        #                    stdout=subprocess.DEVNULL)f.caseDir, 'obj.txt')
     #         obj = np.loadtxt(path)
     #     else:
     #         obj = self._postProc(self)
@@ -259,11 +365,11 @@ class CFDCase: #(PreProcCase, PostProcCase)
     ##########################
     #    CLASS PROPERTIES    #
     ##########################
+    ### Job Lines ###
     @property
     def jobLines(self):
         with open(self.jobPath, 'r') as f:
-            jobLines = f.readlines()
-        # self.jobLines = jobLines
+            jobLines = f
         return jobLines
     @jobLines.setter
     def jobLines(self, lines):
@@ -274,6 +380,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
             with open(self.jobPath, 'w+') as f:
                 f.writelines(lines)
 
+    ### Input Lines ###
     @property
     def inputLines(self):
         with open(self.inputPath, 'r') as f:
@@ -291,12 +398,14 @@ class CFDCase: #(PreProcCase, PostProcCase)
     # def jobLines(self):
     #     self.jobLines = None
 
+    ### Data File Lines ###
     @property
     def datLines(self):
         with open(self.datPath, 'r') as f:
             lines = f.readlines()
         return lines
 
+    ### Variables ###
     @property
     def x(self): return self._x
     @x.setter
@@ -306,6 +415,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
         np.savetxt(path, x)
         self._x = x
 
+    ### Objectives ###
     @property
     def f(self): return self._f
     @f.setter
@@ -329,11 +439,11 @@ class CFDCase: #(PreProcCase, PostProcCase)
     def getLogger(self):
         _, tail = os.path.split(self.caseDir)
         logFile = os.path.join(self.caseDir, f'{tail}.log')
-        logger = logging.getLogger(__name__)
+        logger = logging.getLogger(logFile)
         logger.setLevel(logging.INFO)
         # define file handler and set formatter
         file_handler = logging.FileHandler(logFile)
-        formatter    = logging.Formatter('%(asctime)s : %(levelname)s : %(name)s : %(message)s')
+        formatter = logging.Formatter('%(asctime)s : %(levelname)s : %(name)s : %(message)s')
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
         return logger
@@ -366,13 +476,6 @@ class CFDCase: #(PreProcCase, PostProcCase)
                 kw_line_i = line_i
         return kw_line, kw_line_i
 
-        # def copyFromBaseCase(self):
-        #     sh
-        # def execute(self):
-        #     if self.solverExecCmd is not None:
-        #         proc = subprocess.Popen(self.solverExecCmd, cwd = self.caseDir,
-        #                                 stdout=subprocess.DEVNULL)
-        #         proc.wait()
         # @run_once# import functools
     # def run_once(f):
     #     """Runs a function (successfully) only once.
@@ -428,7 +531,13 @@ class CFDCase: #(PreProcCase, PostProcCase)
         self._preProc()
         pass
 
-    def _isExecDone(self):
+    def _pySolve(self):
+        pass
+
+    def _solve(self):
+        print('OVERRIDE _solve(self) method to execute internal python solver OR use externalSolver=True')
+
+    def _execDone(self):
         return True
 
     def _postProc(self):
@@ -436,6 +545,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
 
     def _genMesh(self):
         pass
+
 
 ###################
 #    FUNCTIONS    #
