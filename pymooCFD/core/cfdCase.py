@@ -164,7 +164,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
             cls.pool.apply_async(case.run, ())
 
     def solveExternal(self):
-        self.logger.info(f'SOLVING AS SUBPROCESS...')
+        self.logger.info('SOLVING AS SUBPROCESS...')
         self.logger.info(f'\tcommand: {self.solverExecCmd}')
         subprocess.run(self.solverExecCmd, cwd=self.caseDir,
                        stdout=subprocess.DEVNULL)
@@ -223,13 +223,6 @@ class CFDCase: #(PreProcCase, PostProcCase)
         # saveTxt(self.caseDir, 'var.txt', self.x)
         self.restart = True  # ??????????????????
         self.saveCP()
-
-    def externalSolve(self):
-        self.logger.info(f'SOLVING AS SUBPROCESS...')
-        self.logger.info(f'\tcommand: {self.solverExecCmd}')
-        subprocess.run(self.solverExecCmd, cwd=self.caseDir,
-                       stdout=subprocess.DEVNULL)
-
     # def pySolve(self):
     #     self.logger.info('SOLVING . . . ')
     #     self._pySolve()
