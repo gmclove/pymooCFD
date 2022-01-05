@@ -230,7 +230,6 @@ class OscillCylinderOpt(OptStudy):
         super().__init__(algorithm, problem, baseCase,
                          baseCaseDir='base_cases/osc-cyl_base',
                          optDatDir='cyl-opt_run',
-                         procLim=40,
                          *args, **kwargs)
 
     # def execute(self, cases):
