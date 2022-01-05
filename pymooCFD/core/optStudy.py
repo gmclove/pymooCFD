@@ -262,13 +262,13 @@ class OptStudy:
             self.gen1Pop = cases
         return out
 
-    def runPop(self, cases):
-        nTask = int(self.procLim/self.BaseCase.nProc)
-        pool = mp.Pool(nTask)
-        for case in cases:
-            pool.apply_async(case.run, ())
-        pool.close()
-        pool.join()
+    # def runPop(self, cases):
+    #     nTask = int(self.procLim/self.BaseCase.nProc)
+    #     pool = mp.Pool(nTask)
+    #     for case in cases:
+    #         pool.apply_async(case.run, ())
+    #     pool.close()
+    #     pool.join()
     # def runPop(self, cases):
     #     self.preProcPop(cases)
     #     self.execPop(cases)
@@ -332,7 +332,7 @@ class OptStudy:
                 cornerCaseDir = os.path.join(self.procOptDir, 'corner-cases', caseName)
                 cornerCase = self.BaseCase(self.baseCaseDir, cornerCaseDir, perm)
                 cornerCases.append(cornerCase)
-        self.runPop(cornerCases)
+        self.BaseCase.parallelize(cornerCases)
 
     def runBndCases(self, n_pts, getDiags=False, doMeshStudy=False):
         self.genBndCases(n_pts, getDiags=getDiags)

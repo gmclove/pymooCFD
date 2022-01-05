@@ -171,22 +171,23 @@ class CFDCase: #(PreProcCase, PostProcCase)
 
     def run(self):
         self.preProc()
+        self.logger.info('COMPLETED: PRE-PROCESS')
         self.solve()
         if self._execDone():
-            self.logger.info('RUN COMPLETE')
+            self.logger.info('COMPLETED: SOLVE')
         else:
             self.logger.warning('RUN FAILED TO EXECUTE')
             self.logger.info('RE-RUNNING')
             self.run()
         self.postProc()
 
-    def run(case):
-        case.preProc()
-        case.logger.info('COMPLETED: PRE-PROCESS')
-        case.solve()
-        case.logger.info('COMPLETED: SOLVE')
-        case.postProc()
-        case.logger.info('COMPLETED: POST-PROCESS')
+    # def run(case):
+    #     case.preProc()
+    #     case.logger.info('COMPLETED: PRE-PROCESS')
+    #     case.solve()
+    #     case.logger.info('COMPLETED: SOLVE')
+    #     case.postProc()
+    #     case.logger.info('COMPLETED: POST-PROCESS')
 
     # def execCallback(self):
     #     if self._execDone():
@@ -531,8 +532,8 @@ class CFDCase: #(PreProcCase, PostProcCase)
         self._preProc()
         pass
 
-    def _pySolve(self):
-        pass
+    # def _pySolve(self):
+    #     pass
 
     def _solve(self):
         print('OVERRIDE _solve(self) method to execute internal python solver OR use externalSolver=True')
