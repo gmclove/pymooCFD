@@ -42,7 +42,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
                  jobFile=None,  # jobLines = None,
                  inputFile=None,  # inputLines = None,
                  datFile=None,
-                 restart=False,
+                 restart=True,
                  # solverExecCmd=None,
                  *args, **kwargs
                  ):
@@ -465,8 +465,8 @@ class CFDCase: #(PreProcCase, PostProcCase)
     #    HELPER METHODS    #
     ########################
     def copy(self):
-        if os.path.exists(self.caseDir):
-            self.logger.warning('CASE OVERRIDE - self.caseDir already existed')
+        # if os.path.exists(self.caseDir):
+        #     self.logger.warning('CASE OVERRIDE - self.caseDir already existed')
         shutil.copytree(self.baseCaseDir, self.caseDir, dirs_exist_ok=True)
         self.logger.info(f'COPIED: {self.baseCaseDir} -> {self.caseDir}')
 
