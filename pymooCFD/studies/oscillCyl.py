@@ -33,14 +33,12 @@ class OscillCylinder(CFDCase):
     procLim = 60
     solverExecCmd = ['mpirun', '-np', str(nProc), '2D_cylinder']
 
-    def __init__(self, baseCaseDir, caseDir, x, restart=False):
+    def __init__(self, baseCaseDir, caseDir, x):
         super().__init__(baseCaseDir, caseDir, x,
                          meshFile='2D_cylinder.msh22',
                          datFile='ics_temporals.txt',
                          jobFile='jobslurm.sh',
-                         inputFile='2D_cylinder.in',
-                         restart=restart
-                         )
+                         inputFile='2D_cylinder.in'                         )
 
     def _preProc_restart(self):
         self._preProc()
