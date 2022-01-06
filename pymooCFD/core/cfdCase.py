@@ -262,6 +262,8 @@ class CFDCase: #(PreProcCase, PostProcCase)
         print(f'GENERATING MESH STUDY: {self}')
         print(f'\t{self.meshSFs}')
         ### Pre-Process
+        path = os.path.join(self.caseDir, 'meshStudy')
+        os.makedirs()
         study = []
         var = []
         a_numElem = []
@@ -270,6 +272,8 @@ class CFDCase: #(PreProcCase, PostProcCase)
             ### Deep copy case instance
             msCase = copy.deepcopy(self)
             self.msCases.append(msCase)
+            msCase.logger = msCase.getlogger()
+            msCase.restart = False
             msCase.meshSFs = None
             msCase.meshStudyDir = None
             msCase.caseDir = os.path.join(self.meshStudyDir, f'meshSF-{sf}')
@@ -359,6 +363,14 @@ class CFDCase: #(PreProcCase, PostProcCase)
     ##########################
     #    CLASS PROPERTIES    #
     ##########################
+    # @property
+    # def caseDir(self):
+    #     return self.caseDir
+    # @caseDir.setter
+    # def caseDir(self, caseDir):
+    #     os.makedirs(caseDir, exist_ok)
+    #     self.
+    #     self.caseDir = caseDir
     ### Job Lines ###
     @property
     def jobLines(self):
