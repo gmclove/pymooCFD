@@ -268,15 +268,22 @@ class CFDCase: #(PreProcCase, PostProcCase)
         self.msCases = []
         for sf in self.meshSFs:
             ### Deep copy case instance
+            # msCase = copy.deepcopy(self)
+            # self.msCases.append(msCase)
+            # msCase.logger = msCase.getLogger()
+            # msCase.restart = False
+            # msCase.meshSFs = None
+            # msCase.meshStudyDir = None
+            # msCase.caseDir = os.path.join(self.meshStudyDir, f'meshSF-{sf}')
+            # msCase.meshSF = sf
+            # msCase.copy()
             msCase = copy.deepcopy(self)
             self.msCases.append(msCase)
-            msCase.logger = msCase.getLogger()
-            msCase.restart = False
+            path = os.path.join(self.meshStudyDir, f'meshSF-{sf}')
+            msCase.__init__(self.baseCaseDir, path, self.x)
             msCase.meshSFs = None
-            msCase.meshStudyDir = None
-            msCase.caseDir = os.path.join(self.meshStudyDir, f'meshSF-{sf}')
             msCase.meshSF = sf
-            msCase.copy()
+
             ### only pre-processing needed is generating mesh
             msCase.genMesh()
             a_numElem.append(msCase.numElem)
