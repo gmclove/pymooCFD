@@ -270,7 +270,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
             ### Deep copy case instance
             msCase = copy.deepcopy(self)
             self.msCases.append(msCase)
-            msCase.logger = msCase.getlogger()
+            msCase.logger = msCase.getLogger()
             msCase.restart = False
             msCase.meshSFs = None
             msCase.meshStudyDir = None
