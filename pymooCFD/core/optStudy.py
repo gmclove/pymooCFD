@@ -183,6 +183,12 @@ class OptStudy:
     #######################
     #    CHECKPOINTING    #
     #######################
+    # def saveCP(self): np.save(self.cpPath, self)
+    # def loadCP(self):
+    #     cp, = np.load(self.cpPath, allow_pickle=True).flatten()
+    #     self.__dict__.update(cp.__dict__)
+    #     self.logger.info('LOADING CHECKPOINT')
+
     def loadCP(self, hasTerminated=False):
         try:
             checkpoint, = np.load(self.CP_path, allow_pickle=True).flatten()
@@ -202,9 +208,11 @@ class OptStudy:
 
     def saveCP(self, alg=None):
         ## default use self.algorithm
-        if alg is None: alg = self.algorithm
+        if alg is None:
+            alg = self.algorithm
         ## if give alg assign it to self.algorithm
-        else: self.algorithm = alg
+        else:
+            self.algorithm = alg
         gen = alg.callback.gen
         print(f'SAVING CHECKPOINT - GENERATION {gen}')
         # genDir = f'gen{gen}'
@@ -216,20 +224,20 @@ class OptStudy:
         # save text file of variables and objectives as well
         # this provides more options for post-processesing data
         genX = alg.pop.get('X')
-        with open(f'{self.optDatDir}/gen{gen}X.txt', "w+") as file:  # write file
-            np.savetxt(file, genX)
+        path = os.path.join(self.optDatDir, f'gen{gen}X.txt')
+        np.savetxt(path, genX)
         try:
             genF = alg.pop.get('F')
-            with open(f'{self.optDatDir}/gen{gen}F.txt', "w+") as file:  # write file
-                np.savetxt(file, genF)
+            path = os.path.join(self.optDatDir, f'gen{gen}F.txt')
+            np.savetxt(path, genF)
         except TypeError:  # AttributeError
-            print('     mid-generation')
+            print('\tmid-generation')
 
     ###################
     #    TEST CASE    #
     ###################
     def genTestCase(self, testCaseDir='test_case'):
-        shutil.rmtree('test_case', ignore_errors=True)
+        # shutil.rmtree('test_case', ignore_errors=True)
         xl = self.problem.xl
         xu = self.problem.xu
         x_mid = [xl[x_i]+(xu[x_i]-xl[x_i])/2 for x_i in range(self.problem.n_var)]
@@ -239,7 +247,7 @@ class OptStudy:
         print('TEST CASE RUNNING')
         if self.testCase is None:
             self.genTestCase()
-        obj = self.testCase.run()
+        self.testCase.run()
         print('Parameters:', self.testCase.x)
         print('Objectives:', self.testCase.f)
         print('TEST CASE COMPLETE ')
