@@ -262,8 +262,6 @@ class CFDCase: #(PreProcCase, PostProcCase)
         print(f'GENERATING MESH STUDY: {self}')
         print(f'\t{self.meshSFs}')
         ### Pre-Process
-        path = os.path.join(self.caseDir, 'meshStudy')
-        os.makedirs()
         study = []
         var = []
         a_numElem = []

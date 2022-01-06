@@ -241,7 +241,7 @@ class OptStudy:
             self.genTestCase()
         obj = self.testCase.run()
         print('Parameters:', self.testCase.x)
-        print('Objectives:', obj)
+        print('Objectives:', self.testCase.f)
         print('TEST CASE COMPLETE ')
         return self.testCase
 
