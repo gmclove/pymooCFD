@@ -241,7 +241,7 @@ class OptStudy:
         xl = self.problem.xl
         xu = self.problem.xu
         x_mid = [xl[x_i]+(xu[x_i]-xl[x_i])/2 for x_i in range(self.problem.n_var)]
-        self.testCase = self.BaseCase(self.baseCaseDir, testCaseDir, x_mid, restart=True)
+        self.testCase = self.BaseCase(self.baseCaseDir, testCaseDir, x_mid) #, restart=True)
 
     def runTestCase(self):
         print('TEST CASE RUNNING')

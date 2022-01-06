@@ -42,7 +42,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
                  jobFile=None,  # jobLines = None,
                  inputFile=None,  # inputLines = None,
                  datFile=None,
-                 restart=True,
+                 # restart=False,
                  # solverExecCmd=None,
                  *args, **kwargs
                  ):
@@ -50,21 +50,22 @@ class CFDCase: #(PreProcCase, PostProcCase)
         self.baseCaseDir = baseCaseDir
         self.caseDir = caseDir
         self.cpPath = os.path.join(caseDir, 'case.npy')
+        self.restart = False
         if os.path.exists(caseDir):
-            if os.path.exists(self.cpPath) and restart:
+            if os.path.exists(self.cpPath):
                 self.loadCP()
                 self.logger.info(f'RESTART CASE - restart from {self.cpPath}')
+                self.restart = True
                 return
             else:
                 self.logger = self.getLogger()
-                self.logger.info(f'OVERRIDE CASE - {caseDir} already exists')
+                self.logger.info(f'OVERRIDE CASE - {caseDir} already exists but {self.cpPath} does not')
                 self.copy()
         else:
             os.makedirs(caseDir, exist_ok=True)
             self.logger = self.getLogger()
             self.logger.info(f'NEW CASE - {caseDir} did not exist')
             self.copy()
-
         ### If solverExecCmd is provided use
         # if self.solverExecCmd is None:
         #     externalSolver = False
@@ -90,7 +91,6 @@ class CFDCase: #(PreProcCase, PostProcCase)
         self.jobFile = jobFile
         self.datFile = datFile
         self.inputFile = inputFile
-        self.restart = restart
         ## generate file path attributes when possible
         self.meshStudyDir = os.path.join(self.caseDir, 'meshStudy')
         self.cpPath = os.path.join(caseDir, 'case.npy') # not variable?????????
