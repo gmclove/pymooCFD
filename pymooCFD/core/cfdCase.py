@@ -418,9 +418,11 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     @jobLines.setter
     def jobLines(self, lines):
         if self.jobPath is None:
-            self.logger.info('self.jobPath is None: Job lines not written')
+            self.logger.info('self.jobPath is None: self.jobLines not written')
         else:
-            lines = '\n'.join(lines)
+            for i, line in enumerate(lines):
+                if not line.endswith('/n'):
+                    lines[i] += '/n'
             with open(self.jobPath, 'w+') as f:
                 f.writelines(lines)
 
@@ -436,7 +438,9 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         if self.inputPath is None:
             self.logger.info('self.inputPath is None: Input lines not written')
         else:
-            lines = '\n'.join(lines)
+            for i, line in enumerate(lines):
+                if not line.endswith('/n'):
+                    lines[i] += '/n'
             with open(self.inputPath, 'w+') as f:
                 f.writelines(lines)
     # @jobLines.deleter
@@ -575,11 +579,11 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #     return result
 
     # Calling destructor
-    def __del__(self):
-        # self.saveCP()
-        # shutil.rmtree(caseDir)
-        self.logger.info('EXITED')
-        print('EXITED:', self.caseDir)
+    # def __del__(self):
+    #     # self.saveCP()
+    #     # shutil.rmtree(caseDir)
+    #     self.logger.info('EXITED')
+    #     print('EXITED:', self.caseDir)
 
     # ==========================================================================
     # TO BE OVERWRITTEN

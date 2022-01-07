@@ -3,15 +3,18 @@
 # @Last modified by:   glove
 # @Last modified time: 2021-12-14T15:45:19-05:00
 
-<<<<<<< HEAD
-=======
+lines = ['asfasdf/n', 'assdasdf/n', 'sfassdf/n', 'sdfsf']
 
-import os
->>>>>>> 669223102f0c47e1f91e8eee1217a3ac414b81f8
-import numpy as np
-print(int(23/5))
+for i, line in enumerate(lines):
+    if not line.endswith('/n'):
+        lines[i] += '/n'
 
-<<<<<<< HEAD
+print(lines)
+
+
+# import numpy as np
+# print(int(23/5))
+
 # class A:
 #     @classmethod
 #     def a(cls):
@@ -46,18 +49,6 @@ print(int(23/5))
 #
 # from setupOpt import algorithm, problem
 # MyOptStudy(algorithm, problem, BaseCase).runPop(cases)
-=======
-from pymooCFD.studies.oscillCyl import BaseCase, MyOptStudy
-
-wds = ['test_case1', 'test_case2', 'test_case3']
-X = [[1.5, 0.1], [0.5, 0.2], [1, 0.3]]
-cases = []
-for i, wd in enumerate(wds):
-    cases.append(BaseCase('osc-cyl_base', wd, X[i]))
-
-from setupOpt import algorithm, problem
-MyOptStudy(algorithm, problem, BaseCase).runPop(cases)
->>>>>>> 669223102f0c47e1f91e8eee1217a3ac414b81f8
 
 # BaseCase('base_cases/osc-cyl_base', 'test_case', [0,0]).genMesh()
 
@@ -149,7 +140,6 @@ MyOptStudy(algorithm, problem, BaseCase).runPop(cases)
 # print(list)
 
 
-
 # import numpy as np
 # class Test:
 #     def __init__(self):
@@ -180,7 +170,6 @@ MyOptStudy(algorithm, problem, BaseCase).runPop(cases)
 # test1.__str__ = lambda self: 'Test 1'
 # l = [[1, test1], [2, test2]]
 # for e in l: print(f'\t\t {e[0]} {e[1]}')
-
 
 
 # # from http://stackoverflow.com/questions/4103773/efficient-way-of-having-a-function-only-execute-once-in-a-loop
