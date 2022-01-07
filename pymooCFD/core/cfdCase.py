@@ -65,7 +65,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         self.parallelizeInit(self.externalSolver)
         self.baseCaseDir = baseCaseDir
         self.caseDir = caseDir
-        self.cpPath = os.path.join(caseDir, 'case.npy')
+        self.cpPath = os.path.join(caseDir, 'case')
         if os.path.exists(caseDir):
             if os.path.exists(self.cpPath):
                 self.loadCP()
@@ -498,16 +498,16 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #    CHECKPOINTING    #
     #######################
     def saveCP(self):
-        np.save(self.cpPath + '.temp', self)
-        if os.path.exists(self.cpPath):
-            os.rename(self.cpPath, self.cpPath + '.old')
-        os.rename(self.cpPath + '.temp', self.cpPath)
-        os.remove(self.cpPath + '.old')
+        np.save(self.cpPath + '.temp.npy', self)
+        if os.path.exists(self.cpPath + '.npy'):
+            os.rename(self.cpPath + '.npy', self.cpPath + '.old.npy')
+        os.rename(self.cpPath + '.temp.npy', self.cpPath + '.npy')
+        os.remove(self.cpPath + '.old.npy')
 
     def loadCP(self):
         if os.path.exists(self.cpPath + '.old'):
-            os.rename(self.cpPath + '.old', self.cpPath)
-        cp, = np.load(self.cpPath, allow_pickle=True).flatten()
+            os.rename(self.cpPath + '.old', self.cpPath + '.npy')
+        cp, = np.load(self.cpPath + '.npy', allow_pickle=True).flatten()
         self.__dict__.update(cp.__dict__)
         self.logger.info('CHECKPOINT LOADED')
 
