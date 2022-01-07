@@ -499,7 +499,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #######################
     def saveCP(self):
         np.save(self.cpPath + '.temp', self)
-        os.rename(self.cpPath, self.cpPath + '.old')
+        if os.path.exists(self.cpPath):
+            os.rename(self.cpPath, self.cpPath + '.old')
         os.rename(self.cpPath + '.temp', self.cpPath)
         os.remove(self.cpPath + '.old')
 
@@ -572,8 +573,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     # Calling destructor
     def __del__(self):
         self.saveCP()
-        shutil.rmtree(caseDir)
-        print('REMOVED', caseDir)
+        # shutil.rmtree(caseDir)
+        print('EXITED:', self.caseDir)
 
     # ==========================================================================
     # TO BE OVERWRITTEN
