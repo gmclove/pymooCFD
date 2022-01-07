@@ -12,6 +12,8 @@ def main():
 
     import your optimization study object/instance from setupOpt.py and execute
     '''
+    optStudy.testCase.loadCP()
+    print(optStudy.testCase.__dict__)
     ### Pre-Proccess ###
     # optStudy.preProc()
     optStudy.runTestCase()

@@ -61,11 +61,11 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                  ):
         super().__init__()
         self.complete = False
+        self.restart = False
         self.parallelizeInit(self.externalSolver)
         self.baseCaseDir = baseCaseDir
         self.caseDir = caseDir
         self.cpPath = os.path.join(caseDir, 'case.npy')
-        self.restart = False
         if os.path.exists(caseDir):
             if os.path.exists(self.cpPath):
                 self.loadCP()
@@ -340,12 +340,13 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         print(a_numElem)
         # Plot
         for obj_i, obj_label in enumerate(self.obj_labels):
+            print(f'\tPLOTTING OBJECTIVE {obj_i}: {obj_label}')
             plt.plot(a_numElem, msObj[:, obj_i])
             plt.suptitle('Mesh Sensitivity Study')
             plt.title(tail)
             plt.xlabel('Number of Elements')
             plt.ylabel(obj_label)
-            fName = f'meshStudy_plot-{tail}-obj{obj_i}.png'
+            fName = f'ms_plot-{tail}-obj{obj_i}.png'
             fPath = os.path.join(self.meshStudyDir, fName)
             plt.savefig(fPath)
             plt.clf()
@@ -496,9 +497,15 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #######################
     #    CHECKPOINTING    #
     #######################
-    def saveCP(self): np.save(self.cpPath, self)
+    def saveCP(self):
+        np.save(self.cpPath + '.temp', self)
+        os.rename(self.cpPath, self.cpPath + '.old')
+        os.rename(self.cpPath + '.temp', self.cpPath)
+        os.remove(self.cpPath + '.old')
 
     def loadCP(self):
+        if os.path.exists(self.cpPath + '.old'):
+            os.rename(self.cpPath + '.old', self.cpPath)
         cp, = np.load(self.cpPath, allow_pickle=True).flatten()
         self.__dict__.update(cp.__dict__)
         self.logger.info('CHECKPOINT LOADED')
@@ -563,9 +570,10 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #         setattr(result, k, copy.deepcopy(v, memo))
     #     return result
     # Calling destructor
-    # def __del__(self):
-    #     shutil.rmtree(caseDir)
-    #     print('REMOVED', caseDir)
+    def __del__(self):
+        self.saveCP()
+        shutil.rmtree(caseDir)
+        print('REMOVED', caseDir)
 
     # ==========================================================================
     # TO BE OVERWRITTEN
