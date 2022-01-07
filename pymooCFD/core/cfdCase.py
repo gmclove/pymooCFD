@@ -183,6 +183,11 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     def parallelize(cls, cases):
         for case in cases:
             cls.pool.apply_async(case.run, ())
+        cls.pool.close()
+        cls.pool.join()
+
+    # def parallelizeCleanUp(self):
+    #     self.pool.terminate()
 
     def solveExternal(self):
         self.logger.info('SOLVING AS SUBPROCESS...')
