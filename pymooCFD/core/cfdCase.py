@@ -291,7 +291,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #    MESH STUDY    #
     ####################
     def genMeshStudy(self):
-        print(f'GENERATING MESH STUDY: {self}')
+        print(f'GENERATING MESH STUDY - {self}')
         print(f'\t{self.meshSFs}')
         # Pre-Process
         study = []
@@ -421,8 +421,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             self.logger.info('self.jobPath is None: self.jobLines not written')
         else:
             for i, line in enumerate(lines):
-                if not line.endswith('/n'):
-                    lines[i] += '/n'
+                if not line.endswith('\n'):
+                    lines[i] += '\n'
             with open(self.jobPath, 'w+') as f:
                 f.writelines(lines)
 
@@ -439,8 +439,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             self.logger.info('self.inputPath is None: Input lines not written')
         else:
             for i, line in enumerate(lines):
-                if not line.endswith('/n'):
-                    lines[i] += '/n'
+                if not line.endswith('\n'):
+                    lines[i] += '\n'
             with open(self.inputPath, 'w+') as f:
                 f.writelines(lines)
     # @jobLines.deleter
