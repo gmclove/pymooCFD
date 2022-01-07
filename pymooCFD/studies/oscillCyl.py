@@ -38,7 +38,8 @@ class OscillCylinder(CFDCase):
                          meshFile='2D_cylinder.msh22',
                          datFile='ics_temporals.txt',
                          jobFile='jobslurm.sh',
-                         inputFile='2D_cylinder.in'                         )
+                         inputFile='2D_cylinder.in'
+                         )
 
     def _preProc_restart(self):
         self._preProc()

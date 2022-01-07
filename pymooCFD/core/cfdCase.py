@@ -283,7 +283,6 @@ class CFDCase: #(PreProcCase, PostProcCase)
             msCase.__init__(self.baseCaseDir, path, self.x)
             msCase.meshSFs = None
             msCase.meshSF = sf
-
             ### only pre-processing needed is generating mesh
             msCase.genMesh()
             a_numElem.append(msCase.numElem)
@@ -316,7 +315,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
             plt.title(tail)
             plt.xlabel('Number of Elements')
             plt.ylabel(obj_label)
-            fName = f'meshStudy_plot-{tail}-{obj_label}.png'
+            fName = f'meshStudy_plot-{tail}-obj{obj_i}.png'
             fPath = os.path.join(self.meshStudyDir, fName)
             plt.savefig(fPath)
             plt.clf()
