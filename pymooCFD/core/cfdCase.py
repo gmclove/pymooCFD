@@ -67,12 +67,12 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         self.caseDir = caseDir
         self.cpPath = os.path.join(caseDir, 'case')
         if os.path.exists(caseDir):
-            if os.path.exists(self.cpPath):
+            try:
                 self.loadCP()
-                self.logger.info(f'RESTART CASE - restart from {self.cpPath}')
+                self.logger.info('RESTART CASE')
                 self.restart = True
                 return
-            else:
+            except FileNotFoundError:
                 self.logger = self.getLogger()
                 self.logger.info(
                     f'OVERRIDE CASE - {caseDir} already exists but {self.cpPath} does not')
@@ -509,7 +509,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             os.rename(self.cpPath + '.old', self.cpPath + '.npy')
         cp, = np.load(self.cpPath + '.npy', allow_pickle=True).flatten()
         self.__dict__.update(cp.__dict__)
-        self.logger.info('CHECKPOINT LOADED')
+        self.logger.info(f'\tCHECKPOINT LOADED - from {self.cpPath}.npy')
 
     ########################
     #    HELPER METHODS    #
