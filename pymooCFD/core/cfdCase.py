@@ -174,10 +174,10 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             assert cls.solverExecCmd is not None
             assert cls.nProc is not None
             assert cls.procLim is not None
-            cls.solve = cls.solveExternal
+            cls._solve = cls.solveExternal
             cls.pool = mp.pool.ThreadPool(nTasks)
         else:
-            cls.solve = cls._solve
+            # cls.solve = cls._solve
             cls.pool = cls.Pool(nTasks)
 
     @classmethod
@@ -189,6 +189,9 @@ class CFDCase:  # (PreProcCase, PostProcCase)
 
     # def parallelizeCleanUp(self):
     #     self.pool.terminate()
+    def solve(self):
+        if not self.complete:
+            self._solve()
 
     def solveExternal(self):
         self.logger.info('SOLVING AS SUBPROCESS...')

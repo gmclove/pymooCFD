@@ -198,20 +198,20 @@ class OptStudy:
     #######################
     #    CHECKPOINTING    #
     #######################
-    def saveCP(self):
-        np.save(self.CP_path + '.temp.npy', self)
-        if os.path.exists(self.CP_path + '.npy'):
-            os.rename(self.CP_path + '.npy', self.CP_path + '.old.npy')
-        os.rename(self.CP_path + '.temp.npy', self.CP_path + '.npy')
-        if os.path.exists(self.CP_path + '.old.npy'):
-            os.remove(self.CP_path + '.old.npy')
-
-    def loadCP(self):
-        if os.path.exists(self.CP_path + '.old'):
-            os.rename(self.CP_path + '.old', self.CP_path + '.npy')
-        cp, = np.load(self.CP_path + '.npy', allow_pickle=True).flatten()
-        self.__dict__.update(cp.__dict__)
-        self.logger.info(f'\tCHECKPOINT LOADED - from {self.CP_path}.npy')
+    # def saveCP(self):
+    #     np.save(self.CP_path + '.temp.npy', self)
+    #     if os.path.exists(self.CP_path + '.npy'):
+    #         os.rename(self.CP_path + '.npy', self.CP_path + '.old.npy')
+    #     os.rename(self.CP_path + '.temp.npy', self.CP_path + '.npy')
+    #     if os.path.exists(self.CP_path + '.old.npy'):
+    #         os.remove(self.CP_path + '.old.npy')
+    #
+    # def loadCP(self):
+    #     if os.path.exists(self.CP_path + '.old'):
+    #         os.rename(self.CP_path + '.old', self.CP_path + '.npy')
+    #     cp, = np.load(self.CP_path + '.npy', allow_pickle=True).flatten()
+    #     self.__dict__.update(cp.__dict__)
+    #     self.logger.info(f'\tCHECKPOINT LOADED - from {self.CP_path}.npy')
 
     def loadCP(self, hasTerminated=False):
         try:
