@@ -33,6 +33,19 @@ class CFDCase: #(PreProcCase, PostProcCase)
     procLim = None
     nProc = None
     solverExecCmd = None
+    # if procLim is None:
+    #     nTasks = 1000000
+    # else:
+    #     nTasks = int(procLim/nProc)
+    # if externalSolver:
+    #     assert solverExecCmd is not None
+    #     assert nProc is not None
+    #     assert procLim is not None
+    #     solve = solveExternal
+    #     pool = mp.pool.ThreadPool(nTasks)
+    # else:
+    #     solve = _solve
+    #     pool = Pool(nTasks)
 
     def __init__(self, baseCaseDir, caseDir, x,
                  meshSF=1, meshSFs=np.arange(0.5, 1.5, 0.1),
