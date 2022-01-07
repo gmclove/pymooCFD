@@ -70,7 +70,6 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             try:
                 self.loadCP()
                 self.logger.info('RESTART CASE')
-                self.restart = True
                 return
             except FileNotFoundError:
                 self.logger = self.getLogger()
