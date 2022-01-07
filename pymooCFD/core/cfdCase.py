@@ -47,6 +47,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
                  *args, **kwargs
                  ):
         super().__init__()
+        self.parallelizeInit(self.externalSolver)
         self.baseCaseDir = baseCaseDir
         self.caseDir = caseDir
         self.cpPath = os.path.join(caseDir, 'case.npy')
@@ -71,7 +72,6 @@ class CFDCase: #(PreProcCase, PostProcCase)
         #     externalSolver = False
         # elif self.nProc is not None and self.procLim is not None:
         #     externalSolver = True
-        self.parallelizeInit(self.externalSolver)
         # self.externalSolver = externalSolver
 
         # if not os.path.exists(caseDir):
