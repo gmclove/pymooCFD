@@ -12,7 +12,7 @@ import copy
 import shutil
 # import h5py
 # import matplotlib.pyplot as plt
-from pymooCFD.util.sysTools import emptyDir, copy_and_overwrite
+from pymooCFD.util.sysTools import emptyDir, copy_and_overwrite, saveTxt
 
 
 class OptStudy:
@@ -221,10 +221,9 @@ class OptStudy:
             self.__dict__.update(cp.__dict__)
             print(f'\tCHECKPOINT LOADED - from {self.CP_path}.npy')
             # self.logger.info(f'\tCHECKPOINT LOADED - from {self.CP_path}.npy')
-            checkpoint, = np.load(self.CP_path, allow_pickle=True).flatten()
             # only necessary if for the checkpoint the termination criterion has been met
-            checkpoint.has_terminated = hasTerminated
-            alg = checkpoint
+            self.algorithm.has_terminated = hasTerminated
+            alg = self.algorithm
             # Update any changes made to the algorithms between runs
             alg.termination = self.algorithm.termination
             alg.pop_size = self.algorithm.pop_size
@@ -236,32 +235,65 @@ class OptStudy:
             print(err)
             raise Exception(f'{self.CP_path} load failed.')
 
-    def saveCP(self, alg=None):
-        # default use self.algorithm
-        if alg is None:
-            alg = self.algorithm
-        # if give alg assign it to self.algorithm
-        else:
-            self.algorithm = alg
-        gen = alg.callback.gen
+    def saveCP(self):  # , alg=None):
+        # # default use self.algorithm
+        # if alg is None:
+        #     alg = self.algorithm
+        # # if give alg assign it to self.algorithm
+        # else:
+        #     self.algorithm = alg
+        gen = self.algorithm.callback.gen
         print(f'SAVING CHECKPOINT - GENERATION {gen}')
+        np.save(self.CP_path + '.temp.npy', self)
+        if os.path.exists(self.CP_path + '.npy'):
+            os.rename(self.CP_path + '.npy', self.CP_path + '.old.npy')
+        os.rename(self.CP_path + '.temp.npy', self.CP_path + '.npy')
+        if os.path.exists(self.CP_path + '.old.npy'):
+            os.remove(self.CP_path + '.old.npy')
         # genDir = f'gen{gen}'
         # os.path.join(optDatDir, 'checkpoint')
-        np.save(self.CP_path, alg)
+        # np.save(self.CP_path, alg)
         # gen0 and every nCP generations save additional static checkpoint
         if gen % self.n_CP == 1:
-            np.save(os.path.join(self.optDatDir, f'checkpoint-gen{gen}'), alg)
+            np.save(os.path.join(self.optDatDir, f'checkpoint-gen{gen}'), self)
         # save text file of variables and objectives as well
         # this provides more options for post-processesing data
-        genX = alg.pop.get('X')
-        path = os.path.join(self.optDatDir, f'gen{gen}X.txt')
-        np.savetxt(path, genX)
+        genX = self.algorithm.pop.get('X')
+        saveTxt(self.optDatDir, f'gen{gen}X.txt', genX)
         try:
-            genF = alg.pop.get('F')
-            path = os.path.join(self.optDatDir, f'gen{gen}F.txt')
-            np.savetxt(path, genF)
+            genF = self.algorithm.pop.get('F')
+            saveTxt(self.optDatDir, f'gen{gen}F.txt', genF)
+            # path = os.path.join(self.optDatDir, f'gen{gen}F.txt')
+            # np.savetxt(path, genF)
         except TypeError:  # AttributeError
             print('\tmid-generation')
+
+    # def saveCP(self, alg=None):
+    #     # default use self.algorithm
+    #     if alg is None:
+    #         alg = self.algorithm
+    #     # if give alg assign it to self.algorithm
+    #     else:
+    #         self.algorithm = alg
+    #     gen = alg.callback.gen
+    #     print(f'SAVING CHECKPOINT - GENERATION {gen}')
+    #     # genDir = f'gen{gen}'
+    #     # os.path.join(optDatDir, 'checkpoint')
+    #     np.save(self.CP_path, alg)
+    #     # gen0 and every nCP generations save additional static checkpoint
+    #     if gen % self.n_CP == 1:
+    #         np.save(os.path.join(self.optDatDir, f'checkpoint-gen{gen}'), alg)
+    #     # save text file of variables and objectives as well
+    #     # this provides more options for post-processesing data
+    #     genX = alg.pop.get('X')
+    #     path = os.path.join(self.optDatDir, f'gen{gen}X.txt')
+    #     np.savetxt(path, genX)
+    #     try:
+    #         genF = alg.pop.get('F')
+    #         path = os.path.join(self.optDatDir, f'gen{gen}F.txt')
+    #         np.savetxt(path, genF)
+    #     except TypeError:  # AttributeError
+    #         print('\tmid-generation')
 
     ###################
     #    TEST CASE    #

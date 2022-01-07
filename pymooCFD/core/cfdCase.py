@@ -11,6 +11,7 @@ import copy
 import matplotlib.pyplot as plt
 import multiprocessing as mp
 import multiprocessing.pool
+from pymooCFD.util.sysTools import saveTxt
 
 
 class CFDCase:  # (PreProcCase, PostProcCase)
@@ -355,6 +356,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
 
     def execMeshStudy(self):
         self.parallelize(self.msCases)
+        obj = np.array([case.f for case in self.msCases])
+        print('Objectives:\n\t', str(obj).replace('\n', '\n\t'))
         # nTask = int(self.procLim/self.BaseCase.nProc)
         # pool = mp.Pool(nTask)
         # for case in self.msCases:
@@ -614,10 +617,10 @@ class CFDCase:  # (PreProcCase, PostProcCase)
 ###################
 #    FUNCTIONS    #
 ###################
-def saveTxt(path, fname, data):
-    datFile = os.path.join(path, fname)
-    # save data as text file in directory
-    np.savetxt(datFile, data)
+# def saveTxt(path, fname, data):
+#     datFile = os.path.join(path, fname)
+#     # save data as text file in directory
+#     np.savetxt(datFile, data)
 
 # from http://stackoverflow.com/questions/4103773/efficient-way-of-having-a-function-only-execute-once-in-a-loop
 # import functools

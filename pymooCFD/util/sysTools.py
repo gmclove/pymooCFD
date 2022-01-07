@@ -2,6 +2,12 @@ import os
 import shutil
 
 
+def saveTxt(path, fname, data):
+    datFile = os.path.join(path, fname)
+    # save data as text file in directory
+    np.savetxt(datFile, data)
+
+
 def makeDir(path):
     try:
         os.mkdir(path)
@@ -10,6 +16,7 @@ def makeDir(path):
         print(err)
         pass
 
+
 def removeDir(path):
     print(f'removing {path}..')
     try:
@@ -17,6 +24,7 @@ def removeDir(path):
         print(f"{path} removed successfully")
     except OSError as err:
         print(err)
+
 
 def emptyDir(folder):
     for filename in os.listdir(folder):
@@ -28,6 +36,7 @@ def emptyDir(folder):
                 shutil.rmtree(file_path)
         except OSError as e:
             print('Failed to delete %s. Reason: %s' % (file_path, e))
+
 
 def copy_and_overwrite(from_path, to_path):
     if os.path.exists(to_path):

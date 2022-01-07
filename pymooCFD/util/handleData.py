@@ -1,4 +1,4 @@
-    # preProcDir, inputFile
+# preProcDir, inputFile
 # from pymooCFD.util.sysTools import removeDir #, makeDir, emptyDir
 # from pymooCFD.setupCFD import runCase
 
@@ -19,6 +19,11 @@ import shutil
 #     except FileNotFoundError as err:
 #         print(err)
 #         return 0
+
+def saveTxt(path, fname, data):
+    datFile = os.path.join(path, fname)
+    # save data as text file in directory
+    np.savetxt(datFile, data)
 
 
 def findKeywordLine(kw, file_lines):
@@ -48,6 +53,8 @@ def findKeywordLine(kw, file_lines):
 #     # algorithm.sampling = pop
 #     algorithm.sampling = pop
 #
+
+
 def archive(dirToComp, archDir, background=True):
     if background:
         from multiprocessing import Process
@@ -71,10 +78,6 @@ def compressDir(dirToComp, archDir):
         tar.add(dirToComp)
     print(f'{dirToComp} compression finished')
     shutil.rmtree(dirToComp)
-
-
-
-
 
 
 # def runPop(X):
@@ -213,8 +216,6 @@ def compressDir(dirToComp, archDir):
 #     algorithm = NSGA2(pop_size=pop_size, sampling=pop)
 
 #     return algorithm
-
-
 
 
 # def restartGen(gen, checkpointPath=checkpointPath):
