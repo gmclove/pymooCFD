@@ -18,7 +18,7 @@ from pymooCFD.util.sysTools import emptyDir, copy_and_overwrite
 class OptStudy:
     def __init__(self, algorithm, problem, BaseCase,
                  archiveDir='archive', n_CP=10, n_opt=20,
-                 optDatDir='opt_run', CP_fName='checkpoint.npy',
+                 optDatDir='opt_run', CP_fName='checkpoint',
                  pfDir='pareto_front', baseCaseDir='base_case',
                  procOptDir='procOpt', plotsDir='plots',
                  mapGen1Dir='mapGen1', meshStudyDir='meshStudy',
@@ -38,13 +38,15 @@ class OptStudy:
         self.BaseCase = BaseCase
         self.baseCaseDir = baseCaseDir
         # self.genTestCase()
-        ### Variable and Objective Labels are passed to self.BaseCase instance
+        # Variable and Objective Labels are passed to self.BaseCase instance
         if var_labels is None:
-            self.var_labels = [f'var{x_i}' for x_i in range(self.problem.n_var)]
+            self.var_labels = [
+                f'var{x_i}' for x_i in range(self.problem.n_var)]
         else:
             self.var_labels = var_labels
         if obj_labels is None:
-            self.obj_labels = [f'obj{x_i}' for x_i in range(self.problem.n_obj)]
+            self.obj_labels = [
+                f'obj{x_i}' for x_i in range(self.problem.n_obj)]
         else:
             self.obj_labels = obj_labels
         self.BaseCase.var_labels = self.var_labels
@@ -62,19 +64,20 @@ class OptStudy:
         ### Optimization Pre/Post Processing ###
         self.procOptDir = procOptDir
         os.makedirs(self.procOptDir, exist_ok=True)
-        ### Pareto Front Directory
-        self.pfDir = pfDir  # directory to save optimal solutions (a.k.a. Pareto Front)
+        # Pareto Front Directory
+        # directory to save optimal solutions (a.k.a. Pareto Front)
+        self.pfDir = pfDir
         self.n_opt = n_opt  # number of optimal points along Pareto front to save
-        ### Plots Directory
+        # Plots Directory
         self.plotDir = os.path.join(self.procOptDir, plotsDir)
         os.makedirs(self.plotDir, exist_ok=True)
-        ### Mapping Objectives vs. Variables Directory
+        # Mapping Objectives vs. Variables Directory
         self.mapDir = os.path.join(self.procOptDir, mapGen1Dir)
         os.makedirs(self.mapDir, exist_ok=True)
         #### Mesh Sensitivity Studies ###
         self.studyDir = os.path.join(procOptDir, meshStudyDir)
         os.makedirs(self.studyDir, exist_ok=True)
-        self.meshSFs = meshSFs # mesh size factors
+        self.meshSFs = meshSFs  # mesh size factors
         # self.procLim = procLim
         ##### Processing #####
         # self.client = client
@@ -92,7 +95,8 @@ class OptStudy:
         if restart:
             self.loadCP()
             print("Loaded Checkpoint:", self.algorithm)
-            print(f'Last checkpoint at generation {self.algorithm.callback.gen}')
+            print(
+                f'Last checkpoint at generation {self.algorithm.callback.gen}')
             # restart client if being used
             if self.client is not None:
                 self.client.restart()
@@ -115,48 +119,51 @@ class OptStudy:
         ######    OPTIMIZATION    ######
         # until the algorithm has not terminated
         while self.algorithm.has_next():
-            ### First generation
-            ## population is None so ask for new pop
+            # First generation
+            # population is None so ask for new pop
             if self.algorithm.pop is None:
                 print('     START-UP: first generation')
                 evalPop = self.algorithm.ask()
                 self.algorithm.pop = evalPop
                 self.algorithm.off = evalPop
-            ### Previous generation complete
-            ## If current objective does not have None values then get new pop
-            ## ie previous pop is complete
-            ## evaluate new pop
+            # Previous generation complete
+            # If current objective does not have None values then get new pop
+            # ie previous pop is complete
+            # evaluate new pop
             elif None not in self.algorithm.pop.get('F'):
                 print('     START-UP: new generation')
                 evalPop = self.algorithm.ask()
                 self.algorithm.off = evalPop
-            ### Mid-generation start-up
-            ## evaluate offspring population
+            # Mid-generation start-up
+            # evaluate offspring population
             else:
                 print('     START-UP: mid-generation')
                 evalPop = self.algorithm.off
-            ### save checkpoint before evaluation
+            # save checkpoint before evaluation
             self.saveCP()
-            ### evaluate the individuals using the algorithm's evaluator (necessary to count evaluations for termination)
+            # evaluate the individuals using the algorithm's evaluator (necessary to count evaluations for termination)
             self.algorithm.evaluator.eval(self.problem, evalPop)
-            ### returned the evaluated individuals which have been evaluated or even modified
-            ## checkpoint saved after in algorithm.callback.notify() method
+            # returned the evaluated individuals which have been evaluated or even modified
+            # checkpoint saved after in algorithm.callback.notify() method
             self.algorithm.tell(infills=evalPop)
-            ### save top {n_opt} optimal evaluated cases in pf directory
+            # save top {n_opt} optimal evaluated cases in pf directory
             for off_i, off in enumerate(self.algorithm.off):
                 for opt_i, opt in enumerate(self.algorithm.opt[:self.n_opt]):
                     if np.array_equal(off.X, opt.X):
-                        optDir = os.path.join(self.optDatDir, self.pfDir, f'opt{opt_i+1}')
-                        offDir = os.path.join(self.optDatDir, f'gen{self.algorithm.n_gen}', f'ind{off_i+1}')
-                        print(f'     Updating Pareto front folder: {offDir} -> {optDir}')
+                        optDir = os.path.join(
+                            self.optDatDir, self.pfDir, f'opt{opt_i+1}')
+                        offDir = os.path.join(
+                            self.optDatDir, f'gen{self.algorithm.n_gen}', f'ind{off_i+1}')
+                        print(
+                            f'     Updating Pareto front folder: {offDir} -> {optDir}')
                         copy_and_overwrite(offDir, optDir)
-            ### do some more things, printing, logging, storing or even modifying the algorithm object
+            # do some more things, printing, logging, storing or even modifying the algorithm object
             # print(algorithm.n_gen, algorithm.evaluator.n_eval)
             # print('Parameters:')
             # print(algorithm.pop.get('X'))
             # print('Objectives:')
             # print(algorithm.pop.get('F'))
-            #algorithm.display.do(algorithm.problem,
+            # algorithm.display.do(algorithm.problem,
             #                      algorithm.evaluator,
             #                      algorithm
             #                      )
@@ -183,14 +190,37 @@ class OptStudy:
     #######################
     #    CHECKPOINTING    #
     #######################
-    # def saveCP(self): np.save(self.cpPath, self)
+    # def saveCP(self): np.save(self.CP_path, self)
     # def loadCP(self):
-    #     cp, = np.load(self.cpPath, allow_pickle=True).flatten()
+    #     cp, = np.load(self.CP_path, allow_pickle=True).flatten()
     #     self.__dict__.update(cp.__dict__)
     #     self.logger.info('LOADING CHECKPOINT')
+    #######################
+    #    CHECKPOINTING    #
+    #######################
+    def saveCP(self):
+        np.save(self.CP_path + '.temp.npy', self)
+        if os.path.exists(self.CP_path + '.npy'):
+            os.rename(self.CP_path + '.npy', self.CP_path + '.old.npy')
+        os.rename(self.CP_path + '.temp.npy', self.CP_path + '.npy')
+        if os.path.exists(self.CP_path + '.old.npy'):
+            os.remove(self.CP_path + '.old.npy')
+
+    def loadCP(self):
+        if os.path.exists(self.CP_path + '.old'):
+            os.rename(self.CP_path + '.old', self.CP_path + '.npy')
+        cp, = np.load(self.CP_path + '.npy', allow_pickle=True).flatten()
+        self.__dict__.update(cp.__dict__)
+        self.logger.info(f'\tCHECKPOINT LOADED - from {self.CP_path}.npy')
 
     def loadCP(self, hasTerminated=False):
         try:
+            if os.path.exists(self.CP_path + '.old'):
+                os.rename(self.CP_path + '.old', self.CP_path + '.npy')
+            cp, = np.load(self.CP_path + '.npy', allow_pickle=True).flatten()
+            self.__dict__.update(cp.__dict__)
+            print(f'\tCHECKPOINT LOADED - from {self.CP_path}.npy')
+            # self.logger.info(f'\tCHECKPOINT LOADED - from {self.CP_path}.npy')
             checkpoint, = np.load(self.CP_path, allow_pickle=True).flatten()
             # only necessary if for the checkpoint the termination criterion has been met
             checkpoint.has_terminated = hasTerminated
@@ -207,10 +237,10 @@ class OptStudy:
             raise Exception(f'{self.CP_path} load failed.')
 
     def saveCP(self, alg=None):
-        ## default use self.algorithm
+        # default use self.algorithm
         if alg is None:
             alg = self.algorithm
-        ## if give alg assign it to self.algorithm
+        # if give alg assign it to self.algorithm
         else:
             self.algorithm = alg
         gen = alg.callback.gen
@@ -240,8 +270,10 @@ class OptStudy:
         # shutil.rmtree('test_case', ignore_errors=True)
         xl = self.problem.xl
         xu = self.problem.xu
-        x_mid = [xl[x_i]+(xu[x_i]-xl[x_i])/2 for x_i in range(self.problem.n_var)]
-        self.testCase = self.BaseCase(self.baseCaseDir, testCaseDir, x_mid) #, restart=True)
+        x_mid = [xl[x_i] + (xu[x_i] - xl[x_i]) /
+                 2 for x_i in range(self.problem.n_var)]
+        self.testCase = self.BaseCase(
+            self.baseCaseDir, testCaseDir, x_mid)  # , restart=True)
 
     def runTestCase(self):
         print('TEST CASE RUNNING')
@@ -335,10 +367,13 @@ class OptStudy:
         with np.printoptions(precision=3, suppress=True):
             cornerCases = []
             for perm in lim_perms:
-                with np.printoptions(precision=3, suppress=True, formatter={'all':lambda x: '%.3g' % x}):
-                    caseName = str(perm).replace('[', '').replace(']', '').replace(' ', '_')
-                cornerCaseDir = os.path.join(self.procOptDir, 'corner-cases', caseName)
-                cornerCase = self.BaseCase(self.baseCaseDir, cornerCaseDir, perm)
+                with np.printoptions(precision=3, suppress=True, formatter={'all': lambda x: '%.3g' % x}):
+                    caseName = str(perm).replace(
+                        '[', '').replace(']', '').replace(' ', '_')
+                cornerCaseDir = os.path.join(
+                    self.procOptDir, 'corner-cases', caseName)
+                cornerCase = self.BaseCase(
+                    self.baseCaseDir, cornerCaseDir, perm)
                 cornerCases.append(cornerCase)
         self.BaseCase.parallelize(cornerCases)
 
@@ -353,9 +388,11 @@ class OptStudy:
         bndPts = self.getBndPts(n_pts, getDiags=getDiags)
         dirs = []
         for pt in bndPts:
-            with np.printoptions(precision=3, suppress=True, formatter={'all':lambda x: '%.3g' % x}):
-                caseName = str(pt).replace('[', '').replace(']', '').replace(' ', '_')
-            dirs.append(os.path.join(self.procOptDir, 'boundary-cases', caseName))
+            with np.printoptions(precision=3, suppress=True, formatter={'all': lambda x: '%.3g' % x}):
+                caseName = str(pt).replace(
+                    '[', '').replace(']', '').replace(' ', '_')
+            dirs.append(os.path.join(self.procOptDir,
+                                     'boundary-cases', caseName))
         cases = self.genCases(dirs, bndPts)
         self.bndCases = cases
 
@@ -501,7 +538,7 @@ class OptStudy:
     ########################
     #    HELPER METHODS    #
     ########################
-    def genCases(self, paths, X):  #, baseCase=None):
+    def genCases(self, paths, X):  # , baseCase=None):
         # if baseCase is None:
         #     baseCase = self.BaseCase
         assert len(paths) == len(X), 'genCases(paths, X): len(paths) == len(X)'
@@ -532,6 +569,7 @@ class OptStudy:
         path = os.path.join(self.optDatDir, 'gen1Pop.npy')
         gen1Pop = np.load(path, allow_pickle=True).flatten()
         return gen1Pop
+
     @gen1Pop.setter
     def gen1Pop(self, cases):
         path = os.path.join(self.optDatDir, 'gen1Pop.npy')
@@ -555,13 +593,12 @@ class OptStudy:
     def normalize(self, cases):
         pass
 
-
     #####################################
     #######  EXTERNAL CFD SOLVER  #######
     #####################################
     ####### OPTION ########
-    ## 1) slurm / multiple nodes
-    ## 2) local / single node
+    # 1) slurm / multiple nodes
+    # 2) local / single node
     # def execute(self, paths):
     #     from pymooCFD.execSimsBatch import singleNodeExec
     #     singleNodeExec(paths)
@@ -573,9 +610,6 @@ class OptStudy:
     #         jobs = [self.client.submit(case.run) for case in cases]
     #         # obj = np.row_stack([job.result() for job in jobs])
     #
-
-
-
 
     # def meshStudy(self, cases): #, meshSFs=None):
     #     # if meshSFs is None:

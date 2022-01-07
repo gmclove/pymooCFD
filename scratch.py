@@ -3,13 +3,26 @@
 # @Last modified by:   glove
 # @Last modified time: 2021-12-14T15:45:19-05:00
 
-lines = ['asfasdf/n', 'assdasdf/n', 'sfassdf/n', 'sdfsf']
+import numpy as np
 
-for i, line in enumerate(lines):
-    if not line.endswith('/n'):
-        lines[i] += '/n'
+A = np.around(np.arange(0.5, 1.5, 0.1), decimals=2)
+print(A)
+print([a for a in A])
+A = np.around(A, decimals=2)
+print(A)
+print([a for a in A])
 
-print(lines)
+
+# numpy.around(a, decimals=0)
+
+
+# lines = ['asfasdf/n', 'assdasdf/n', 'sfassdf/n', 'sdfsf']
+#
+# for i, line in enumerate(lines):
+#     if not line.endswith('\n'):
+#         lines[i] += '\n'
+#
+# print(lines)
 
 
 # import numpy as np

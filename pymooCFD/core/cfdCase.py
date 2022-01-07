@@ -48,7 +48,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #     pool = Pool(nTasks)
 
     def __init__(self, baseCaseDir, caseDir, x,
-                 meshSF=1, meshSFs=np.arange(0.5, 1.5, 0.1),
+                 meshSF=1, meshSFs=np.around(np.arange(0.5, 1.5, 0.1), decimals=2),
                  # externalSolver=False,
                  # var_labels = None, obj_labels = None,
                  meshFile=None,  # meshLines = None,
@@ -292,7 +292,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     ####################
     def genMeshStudy(self):
         print(f'GENERATING MESH STUDY - {self}')
-        print(f'\t{self.meshSFs}')
+        print('\tMesh Size Factors:', self.meshSFs)
         # Pre-Process
         study = []
         var = []
@@ -318,21 +318,21 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             # only pre-processing needed is generating mesh
             msCase.genMesh()
             a_numElem.append(msCase.numElem)
-            path = os.path.join(msCase.caseDir, 'numElem.txt')
-            np.savetxt(path, [msCase.numElem])
+            saveTxt(msCase.caseDir, 'numElem.txt', [msCase.numElem])
             study.append([msCase.caseDir, str(msCase.numElem)])
             var.append(msCase.x)
-        print(f'\t{a_numElem}')
-        # study = np.array(study)
+        print(f'\tNumber of Elements:\n\t\t{a_numElem}'.replace(
+            '],', '\n\t\t'))
         print(study)
         print('\t' + str(study).replace('\n', '\n\t'))
         path = os.path.join(self.meshStudyDir, 'study.txt')
         np.savetxt(path, study, fmt="%s")
         path = os.path.join(self.meshStudyDir, 'studyX.txt')
         np.savetxt(path, var)
-        obj = np.array([case.f for case in self.msCases])
-        path = os.path.join(self.meshStudyDir, 'studyF.txt')
-        np.savetxt(path, obj)
+        # obj = np.array([case.f for case in self.msCases])
+        # print('Objectives:\n\t', obj)
+        # path = os.path.join(self.meshStudyDir, 'studyF.txt')
+        # np.savetxt(path, obj)
 
     def plotMeshStudy(self):
         _, tail = os.path.split(self.caseDir)
