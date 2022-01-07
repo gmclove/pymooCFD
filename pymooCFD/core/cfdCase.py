@@ -500,7 +500,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         if os.path.exists(self.cpPath + '.npy'):
             os.rename(self.cpPath + '.npy', self.cpPath + '.old.npy')
         os.rename(self.cpPath + '.temp.npy', self.cpPath + '.npy')
-        os.remove(self.cpPath + '.old.npy')
+        if os.path.exists(self.cpPath + '.old.npy'):
+            os.remove(self.cpPath + '.old.npy')
 
     def loadCP(self):
         if os.path.exists(self.cpPath + '.old'):
