@@ -13,13 +13,13 @@ import multiprocessing as mp
 import multiprocessing.pool
 
 
-class CFDCase: #(PreProcCase, PostProcCase)
+class CFDCase:  # (PreProcCase, PostProcCase)
     ####### Define Design Space #########
     n_var = None
     var_labels = None
-    varType = None  ## OPTIONS: 'int' or 'real'
-    xl = None  ## lower limits of parameters/variables
-    xu = None  ## upper limits of variables
+    varType = None  # OPTIONS: 'int' or 'real'
+    xl = None  # lower limits of parameters/variables
+    xu = None  # upper limits of variables
     # if not len(xl) == len(xu) and len(xu) == len(var_labels) and len(var_labels) == n_var:
     #     raise ExceptionDesign Space Definition Incorrect")
     ####### Define Objective Space ########
@@ -60,6 +60,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
                  *args, **kwargs
                  ):
         super().__init__()
+        self.complete = False
         self.parallelizeInit(self.externalSolver)
         self.baseCaseDir = baseCaseDir
         self.caseDir = caseDir
@@ -73,14 +74,15 @@ class CFDCase: #(PreProcCase, PostProcCase)
                 return
             else:
                 self.logger = self.getLogger()
-                self.logger.info(f'OVERRIDE CASE - {caseDir} already exists but {self.cpPath} does not')
+                self.logger.info(
+                    f'OVERRIDE CASE - {caseDir} already exists but {self.cpPath} does not')
                 self.copy()
         else:
             os.makedirs(caseDir, exist_ok=True)
             self.logger = self.getLogger()
             self.logger.info(f'NEW CASE - {caseDir} did not exist')
             self.copy()
-        ### If solverExecCmd is provided use
+        # If solverExecCmd is provided use
         # if self.solverExecCmd is None:
         #     externalSolver = False
         # elif self.nProc is not None and self.procLim is not None:
@@ -91,38 +93,47 @@ class CFDCase: #(PreProcCase, PostProcCase)
         #     os.makedirs(caseDir)
         #     msg = f'NEW CASE - {caseDir} did not exist'
         #     print(msg)
-        ### Required Arguments -> Attributes
+        # Required Arguments -> Attributes
         # self.logger = self.getLogger()
         # self.copy()  # create directory before start
         self.x = x
-        ### Default Attributes
+        # Default Attributes
         # os.makedirs(self.baseCaseDir, exist_ok=True)
         self.meshSF = meshSF
         self.meshSFs = meshSFs
-        ### Optional Attributes
+        # Optional Attributes
         self.meshFile = meshFile
         self.jobFile = jobFile
         self.datFile = datFile
         self.inputFile = inputFile
-        ## generate file path attributes when possible
+        # generate file path attributes when possible
         self.meshStudyDir = os.path.join(self.caseDir, 'meshStudy')
-        self.cpPath = os.path.join(caseDir, 'case.npy') # not variable?????????
+        self.cpPath = os.path.join(
+            caseDir, 'case.npy')  # not variable?????????
 
-        if inputFile is None: self.inputPath = None
-        else: self.inputPath = os.path.join(self.caseDir, inputFile)
+        if inputFile is None:
+            self.inputPath = None
+        else:
+            self.inputPath = os.path.join(self.caseDir, inputFile)
 
-        if datFile is None: self.datPath = None
-        else: self.datPath = os.path.join(self.caseDir, datFile)
+        if datFile is None:
+            self.datPath = None
+        else:
+            self.datPath = os.path.join(self.caseDir, datFile)
 
-        if meshFile is None: self.meshPath = None
-        else: self.meshPath = os.path.join(self.caseDir, meshFile)
+        if meshFile is None:
+            self.meshPath = None
+        else:
+            self.meshPath = os.path.join(self.caseDir, meshFile)
 
-        if jobFile is None: self.jobPath = None
-        else: self.jobPath = os.path.join(self.caseDir, jobFile)
+        if jobFile is None:
+            self.jobPath = None
+        else:
+            self.jobPath = os.path.join(self.caseDir, jobFile)
         ###################################################
         #    Attributes To Be Set Later During Each Run   #
         ###################################################
-        self.f = None # if not None then case complete
+        self.f = None  # if not None then case complete
         self.msCases = None
         self.numElem = None
         # self.var_labels = None
@@ -160,7 +171,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
         if cls.procLim is None:
             nTasks = 1000000
         else:
-            nTasks = int(cls.procLim/cls.nProc)
+            nTasks = int(cls.procLim / cls.nProc)
         if externalSolver:
             assert cls.solverExecCmd is not None
             assert cls.nProc is not None
@@ -183,16 +194,21 @@ class CFDCase: #(PreProcCase, PostProcCase)
                        stdout=subprocess.DEVNULL)
 
     def run(self):
-        self.preProc()
-        self.logger.info('COMPLETED: PRE-PROCESS')
-        self.solve()
-        if self._execDone():
-            self.logger.info('COMPLETED: SOLVE')
+        if not self.complete:
+            self.preProc()
+            self.logger.info('COMPLETED: PRE-PROCESS')
+            self.solve()
+            if self._execDone():
+                self.logger.info('COMPLETED: SOLVE')
+            else:
+                self.logger.warning('RUN FAILED TO EXECUTE')
+                self.logger.info('RE-RUNNING')
+                self.run()
+            self.postProc()
+            self.logger.info('COMPLETED: POST-PROCESS')
+            self.complete = True
         else:
-            self.logger.warning('RUN FAILED TO EXECUTE')
-            self.logger.info('RE-RUNNING')
-            self.run()
-        self.postProc()
+            self.logger.info('self.run() called but case already complete')
 
     # def run(case):
     #     case.preProc()
@@ -227,8 +243,9 @@ class CFDCase: #(PreProcCase, PostProcCase)
 
     def preProc(self):
         if self.restart:
-        # self.cpPath = os.path.join
-            self.logger.info('PRE-PROCESS RESTART - Using self._preProc_restart()')
+            # self.cpPath = os.path.join
+            self.logger.info(
+                'PRE-PROCESS RESTART - Using self._preProc_restart()')
             self._preProc_restart()
         else:
             self._preProc()
@@ -274,13 +291,13 @@ class CFDCase: #(PreProcCase, PostProcCase)
     def genMeshStudy(self):
         print(f'GENERATING MESH STUDY: {self}')
         print(f'\t{self.meshSFs}')
-        ### Pre-Process
+        # Pre-Process
         study = []
         var = []
         a_numElem = []
         self.msCases = []
         for sf in self.meshSFs:
-            ### Deep copy case instance
+            # Deep copy case instance
             # msCase = copy.deepcopy(self)
             # self.msCases.append(msCase)
             # msCase.logger = msCase.getLogger()
@@ -296,7 +313,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
             msCase.__init__(self.baseCaseDir, path, self.x)
             msCase.meshSFs = None
             msCase.meshSF = sf
-            ### only pre-processing needed is generating mesh
+            # only pre-processing needed is generating mesh
             msCase.genMesh()
             a_numElem.append(msCase.numElem)
             path = os.path.join(msCase.caseDir, 'numElem.txt')
@@ -321,7 +338,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
         msObj = np.array([case.f for case in self.msCases])
         print(msObj)
         print(a_numElem)
-        ### Plot
+        # Plot
         for obj_i, obj_label in enumerate(self.obj_labels):
             plt.plot(a_numElem, msObj[:, obj_i])
             plt.suptitle('Mesh Sensitivity Study')
@@ -342,7 +359,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
         # pool.close()
         # pool.join()
 
-    def meshStudy(self, restart=True): #, meshSFs=None):
+    def meshStudy(self, restart=True):  # , meshSFs=None):
         # if meshSFs is None:
         #     meshSFs = self.meshSFs
         # if self.msCases is None:
@@ -394,6 +411,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
         with open(self.jobPath, 'r') as f:
             jobLines = f
         return jobLines
+
     @jobLines.setter
     def jobLines(self, lines):
         if self.jobPath is None:
@@ -409,6 +427,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
         with open(self.inputPath, 'r') as f:
             inputLines = f.readlines()
         return inputLines
+
     @inputLines.setter
     def inputLines(self, lines):
         if self.inputPath is None:
@@ -431,6 +450,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
     ### Variables ###
     @property
     def x(self): return self._x
+
     @x.setter
     def x(self, x):
         x = np.array(x)
@@ -441,6 +461,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
     ### Objectives ###
     @property
     def f(self): return self._f
+
     @f.setter
     def f(self, f):
         if f is not None:
@@ -466,7 +487,8 @@ class CFDCase: #(PreProcCase, PostProcCase)
         logger.setLevel(logging.INFO)
         # define file handler and set formatter
         file_handler = logging.FileHandler(logFile)
-        formatter = logging.Formatter('%(asctime)s : %(levelname)s : %(name)s : %(message)s')
+        formatter = logging.Formatter(
+            '%(asctime)s : %(levelname)s : %(name)s : %(message)s')
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
         return logger
@@ -475,10 +497,11 @@ class CFDCase: #(PreProcCase, PostProcCase)
     #    CHECKPOINTING    #
     #######################
     def saveCP(self): np.save(self.cpPath, self)
+
     def loadCP(self):
         cp, = np.load(self.cpPath, allow_pickle=True).flatten()
         self.__dict__.update(cp.__dict__)
-        self.logger.info('LOADING CHECKPOINT')
+        self.logger.info('CHECKPOINT LOADED')
 
     ########################
     #    HELPER METHODS    #
@@ -539,7 +562,7 @@ class CFDCase: #(PreProcCase, PostProcCase)
     #     for k, v in self.__dict__.items():
     #         setattr(result, k, copy.deepcopy(v, memo))
     #     return result
-    ### Calling destructor
+    # Calling destructor
     # def __del__(self):
     #     shutil.rmtree(caseDir)
     #     print('REMOVED', caseDir)
