@@ -3,6 +3,7 @@
 # @Last modified by:   glove
 # @Last modified time: 2021-12-15T16:36:54-05:00
 
+from pymooCFD.core.optStudy import OptStudy
 import os
 import gmsh
 import numpy as np
@@ -17,9 +18,9 @@ class OscillCylinder(CFDCase):
     ####### Define Design Space #########
     n_var = 2
     var_labels = ['Amplitude [1/s]', 'Frequency [1/s]']
-    varType =    ["real", "real"]  # options: 'int' or 'real'
-    xl =         [0.1, 0.1]  # lower limits of parameters/variables
-    xu =         [3.0, 1]  # upper limits of variables
+    varType = ["real", "real"]  # options: 'int' or 'real'
+    xl = [0.1, 0.1]  # lower limits of parameters/variables
+    xu = [3.0, 1]  # upper limits of variables
     if not len(xl) == len(xu) and len(xu) == len(var_labels) and len(var_labels) == n_var:
         raise Exception("Design Space Definition Incorrect")
     ####### Define Objective Space ########
@@ -103,24 +104,26 @@ class OscillCylinder(CFDCase):
         p_over_rho_intgrl_1 = data[mask, 4]
         tau_intgrl_1 = data[mask, 6]
         F_drag = np.mean(p_over_rho_intgrl_1 - tau_intgrl_1)
-        C_drag = F_drag/((1/2)*rho*U**2*D**2)
+        C_drag = F_drag / ((1 / 2) * rho * U**2 * D**2)
 
         ### Objective 2 ###
-        ## Objective 2: Power consumed by rotating cylinder
+        # Objective 2: Power consumed by rotating cylinder
         # t = 1  # [sec]
         D = 1  # [m] cylinder diameter
         th = 0.1  # [m] thickness of cylinder wall
-        r_o = D/2  # [m] outer radius
-        r_i = r_o-th  # [m] inner radius
+        r_o = D / 2  # [m] outer radius
+        r_i = r_o - th  # [m] inner radius
         d = 2700  # [kg/m^3] density of aluminum
         L = 1  # [m] length of cylindrical tube
-        V = L*np.pi*(r_o**2-r_i**2)  # [m^3] volume of cylinder
-        m = d*V  # [kg] mass of cylinder
-        I = 0.5*m*(r_i**2+r_o**2)  # [kg m^2] moment of inertia of a hollow cylinder
-        KE_consu = 0.5*I*omega**2*4*np.pi*freq*quad(lambda t: abs(np.sin(2*np.pi*freq*t)*np.cos(2*np.pi*freq*t)), 0, 1)[0]
+        V = L * np.pi * (r_o**2 - r_i**2)  # [m^3] volume of cylinder
+        m = d * V  # [kg] mass of cylinder
+        # [kg m^2] moment of inertia of a hollow cylinder
+        I = 0.5 * m * (r_i**2 + r_o**2)
+        KE_consu = 0.5 * I * omega**2 * 4 * np.pi * freq * \
+            quad(lambda t: abs(np.sin(2 * np.pi * freq * t)
+                               * np.cos(2 * np.pi * freq * t)), 0, 1)[0]
         obj = [C_drag, KE_consu]
-        self.logger.info(f'{self.caseDir}: {obj}')
-        return obj
+        self.f = obj
 
     def _genMesh(self):
         projName = '2D_cylinder'
@@ -149,14 +152,16 @@ class OscillCylinder(CFDCase):
         #################################
         rect = gmsh.model.occ.addRectangle(0, 0, 0, dom_dx, dom_dy)
         # add circle to rectangular domain to represent cylinder
-        cir = gmsh.model.occ.addCircle(dom_dx/4, dom_dy/2, 0, cylD)
+        cir = gmsh.model.occ.addCircle(dom_dx / 4, dom_dy / 2, 0, cylD)
         # use 1-D circle to create curve loop entity
         cir_loop = gmsh.model.occ.addCurveLoop([cir])
-        cir_plane = gmsh.model.occ.addPlaneSurface([cir_loop])  # creates 2-D entity
+        cir_plane = gmsh.model.occ.addPlaneSurface(
+            [cir_loop])  # creates 2-D entity
         # cut circle out of a rectangle
         # print(cylLoop)
         # print(rect)
-        domDimTags, domDimTagsMap = gmsh.model.occ.cut([(2, rect)], [(2, cir_plane)])
+        domDimTags, domDimTagsMap = gmsh.model.occ.cut(
+            [(2, rect)], [(2, cir_plane)])
         # dom = domDimTags
         # We finish by synchronizing the data from OpenCASCADE CAD kernel with
         # the Gmsh model:
@@ -177,8 +182,8 @@ class OscillCylinder(CFDCase):
         #################################
         #           MESHING             #
         #################################
-        ### We could also use a `Box' field to impose a step change in element
-        ## sizes inside a box
+        # We could also use a `Box' field to impose a step change in element
+        # sizes inside a box
         # boxF = gmsh.model.mesh.field.add("Box")
         # gmsh.model.mesh.field.setNumber(boxF, "VIn", meshSizeMax/10)
         # gmsh.model.mesh.field.setNumber(boxF, "VOut", meshSizeMax)
@@ -206,12 +211,13 @@ class OscillCylinder(CFDCase):
         # We can then generate a 2D mesh...
         gmsh.model.mesh.generate(1)
         gmsh.model.mesh.generate(2)
-        ### extract number of elements
+        # extract number of elements
         # get all elementary entities in the model
         entities = gmsh.model.getEntities()
         e = entities[-1]
         # get the mesh elements for each elementary entity
-        elemTypes, elemTags, elemNodeTags = gmsh.model.mesh.getElements(e[0], e[1])
+        elemTypes, elemTags, elemNodeTags = gmsh.model.mesh.getElements(
+            e[0], e[1])
         # count number of elements
         self.numElem = sum(len(i) for i in elemTags)
         # ... and save it to disk
@@ -223,7 +229,6 @@ class OscillCylinder(CFDCase):
         gmsh.finalize()
 
 
-from pymooCFD.core.optStudy import OptStudy
 class OscillCylinderOpt(OptStudy):
     def __init__(self, algorithm, problem, baseCase,
                  *args, **kwargs):
@@ -234,6 +239,7 @@ class OscillCylinderOpt(OptStudy):
 
     # def execute(self, cases):
     #     self.singleNodeExec(cases)
+
 
 MyOptStudy = OscillCylinderOpt
 BaseCase = OscillCylinder

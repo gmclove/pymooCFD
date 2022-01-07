@@ -272,8 +272,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
 
     def postProc(self):
         if self.f is None:
-            obj = self._postProc()
-            self.f = obj
+            self._postProc()
             ###### SAVE VARIABLES AND OBJECTIVES TO TEXT FILES #######
             # save variables in case directory as text file after completing post-processing
             # saveTxt(self.caseDir, 'var.txt', self.x)
@@ -282,6 +281,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         else:
             self.logger.info('self.postProc() called but self.f is not None')
         self.saveCP()
+        self.logger.info(f'\t{self.caseDir}: {obj}')
         return self.f
 
     def genMesh(self):
