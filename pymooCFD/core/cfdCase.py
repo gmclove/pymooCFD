@@ -573,10 +573,12 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #     for k, v in self.__dict__.items():
     #         setattr(result, k, copy.deepcopy(v, memo))
     #     return result
+
     # Calling destructor
     def __del__(self):
-        self.saveCP()
+        # self.saveCP()
         # shutil.rmtree(caseDir)
+        self.logger.info('EXITED')
         print('EXITED:', self.caseDir)
 
     # ==========================================================================
