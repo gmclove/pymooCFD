@@ -108,8 +108,6 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         self.inputFile = inputFile
         # generate file path attributes when possible
         self.meshStudyDir = os.path.join(self.caseDir, 'meshStudy')
-        self.cpPath = os.path.join(
-            caseDir, 'case.npy')  # not variable?????????
 
         if inputFile is None:
             self.inputPath = None
