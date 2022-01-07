@@ -281,7 +281,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         else:
             self.logger.info('self.postProc() called but self.f is not None')
         self.saveCP()
-        self.logger.info(f'\t{self.caseDir}: {obj}')
+        self.logger.info(f'\t{self.caseDir}: {self.f}')
         return self.f
 
     def genMesh(self):
