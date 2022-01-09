@@ -10,8 +10,8 @@ import subprocess
 #                  '10', '2D_cylinder', '>', 'pyTest.out']
 # print(solverExecCmd)
 # print(caseDir)
-subprocess.run(['mpirun', '-n', '10', '2D_cylinder'],  cwd='test_case')
-# stdout=subprocess.DEVNULL)
+subprocess.run(['mpirun', '-n', '10', '2D_cylinder'],
+               cwd='test_case', stdout=subprocess.DEVNULL)
 
 # import numpy as np
 #
