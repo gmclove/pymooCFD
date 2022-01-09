@@ -296,6 +296,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
 
     def genMesh(self):
         self._genMesh()
+        self.logger.info('MESHING GENERATED - using self._genMesh()')
 
     ####################
     #    MESH STUDY    #
