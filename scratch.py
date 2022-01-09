@@ -3,14 +3,20 @@
 # @Last modified by:   glove
 # @Last modified time: 2021-12-14T15:45:19-05:00
 
-import numpy as np
+import subprocess
+caseDir = 'test_case'
+solverExecCmd = ['mpirun', '-n', '10', '2D_cylinder']
+subprocess.run(solverExecCmd, cwd=caseDir,
+               stdout=subprocess.DEVNULL)
 
-A = np.around(np.arange(0.5, 1.5, 0.1), decimals=2)
-print(A)
-print([a for a in A])
-A = np.around(A, decimals=2)
-print(A)
-print([a for a in A])
+# import numpy as np
+#
+# A = np.around(np.arange(0.5, 1.5, 0.1), decimals=2)
+# print(A)
+# print([a for a in A])
+# A = np.around(A, decimals=2)
+# print(A)
+# print([a for a in A])
 
 
 # numpy.around(a, decimals=0)

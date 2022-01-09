@@ -212,7 +212,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                 self.logger.info('RE-RUNNING')
                 self.run()
             self.postProc()
-            if np.isnan(self.f):
+            if np.isnan(self.f) or self.f is None:
                 self.logger.error('INCOMPLETE: POST-PROCESS')
             else:
                 self.logger.info('COMPLETE: POST-PROCESS')
