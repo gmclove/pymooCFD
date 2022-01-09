@@ -5,7 +5,7 @@
 
 import subprocess
 caseDir = 'test_case'
-solverExecCmd = ['pwd', '&&', 'mpirun', '-n',
+solverExecCmd = ['cd', 'test_case', '&&', 'mpirun', '-n',
                  '10', '2D_cylinder' '>', 'pyTest.out']
 subprocess.run(solverExecCmd, cwd=caseDir,
                stdout=subprocess.DEVNULL)
