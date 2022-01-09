@@ -295,8 +295,14 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         return self.f
 
     def genMesh(self):
-        self._genMesh()
-        self.logger.info('MESHING GENERATED - using self._genMesh()')
+        if self.meshPath is None:
+            self.logger.warning(
+                'self.genMesh() called but self.meshPath is None')
+        else:
+            self._genMesh()
+            self.logger.info('MESHING GENERATED')
+            self.logger.info(
+                f'\tMesh written to {self.meshPath} using self._genMesh()')
 
     ####################
     #    MESH STUDY    #
