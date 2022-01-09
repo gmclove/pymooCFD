@@ -7,7 +7,7 @@ import subprocess
 # caseDir = os.path.join(os.getcwd(), 'test_case')
 # caseDir = 'test_case'
 solverExecCmd = ['cd', 'test_case', '&&', 'mpirun', '-n',
-                 '10', '2D_cylinder' '>', 'pyTest.out']
+                 '10', '2D_cylinder', '>', 'pyTest.out']
 print(solverExecCmd)
 # print(caseDir)
 subprocess.run(solverExecCmd)  # ,  # cwd=caseDir,
