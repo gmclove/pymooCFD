@@ -203,16 +203,19 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     def run(self):
         if self.f is None:
             self.preProc()
-            self.logger.info('COMPLETED: PRE-PROCESS')
+            self.logger.info('COMPLETE: PRE-PROCESS')
             self.solve()
             if self._execDone():
-                self.logger.info('COMPLETED: SOLVE')
+                self.logger.info('COMPLETE: SOLVE')
             else:
                 self.logger.warning('RUN FAILED TO EXECUTE')
                 self.logger.info('RE-RUNNING')
                 self.run()
             self.postProc()
-            self.logger.info('COMPLETED: POST-PROCESS')
+            if np.isnan(self.f):
+                self.logger.error('INCOMPLETE: POST-PROCESS')
+            else:
+                self.logger.info('COMPLETE: POST-PROCESS')
             # self.complete = True
         else:
             self.logger.info('self.run() called but case already complete')
@@ -276,7 +279,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         #                    stdout=subprocess.DEVNULL)
 
     def postProc(self):
-        if self.f is None:
+        if self.f is None or np.isnan(self.f):
             self._postProc()
             ###### SAVE VARIABLES AND OBJECTIVES TO TEXT FILES #######
             # save variables in case directory as text file after completing post-processing
@@ -284,9 +287,11 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             # save objectives in text file
             # saveTxt(self.caseDir, 'obj.txt', self.f)
         else:
-            self.logger.info('self.postProc() called but self.f is not None')
+            self.logger.info(
+                'self.postProc() called but self.f is not None or NaN so no action was taken')
         self.saveCP()
         self.logger.info(f'\t{self.caseDir}: {self.f}')
+
         return self.f
 
     def genMesh(self):
