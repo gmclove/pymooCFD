@@ -32,7 +32,8 @@ class OscillCylinder(CFDCase):
     externalSolver = True
     nProc = 10
     procLim = 60
-    solverExecCmd = ['mpirun', '-np', str(nProc), '2D_cylinder']
+    solverExecCmd = ['conda', 'deactivate', '&&',
+                     'mpirun', '-np', str(nProc), '2D_cylinder']
 
     def __init__(self, baseCaseDir, caseDir, x):
         super().__init__(baseCaseDir, caseDir, x,

@@ -61,7 +61,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                  *args, **kwargs
                  ):
         super().__init__()
-        self.complete = False
+        # self.complete = False
         self.restart = False
         self.parallelizeInit(self.externalSolver)
         self.baseCaseDir = baseCaseDir
@@ -174,10 +174,10 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             assert cls.solverExecCmd is not None
             assert cls.nProc is not None
             assert cls.procLim is not None
-            cls._solve = cls.solveExternal
+            cls.solve = cls.solveExternal
             cls.pool = mp.pool.ThreadPool(nTasks)
         else:
-            # cls.solve = cls._solve
+            cls.solve = cls._solve
             cls.pool = cls.Pool(nTasks)
 
     @classmethod
@@ -189,9 +189,10 @@ class CFDCase:  # (PreProcCase, PostProcCase)
 
     # def parallelizeCleanUp(self):
     #     self.pool.terminate()
-    def solve(self):
-        if not self.complete:
-            self._solve()
+    # def solve(self):
+    #     # if not self.complete:
+    #     if self.f is None:
+    #         self._solve()
 
     def solveExternal(self):
         self.logger.info('SOLVING AS SUBPROCESS...')
@@ -200,7 +201,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                        stdout=subprocess.DEVNULL)
 
     def run(self):
-        if not self.complete:
+        if self.f is None:
             self.preProc()
             self.logger.info('COMPLETED: PRE-PROCESS')
             self.solve()
@@ -212,7 +213,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                 self.run()
             self.postProc()
             self.logger.info('COMPLETED: POST-PROCESS')
-            self.complete = True
+            # self.complete = True
         else:
             self.logger.info('self.run() called but case already complete')
 
@@ -325,8 +326,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             saveTxt(msCase.caseDir, 'numElem.txt', [msCase.numElem])
             study.append([msCase.caseDir, str(msCase.numElem)])
             var.append(msCase.x)
-        print(f'\tNumber of Elements:\n\t\t{a_numElem}'.replace(
-            '],', '\n\t\t'))
+        print('\tNumber of Elements:', a_numElem)
         print(study)
         print('\t' + str(study).replace('\n', '\n\t'))
         path = os.path.join(self.meshStudyDir, 'study.txt')
@@ -599,7 +599,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
 
     def _preProc_restart(self):
         self._preProc()
-        pass
+        # pass
 
     # def _pySolve(self):
     #     pass

@@ -7,9 +7,9 @@ import os
 import numpy as np
 # import subprocess
 # from threading import Thread
-import multiprocessing as mp
+# import multiprocessing as mp
 import copy
-import shutil
+# import shutil
 # import h5py
 # import matplotlib.pyplot as plt
 from pymooCFD.util.sysTools import emptyDir, copy_and_overwrite, saveTxt
@@ -29,6 +29,21 @@ class OptStudy:
                  *args, **kwargs
                  ):
         super().__init__()
+        self.CP_path = os.path.join(optDatDir, CP_fName)
+        if os.path.exists(self.CP_path):
+            # try:
+            self.loadCP()
+            print('RESTARTED FROM', self.CP_path)
+            return
+            # except FileNotFoundError:
+            #     print('OVERRIDE OPTIMIZATION STUDY -')
+            #     print('\t{self.CP_path} already exists but {self.cpPath} does not')
+            #     self.copy()
+        # else:
+        #     os.makedirs(caseDir, exist_ok=True)
+        #     self.logger = self.getLogger()
+        #     self.logger.info(f'NEW CASE - {caseDir} did not exist')
+        #     self.copy()
         #############################
         #    Required Attributes    #
         #############################

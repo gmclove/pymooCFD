@@ -2,23 +2,26 @@
 # @Date:   2021-12-14T16:17:44-05:00
 # @Last modified by:   glove
 # @Last modified time: 2021-12-15T16:36:59-05:00
-from pymooCFD.core.parallelProc import ParellelProc
-class MyParallelProc(ParallelProc):
-    def __init__(self):
-        super().__init__(externalSolver)
 
+
+# from pymooCFD.core.parallelProc import ParellelProc
+# class MyParallelProc(ParallelProc):
+#     def __init__(self):
+#         super().__init__(externalSolver)
 
 
 import gmsh
 import math
 from pymooCFD.core.cfdCase import CFDCase
+
+
 class RANSJet(CFDCase):
     ####### Define Design Space #########
     n_var = 2
     var_labels = ['Mouth Diameter [m]', 'Breath Velocity [m/s]']
-    varType =    ["real", "real"]  ## OPTIONS: 'int' or 'real'
-    xl =         [0.005, 0.1] ## lower limits of parameters/variables
-    xu =         [0.04, 0.4]  ## upper limits of variables
+    varType = ["real", "real"]  # OPTIONS: 'int' or 'real'
+    xl = [0.005, 0.1]  # lower limits of parameters/variables
+    xu = [0.04, 0.4]  # upper limits of variables
     if not len(xl) == len(xu) and len(xu) == len(var_labels) and len(var_labels) == n_var:
         raise Exception("Design Space Definition Incorrect")
     ####### Define Objective Space ########
@@ -42,36 +45,38 @@ class RANSJet(CFDCase):
                          # obj_labels = obj_labels,
                          # n_var = n_var,
                          # n_obj = n_obj,
-                         meshFile = 'jet_rans-axi_sym.unv',
-                         datFile = 'jet_rans-axi_sym.cgns',
-                         jobFile = 'jobslurm.sh',
-                         inputFile = 'jet_rans-axi_sym.jou',
+                         meshFile='jet_rans-axi_sym.unv',
+                         datFile='jet_rans-axi_sym.cgns',
+                         jobFile='jobslurm.sh',
+                         inputFile='jet_rans-axi_sym.jou',
                          # nProc = nProc
                          )
+
     def _genMesh(self):
         mouthD = self.x[0]
 
         projName = 'jet_cone_axi-sym'
 
-        cyl_r = mouthD/2 #0.02/2
+        cyl_r = mouthD / 2  # 0.02/2
 
-        sph_r = (0.15/0.02)*cyl_r
+        sph_r = (0.15 / 0.02) * cyl_r
         sph_xc = -sph_r
         sph_yc = 0
 
         cone_dx = 3.5
-        cone_r1 = 0.5/2
-        cone_r2 = cone_dx*(0.7/2.5)+cone_r1
+        cone_r1 = 0.5 / 2
+        cone_r2 = cone_dx * (0.7 / 2.5) + cone_r1
         cone_xc = -0.5
 
-        ### Meshing Scheme
-        NN_inlet = int((20/0.01)*cyl_r)
-        sph_wall_len = sph_r*math.pi - math.asin(cyl_r/(2*math.pi))*sph_r
-        NN_sph_wall = int((100/0.2355)*sph_wall_len)
+        # Meshing Scheme
+        NN_inlet = int((20 / 0.01) * cyl_r)
+        sph_wall_len = sph_r * math.pi - \
+            math.asin(cyl_r / (2 * math.pi)) * sph_r
+        NN_sph_wall = int((100 / 0.2355) * sph_wall_len)
         NN_axis_r = 500
-        axis_l_len = (sph_xc-sph_r)+0.5
-        NN_axis_l = int((40/0.35)*axis_l_len)
-        NN_cyl_axis = int((70/0.075)*sph_r)
+        axis_l_len = (sph_xc - sph_r) + 0.5
+        NN_axis_l = int((40 / 0.35) * axis_l_len)
+        NN_cyl_axis = int((70 / 0.075) * sph_r)
         #################################
         #          Initialize           #
         #################################
@@ -92,19 +97,19 @@ class RANSJet(CFDCase):
         ##### Points #####
         # Cone
         cone_ll = gmsh.model.occ.addPoint(cone_xc, 0, 0)
-        cone_lr = gmsh.model.occ.addPoint(cone_dx+cone_xc, 0, 0)
-        cone_ur = gmsh.model.occ.addPoint(cone_dx+cone_xc, cone_r2, 0)
+        cone_lr = gmsh.model.occ.addPoint(cone_dx + cone_xc, 0, 0)
+        cone_ur = gmsh.model.occ.addPoint(cone_dx + cone_xc, cone_r2, 0)
         cone_ul = gmsh.model.occ.addPoint(cone_xc, cone_r1, 0)
         # sphere
-        sph_start = gmsh.model.occ.addPoint(sph_xc-sph_r, sph_yc, 0)
+        sph_start = gmsh.model.occ.addPoint(sph_xc - sph_r, sph_yc, 0)
         sph_cent = gmsh.model.occ.addPoint(sph_xc, sph_yc, 0)
         sph_end_x = sph_xc + math.sqrt(sph_r**2 - cyl_r**2)
-        sph_end = gmsh.model.occ.addPoint(sph_end_x, sph_yc+cyl_r, 0)
+        sph_end = gmsh.model.occ.addPoint(sph_end_x, sph_yc + cyl_r, 0)
         # cylinder
         cyl_ll = sph_cent
-        cyl_ul = gmsh.model.occ.addPoint(sph_xc, sph_yc+cyl_r, 0)
+        cyl_ul = gmsh.model.occ.addPoint(sph_xc, sph_yc + cyl_r, 0)
         cyl_ur = sph_end
-        cyl_mid_outlet = gmsh.model.occ.addPoint(sph_xc+sph_r, 0, 0)
+        cyl_mid_outlet = gmsh.model.occ.addPoint(sph_xc + sph_r, 0, 0)
         ##### Curves #####
         # sphere wall
         sph_wall = gmsh.model.occ.addCircleArc(sph_start, sph_cent, sph_end)
@@ -140,20 +145,23 @@ class RANSJet(CFDCase):
         gmsh.model.mesh.setTransfiniteCurve(cyl_wall, NN_cyl_axis)
         gmsh.model.mesh.setTransfiniteCurve(cyl_axis, NN_cyl_axis)
         gmsh.model.mesh.setTransfiniteCurve(inlet, NN_inlet)
-        gmsh.model.mesh.setTransfiniteCurve(axis_r, NN_axis_r, meshType='Progression', coef=1.005)
+        gmsh.model.mesh.setTransfiniteCurve(
+            axis_r, NN_axis_r, meshType='Progression', coef=1.005)
         gmsh.model.mesh.setTransfiniteCurve(axis_l, NN_axis_l)
         gmsh.model.mesh.setTransfiniteCurve(back_wall, 15)
-        gmsh.model.mesh.setTransfiniteCurve(outlet, 50, meshType='Progression', coef=0.99)
+        gmsh.model.mesh.setTransfiniteCurve(
+            outlet, 50, meshType='Progression', coef=0.99)
         gmsh.model.mesh.setTransfiniteCurve(cone_wall, 100)
         ##### Execute Meshing ######
         gmsh.model.mesh.generate(1)
         gmsh.model.mesh.generate(2)
-        ### extract number of elements
+        # extract number of elements
         # get all elementary entities in the model
         entities = gmsh.model.getEntities()
         e = entities[-1]
         # get the mesh elements for each elementary entity
-        elemTypes, elemTags, elemNodeTags = gmsh.model.mesh.getElements(e[0], e[1])
+        elemTypes, elemTags, elemNodeTags = gmsh.model.mesh.getElements(
+            e[0], e[1])
         # count number of elements
         self.numElem = sum(len(i) for i in elemTags)
         #################################
@@ -198,22 +206,22 @@ class RANSJet(CFDCase):
         ##### Generate New Mesh ######
         self.genMesh()
         ##### Write Entire Input File #####
-        ### useful if input file is short enough
-        coflowVel = 0.005 # outVel*(2/100)
+        # useful if input file is short enough
+        coflowVel = 0.005  # outVel*(2/100)
         lines = [
-            ## IMPORT
+            # IMPORT
             f'/file/import ideas-universal {self.meshFile}',
-            ## AUTO-SAVE
+            # AUTO-SAVE
             '/file/auto-save case-frequency if-case-is-modified',
     	    '/file/auto-save data-frequency 1000',
-            ## MODEL
+            # MODEL
             '/define/models axisymmetric y',
             '/define/models/viscous kw-sst y',
             # species
             '/define/models/species species-transport y mixture-template',
             '/define/materials change-create air scalar n n n n n n n n',
             '/define/materials change-create mixture-template mixture-template y 2 scalar air 0 0 n n n n n n',
-            ## BOUNDARY CONDITIONS
+            # BOUNDARY CONDITIONS
             # outlet
             '/define/boundary-conditions/modify-zones/zone-type outlet pressure-outlet ;outflow',
             # coflow
@@ -224,11 +232,11 @@ class RANSJet(CFDCase):
             f'/define/boundary-conditions velocity-inlet inlet n n y y n {outVel} n 0 n 300 n n y 5 10 n n 1',
             # axis
             '/define/boundary-conditions/modify-zones/zone-type axis axis',
-            ## INITIALIZE
+            # INITIALIZE
             '/solve/initialize/hyb-initialization',
-            ## CHANGE CONVERGENCE CRITERIA
+            # CHANGE CONVERGENCE CRITERIA
             '/solve/monitors/residual convergence-criteria 1e-5 1e-6 1e-6 1e-6 1e-6 1e-5 1e-6',
-            ## SOLVE
+            # SOLVE
             '/solve/iterate 1000',
             # change convergence, methods and coflow speed
             '/solve/set discretization-scheme species-0 6',
@@ -238,7 +246,7 @@ class RANSJet(CFDCase):
             '/solve/set discretization-scheme temperature 6',
             f'/define/boundary-conditions velocity-inlet coflow y y n {coflowVel} n 0 n 1 n 0 n 300 n n y 5 10 n n 0',
             '/solve/iterate 4000',
-            ## EXPORT
+            # EXPORT
             f'/file/export cgns {self.datFile} n y velocity-mag scalar q',
             'OK',
             f'/file write-case-data {self.datFile}',
@@ -266,26 +274,26 @@ class RANSJet(CFDCase):
         self._preProc()
         outVel = self.x[self.var_labels.index('Breath Velocity')]
         ##### Write Entire Input File #####
-        ### useful if input file is short enough                            add solverExecCmd to CFDCase object.')
+        # useful if input file is short enough                            add solverExecCmd to CFDCase object.')
         else:
             subprocess.run(case.solverExecCmd, cwd=case.caseDir,
-        coflowVel = 0.005 # outVel*(2/100)
-        lines = [
-            ## IMPORT
+        coflowVel=0.005  # outVel*(2/100)
+        lines=[
+            # IMPORT
             f'/file/import ideas-universal {self.meshFile}',
-            ## AUTO-SAVE
+            # AUTO-SAVE
             '/file/auto-save case-frequency if-case-is-modified',
     	    '/file/auto-save data-frequency 1000',
-            ## MODEL
+            # MODEL
             '/define/models axisymmetric y',
             '/define/models/viscous kw-                            add solverExecCmd to CFDCase object.')
         else:
-            subprocess.run(case.solverExecCmd, cwd=case.caseDir,sst y',
+            subprocess.run(case.solverExecCmd, cwd=case.caseDir, sst y',
             # species
             '/define/models/species species-transport y mixture-template',
             '/define/materials change-create air scalar n n n n n n n n',
             '/define/materials change-create mixture-template mixture-template y 2 scalar air 0 0 n n n n n n',
-            ## BOUNDARY CONDITIONS
+            # BOUNDARY CONDITIONS
             # outlet
             '/define/boundary-conditions/modify-zones/zone-type outlet pressure-outlet ;outflow',
             # coflow
@@ -296,11 +304,11 @@ class RANSJet(CFDCase):
             f'/define/boundary-conditions velocity-inlet inlet n n y y n {outVel} n 0 n 300 n n y 5 10 n n 1',
             # axis
             '/define/boundary-conditions/modify-zones/zone-type axis axis',
-            ## INITIALIZE
+            # INITIALIZE
             '/solve/initialize/hyb-initialization',
-            ## CHANGE CONVERGENCE CRITERIA
+            # CHANGE CONVERGENCE CRITERIA
             '/solve/monitors/residual convergence-criteria 1e-5 1e-6 1e-6 1e-6 1e-6 1e-5 1e-6',
-            ## SOLVE
+            # SOLVE
             '/solve/iterate 1000',
             # change convergence, methods and coflow speed
             '/solve/set discretization-scheme species-0 6',
@@ -310,7 +318,7 @@ class RANSJet(CFDCase):
             '/solve/set discretization-scheme temperature 6',
             f'/define/boundary-conditions velocity-inlet coflow y y n {coflowVel} n 0 n 1 n 0 n 300 n n y 5 10 n n 0',
             '/solve/iterate 4000',
-            ## EXPORT
+            # EXPORT
             f'/file/export cgns {self.datFile} n y velocity-mag scalar q',
             'OK',
             f'/file write-case-data {self.datFile}',
@@ -318,7 +326,7 @@ class RANSJet(CFDCase):
             '/exit',
             'OK'
             ]
-        self.inputLines = lines
+        self.inputLines=lines
 
 import os
 import numpy as np
@@ -330,79 +338,79 @@ class RANSJetOpt(OptStudy):
     ###################################################
     #      High Quality Simulation Interpolation      #
     ###################################################
-    ### Define grid interpolation parameters and perform interpolation on high
-    ## quality simulation. These results can be compared to lower quality
-    ## simulations on a universal grid.
-    hqSim_dir = 'hq_sim'
-    hqSim_y2DatDir = os.path.join(hqSim_dir, 'dump')
-    y2DumpPrefix = 'pipe_expansion.sol'
-    xmin, xmax = 1.0, 2.0
-    ymin, ymax = -0.5, 0.5
-    zmin, zmax = -0.5, 0.5
-    t_begin, t_end = 80, 100
-    t_resol = t_end - t_begin # highest quality
-    gridInterp3D = GridInterp3D(y2DumpPrefix, xmin, xmax, ymin, ymax, zmin, zmax,
+    # Define grid interpolation parameters and perform interpolation on high
+    # quality simulation. These results can be compared to lower quality
+    # simulations on a universal grid.
+    hqSim_dir='hq_sim'
+    hqSim_y2DatDir=os.path.join(hqSim_dir, 'dump')
+    y2DumpPrefix='pipe_expansion.sol'
+    xmin, xmax=1.0, 2.0
+    ymin, ymax=-0.5, 0.5
+    zmin, zmax=-0.5, 0.5
+    t_begin, t_end=80, 100
+    t_resol=t_end - t_begin  # highest quality
+    gridInterp3D=GridInterp3D(y2DumpPrefix, xmin, xmax, ymin, ymax, zmin, zmax,
                                 t_begin, t_end, t_resol,
-                                x_resol = 200j)
-    ## SPECIAL CASE: Radial Averaging
-    ## initialize 2D gridInterp object for interpolating onto after getting
-    ## radial average
-    gridInterp2D = GridInterp2D(gridInterp3D.y2DumpPrefix,
+                                x_resol=200j)
+    # SPECIAL CASE: Radial Averaging
+    # initialize 2D gridInterp object for interpolating onto after getting
+    # radial average
+    gridInterp2D=GridInterp2D(gridInterp3D.y2DumpPrefix,
                                 gridInterp3D.xmin, gridInterp3D.xmax,
                                 0.01, gridInterp3D.ymax,
                                 gridInterp3D.t_begin, gridInterp3D.t_end,
                                 gridInterp3D.t_resol,
-                                x_resol = gridInterp3D.x_resol)
-    ## stop expensive spatiotemporal interoplation from being performed each time
-    ## by checking if path exists already
-    hqGrid_uMag_path_3D = os.path.join(hqSim_dir, 'hqGrid_uMag-3D.npy')
+                                x_resol=gridInterp3D.x_resol)
+    # stop expensive spatiotemporal interoplation from being performed each time
+    # by checking if path exists already
+    hqGrid_uMag_path_3D=os.path.join(hqSim_dir, 'hqGrid_uMag-3D.npy')
     if not os.path.exists(hqGrid_uMag_path_3D):
         with h5py.File('hq_sim/merged-mesh.h5') as h5f:
-            coor = h5f['XYZ'][:]
+            coor=h5f['XYZ'][:]
             print(coor.shape)
         with h5py.File('hq_sim/merged-u_mean.h5') as h5f:
-            dset1 = list(h5f.keys())[0]
-            uMean = h5f[dset1][:]
-        mag_uMean = np.linalg.norm(uMean, axis=1)
-        hqGrid_mag_uMean = gridInterp3D.getInterpGrid(coor, mag_uMean)
+            dset1=list(h5f.keys())[0]
+            uMean=h5f[dset1][:]
+        mag_uMean=np.linalg.norm(uMean, axis=1)
+        hqGrid_mag_uMean=gridInterp3D.getInterpGrid(coor, mag_uMean)
         np.save(hqGrid_uMag_path_3D, hqGrid_mag_uMean)
         gridInterp3D.plot3DGrid(hqGrid_mag_uMean, 'hqGrid_uMag-3D')
     else:
-        hqGrid_uMag_3D = np.load(hqGrid_uMag_path_3D)
+        hqGrid_uMag_3D=np.load(hqGrid_uMag_path_3D)
 
-    hqGrid_uMag_path = os.path.join(hqSim_dir, 'hqGrid_uMag.npy')
+    hqGrid_uMag_path=os.path.join(hqSim_dir, 'hqGrid_uMag.npy')
     if not os.path.exists(hqGrid_uMag_path):
         # radial average
-        hqGrid_uMag = radialAvg(hqGrid_uMag_3D, gridInterp3D, gridInterp2D)
+        hqGrid_uMag=radialAvg(hqGrid_uMag_3D, gridInterp3D, gridInterp2D)
         gridInterp2D.plot2DGrid(hqGrid_uMag, 'hqGrid_uMag_radAvg')
-        #save binary
+        # save binary
         np.save(hqGrid_uMag_path, hqGrid_uMag)
     else:
-        hqGrid_uMag = np.load(hqGrid_uMag_path)
+        hqGrid_uMag=np.load(hqGrid_uMag_path)
 
 
-    hqGrid_phi_path_3D = os.path.join(hqSim_dir, 'hqGrid_phi-3D.npy')
+    hqGrid_phi_path_3D=os.path.join(hqSim_dir, 'hqGrid_phi-3D.npy')
     if not os.path.exists(hqGrid_phi_path_3D):
         with h5py.File('hq_sim/merged-mesh.h5') as h5f:
-            coor = h5f['XYZ'][:]
+            coor=h5f['XYZ'][:]
         with h5py.File('hq_sim/merged-phi_mean.h5') as h5f:
-            dset1 = list(h5f.keys())[0]
-            phiMean = h5f[dset1][:]
-        hqGrid_phi_3D = gridInterp3D.getInterpGrid(coor, phiMean)
+            dset1=list(h5f.keys())[0]
+            phiMean=h5f[dset1][:]
+        hqGrid_phi_3D=gridInterp3D.getInterpGrid(coor, phiMean)
         np.save(hqGrid_phi_path_3D, hqGrid_phi_3D)
         gridInterp3D.plot3DGrid(hqGrid_phi_3D, 'hqGrid_phi-3D')
     else:
-        hqGrid_phi_3D = np.load(hqGrid_phi_path_3D)
+        hqGrid_phi_3D=np.load(hqGrid_phi_path_3D)
 
-    hqGrid_phi_path = os.path.join(hqSim_dir, 'hqGrid_phi.npy')
+    hqGrid_phi_path=os.path.join(hqSim_dir, 'hqGrid_phi.npy')
     if not os.path.exists(hqGrid_phi_path):
         # radial average
-        hqGrid_phi = radialAvg(hqGrid_phi_3D, gridInterp3D, gridInterp2D)
+        hqGrid_phi=radialAvg(hqGrid_phi_3D, gridInterp3D, gridInterp2D)
         gridInterp2D.plot2DGrid(hqGrid_phi, 'hqGrid_phi_radAvg')
         # save binary
         np.save(hqGrid_phi_path, hqGrid_phi)
     else:
-        hqGrid_phi = np.load(hqGrid_phi_path)
+        hqGrid_phi=np.load(hqGrid_phi_path)
 
     def __init__(self, algorithm, problem, baseCase,
                  *args, **kwargs):
@@ -417,5 +425,5 @@ class RANSJetOpt(OptStudy):
     def preProc(self):
         pass
 
-MyOptStudy = RANSJetOpt
-BaseCase = RANSJet
+MyOptStudy=RANSJetOpt
+BaseCase=RANSJet
