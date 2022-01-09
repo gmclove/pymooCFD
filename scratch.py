@@ -2,16 +2,124 @@
 # @Date:   2021-12-10T11:22:40-05:00
 # @Last modified by:   glove
 # @Last modified time: 2021-12-14T15:45:19-05:00
+import gmsh
+
+meshPath = './test.msh22'
+meshSF = 1
+
+
+projName = '2D_cylinder'
+dom_dx, dom_dy = 60, 25
+cylD = 1
+meshSizeMax = 0.5
+#################################
+#          Initialize           #
+#################################
+gmsh.initialize()
+# By default Gmsh will not print out any messages: in order to output messages
+# on the terminal, just set the "General.Terminal" option to 1:
+gmsh.option.setNumber("General.Terminal", 0)
+gmsh.clear()
+gmsh.model.add(projName)
+gmsh.option.setNumber('Mesh.MeshSizeFactor', meshSF)
+#################################
+#      YALES2 Requirements      #
+#################################
+# Make sure "Recombine all triangular meshes" is unchecked so only triangular elements are produced
+gmsh.option.setNumber('Mesh.RecombineAll', 0)
+# Only save entities that are assigned to a physical group
+gmsh.option.setNumber('Mesh.SaveAll', 0)
+#################################
+#           Geometry            #
+#################################
+rect = gmsh.model.occ.addRectangle(0, 0, 0, dom_dx, dom_dy)
+# add circle to rectangular domain to represent cylinder
+cir = gmsh.model.occ.addCircle(dom_dx / 4, dom_dy / 2, 0, cylD)
+# use 1-D circle to create curve loop entity
+cir_loop = gmsh.model.occ.addCurveLoop([cir])
+cir_plane = gmsh.model.occ.addPlaneSurface(
+    [cir_loop])  # creates 2-D entity
+# cut circle out of a rectangle
+# print(cylLoop)
+# print(rect)
+domDimTags, domDimTagsMap = gmsh.model.occ.cut(
+    [(2, rect)], [(2, cir_plane)])
+# dom = domDimTags
+# We finish by synchronizing the data from OpenCASCADE CAD kernel with
+# the Gmsh model:
+gmsh.model.occ.synchronize()
+#################################
+#    Physical Group Naming      #
+#################################
+grpTag = gmsh.model.addPhysicalGroup(2, [7])
+gmsh.model.setPhysicalName(1, grpTag, 'x0')
+grpTag = gmsh.model.addPhysicalGroup(1, [8])
+gmsh.model.setPhysicalName(1, grpTag, 'x1')
+grpTag = gmsh.model.addPhysicalGroup(1, [6])
+gmsh.model.setPhysicalName(1, grpTag, 'y0')
+grpTag = gmsh.model.addPhysicalGroup(1, [9])
+gmsh.model.setPhysicalName(1, grpTag, 'y1')
+grpTag = gmsh.model.addPhysicalGroup(1, [5])
+gmsh.model.setPhysicalName(1, grpTag, 'cyl')
+#################################
+#           MESHING             #
+#################################
+# We could also use a `Box' field to impose a step change in element
+# sizes inside a box
+# boxF = gmsh.model.mesh.field.add("Box")
+# gmsh.model.mesh.field.setNumber(boxF, "VIn", meshSizeMax/10)
+# gmsh.model.mesh.field.setNumber(boxF, "VOut", meshSizeMax)
+# gmsh.model.mesh.field.setNumber(boxF, "XMin", cylD/3)
+# gmsh.model.mesh.field.setNumber(boxF, "XMax", cylD/3+cylD*10)
+# gmsh.model.mesh.field.setNumber(boxF, "YMin", -cylD)
+# gmsh.model.mesh.field.setNumber(boxF, "YMax", cylD)
+# # Finally, let's use the minimum of all the fields as the background mesh field:
+# minF = gmsh.model.mesh.field.add("Min")
+# gmsh.model.mesh.field.setNumbers(minF, "FieldsList", [boxF])
+# gmsh.model.mesh.field.setAsBackgroundMesh(minF)
+
+# Set minimum and maximum mesh size
+#gmsh.option.setNumber('Mesh.MeshSizeMin', meshSizeMin)
+gmsh.option.setNumber('Mesh.MeshSizeMax', meshSizeMax)
+
+# Set number of nodes along cylinder wall
+gmsh.option.setNumber('Mesh.MeshSizeFromCurvature', 200)
+# gmsh.option.setNumber('Mesh.MeshSizeFromCurvatureIsotropic', 1)
+
+# Set size of mesh at every point in model
+# gmsh.model.mesh.setSize(gmsh.model.getEntities(0), meshSize)
+
+# gmsh.model.mesh.setTransfiniteCurve(cylCir, 150, coef=1.1)
+# We can then generate a 2D mesh...
+gmsh.model.mesh.generate(1)
+gmsh.model.mesh.generate(2)
+# extract number of elements
+# get all elementary entities in the model
+entities = gmsh.model.getEntities()
+e = entities[-1]
+# get the mesh elements for each elementary entity
+elemTypes, elemTags, elemNodeTags = gmsh.model.mesh.getElements(
+    e[0], e[1])
+# count number of elements
+numElem = sum(len(i) for i in elemTags)
+# ... and save it to disk
+gmsh.write(meshPath)
+# To visualize the model we can run the graphical user interface with
+# `gmsh.fltk.run()'.
+gmsh.fltk.run()
+# This should be called when you are done using the Gmsh Python API:
+gmsh.finalize()
+
 # import os
-import subprocess
-# caseDir = os.path.join(os.getcwd(), 'test_case')
-# caseDir = 'test_case'
-# solverExecCmd = ['cd', 'test_case', '&&', 'mpirun', '-n',
-#                  '10', '2D_cylinder', '>', 'pyTest.out']
-# print(solverExecCmd)
-# print(caseDir)
-subprocess.run(['mpirun', '-n', '10', '2D_cylinder'],
-               cwd='test_case', stdout=subprocess.DEVNULL)
+# import subprocess
+# # caseDir = os.path.join(os.getcwd(), 'test_case')
+# # caseDir = 'test_case'
+# # solverExecCmd = ['cd', 'test_case', '&&', 'mpirun', '-n',
+# #                  '10', '2D_cylinder', '>', 'pyTest.out']
+# # print(solverExecCmd)
+# # print(caseDir)
+# subprocess.run(['mpirun', '-n', '10', '2D_cylinder'],
+#                cwd='test_case', stdout=subprocess.DEVNULL)
 
 # import numpy as np
 #
@@ -115,7 +223,7 @@ subprocess.run(['mpirun', '-n', '10', '2D_cylinder'],
 #         pool.apply_async(solve, (wd,), callback=execCallback)
 #
 #     # check if simulation completed correctly
-#     # if not self._execDone():
+#     # if not _execDone():
 #     #     pass
 #
 #     pool.close()

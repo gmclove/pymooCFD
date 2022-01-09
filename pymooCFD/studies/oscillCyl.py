@@ -169,16 +169,20 @@ class OscillCylinder(CFDCase):
         #################################
         #    Physical Group Naming      #
         #################################
-        grpTag = gmsh.model.addPhysicalGroup(2, [7])
-        gmsh.model.setPhysicalName(1, grpTag, 'x0')
-        grpTag = gmsh.model.addPhysicalGroup(1, [8])
-        gmsh.model.setPhysicalName(1, grpTag, 'x1')
-        grpTag = gmsh.model.addPhysicalGroup(1, [6])
-        gmsh.model.setPhysicalName(1, grpTag, 'y0')
-        grpTag = gmsh.model.addPhysicalGroup(1, [9])
-        gmsh.model.setPhysicalName(1, grpTag, 'y1')
-        grpTag = gmsh.model.addPhysicalGroup(1, [5])
-        gmsh.model.setPhysicalName(1, grpTag, 'cyl')
+        dim = 2
+        grpTag = gmsh.model.addPhysicalGroup(dim, [1])
+        gmsh.model.setPhysicalName(dim, grpTag, 'dom')
+        dim = 1
+        grpTag = gmsh.model.addPhysicalGroup(dim, [7])
+        gmsh.model.setPhysicalName(dim, grpTag, 'x0')
+        grpTag = gmsh.model.addPhysicalGroup(dim, [8])
+        gmsh.model.setPhysicalName(dim, grpTag, 'x1')
+        grpTag = gmsh.model.addPhysicalGroup(dim, [6])
+        gmsh.model.setPhysicalName(dim, grpTag, 'y0')
+        grpTag = gmsh.model.addPhysicalGroup(dim, [9])
+        gmsh.model.setPhysicalName(dim, grpTag, 'y1')
+        grpTag = gmsh.model.addPhysicalGroup(dim, [5])
+        gmsh.model.setPhysicalName(dim, grpTag, 'cyl')
         #################################
         #           MESHING             #
         #################################
