@@ -2,15 +2,16 @@
 # @Date:   2021-12-10T11:22:40-05:00
 # @Last modified by:   glove
 # @Last modified time: 2021-12-14T15:45:19-05:00
-import os
+# import os
 import subprocess
 # caseDir = os.path.join(os.getcwd(), 'test_case')
 # caseDir = 'test_case'
-solverExecCmd = ['cd', 'test_case', '&&', 'mpirun', '-n',
-                 '10', '2D_cylinder', '>', 'pyTest.out']
-print(solverExecCmd)
+# solverExecCmd = ['cd', 'test_case', '&&', 'mpirun', '-n',
+#                  '10', '2D_cylinder', '>', 'pyTest.out']
+# print(solverExecCmd)
 # print(caseDir)
-subprocess.run(solverExecCmd)  # ,  # cwd=caseDir,
+subprocess.run(['cd', 'test_case', '&&', 'mpirun', '-n',
+                '10', '2D_cylinder'])  # ,  # cwd=caseDir,
 # stdout=subprocess.DEVNULL)
 
 # import numpy as np
