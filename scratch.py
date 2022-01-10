@@ -9,8 +9,10 @@ meshSF = 1
 
 
 projName = '2D_cylinder'
-dom_dx, dom_dy = 60, 25
+# dom_dx, dom_dy = 60, 25
+centX, centY, centZ = 0, 0, 0
 cylD = 1
+domD = cylD * 20
 meshSizeMax = 0.5
 #################################
 #          Initialize           #
@@ -32,19 +34,15 @@ gmsh.option.setNumber('Mesh.SaveAll', 0)
 #################################
 #           Geometry            #
 #################################
-rect = gmsh.model.occ.addRectangle(0, 0, 0, dom_dx, dom_dy)
-# add circle to rectangular domain to represent cylinder
-cir = gmsh.model.occ.addCircle(dom_dx / 4, dom_dy / 2, 0, cylD)
-# use 1-D circle to create curve loop entity
-cir_loop = gmsh.model.occ.addCurveLoop([cir])
-cir_plane = gmsh.model.occ.addPlaneSurface(
-    [cir_loop])  # creates 2-D entity
-# cut circle out of a rectangle
-# print(cylLoop)
-# print(rect)
-domDimTags, domDimTagsMap = gmsh.model.occ.cut(
-    [(2, rect)], [(2, cir_plane)])
-# dom = domDimTags
+cyl = gmsh.model.occ.addCircle(centX, centY, centZ, cylD)
+topPt = gmsh.model.occ.addPoint(centX, centY + domD, centZ)
+botPt = gmsh.model.occ.addPoint(centX, centY - domD, centZ)
+centPt = gmsh.model.occ.addPoint(centX, centY, centZ)
+inlet = gmsh.model.occ.addCircleArc(botPt, centPt, topPt)
+outlet = gmsh.model.occ.addCircleArc(topPt, centPt, botPt)
+outerLoop = gmsh.model.occ.addCurveLoop([inlet, outlet])
+innerLoop = gmsh.model.occ.addCurveLoop([cyl])
+dom = gmsh.model.occ.addPlaneSurface([innerLoop, outerLoop])
 # We finish by synchronizing the data from OpenCASCADE CAD kernel with
 # the Gmsh model:
 gmsh.model.occ.synchronize()
@@ -52,18 +50,14 @@ gmsh.model.occ.synchronize()
 #    Physical Group Naming      #
 #################################
 dim = 2
-grpTag = gmsh.model.addPhysicalGroup(dim, [1])
+grpTag = gmsh.model.addPhysicalGroup(dim, [dom])
 gmsh.model.setPhysicalName(dim, grpTag, 'dom')
 dim = 1
-grpTag = gmsh.model.addPhysicalGroup(dim, [7])
+grpTag = gmsh.model.addPhysicalGroup(dim, [inlet])
 gmsh.model.setPhysicalName(dim, grpTag, 'x0')
-grpTag = gmsh.model.addPhysicalGroup(dim, [8])
+grpTag = gmsh.model.addPhysicalGroup(dim, [outlet])
 gmsh.model.setPhysicalName(dim, grpTag, 'x1')
-grpTag = gmsh.model.addPhysicalGroup(dim, [6])
-gmsh.model.setPhysicalName(dim, grpTag, 'y0')
-grpTag = gmsh.model.addPhysicalGroup(dim, [9])
-gmsh.model.setPhysicalName(dim, grpTag, 'y1')
-grpTag = gmsh.model.addPhysicalGroup(dim, [5])
+grpTag = gmsh.model.addPhysicalGroup(dim, [cyl])
 gmsh.model.setPhysicalName(dim, grpTag, 'cyl')
 #################################
 #           MESHING             #
