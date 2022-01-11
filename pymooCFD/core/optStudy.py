@@ -426,7 +426,7 @@ class OptStudy:
 
     def runBndCases(self, n_pts, getDiags=False, doMeshStudy=False):
         self.genBndCases(n_pts, getDiags=getDiags)
-        self.runPop(self.bndCases)
+        self.BaseCase.parallelize(self.bndCases)
         if doMeshStudy:
             for case in self.bndCases:
                 case.meshStudy()
