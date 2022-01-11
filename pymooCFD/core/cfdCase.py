@@ -139,8 +139,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         self.numElem = None
         # self.var_labels = None
         # self.obj_labels = None
-        self.n_var = None
-        self.n_obj = None
+        # self.n_var = None
+        # self.n_obj = None
         # self.jobLines = None #???????????
         # self.preProcComplete = False
         # self.postProcComplete = False
@@ -221,7 +221,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                 self.logger.info('RE-RUNNING')
                 self.run()
             self.postProc()
-            if np.isnan(self.f) or self.f is None:
+            if np.isnan(np.sum(self.f)) or self.f is None:
                 self.logger.error('INCOMPLETE: POST-PROCESS')
             else:
                 self.logger.info('COMPLETE: POST-PROCESS')
