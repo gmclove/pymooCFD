@@ -142,9 +142,9 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         self.n_var = None
         self.n_obj = None
         # self.jobLines = None #???????????
-        self.preProcComplete = False
-        self.postProcComplete = False
-        self.execComplete = False
+        # self.preProcComplete = False
+        # self.postProcComplete = False
+        # self.execComplete = False
 
         ### Save Checkpoint ###
         # _, tail = os.path.split(caseDir)
