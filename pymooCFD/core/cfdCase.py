@@ -511,7 +511,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         _, tail = os.path.split(self.caseDir)
         logFile = os.path.join(self.caseDir, f'{tail}.log')
         logger = logging.getLogger(logFile)
-        logger.setLevel(logging.ERROR)
+        logger.setLevel(logging.DEBUG)
         # define file handler and set formatter
         file_handler = logging.FileHandler(logFile)
         formatter = logging.Formatter(

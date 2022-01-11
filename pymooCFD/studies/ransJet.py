@@ -48,7 +48,7 @@ class RANSJet(CFDCase):
                          meshFile='jet_rans-axi_sym.unv',
                          datFile='jet_rans-axi_sym.cgns',
                          jobFile='jobslurm.sh',
-                         inputFile='jet_rans-axi_sym.jou',
+                         inputFile='jet_rans-axi_sym.jou'
                          # nProc = nProc
                          )
 
