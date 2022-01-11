@@ -77,6 +77,9 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                 self.logger.info(
                     f'OVERRIDE CASE - {caseDir} already exists but {self.cpPath} does not')
                 self.copy()
+            except ModuleNotFoundError as err:
+                print(self.cpPath + '.npy')
+                raise err
         else:
             os.makedirs(caseDir, exist_ok=True)
             self.logger = self.getLogger()
@@ -355,8 +358,6 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         _, tail = os.path.split(self.caseDir)
         a_numElem = np.array([case.numElem for case in self.msCases])
         msObj = np.array([case.f for case in self.msCases])
-        print(msObj)
-        print(a_numElem)
         # Plot
         for obj_i, obj_label in enumerate(self.obj_labels):
             print(f'\tPLOTTING OBJECTIVE {obj_i}: {obj_label}')
@@ -373,7 +374,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     def execMeshStudy(self):
         self.parallelize(self.msCases)
         obj = np.array([case.f for case in self.msCases])
-        print('Objectives:\n\t', str(obj).replace('\n', '\n\t'))
+        print('\tObjectives:\n\t', str(obj).replace('\n', '\n\t\t'))
         # nTask = int(self.procLim/self.BaseCase.nProc)
         # pool = mp.Pool(nTask)
         # for case in self.msCases:
@@ -510,7 +511,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         _, tail = os.path.split(self.caseDir)
         logFile = os.path.join(self.caseDir, f'{tail}.log')
         logger = logging.getLogger(logFile)
-        logger.setLevel(logging.INFO)
+        logger.setLevel(logging.ERROR)
         # define file handler and set formatter
         file_handler = logging.FileHandler(logFile)
         formatter = logging.Formatter(
