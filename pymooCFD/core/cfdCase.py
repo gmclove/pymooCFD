@@ -374,7 +374,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     def execMeshStudy(self):
         self.parallelize(self.msCases)
         obj = np.array([case.f for case in self.msCases])
-        print('\tObjectives:\n\t', str(obj).replace('\n', '\n\t\t'))
+        print('\tObjectives:\n\t\t', str(obj).replace('\n', '\n\t\t'))
         # nTask = int(self.procLim/self.BaseCase.nProc)
         # pool = mp.Pool(nTask)
         # for case in self.msCases:
