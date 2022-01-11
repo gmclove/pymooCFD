@@ -113,9 +113,9 @@ class OptStudy:
             print(
                 f'Last checkpoint at generation {self.algorithm.callback.gen}')
             # restart client if being used
-            if self.client is not None:
-                self.client.restart()
-                print("CLIENT RESTARTED")
+            # if self.client is not None:
+            #     self.client.restart()
+            #     print("CLIENT RESTARTED")
         else:
             print('STARTING NEW OPTIMIZATION STUDY')
             # archive/empty previous runs data directory
@@ -128,9 +128,9 @@ class OptStudy:
                                  return_least_infeasible=self.algorithm.return_least_infeasible
                                  )
             # start client if being used
-            if self.client is not None:
-                self.client()
-                print("CLIENT STARTED")
+            # if self.client is not None:
+            #     self.client()
+            #     print("CLIENT STARTED")
         ######    OPTIMIZATION    ######
         # until the algorithm has not terminated
         while self.algorithm.has_next():
