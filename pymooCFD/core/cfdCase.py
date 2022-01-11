@@ -185,7 +185,10 @@ class CFDCase:  # (PreProcCase, PostProcCase)
 
     @classmethod
     def parallelize(cls, cases):
+        print('parallelizing:')
         for case in cases:
+            print(case.__dict__)
+            print(case.solve)
             cls.pool.apply_async(case.run, ())
         cls.pool.close()
         cls.pool.join()
