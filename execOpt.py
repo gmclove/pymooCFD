@@ -12,17 +12,16 @@ def main():
 
     import your optimization study object/instance from setupOpt.py and execute
     '''
-    optStudy.testCase.loadCP()
-    print(optStudy.testCase.__dict__)
+    optStudy.testCase.msCases[0].genMesh()
 
     ### Pre-Proccess ###
     # optStudy.preProc()
-    optStudy.runTestCase()
-
-    optStudy.testCase.meshStudy()
-    optStudy.runBndCases(1, getDiags=False, doMeshStudy=True)
-    # optStudy.runGen1()
-    optStudy.run(restart=False)
+    # optStudy.runTestCase()
+    #
+    # optStudy.testCase.meshStudy()
+    # optStudy.runBndCases(1, getDiags=False, doMeshStudy=True)
+    # # optStudy.runGen1()
+    # optStudy.run(restart=False)
     # optStudy.meshStudy(optStudy.gen1Pop)
 
     ### Execute Study ###

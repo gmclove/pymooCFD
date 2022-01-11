@@ -104,7 +104,7 @@ numElem = sum(len(i) for i in elemTags)
 gmsh.write(meshPath)
 # To visualize the model we can run the graphical user interface with
 # `gmsh.fltk.run()'.
-# gmsh.fltk.run()
+gmsh.fltk.run()
 # This should be called when you are done using the Gmsh Python API:
 gmsh.finalize()
 

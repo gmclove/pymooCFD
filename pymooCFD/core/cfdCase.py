@@ -77,9 +77,9 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                 self.logger.info(
                     f'OVERRIDE CASE - {caseDir} already exists but {self.cpPath} does not')
                 self.copy()
-            except ModuleNotFoundError as err:
-                print(self.cpPath + '.npy')
-                raise err
+            # except ModuleNotFoundError as err:
+            #     print(self.cpPath + '.npy')
+            #     raise err
         else:
             os.makedirs(caseDir, exist_ok=True)
             self.logger = self.getLogger()
