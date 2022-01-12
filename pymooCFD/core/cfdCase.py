@@ -367,18 +367,18 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         # a_sf = np.array([case.meshSF for case in self.msCases])
         msObj = np.array([case.f for case in self.msCases])
         # Plot
-        for obj_i, obj_label in enumerate(self.obj_labels):
-            print(f'\tPLOTTING OBJECTIVE {obj_i}: {obj_label}')
-            plt.plot(a_numElem, msObj[:, obj_i])
-            plt.suptitle('Mesh Sensitivity Study')
-            plt.title(tail)
-            plt.xlabel('Number of Elements')
-            plt.ylabel(obj_label)
-            plt.ticklabel_format(axis="x", style="sci", scilimits=(0, 0))
-            fName = f'ms_plot-{tail}-obj{obj_i}.png'
-            fPath = os.path.join(self.meshStudyDir, fName)
-            plt.savefig(fPath)
-            plt.clf()
+        # for obj_i, obj_label in enumerate(self.obj_labels):
+        #     print(f'\tPLOTTING OBJECTIVE {obj_i}: {obj_label}')
+        #     plt.plot(a_numElem, msObj[:, obj_i])
+        #     plt.suptitle('Mesh Sensitivity Study')
+        #     plt.title(tail)
+        #     plt.xlabel('Number of Elements')
+        #     plt.ylabel(obj_label)
+        #     plt.ticklabel_format(axis="x", style="sci", scilimits=(0, 0))
+        #     fName = f'ms_plot-{tail}-obj{obj_i}.png'
+        #     fPath = os.path.join(self.meshStudyDir, fName)
+        #     plt.savefig(fPath)
+        #     plt.clf()
 
         for obj_i, obj_label in enumerate(self.obj_labels):
             print(f'\tPLOTTING OBJECTIVE {obj_i}: {obj_label}')
