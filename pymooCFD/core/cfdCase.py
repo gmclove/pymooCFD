@@ -364,7 +364,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     def plotMeshStudy(self):
         _, tail = os.path.split(self.caseDir)
         a_numElem = np.array([case.numElem for case in self.msCases])
-        # a_sf = np.array([case.meshSF for case in self.msCases])
+        a_sf = np.array([case.meshSF for case in self.msCases])
         msObj = np.array([case.f for case in self.msCases])
         # Plot
         # for obj_i, obj_label in enumerate(self.obj_labels):
@@ -382,30 +382,32 @@ class CFDCase:  # (PreProcCase, PostProcCase)
 
         for obj_i, obj_label in enumerate(self.obj_labels):
             print(f'\tPLOTTING OBJECTIVE {obj_i}: {obj_label}')
-            fig, ax = plt.subplots(constrained_layout=True)
-            # x = a_numElem
-            ax.plot(a_numElem, msObj[:, obj_i])
-            ax.set_xlabel('Number of Elements')
-            ax.set_ylabel(obj_label)
-            ax.ticklabel_format(axis="x", style="sci", scilimits=(0, 0))
-            ax.set_title(tail)
+            fig, ax1 = plt.subplots()  # constrained_layout=True)
+            ax2 = ax1.twiny()
+            ax1.plot(a_numElem, msObj[:, obj_i])
+            ax2.plot(a_sf, msObj[:, obj_i])
+            ax2.set_xlabel('Mesh Size Factor')
+            ax1.set_xlabel('Number of Elements')
+            ax1.set_ylabel(obj_label)
+            ax1.ticklabel_format(axis="x", style="sci", scilimits=(0, 0))
+            ax1.set_title(tail)
             fig.suptitle('Mesh Sensitivity Study')
 
-            def elem2sf(numElem):
-                print('numElem', numElem)
-                return [case.meshSF for case in self.msCases]
-                # for case in self.msCases:
-                #     if case.numElem == numElem:
-                #         return case.meshSF
-
-            def sf2elem(sf):
-                print('sf', sf)
-                return [case.numElem for case in self.msCases]
-                # for case in self.msCases:
-                #     if case.meshSF == sf:
-                #         return case.numElem
-            secax = ax.secondary_xaxis('top', functions=(elem2sf, sf2elem))
-            secax.set_xlabel('Mesh Size Factor')
+            # def elem2sf(numElem):
+            #     print('numElem', numElem)
+            #     return [case.meshSF for case in self.msCases]
+            #     # for case in self.msCases:
+            #     #     if case.numElem == numElem:
+            #     #         return case.meshSF
+            #
+            # def sf2elem(sf):
+            #     print('sf', sf)
+            #     return [case.numElem for case in self.msCases]
+            #     # for case in self.msCases:
+            #     #     if case.meshSF == sf:
+            #     #         return case.numElem
+            # secax = ax.secondary_xaxis('top', functions=(elem2sf, sf2elem))
+            # secax.set_xlabel('Mesh Size Factor')
             #######################################
             # Define a closure function to register as a callback
             #
