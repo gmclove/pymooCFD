@@ -389,7 +389,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             # def elem2sf(x):
             #     return sf
             secax = ax.secondary_xaxis(
-                'top', functions=(lambda: a_sf, lambda: a_numElem))
+                'top', functions=(lambda _: a_sf, lambda _: a_numElem))
             secax.set_xlabel('Mesh Size Factor')
             #######################################
             # Define a closure function to register as a callback
