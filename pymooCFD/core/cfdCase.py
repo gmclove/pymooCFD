@@ -140,6 +140,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         self.f = None  # if not None then case complete
         self.msCases = None
         self.numElem = None
+        # self.sfToElem
         # self.var_labels = None
         # self.obj_labels = None
         # self.n_var = None
@@ -320,6 +321,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         study = []
         var = []
         a_numElem = []
+        # sfToElem = []
         self.msCases = []
         for sf in self.meshSFs:
             # Deep copy case instance
@@ -341,12 +343,14 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             # only pre-processing needed is generating mesh
             msCase.genMesh()
             a_numElem.append(msCase.numElem)
+            # sfToElem.append([msCase.meshSF, msCase.numElem])
             saveTxt(msCase.caseDir, 'numElem.txt', [msCase.numElem])
             study.append([msCase.caseDir, str(msCase.numElem)])
             var.append(msCase.x)
         print('\tNumber of Elements:', a_numElem)
         study = np.array(study)
-        print('\tStudy:\n\t\t', str(study).replace('\n', '\n\t\t'))
+        print('\tStudy:\n\t\t\b', str(study).replace('\n', '\n\t\t'))
+        # self.sfToElem = np.array(sfToElem)
         # print('\t' + str(study).replace('\n', '\n\t'))
         path = os.path.join(self.meshStudyDir, 'study.txt')
         np.savetxt(path, study, fmt="%s")
@@ -360,7 +364,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     def plotMeshStudy(self):
         _, tail = os.path.split(self.caseDir)
         a_numElem = np.array([case.numElem for case in self.msCases])
-        a_sf = np.array([case.meshSF for case in self.msCases])
+        # a_sf = np.array([case.meshSF for case in self.msCases])
         msObj = np.array([case.f for case in self.msCases])
         # Plot
         for obj_i, obj_label in enumerate(self.obj_labels):
@@ -386,10 +390,17 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             ax.ticklabel_format(axis="x", style="sci", scilimits=(0, 0))
             ax.set_title(tail)
             fig.suptitle('Mesh Sensitivity Study')
-            # def elem2sf(x):
-            #     return sf
-            secax = ax.secondary_xaxis(
-                'top', functions=(lambda _: a_sf, lambda _: a_numElem))
+
+            def elem2sf(numElem):
+                for case in self.msCases:
+                    if case.numElem == numElem:
+                        return case.meshSF
+
+            def sf2elem(sf):
+                for case in self.msCases:
+                    if case.meshSF == sf:
+                        return case.numElem
+            secax = ax.secondary_xaxis('top', functions=(elem2sf, sf2elem))
             secax.set_xlabel('Mesh Size Factor')
             #######################################
             # Define a closure function to register as a callback
@@ -422,7 +433,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     def execMeshStudy(self):
         self.parallelize(self.msCases)
         obj = np.array([case.f for case in self.msCases])
-        print('\tObjectives:\n\t\t', str(obj).replace('\n', '\n\t\t'))
+        print('\tObjectives:\n\t\t\b', str(obj).replace('\n', '\n\t\t'))
         # nTask = int(self.procLim/self.BaseCase.nProc)
         # pool = mp.Pool(nTask)
         # for case in self.msCases:
