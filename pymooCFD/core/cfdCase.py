@@ -391,6 +391,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             self.genMeshStudy()
         self.execMeshStudy()
         self.plotMeshStudy()
+        self.saveCP()
 
     # @calltracker
     # def postProc(self):

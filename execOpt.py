@@ -4,6 +4,7 @@
 # @Last modified time: 2021-12-16T09:37:30-05:00
 
 from setupOpt import optStudy
+import numpy as np
 
 
 def main():
@@ -17,6 +18,7 @@ def main():
     ### Pre-Proccess ###
     # optStudy.preProc()
     optStudy.runTestCase()
+    optStudy.testCase.meshSFs = np.around(np.arange(0.2, 2.0, 0.1), decimals=2)
     optStudy.testCase.meshStudy()
     # optStudy.runBndCases(1, getDiags=False, doMeshStudy=True)
     # # optStudy.runGen1()
