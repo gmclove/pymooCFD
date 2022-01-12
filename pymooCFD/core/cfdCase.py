@@ -366,6 +366,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             plt.title(tail)
             plt.xlabel('Number of Elements')
             plt.ylabel(obj_label)
+            plt.ticklabel_format(axis="x", style="sci", scilimits=(0, 0))
             fName = f'ms_plot-{tail}-obj{obj_i}.png'
             fPath = os.path.join(self.meshStudyDir, fName)
             plt.savefig(fPath)
