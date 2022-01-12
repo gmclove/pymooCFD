@@ -392,14 +392,14 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             fig.suptitle('Mesh Sensitivity Study')
 
             def elem2sf(numElem):
-                print(numElem)
+                print('numElem', numElem)
                 return [case.meshSF for case in self.msCases]
                 # for case in self.msCases:
                 #     if case.numElem == numElem:
                 #         return case.meshSF
 
             def sf2elem(sf):
-                print(sf)
+                print('sf', sf)
                 return [case.numElem for case in self.msCases]
                 # for case in self.msCases:
                 #     if case.meshSF == sf:
