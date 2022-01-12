@@ -13,6 +13,9 @@ import multiprocessing as mp
 import multiprocessing.pool
 from pymooCFD.util.sysTools import saveTxt
 
+# import matplotlib.dates as mdates
+# from matplotlib.ticker import AutoMinorLocator
+
 
 class CFDCase:  # (PreProcCase, PostProcCase)
     ####### Define Design Space #########
@@ -357,6 +360,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     def plotMeshStudy(self):
         _, tail = os.path.split(self.caseDir)
         a_numElem = np.array([case.numElem for case in self.msCases])
+        a_sf = np.array([case.meshSF for case in self.msCases])
         msObj = np.array([case.f for case in self.msCases])
         # Plot
         for obj_i, obj_label in enumerate(self.obj_labels):
@@ -371,6 +375,49 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             fPath = os.path.join(self.meshStudyDir, fName)
             plt.savefig(fPath)
             plt.clf()
+
+        for obj_i, obj_label in enumerate(self.obj_labels):
+            print(f'\tPLOTTING OBJECTIVE {obj_i}: {obj_label}')
+            fig, ax = plt.subplots(constrained_layout=True)
+            # x = a_numElem
+            ax.plot(a_numElem, msObj[:, obj_i])
+            ax.set_xlabel('Number of Elements')
+            ax.set_ylabel(obj_label)
+            ax.ticklabel_format(axis="x", style="sci", scilimits=(0, 0))
+            ax.set_title(tail)
+            fig.suptitle('Mesh Sensitivity Study')
+            # def elem2sf(x):
+            #     return sf
+            secax = ax.secondary_xaxis(
+                'top', functions=(lambda: a_sf, lambda: a_numElem))
+            secax.set_xlabel('Mesh Size Factor')
+            #######################################
+            # Define a closure function to register as a callback
+            #
+            # def convert_ax_c_to_celsius(ax_f):
+            #     """
+            #     Update second axis according with first axis.
+            #     """
+            #     y1, y2 = ax_f.get_ylim()
+            #     ax_c.set_ylim(fahrenheit2celsius(y1), fahrenheit2celsius(y2))
+            #     ax_c.figure.canvas.draw()
+            #
+            # fig, ax_f = plt.subplots()
+            # ax_elem = ax_f.twinx()
+            #
+            # # automatically update ylim of ax2 when ylim of ax1 changes.
+            # ax_f.callbacks.connect("ylim_changed", convert_ax_c_to_celsius)
+            # ax_f.plot(np.linspace(-40, 120, 100))
+            # ax_f.set_xlim(0, 100)
+            #
+            # ax_f.set_title('Two scales: Fahrenheit and Celsius')
+            # ax_f.set_ylabel('Fahrenheit')
+            # ax_elem.set_ylabel('Celsius')
+            #################################################
+            fName = f'ms_plot-{tail}-obj{obj_i}.png'
+            fPath = os.path.join(self.meshStudyDir, fName)
+            fig.savefig(fPath)
+            fig.clf()
 
     def execMeshStudy(self):
         self.parallelize(self.msCases)
