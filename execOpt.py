@@ -18,7 +18,7 @@ def main():
     ### Pre-Proccess ###
     # optStudy.preProc()
     optStudy.runTestCase()
-    optStudy.testCase.meshSFs = np.around(np.arange(0.2, 2.0, 0.1), decimals=2)
+    # optStudy.testCase.meshSFs = np.around(np.arange(0.2, 0.9, 0.5), decimals=2)
     optStudy.testCase.meshStudy()
     # optStudy.runBndCases(1, getDiags=False, doMeshStudy=True)
     # # optStudy.runGen1()
