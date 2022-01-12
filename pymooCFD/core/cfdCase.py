@@ -392,14 +392,18 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             fig.suptitle('Mesh Sensitivity Study')
 
             def elem2sf(numElem):
-                for case in self.msCases:
-                    if case.numElem == numElem:
-                        return case.meshSF
+                print(numElem)
+                return [case.meshSF for case in self.msCases]
+                # for case in self.msCases:
+                #     if case.numElem == numElem:
+                #         return case.meshSF
 
             def sf2elem(sf):
-                for case in self.msCases:
-                    if case.meshSF == sf:
-                        return case.numElem
+                print(sf)
+                return [case.numElem for case in self.msCases]
+                # for case in self.msCases:
+                #     if case.meshSF == sf:
+                #         return case.numElem
             secax = ax.secondary_xaxis('top', functions=(elem2sf, sf2elem))
             secax.set_xlabel('Mesh Size Factor')
             #######################################
