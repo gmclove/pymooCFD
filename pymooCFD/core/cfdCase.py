@@ -345,7 +345,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             study.append([msCase.caseDir, str(msCase.numElem)])
             var.append(msCase.x)
         study = np.array(study)
-        print('\tStudy:\n\t\t\b', str(study).replace('\n', '\n\t\t'))
+        print('\tStudy:\n\t\t', str(study).replace('\n', '\n\t\t'))
         # self.sfToElem = np.array(sfToElem)
         # print('\t' + str(study).replace('\n', '\n\t'))
         path = os.path.join(self.meshStudyDir, 'study.txt')
@@ -467,9 +467,11 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         #     meshSFs = self.meshSFs
         # if self.msCases is None:
         #     self.genMeshStudy()
-        print('MESH STUDY:', self)
+        print('MESH STUDY -', self)
         if not restart or self.msCases is None:
             self.genMeshStudy()
+        else:
+            print('\tRESTARTING MESH STUDY')
         print('\tMesh Size Factors:', self.meshSFs)
         a_numElem = [case.numElem for case in self.msCases]
         print('\tNumber of Elements:', a_numElem)

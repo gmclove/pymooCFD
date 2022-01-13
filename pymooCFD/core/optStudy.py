@@ -424,7 +424,7 @@ class OptStudy:
                 cornerCases.append(cornerCase)
         self.BaseCase.parallelize(cornerCases)
 
-    def runBndCases(self, n_pts, getDiags=False, doMeshStudy=False):
+    def runBndCases(self, n_pts=1, getDiags=False, doMeshStudy=False):
         self.genBndCases(n_pts, getDiags=getDiags)
         self.BaseCase.parallelize(self.bndCases)
         if doMeshStudy:
