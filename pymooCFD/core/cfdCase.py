@@ -368,39 +368,48 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         a_sf = a_sf[::-1]
         msObj = np.array([case.f for case in self.msCases])
         # Plot
-        # for obj_i, obj_label in enumerate(self.obj_labels):
-        #     print(f'\tPLOTTING OBJECTIVE {obj_i}: {obj_label}')
-        #     plt.plot(a_numElem, msObj[:, obj_i])
-        #     plt.suptitle('Mesh Sensitivity Study')
-        #     plt.title(tail)
-        #     plt.xlabel('Number of Elements')
-        #     plt.ylabel(obj_label)
-        #     plt.ticklabel_format(axis="x", style="sci", scilimits=(0, 0))
-        #     fName = f'ms_plot-{tail}-obj{obj_i}.png'
-        #     fPath = os.path.join(self.meshStudyDir, fName)
-        #     plt.savefig(fPath)
-        #     plt.clf()
-
         for obj_i, obj_label in enumerate(self.obj_labels):
             print(f'\tPLOTTING OBJECTIVE {obj_i}: {obj_label}')
-            fig, ax1 = plt.subplots()  # constrained_layout=True)
-            ax2 = ax1.twiny()
-            ax1.plot(a_numElem, msObj[:, obj_i])
-            ax2.plot(a_sf, msObj[:, obj_i])
-            xl1, xu1 = ax1.get_xlim()
-            print(xl1)
-            print(xu1)
-            # xl2 = a_sf[0]
-            # xu2 =
-            # ax2.clear()
-            ax2.set_xlabel('Mesh Size Factor')
-            # ax2.set_xlim(ax1.get_xlim())
-            ax1.set_xlabel('Number of Elements')
-            ax1.set_ylabel(obj_label)
-            ax1.ticklabel_format(axis="x", style="sci", scilimits=(0, 0))
-            ax1.set_title(tail)
-            fig.suptitle('Mesh Sensitivity Study')
-            fig.tight_layout(rect=[0, 0.03, 1, 0.95])
+            plt.plot(a_numElem, msObj[:, obj_i])
+            plt.suptitle('Mesh Sensitivity Study')
+            plt.title(tail)
+            plt.xlabel('Number of Elements')
+            plt.ylabel(obj_label)
+            plt.ticklabel_format(axis="x", style="sci", scilimits=(0, 0))
+            fName = f'ms_plot-{tail}-obj{obj_i}-numElem.png'
+            fPath = os.path.join(self.meshStudyDir, fName)
+            plt.savefig(fPath)
+            plt.clf()
+            plt.plot(a_sf, msObj[:, obj_i])
+            plt.suptitle('Mesh Sensitivity Study')
+            plt.title(tail)
+            plt.xlabel('Mesh Size Factor')
+            plt.ylabel(obj_label)
+            fName = f'ms_plot-{tail}-obj{obj_i}-meshSFs.png'
+            fPath = os.path.join(self.meshStudyDir, fName)
+            plt.savefig(fPath)
+            plt.clf()
+
+        # for obj_i, obj_label in enumerate(self.obj_labels):
+        #     print(f'\tPLOTTING OBJECTIVE {obj_i}: {obj_label}')
+        #     fig, ax1 = plt.subplots()  # constrained_layout=True)
+        #     ax2 = ax1.twiny()
+        #     ax1.plot(a_numElem, msObj[:, obj_i])
+        #     ax2.plot(a_sf, msObj[:, obj_i])
+        #     xl1, xu1 = ax1.get_xlim()
+        #     print(xl1)
+        #     print(xu1)
+        #     # xl2 = a_sf[0]
+        #     # xu2 =
+        #     # ax2.clear()
+        #     ax2.set_xlabel('Mesh Size Factor')
+        #     # ax2.set_xlim(ax1.get_xlim())
+        #     ax1.set_xlabel('Number of Elements')
+        #     ax1.set_ylabel(obj_label)
+        #     ax1.ticklabel_format(axis="x", style="sci", scilimits=(0, 0))
+        #     ax1.set_title(tail)
+        #     fig.suptitle('Mesh Sensitivity Study')
+        #     fig.tight_layout(rect=[0, 0.03, 1, 0.95])
 
             # def elem2sf(numElem):
             #     print('numElem', numElem)
@@ -440,10 +449,10 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             # ax_f.set_ylabel('Fahrenheit')
             # ax_elem.set_ylabel('Celsius')
             #################################################
-            fName = f'ms_plot-{tail}-obj{obj_i}.png'
-            fPath = os.path.join(self.meshStudyDir, fName)
-            fig.savefig(fPath)
-            fig.clf()
+            # fName = f'ms_plot-{tail}-obj{obj_i}.png'
+            # fPath = os.path.join(self.meshStudyDir, fName)
+            # fig.savefig(fPath)
+            # fig.clf()
 
     def execMeshStudy(self):
         self.parallelize(self.msCases)
