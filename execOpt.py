@@ -21,7 +21,7 @@ def main():
     print(np.around(np.arange(0.2, 0.6, 0.05), decimals=2))
     optStudy.testCase.meshSFs = np.around(
         np.arange(0.2, 0.6, 0.05), decimals=2)
-    optStudy.testCase.meshStudy()
+    optStudy.testCase.meshStudy(restart=False)
     # optStudy.runBndCases(1, getDiags=False, doMeshStudy=True)
     # # optStudy.runGen1()
     # optStudy.run(restart=False)
