@@ -388,8 +388,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             ax1.plot(a_numElem, msObj[:, obj_i])
             ax2.plot(a_sf, msObj[:, obj_i])
             xl1, xu1 = ax1.get_xlim()
-            print(xl)
-            print(xu)
+            print(xl1)
+            print(xu1)
             # xl2 = a_sf[0]
             # xu2 =
             # ax2.clear()
