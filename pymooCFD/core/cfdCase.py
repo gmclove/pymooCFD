@@ -387,7 +387,12 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             ax2 = ax1.twiny()
             ax1.plot(a_numElem, msObj[:, obj_i])
             ax2.plot(a_sf, msObj[:, obj_i])
-            ax2.clear()
+            xl1, xu1 = ax1.get_xlim()
+            print(xl)
+            print(xu)
+            # xl2 = a_sf[0]
+            # xu2 =
+            # ax2.clear()
             ax2.set_xlabel('Mesh Size Factor')
             # ax2.set_xlim(ax1.get_xlim())
             ax1.set_xlabel('Number of Elements')
