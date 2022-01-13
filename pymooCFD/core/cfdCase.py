@@ -315,13 +315,11 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #    MESH STUDY    #
     ####################
     def genMeshStudy(self):
-        print(f'GENERATING MESH STUDY - {self}')
+        print('\tGENERATING MESH STUDY')
         print('\tMesh Size Factors:', self.meshSFs)
         # Pre-Process
         study = []
         var = []
-        a_numElem = []
-        # sfToElem = []
         self.msCases = []
         for sf in self.meshSFs:
             # Deep copy case instance
@@ -342,12 +340,10 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             msCase.meshSF = sf
             # only pre-processing needed is generating mesh
             msCase.genMesh()
-            a_numElem.append(msCase.numElem)
             # sfToElem.append([msCase.meshSF, msCase.numElem])
             saveTxt(msCase.caseDir, 'numElem.txt', [msCase.numElem])
             study.append([msCase.caseDir, str(msCase.numElem)])
             var.append(msCase.x)
-        print('\tNumber of Elements:', a_numElem)
         study = np.array(study)
         print('\tStudy:\n\t\t\b', str(study).replace('\n', '\n\t\t'))
         # self.sfToElem = np.array(sfToElem)
@@ -362,10 +358,10 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         # np.savetxt(path, obj)
 
     def plotMeshStudy(self):
+        print('\tPLOTTING MESH STUDY')
         _, tail = os.path.split(self.caseDir)
         a_numElem = np.array([case.numElem for case in self.msCases])
         a_sf = [case.meshSF for case in self.msCases]
-        # a_sf = a_sf[::-1]
         msObj = np.array([case.f for case in self.msCases])
         # Plot
         for obj_i, obj_label in enumerate(self.obj_labels):
@@ -455,9 +451,10 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             # fig.clf()
 
     def execMeshStudy(self):
+        print('\tEXECUTING MESH STUDY')
         self.parallelize(self.msCases)
         obj = np.array([case.f for case in self.msCases])
-        print('\tObjectives:\n\t\t\b', str(obj).replace('\n', '\n\t\t'))
+        print('\tObjectives:\n\t\t', str(obj).replace('\n', '\n\t\t'))
         # nTask = int(self.procLim/self.BaseCase.nProc)
         # pool = mp.Pool(nTask)
         # for case in self.msCases:
@@ -470,8 +467,12 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         #     meshSFs = self.meshSFs
         # if self.msCases is None:
         #     self.genMeshStudy()
+        print('MESH STUDY:', self)
         if not restart or self.msCases is None:
             self.genMeshStudy()
+        print('\tMesh Size Factors:', self.meshSFs)
+        a_numElem = [case.numElem for case in self.cases]
+        print('\tNumber of Elements:', a_numElem)
         self.execMeshStudy()
         self.plotMeshStudy()
         self.saveCP()
