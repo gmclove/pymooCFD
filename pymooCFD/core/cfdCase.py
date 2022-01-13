@@ -471,7 +471,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         if not restart or self.msCases is None:
             self.genMeshStudy()
         print('\tMesh Size Factors:', self.meshSFs)
-        a_numElem = [case.numElem for case in self.cases]
+        a_numElem = [case.numElem for case in self.msCases]
         print('\tNumber of Elements:', a_numElem)
         self.execMeshStudy()
         self.plotMeshStudy()
