@@ -365,7 +365,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         msObj = np.array([case.f for case in self.msCases])
         # Plot
         for obj_i, obj_label in enumerate(self.obj_labels):
-            print(f'\tPLOTTING OBJECTIVE {obj_i}: {obj_label}')
+            print(f'\t\tPlotting Objective {obj_i}: {obj_label}')
             plt.plot(a_numElem, msObj[:, obj_i])
             plt.suptitle('Mesh Sensitivity Study')
             plt.title(tail)
