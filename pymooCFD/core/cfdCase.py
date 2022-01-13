@@ -364,7 +364,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     def plotMeshStudy(self):
         _, tail = os.path.split(self.caseDir)
         a_numElem = np.array([case.numElem for case in self.msCases])
-        a_sf = np.array([case.meshSF for case in self.msCases])
+        a_sf = [case.meshSF for case in self.msCases]
+        a_sf = a_sf[::-1]
         msObj = np.array([case.f for case in self.msCases])
         # Plot
         # for obj_i, obj_label in enumerate(self.obj_labels):
