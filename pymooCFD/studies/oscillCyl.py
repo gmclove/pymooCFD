@@ -42,7 +42,7 @@ class OscillCylinder(CFDCase):
                          inputFile='2D_cylinder.in',
                          meshSF=0.4,
                          meshSFs=np.around(
-                             np.arange(0.2, 0.9, 0.5), decimals=2)
+                             np.arange(0.2, 0.6, 0.5), decimals=2)
                          )
 
     def _preProc_restart(self):
