@@ -393,6 +393,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             ax1.ticklabel_format(axis="x", style="sci", scilimits=(0, 0))
             ax1.set_title(tail)
             fig.suptitle('Mesh Sensitivity Study')
+            fig.tight_layout(rect=[0, 0.03, 1, 0.95])
 
             # def elem2sf(numElem):
             #     print('numElem', numElem)
