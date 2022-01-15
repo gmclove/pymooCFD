@@ -336,13 +336,15 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             self.msCases.append(msCase)
             path = os.path.join(self.meshStudyDir, f'meshSF-{sf}')
             msCase.__init__(self.baseCaseDir, path, self.x)
-            msCase.meshSFs = None
-            msCase.meshSF = sf
-            # only pre-processing needed is generating mesh
-            msCase.genMesh()
+            if msCase.numElem is not None:
+                msCase.meshSFs = None
+                msCase.meshSF = sf
+                # only pre-processing needed is generating mesh
+                msCase.genMesh()
             # sfToElem.append([msCase.meshSF, msCase.numElem])
             saveTxt(msCase.caseDir, 'numElem.txt', [msCase.numElem])
-            study.append([msCase.caseDir, str(msCase.numElem)])
+            study.append([msCase.caseDir, str(
+                msCase.numElem), str(msCase.meshSF)])
             var.append(msCase.x)
         study = np.array(study)
         print('\tStudy:\n\t\t', str(study).replace('\n', '\n\t\t'))
@@ -350,6 +352,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         # print('\t' + str(study).replace('\n', '\n\t'))
         path = os.path.join(self.meshStudyDir, 'study.txt')
         np.savetxt(path, study, fmt="%s")
+        saveTxt(self.meshStudyDir, 'study.txt', study, fmt="%s")
         self.saveCP()
         # path = os.path.join(self.meshStudyDir, 'studyX.txt')
         # np.savetxt(path, var)
@@ -479,6 +482,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             print('self.meshSFs != [case.meshSF for case in self.msCases]')
         if not restart or self.msCases is None:
             self.genMeshStudy()
+        else:
+            self.msCases =
         else:
             print('\tRESTARTING MESH STUDY')
         # Data
