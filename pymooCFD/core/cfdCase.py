@@ -466,7 +466,6 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         #     pool.apply_async(case.run, ())
         # pool.close()
         # pool.join()
-    def
 
     def meshStudy(self, restart=True):  # , meshSFs=None):
         # if meshSFs is None:
