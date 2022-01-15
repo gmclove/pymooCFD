@@ -480,12 +480,13 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         print(self.meshSFs)
         if self.meshSFs != [case.meshSF for case in self.msCases]:
             print('self.meshSFs != [case.meshSF for case in self.msCases]')
-        if not restart or self.msCases is None:
-            self.genMeshStudy()
-        else:
-            self.msCases =
-        else:
-            print('\tRESTARTING MESH STUDY')
+        # if not restart or self.msCases is None:
+        #     self.genMeshStudy()
+        # else:
+        #     print('\tRESTARTING MESH STUDY')
+        # else:
+        #     self.msCases =
+        self.genMeshStudy()
         # Data
         a_numElem = [case.numElem for case in self.msCases]
         a_sf = [case.meshSF for case in self.msCases]
