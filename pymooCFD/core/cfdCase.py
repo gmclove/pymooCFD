@@ -315,8 +315,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #    MESH STUDY    #
     ####################
     def genMeshStudy(self):
-        print('\tGENERATING MESH STUDY')
-        print('\tMesh Size Factors:', self.meshSFs)
+        print('\tGENERATING MESH STUDY . . .')
+        print('\t For Mesh Size Factors:', self.meshSFs)
         # Pre-Process
         study = []
         var = []
@@ -350,8 +350,10 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         # print('\t' + str(study).replace('\n', '\n\t'))
         path = os.path.join(self.meshStudyDir, 'study.txt')
         np.savetxt(path, study, fmt="%s")
-        path = os.path.join(self.meshStudyDir, 'studyX.txt')
-        np.savetxt(path, var)
+        self.saveCP()
+        # path = os.path.join(self.meshStudyDir, 'studyX.txt')
+        # np.savetxt(path, var)
+
         # obj = np.array([case.f for case in self.msCases])
         # print('Objectives:\n\t', obj)
         # path = os.path.join(self.meshStudyDir, 'studyF.txt')
@@ -365,6 +367,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         msObj = np.array([case.f for case in self.msCases])
         # Plot
         for obj_i, obj_label in enumerate(self.obj_labels):
+            # Number of Elements Plot
             print(f'\t\tPlotting Objective {obj_i}: {obj_label}')
             plt.plot(a_numElem, msObj[:, obj_i])
             plt.suptitle('Mesh Sensitivity Study')
@@ -376,6 +379,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             fPath = os.path.join(self.meshStudyDir, fName)
             plt.savefig(fPath)
             plt.clf()
+            # Mesh Size Factor Plot
             plt.plot(a_sf, msObj[:, obj_i])
             plt.suptitle('Mesh Sensitivity Study')
             plt.title(tail)
@@ -385,7 +389,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             fPath = os.path.join(self.meshStudyDir, fName)
             plt.savefig(fPath)
             plt.clf()
-
+        self.saveCP()
         # for obj_i, obj_label in enumerate(self.obj_labels):
         #     print(f'\tPLOTTING OBJECTIVE {obj_i}: {obj_label}')
         #     fig, ax1 = plt.subplots()  # constrained_layout=True)
@@ -407,60 +411,62 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         #     fig.suptitle('Mesh Sensitivity Study')
         #     fig.tight_layout(rect=[0, 0.03, 1, 0.95])
 
-            # def elem2sf(numElem):
-            #     print('numElem', numElem)
-            #     return [case.meshSF for case in self.msCases]
-            #     # for case in self.msCases:
-            #     #     if case.numElem == numElem:
-            #     #         return case.meshSF
-            #
-            # def sf2elem(sf):
-            #     print('sf', sf)
-            #     return [case.numElem for case in self.msCases]
-            #     # for case in self.msCases:
-            #     #     if case.meshSF == sf:
-            #     #         return case.numElem
-            # secax = ax.secondary_xaxis('top', functions=(elem2sf, sf2elem))
-            # secax.set_xlabel('Mesh Size Factor')
-            #######################################
-            # Define a closure function to register as a callback
-            #
-            # def convert_ax_c_to_celsius(ax_f):
-            #     """
-            #     Update second axis according with first axis.
-            #     """
-            #     y1, y2 = ax_f.get_ylim()
-            #     ax_c.set_ylim(fahrenheit2celsius(y1), fahrenheit2celsius(y2))
-            #     ax_c.figure.canvas.draw()
-            #
-            # fig, ax_f = plt.subplots()
-            # ax_elem = ax_f.twinx()
-            #
-            # # automatically update ylim of ax2 when ylim of ax1 changes.
-            # ax_f.callbacks.connect("ylim_changed", convert_ax_c_to_celsius)
-            # ax_f.plot(np.linspace(-40, 120, 100))
-            # ax_f.set_xlim(0, 100)
-            #
-            # ax_f.set_title('Two scales: Fahrenheit and Celsius')
-            # ax_f.set_ylabel('Fahrenheit')
-            # ax_elem.set_ylabel('Celsius')
-            #################################################
-            # fName = f'ms_plot-{tail}-obj{obj_i}.png'
-            # fPath = os.path.join(self.meshStudyDir, fName)
-            # fig.savefig(fPath)
-            # fig.clf()
+        # def elem2sf(numElem):
+        #     print('numElem', numElem)
+        #     return [case.meshSF for case in self.msCases]
+        #     # for case in self.msCases:
+        #     #     if case.numElem == numElem:
+        #     #         return case.meshSF
+        #
+        # def sf2elem(sf):
+        #     print('sf', sf)
+        #     return [case.numElem for case in self.msCases]
+        #     # for case in self.msCases:
+        #     #     if case.meshSF == sf:
+        #     #         return case.numElem
+        # secax = ax.secondary_xaxis('top', functions=(elem2sf, sf2elem))
+        # secax.set_xlabel('Mesh Size Factor')
+        #######################################
+        # Define a closure function to register as a callback
+        #
+        # def convert_ax_c_to_celsius(ax_f):
+        #     """
+        #     Update second axis according with first axis.
+        #     """
+        #     y1, y2 = ax_f.get_ylim()
+        #     ax_c.set_ylim(fahrenheit2celsius(y1), fahrenheit2celsius(y2))
+        #     ax_c.figure.canvas.draw()
+        #
+        # fig, ax_f = plt.subplots()
+        # ax_elem = ax_f.twinx()
+        #
+        # # automatically update ylim of ax2 when ylim of ax1 changes.
+        # ax_f.callbacks.connect("ylim_changed", convert_ax_c_to_celsius)
+        # ax_f.plot(np.linspace(-40, 120, 100))
+        # ax_f.set_xlim(0, 100)
+        #
+        # ax_f.set_title('Two scales: Fahrenheit and Celsius')
+        # ax_f.set_ylabel('Fahrenheit')
+        # ax_elem.set_ylabel('Celsius')
+        #################################################
+        # fName = f'ms_plot-{tail}-obj{obj_i}.png'
+        # fPath = os.path.join(self.meshStudyDir, fName)
+        # fig.savefig(fPath)
+        # fig.clf()
 
     def execMeshStudy(self):
         print('\tEXECUTING MESH STUDY')
         self.parallelize(self.msCases)
         obj = np.array([case.f for case in self.msCases])
         print('\tObjectives:\n\t\t', str(obj).replace('\n', '\n\t\t'))
+        self.saveCP()
         # nTask = int(self.procLim/self.BaseCase.nProc)
         # pool = mp.Pool(nTask)
         # for case in self.msCases:
         #     pool.apply_async(case.run, ())
         # pool.close()
         # pool.join()
+    def
 
     def meshStudy(self, restart=True):  # , meshSFs=None):
         # if meshSFs is None:
@@ -468,16 +474,27 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         # if self.msCases is None:
         #     self.genMeshStudy()
         print('MESH STUDY -', self)
+        print([case.meshSF for case in self.msCases])
+        print(self.meshSFs)
+        if self.meshSFs != [case.meshSF for case in self.msCases]:
+            print('self.meshSFs != [case.meshSF for case in self.msCases]')
         if not restart or self.msCases is None:
             self.genMeshStudy()
         else:
             print('\tRESTARTING MESH STUDY')
-        print('\tMesh Size Factors:', self.meshSFs)
+        # Data
         a_numElem = [case.numElem for case in self.msCases]
+        a_sf = [case.meshSF for case in self.msCases]
+        dat = np.column_stack(a_numElem, a_sf)
+        # Print
+        print('\tMesh Size Factors:', self.meshSFs)
         print('\tNumber of Elements:', a_numElem)
+        print('\tNumber of Elements | Mesh Size Factor\n\t\t',
+              str(dat).replace('\n', '\n\t\t'))
+        saveTxt(self.meshStudyDir, 'numElem-vs-meshSFs.txt', dat)
+
         self.execMeshStudy()
         self.plotMeshStudy()
-        self.saveCP()
 
     # @calltracker
     # def postProc(self):
@@ -507,7 +524,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     ##########################
     #    CLASS PROPERTIES    #
     ##########################
-    # @property
+    # @propert
     # def caseDir(self):
     #     return self.caseDir
     # @caseDir.setter
