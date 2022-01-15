@@ -316,7 +316,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     ####################
     def genMeshStudy(self):
         print('\tGENERATING MESH STUDY . . .')
-        print('\t For Mesh Size Factors:', self.meshSFs)
+        print('\t\t For Mesh Size Factors:', self.meshSFs)
         # Pre-Process
         study = []
         var = []
@@ -490,7 +490,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         # Data
         a_numElem = [case.numElem for case in self.msCases]
         a_sf = [case.meshSF for case in self.msCases]
-        dat = np.column_stack(a_numElem, a_sf)
+        dat = np.column_stack((a_numElem, a_sf))
         # Print
         print('\tMesh Size Factors:', self.meshSFs)
         print('\tNumber of Elements:', a_numElem)
