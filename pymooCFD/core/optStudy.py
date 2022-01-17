@@ -36,7 +36,8 @@ class OptStudy:
         self.logger = self.getLogger()
         # self.restart = False
         # self.parallelizeInit(self.externalSolver)
-        self.CP_path = os.path.join(optDatDir, CP_fName)
+        self.CP_path = __name__
+        optDatDir = __name__
         if os.path.exists(optDatDir):
             try:
                 self.loadCP()
