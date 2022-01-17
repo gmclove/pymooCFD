@@ -213,11 +213,10 @@ class OptStudy:
         else:
             print('self.gen1Pop already exists')
 
-    ####################
-    #    MESH STUDY    #
-    ####################
-    @classmethod
-    def getLogger():
+    ################
+    #    LOGGER    #
+    ################
+    def getLogger(self):
         logger = logging.getLogger(__name__)
         logger.setLevel(logging.DEBUG)
         # define file handler and set formatter

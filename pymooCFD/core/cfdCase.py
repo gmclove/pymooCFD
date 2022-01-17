@@ -65,7 +65,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                  *args, **kwargs
                  ):
         super().__init__()
-        self.getLogger(caseDir)
+        self.logger = self.getLogger(caseDir)
         # self.complete = False
         self.restart = False
         self.parallelizeInit(self.externalSolver)
@@ -555,7 +555,6 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     ################
     #    LOGGER    #
     ################
-    @classmethod
     def getLogger(caseDir):
         _, tail = os.path.split(caseDir)
         logFile = os.path.join(caseDir, f'{tail}.log')
