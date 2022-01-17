@@ -5,6 +5,7 @@
 import numpy as np
 import os
 import subprocess
+import sys
 import shutil
 import logging
 import copy
@@ -225,7 +226,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                 self.logger.info('COMPLETE: POST-PROCESS')
             # self.complete = True
         else:
-            self.logger.info('self.run() called but case already complete')
+            self.logger.warning('self.run() called but case already complete')
 
     # def run(case):
     #     case.preProc()
@@ -322,19 +323,10 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         var = []
         self.msCases = []
         for sf in self.meshSFs:
-            # Deep copy case instance
-            # msCase = copy.deepcopy(self)
-            # self.msCases.append(msCase)
-            # msCase.logger = msCase.getLogger()
-            # msCase.restart = False
-            # msCase.meshSFs = None
-            # msCase.meshStudyDir = None
-            # msCase.caseDir = os.path.join(self.meshStudyDir, f'meshSF-{sf}')
-            # msCase.meshSF = sf
-            # msCase.copy()
             msCase = copy.deepcopy(self)
             self.msCases.append(msCase)
             path = os.path.join(self.meshStudyDir, f'meshSF-{sf}')
+            print('\t\tInitializing', path)
             msCase.__init__(self.baseCaseDir, path, self.x)
             if msCase.numElem is not None:
                 msCase.meshSFs = None
@@ -502,31 +494,6 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         self.execMeshStudy()
         self.plotMeshStudy()
 
-    # @calltracker
-    # def postProc(self):
-    #     if postProc.complete:
-    #         path = os.path.join(sel# if self.solverExecCmd is None:
-        #     self.logger.error('No external solver execution command give. \
-        #                        Please override solve() method with python CFD \
-        #                        solver or add solverExecCmd to CFDCase object.')
-        #     raise Exception('No external solver execution command give. Please \
-        #                     override solve() method with python CFD solver or \
-        #                     add solverExecCmd to CFDCase object.')
-        # else:
-        #     subprocess.run(self.solverExecCmd, cwd=self.caseDir,
-        #                    stdout=subprocess.DEVNULL)f.caseDir, 'obj.txt')
-    #         obj = np.loadtxt(path)
-    #     else:
-    #         obj = self._postProc(self)
-    #         self.completed = True
-    #         self._f = obj
-    #         ###### SAVE VARIABLES AND OBJECTIVES TO TEXT FILES #######
-    #         # save variables in case directory as text file after completing post-processing
-    #         saveTxt(self.caseDir, 'var.txt', self.x)
-    #         # save objectives in text file
-    #         saveTxt(self.caseDir, 'obj.txt', obj)
-    #     return obj
-
     ##########################
     #    CLASS PROPERTIES    #
     ##########################
@@ -623,11 +590,14 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         logger = logging.getLogger(logFile)
         logger.setLevel(logging.DEBUG)
         # define file handler and set formatter
-        file_handler = logging.FileHandler(logFile)
+        fileHandler = logging.FileHandler(logFile)
+        streamHandler = logging.StreamHandler(sys.stdout)
+        streamHandler.setLevel(logging.INFO)
         formatter = logging.Formatter(
             '%(asctime)s : %(levelname)s : %(name)s : %(message)s')
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
+        fileHandler.setFormatter(formatter)
+        logger.addHandler(fileHandler)
+        logger.addHandler(streamHandler)
         return logger
 
     #######################
