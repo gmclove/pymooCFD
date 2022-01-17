@@ -230,42 +230,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             self.logger.warning(
                 'RUN SKIPPED: self.run() called but case already complete')
 
-# @Last modified by:   glove
-# @Last modified time: 2021-12-16T09:28:45-05:00
-# import time
-# import subprocess
-   # def run(case):
-   #     case.preProc()
-   #     case.logger.info('COMPLETED: PRE-PROCESS')
-   #     case.solve()
-   #     case.logger.info('COMPLETED: SOLVE')
-   #     case.postProc()
-   #     case.logger.info('COMPLETED: POST-PROCESS')
-
-   # def execCallback(self):
-   #     if self._execDone():
-   #         self.logger.info('RUN COMPLETE')
-   #     else:
-   #         self.pool.apply_async(self.solve, (self.caseDir,))
-
-   # def solve(self):
-   #     # if self.f is None: # and not self.restart:
-   #     self.restart = True
-   #     if self.solverExecCmd is None:
-   #         self.logger.error('No external solver execution command give. \
-   #                             Please override solve() method with python CFD \
-   #                             solver or add solverExecCmd to CFDCase object.')
-   #         raise Exception('No external solver execution command give. Please \
-   #                         override solve() method with python CFD solver or \
-   #                         add solverExecCmd to CFDCase object.')
-   #     else:
-   #         proc = subprocess.Popen(self.solverExecCmd, cwd=self.caseDir,
-   #                                 stdout=subprocess.DEVNULL)
-   #         return proc
-       # else:
-       #     self.logger.warning('SKIPPED SOLVE() METHOD')
-
-   def preProc(self):
+    def preProc(self):
         if self.restart:
             # self.cpPath = os.path.join
             self.logger.info(
