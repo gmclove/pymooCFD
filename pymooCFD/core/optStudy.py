@@ -3,6 +3,8 @@
 # @Last modified by:   glove
 # @Last modified time: 2021-12-16T09:28:45-05:00
 # import time
+import sys
+import logging
 import os
 import numpy as np
 # import subprocess
@@ -17,8 +19,10 @@ from pymooCFD.util.sysTools import emptyDir, copy_and_overwrite, saveTxt
 
 class OptStudy:
     def __init__(self, algorithm, problem, BaseCase,
+                 restart=True,
+                 optDatDir='opt_run',
                  archiveDir='archive', n_CP=10, n_opt=20,
-                 optDatDir='opt_run', CP_fName='checkpoint',
+                 CP_fName='checkpoint',
                  pfDir='pareto_front', baseCaseDir='base_case',
                  procOptDir='procOpt', plotsDir='plots',
                  mapGen1Dir='mapGen1', meshStudyDir='meshStudy',
@@ -29,12 +33,26 @@ class OptStudy:
                  *args, **kwargs
                  ):
         super().__init__()
+        self.logger = self.getLogger()
+        # self.restart = False
+        # self.parallelizeInit(self.externalSolver)
         self.CP_path = os.path.join(optDatDir, CP_fName)
-        if os.path.exists(self.CP_path):
-            # try:
-            self.loadCP()
-            print('RESTARTED FROM', self.CP_path)
-            return
+        if os.path.exists(optDatDir):
+            try:
+                self.loadCP()
+                self.logger.info('RESTARTED FROM', self.CP_path)
+                return
+            except FileNotFoundError:
+                # self.logger = self.getLogger()
+                self.logger.warning(
+                    f'OVERRIDE OPTIMIZATION STUDY! - {optDatDir} already exists but {self.CP_path} does not')
+                self.copy()
+        else:
+            os.makedirs(optDatDir, exist_ok=True)
+            # self.logger = self.getLogger()
+            self.logger.info(
+                f'NEW OPTIMIZATION STUDY - {optDatDir} did not exist')
+            self.copy()
             # except FileNotFoundError:
             #     print('OVERRIDE OPTIMIZATION STUDY -')
             #     print('\t{self.CP_path} already exists but {self.cpPath} does not')
@@ -170,7 +188,7 @@ class OptStudy:
                         offDir = os.path.join(
                             self.optDatDir, f'gen{self.algorithm.n_gen}', f'ind{off_i+1}')
                         print(
-                            f'     Updating Pareto front folder: {offDir} -> {optDir}')
+                            f'\tUpdating Pareto front folder: {offDir} -> {optDir}')
                         copy_and_overwrite(offDir, optDir)
             # do some more things, printing, logging, storing or even modifying the algorithm object
             # print(algorithm.n_gen, algorithm.evaluator.n_eval)
@@ -194,6 +212,24 @@ class OptStudy:
             alg.next()
         else:
             print('self.gen1Pop already exists')
+
+    ####################
+    #    MESH STUDY    #
+    ####################
+    @classmethod
+    def getLogger():
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.DEBUG)
+        # define file handler and set formatter
+        fileHandler = logging.FileHandler(__name__)
+        streamHandler = logging.StreamHandler(sys.stdout)
+        streamHandler.setLevel(logging.INFO)
+        formatter = logging.Formatter(
+            '%(asctime)s : %(levelname)s : %(name)s : %(message)s')
+        fileHandler.setFormatter(formatter)
+        logger.addHandler(fileHandler)
+        logger.addHandler(streamHandler)
+        return logger
 
     ####################
     #    MESH STUDY    #
@@ -611,6 +647,7 @@ class OptStudy:
     #####################
     #     PROPERTIES    #
     #####################
+
     @property
     def gen1Pop(self):
         path = os.path.join(self.optDatDir, 'gen1Pop.npy')
