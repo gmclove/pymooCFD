@@ -362,10 +362,10 @@ class RANSJetOpt(OptStudy):
     # by checking if path exists already
     hqGrid_uMag_path_3D=os.path.join(hqSim_dir, 'hqGrid_uMag-3D.npy')
     if not os.path.exists(hqGrid_uMag_path_3D):
-        with h5py.File('hq_sim/merged-mesh.h5') as h5f:
+        with h5py.File(os.path.join(hqSim_dir, 'merged-mesh.h5')) as h5f:
             coor=h5f['XYZ'][:]
             print(coor.shape)
-        with h5py.File('hq_sim/merged-u_mean.h5') as h5f:
+        with h5py.File(os.path.join(hqSim_dir, 'merged-u_mean.h5')) as h5f:
             dset1=list(h5f.keys())[0]
             uMean=h5f[dset1][:]
         mag_uMean=np.linalg.norm(uMean, axis=1)
