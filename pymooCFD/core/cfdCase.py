@@ -559,15 +559,16 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #    LOGGER    #
     ################
     def getLogger(self):
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.DEBUG)
+        # File Handle
         _, tail = os.path.split(self.caseDir)
         logFile = os.path.join(self.caseDir, f'{tail}.log')
-        logger = logging.getLogger(logFile)
-        logger.setLevel(logging.DEBUG)
-        # Handles
-        fileHandler = logging.FileHandler(f'{self.optName}.log')
+        fileHandler = logging.FileHandler(logFile)
+        logger.addHandler(fileHandler)
+        # Stream Handler
         streamHandler = logging.StreamHandler(sys.stdout)
         streamHandler.setLevel(logging.INFO)
-        logger.addHandler(fileHandler)
         logger.addHandler(streamHandler)
         # Formatter
         formatter = logging.Formatter(
