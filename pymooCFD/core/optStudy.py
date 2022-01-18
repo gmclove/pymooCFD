@@ -7,6 +7,7 @@ import sys
 import logging
 import os
 import numpy as np
+import shutil
 # import subprocess
 # from threading import Thread
 # import multiprocessing as mp
@@ -19,8 +20,8 @@ from pymooCFD.util.sysTools import emptyDir, copy_and_overwrite, saveTxt, yes_or
 
 class OptStudy:
     def __init__(self, algorithm, problem, BaseCase,
-                 restart=True,
-                 optDatDir='opt_run',
+                 # restart=True,
+                 # optDatDir='opt_run',
                  archiveDir='archive', n_CP=10, n_opt=20,
                  CP_fName='checkpoint',
                  pfDir='pareto_front', baseCaseDir='base_case',
@@ -33,14 +34,11 @@ class OptStudy:
                  *args, **kwargs
                  ):
         super().__init__()
+        self.optName = self.__class__.__name__
         self.initLogger()
-        self.logger.info('TEST LOGGER')
-        # self.restart = False
-        # self.parallelizeInit(self.externalSolver)
-        self.optDatDir = self.__class__.__name__
-        print(self.__class__.__name__)
-        self.logger.info(self.optDatDir)
-        self.CP_path = os.path.join(self.optDatDir, self.__name__)
+        self.logger.info(f'OPTIMIZATION STUDY - {self.optName}')
+        self.optDatDir = 'optStudy-'+self.optName
+        self.CP_path = os.path.join(self.optDatDir, f'{self.optName}-CP')
         # if not restart:
         # if os.path.exists(self.optDatDir):
         #     if os.path.exists(self.CP_path):
@@ -60,20 +58,20 @@ class OptStudy:
         if os.path.isdir(self.optDatDir):
             try:
                 self.loadCP()
-                self.logger.info('RESTARTED FROM', self.CP_path)
+                self.logger.info(f'RESTARTED FROM {self.CP_path}.npy')
                 return
             except FileNotFoundError:
-                question = f'{self.CP_path} does not exist.\nOVERWRITE {self.optDatDir}?'
+                question = f'\n{self.CP_path} does not exist.\nOVERWRITE {self.optDatDir}?'
                 overwrite = yes_or_no(question)
                 if overwrite:
-                    os.removedirs(self.optDatDir)
-                    os.mkdir(optDatDir)
-                    self.logger.info('EMPTIED -', self.optDatDir)
+                    shutil.rmtree(self.optDatDir)
+                    os.mkdir(self.optDatDir)
+                    self.logger.info(f'EMPTIED - {self.optDatDir}')
                 else:
                     self.logger.info('KEEPING FILES')
                 self.logger.info('RE-INITIALIZING OPTIMIZATION ALGORITHM')
         else:
-            os.makedirs(optDatDir)
+            os.makedirs(self.optDatDir)
             self.logger.info(
                 f'NEW OPTIMIZATION STUDY - {self.optDatDir} did not exist')
             # except FileNotFoundError:
@@ -114,9 +112,9 @@ class OptStudy:
         self.archiveDir = archiveDir
         os.makedirs(self.archiveDir, exist_ok=True)
         self.n_CP = n_CP  # number of generations between extra checkpoints
-        self.optDatDir = optDatDir
-        os.makedirs(self.optDatDir, exist_ok=True)
-        self.CP_path = os.path.join(optDatDir, CP_fName)
+        # self.optDatDir = optDatDir
+        # os.makedirs(self.optDatDir, exist_ok=True)
+        # self.CP_path = os.path.join(self.optDatDir, CP_fName)
         ### Optimization Pre/Post Processing ###
         self.procOptDir = procOptDir
         os.makedirs(self.procOptDir, exist_ok=True)
@@ -146,19 +144,20 @@ class OptStudy:
         ### Test Case ###
         self.testCase = None
         self.genTestCase()
+        self.saveCP()
 
     def run(self, restart=True):
         if restart:
             self.loadCP()
-            print("Loaded Checkpoint:", self.algorithm)
-            print(
+            self.logger.info("Loaded Checkpoint:", self.algorithm)
+            self.logger.info(
                 f'Last checkpoint at generation {self.algorithm.callback.gen}')
             # restart client if being used
             # if self.client is not None:
             #     self.client.restart()
-            #     print("CLIENT RESTARTED")
+            #     self.logger.info("CLIENT RESTARTED")
         else:
-            print('STARTING NEW OPTIMIZATION STUDY')
+            self.logger.info('STARTING NEW OPTIMIZATION STUDY')
             # archive/empty previous runs data directory
             emptyDir(self.optDatDir)
             # load algorithm defined in setupOpt.py module
@@ -171,14 +170,14 @@ class OptStudy:
             # start client if being used
             # if self.client is not None:
             #     self.client()
-            #     print("CLIENT STARTED")
+            #     self.logger.info("CLIENT STARTED")
         ######    OPTIMIZATION    ######
         # until the algorithm has not terminated
         while self.algorithm.has_next():
             # First generation
             # population is None so ask for new pop
             if self.algorithm.pop is None:
-                print('     START-UP: first generation')
+                self.logger.info('\tSTART-UP: first generation')
                 evalPop = self.algorithm.ask()
                 self.algorithm.pop = evalPop
                 self.algorithm.off = evalPop
@@ -187,13 +186,13 @@ class OptStudy:
             # ie previous pop is complete
             # evaluate new pop
             elif None not in self.algorithm.pop.get('F'):
-                print('     START-UP: new generation')
+                self.logger.info('\tSTART-UP: new generation')
                 evalPop = self.algorithm.ask()
                 self.algorithm.off = evalPop
             # Mid-generation start-up
             # evaluate offspring population
             else:
-                print('     START-UP: mid-generation')
+                self.logger.info('     START-UP: mid-generation')
                 evalPop = self.algorithm.off
             # save checkpoint before evaluation
             self.saveCP()
@@ -210,15 +209,15 @@ class OptStudy:
                             self.optDatDir, self.pfDir, f'opt{opt_i+1}')
                         offDir = os.path.join(
                             self.optDatDir, f'gen{self.algorithm.n_gen}', f'ind{off_i+1}')
-                        print(
+                        self.logger.info(
                             f'\tUpdating Pareto front folder: {offDir} -> {optDir}')
                         copy_and_overwrite(offDir, optDir)
             # do some more things, printing, logging, storing or even modifying the algorithm object
-            # print(algorithm.n_gen, algorithm.evaluator.n_eval)
-            # print('Parameters:')
-            # print(algorithm.pop.get('X'))
-            # print('Objectives:')
-            # print(algorithm.pop.get('F'))
+            # self.logger.info(algorithm.n_gen, algorithm.evaluator.n_eval)
+            # self.logger.info('Parameters:')
+            # self.logger.info(algorithm.pop.get('X'))
+            # self.logger.info('Objectives:')
+            # self.logger.info(algorithm.pop.get('F'))
             # algorithm.display.do(algorithm.problem,
             #                      algorithm.evaluator,
             #                      algorithm
@@ -226,7 +225,8 @@ class OptStudy:
         # obtain the result objective from the algorithm
         res = self.algorithm.result()
         # calculate a hash to show that all executions end with the same result
-        print("hash", res.F.sum())
+        self.logger.info("hash", res.F.sum())
+        self.saveCP()
 
     def runGen1(self, restart=True):
         if not restart or self.gen1Pop is None:
@@ -234,7 +234,8 @@ class OptStudy:
             alg.setup(self.problem, ('n_gen', 1))
             alg.next()
         else:
-            print('self.gen1Pop already exists')
+            self.logger.info('self.runGen1(restart=True) called but self.gen1Pop already exists')
+        self.saveCP()
 
     ################
     #    LOGGER    #
@@ -243,14 +244,15 @@ class OptStudy:
         logger = logging.getLogger(__name__)
         logger.setLevel(logging.DEBUG)
         # define handlers
-        fileHandler = logging.FileHandler(self.__class__.__name__)
+        fileHandler = logging.FileHandler(f'{self.optName}.log')
         streamHandler = logging.StreamHandler(sys.stdout)
         streamHandler.setLevel(logging.INFO)
         logger.addHandler(fileHandler)
         logger.addHandler(streamHandler)
         # define formatter
         formatter = logging.Formatter(
-            '%(asctime)s : %(levelname)s : %(name)s : %(message)s')
+            '%(asctime)s : %(levelname)-8s : %(name)s : %(message)s')
+                        # ' %(name)s :: %(levelname)-8s :: %(message)s')
         fileHandler.setFormatter(formatter)
         self.logger = logger
 
@@ -292,7 +294,7 @@ class OptStudy:
             os.rename(self.CP_path + '.old', self.CP_path + '.npy')
         cp, = np.load(self.CP_path + '.npy', allow_pickle=True).flatten()
         self.__dict__.update(cp.__dict__)
-        print(f'\tCHECKPOINT LOADED - from {self.CP_path}.npy')
+        self.logger.info(f'\tCHECKPOINT LOADED - from {self.CP_path}.npy')
         # self.logger.info(f'\tCHECKPOINT LOADED - from {self.CP_path}.npy')
         # only necessary if for the checkpoint the termination criterion has been met
         self.algorithm.has_terminated = hasTerminated
@@ -313,7 +315,7 @@ class OptStudy:
         # else:
         #     self.algorithm = alg
         gen = self.algorithm.callback.gen
-        print(f'SAVING CHECKPOINT - GENERATION {gen}')
+        self.logger.info(f'SAVING CHECKPOINT - GENERATION {gen}')
         np.save(self.CP_path + '.temp.npy', self)
         if os.path.exists(self.CP_path + '.npy'):
             os.rename(self.CP_path + '.npy', self.CP_path + '.old.npy')
@@ -324,19 +326,27 @@ class OptStudy:
         # os.path.join(optDatDir, 'checkpoint')
         # np.save(self.CP_path, alg)
         # gen0 and every nCP generations save additional static checkpoint
-        if gen % self.n_CP == 1:
-            np.save(os.path.join(self.optDatDir, f'checkpoint-gen{gen}'), self)
+        # if gen % self.n_CP == 1:
+        #     np.save(os.path.join(self.optDatDir, f'checkpoint-gen{gen}'), self)
         # save text file of variables and objectives as well
         # this provides more options for post-processesing data
-        genX = self.algorithm.pop.get('X')
-        saveTxt(self.optDatDir, f'gen{gen}X.txt', genX)
-        try:
-            genF = self.algorithm.pop.get('F')
-            saveTxt(self.optDatDir, f'gen{gen}F.txt', genF)
-            # path = os.path.join(self.optDatDir, f'gen{gen}F.txt')
-            # np.savetxt(path, genF)
-        except TypeError:  # AttributeError
-            print('\tmid-generation')
+        # genX = self.algorithm.pop.get('X')
+        # saveTxt(self.optDatDir, f'gen{gen}X.txt', genX)
+        # try:
+        #     genF = self.algorithm.pop.get('F')
+        #     saveTxt(self.optDatDir, f'gen{gen}F.txt', genF)
+        #     # path = os.path.join(self.optDatDir, f'gen{gen}F.txt')
+        #     # np.savetxt(path, genF)
+        # except TypeError:  # AttributeError
+        #     self.logger.info('\tmid-generation')
+
+    def checkCPs(self):
+        self.logger.info(f'CHECKPOINT CHECK - {self.CP_path}.npy')
+        if os.path.exists(f'{self.CP_path}.npy'):
+            for cp in np.load(self.CP_path):
+                self.logger.info(cp.__dict__)
+        else:
+            self.logger.info(f'\t{self.CP_path} does not exist')
 
     # def saveCP(self, alg=None):
     #     # default use self.algorithm
@@ -346,7 +356,7 @@ class OptStudy:
     #     else:
     #         self.algorithm = alg
     #     gen = alg.callback.gen
-    #     print(f'SAVING CHECKPOINT - GENERATION {gen}')
+    #     self.logger.info(f'SAVING CHECKPOINT - GENERATION {gen}')
     #     # genDir = f'gen{gen}'
     #     # os.path.join(optDatDir, 'checkpoint')
     #     np.save(self.CP_path, alg)
@@ -363,7 +373,7 @@ class OptStudy:
     #         path = os.path.join(self.optDatDir, f'gen{gen}F.txt')
     #         np.savetxt(path, genF)
     #     except TypeError:  # AttributeError
-    #         print('\tmid-generation')
+    #         self.logger.info('\tmid-generation')
 
     ###################
     #    TEST CASE    #
@@ -374,17 +384,18 @@ class OptStudy:
         xu = self.problem.xu
         x_mid = [xl[x_i] + (xu[x_i] - xl[x_i]) /
                  2 for x_i in range(self.problem.n_var)]
+        testCaseDir = os.path.join(self.optDatDir, testCaseDir)
         self.testCase = self.BaseCase(
             self.baseCaseDir, testCaseDir, x_mid)  # , restart=True)
 
     def runTestCase(self):
-        print('TEST CASE RUNNING')
+        self.logger.info('TEST CASE RUNNING')
         if self.testCase is None:
             self.genTestCase()
         self.testCase.run()
-        print('Parameters:', self.testCase.x)
-        print('Objectives:', self.testCase.f)
-        print('TEST CASE COMPLETE ')
+        self.logger.info('Parameters:', self.testCase.x)
+        self.logger.info('Objectives:', self.testCase.f)
+        self.logger.info('TEST CASE COMPLETE ')
         return self.testCase
 
     #################################
@@ -442,8 +453,8 @@ class OptStudy:
             for var, lim_i in enumerate(bin_perm):
                 lim_perms[perm_i, var] = lims[var][lim_i]
 
-        print('Limit Permutations: ')
-        print(lim_perms)
+        self.logger.info('Limit Permutations: ')
+        self.logger.info(lim_perms)
         return lim_perms
 
     def runCornerCases(self):
@@ -527,14 +538,14 @@ class OptStudy:
     ###################################
 
     # def slurmExec(self, cases, batchSize=None):
-    #     print('EXECUTING BATCH OF SIMULATIONS')
-    #     print('SLURM EXECUTION')
+    #     self.logger.info('EXECUTING BATCH OF SIMULATIONS')
+    #     self.logger.info('SLURM EXECUTION')
     #     if batchSize is not None:
-    #         print(f'\t### Sending sims in batches of {batchSize}')
+    #         self.logger.info(f'\t### Sending sims in batches of {batchSize}')
     #         cases_batches = [cases[i:i + batchSize]
     #                             for i in range(0, len(cases), batchSize)]
     #         for cases_batch in cases_batches:
-    #             print(f'     SUB-BATCH: {cases_batch}')
+    #             self.logger.info(f'     SUB-BATCH: {cases_batch}')
     #             self.slurmExec(cases_batch)
     #         return
     #     # Queue all the individuals in the generation using SLURM
@@ -542,13 +553,13 @@ class OptStudy:
     #     for case in cases:
     #         out = subprocess.check_output(['sbatch', case.jobFile], cwd = case.caseDir)
     #         # Extract number from following: 'Submitted batch job 1847433'
-    #         # print(int(out[20:]))
+    #         # self.logger.info(int(out[20:]))
     #         batchIDs.append([int(out[20:]), case])
     #     # batchIDs = np.array(batchIDs)
-    #     print('     slurm job IDs:')
-    #     print('\t\tJob ID')
-    #     print('\t\t------')
-    #     for e in batchIDs: print(f'\t\t{e[0]} | {e[1]}')
+    #     self.logger.info('     slurm job IDs:')
+    #     self.logger.info('\t\tJob ID')
+    #     self.logger.info('\t\t------')
+    #     for e in batchIDs: self.logger.info(f'\t\t{e[0]} | {e[1]}')
     #     waiting = True
     #     count = np.ones(len(batchIDs))
     #     prev_count = np.ones(len(batchIDs)) #[0] #count

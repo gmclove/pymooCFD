@@ -296,13 +296,15 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             msCase = copy.deepcopy(self)
             self.msCases.append(msCase)
             path = os.path.join(self.meshStudyDir, f'meshSF-{sf}')
-            print('\t\tInitializing', path)
+            self.logger.info(f'\t\tInitializing {path}. . .')
             msCase.__init__(self.baseCaseDir, path, self.x)
-            if msCase.numElem is not None:
+            if msCase.numElem is None:
                 msCase.meshSFs = None
                 msCase.meshSF = sf
                 # only pre-processing needed is generating mesh
                 msCase.genMesh()
+            else:
+                self.logger.info(f'\t\t\t{msCase} already has number of elements: {msCase.numElem}')
             # sfToElem.append([msCase.meshSF, msCase.numElem])
             saveTxt(msCase.caseDir, 'numElem.txt', [msCase.numElem])
             study.append([msCase.caseDir, str(
@@ -438,11 +440,13 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         # if self.msCases is None:
         #     self.genMeshStudy()
         print('MESH STUDY -', self)
-        print('\t', [case.meshSF for case in self.msCases])
-        print('\t', self.meshSFs)
-        if all(self.meshSFs) != all([case.meshSF for case in self.msCases]):
-            print(
-                '\t\t\t all(self.meshSFs) != all([case.meshSF for case in self.msCases])')
+        if self.msCases is not None:
+            print('\t', [case.meshSF for case in self.msCases])
+            if all(self.meshSFs) != all([case.meshSF for case in self.msCases]):
+                print(
+                    '\t\t\t all(self.meshSFs) != all([case.meshSF for case in self.msCases])')
+        else:
+            print('\t', self.meshSFs)
         # if not restart or self.msCases is None:
         #     self.genMeshStudy()
         # else:
@@ -554,20 +558,21 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     ################
     #    LOGGER    #
     ################
-    def getLogger(caseDir):
-        _, tail = os.path.split(caseDir)
-        logFile = os.path.join(caseDir, f'{tail}.log')
+    def getLogger(self):
+        _, tail = os.path.split(self.caseDir)
+        logFile = os.path.join(self.caseDir, f'{tail}.log')
         logger = logging.getLogger(logFile)
         logger.setLevel(logging.DEBUG)
-        # define file handler and set formatter
-        fileHandler = logging.FileHandler(logFile)
+        # Handles
+        fileHandler = logging.FileHandler(f'{self.optName}.log')
         streamHandler = logging.StreamHandler(sys.stdout)
         streamHandler.setLevel(logging.INFO)
+        logger.addHandler(fileHandler)
+        logger.addHandler(streamHandler)
+        # Formatter
         formatter = logging.Formatter(
             '%(asctime)s : %(levelname)s : %(name)s : %(message)s')
         fileHandler.setFormatter(formatter)
-        logger.addHandler(fileHandler)
-        logger.addHandler(streamHandler)
         return logger
 
     #######################

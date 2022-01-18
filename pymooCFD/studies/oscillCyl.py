@@ -339,13 +339,12 @@ class OscillCylinder(CFDCase):
     #     # This should be called when you are done using the Gmsh Python API:
     #     gmsh.finalize()
 
-
 class OscillCylinderOpt(OptStudy):
     def __init__(self, algorithm, problem, baseCase,
                  *args, **kwargs):
         super().__init__(algorithm, problem, baseCase,
                          baseCaseDir='base_cases/osc-cyl_base',
-                         optDatDir='cyl-opt_run',
+                         # optDatDir='cyl-opt_run',
                          *args, **kwargs)
 
     # def execute(self, cases):

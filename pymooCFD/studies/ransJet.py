@@ -271,62 +271,59 @@ class RANSJet(CFDCase):
         self.jobLines = lines
 
     def _preProc_restart(self):
-        self._preProc()
-        outVel = self.x[self.var_labels.index('Breath Velocity')]
-        ##### Write Entire Input File #####
-        # useful if input file is short enough                            add solverExecCmd to CFDCase object.')
-        else:
-            subprocess.run(case.solverExecCmd, cwd=case.caseDir,
-        coflowVel=0.005  # outVel*(2/100)
-        lines=[
-            # IMPORT
-            f'/file/import ideas-universal {self.meshFile}',
-            # AUTO-SAVE
-            '/file/auto-save case-frequency if-case-is-modified',
-    	    '/file/auto-save data-frequency 1000',
-            # MODEL
-            '/define/models axisymmetric y',
-            '/define/models/viscous kw-                            add solverExecCmd to CFDCase object.')
-        else:
-            subprocess.run(case.solverExecCmd, cwd=case.caseDir, sst y',
-            # species
-            '/define/models/species species-transport y mixture-template',
-            '/define/materials change-create air scalar n n n n n n n n',
-            '/define/materials change-create mixture-template mixture-template y 2 scalar air 0 0 n n n n n n',
-            # BOUNDARY CONDITIONS
-            # outlet
-            '/define/boundary-conditions/modify-zones/zone-type outlet pressure-outlet ;outflow',
-            # coflow
-            '/define/boundary-conditions/modify-zones/zone-type coflow velocity-inlet',
-            f'/define/boundary-conditions velocity-inlet coflow y y n {coflowVel*2} n 0 n 1 n 0 n 300 n n y 5 10 n n 0',
-            # inlet
-            '/define/boundary-conditions/modify-zones/zone-type inlet velocity-inlet',
-            f'/define/boundary-conditions velocity-inlet inlet n n y y n {outVel} n 0 n 300 n n y 5 10 n n 1',
-            # axis
-            '/define/boundary-conditions/modify-zones/zone-type axis axis',
-            # INITIALIZE
-            '/solve/initialize/hyb-initialization',
-            # CHANGE CONVERGENCE CRITERIA
-            '/solve/monitors/residual convergence-criteria 1e-5 1e-6 1e-6 1e-6 1e-6 1e-5 1e-6',
-            # SOLVE
-            '/solve/iterate 1000',
-            # change convergence, methods and coflow speed
-            '/solve/set discretization-scheme species-0 6',
-            '/solve/set discretization-scheme mom 6',
-            '/solve/set discretization-scheme k 6',
-            '/solve/set discretization-scheme omega 6',
-            '/solve/set discretization-scheme temperature 6',
-            f'/define/boundary-conditions velocity-inlet coflow y y n {coflowVel} n 0 n 1 n 0 n 300 n n y 5 10 n n 0',
-            '/solve/iterate 4000',
-            # EXPORT
-            f'/file/export cgns {self.datFile} n y velocity-mag scalar q',
-            'OK',
-            f'/file write-case-data {self.datFile}',
-            'OK',
-            '/exit',
-            'OK'
-            ]
-        self.inputLines=lines
+        pass
+        # self._preProc()
+        # outVel = self.x[self.var_labels.index('Breath Velocity')]
+        # ##### Write Entire Input File #####
+        # # useful if input file is short enough
+        # coflowVel=0.005  # outVel*(2/100)
+        # lines=[
+        #     # IMPORT
+        #     f'/file/import ideas-universal {self.meshFile}',
+        #     # AUTO-SAVE
+        #     '/file/auto-save case-frequency if-case-is-modified',
+    	#     '/file/auto-save data-frequency 1000',
+        #     # MODEL
+        #     '/define/models axisymmetric y',
+        #     '/define/models/viscous kw-sst y',
+        #     # species
+        #     '/define/models/species species-transport y mixture-template',
+        #     '/define/materials change-create air scalar n n n n n n n n',
+        #     '/define/materials change-create mixture-template mixture-template y 2 scalar air 0 0 n n n n n n',
+        #     # BOUNDARY CONDITIONS
+        #     # outlet
+        #     '/define/boundary-conditions/modify-zones/zone-type outlet pressure-outlet ;outflow',
+        #     # coflow
+        #     '/define/boundary-conditions/modify-zones/zone-type coflow velocity-inlet',
+        #     f'/define/boundary-conditions velocity-inlet coflow y y n {coflowVel*2} n 0 n 1 n 0 n 300 n n y 5 10 n n 0',
+        #     # inlet
+        #     '/define/boundary-conditions/modify-zones/zone-type inlet velocity-inlet',
+        #     f'/define/boundary-conditions velocity-inlet inlet n n y y n {outVel} n 0 n 300 n n y 5 10 n n 1',
+        #     # axis
+        #     '/define/boundary-conditions/modify-zones/zone-type axis axis',
+        #     # INITIALIZE
+        #     '/solve/initialize/hyb-initialization',
+        #     # CHANGE CONVERGENCE CRITERIA
+        #     '/solve/monitors/residual convergence-criteria 1e-5 1e-6 1e-6 1e-6 1e-6 1e-5 1e-6',
+        #     # SOLVE
+        #     '/solve/iterate 1000',
+        #     # change convergence, methods and coflow speed
+        #     '/solve/set discretization-scheme species-0 6',
+        #     '/solve/set discretization-scheme mom 6',
+        #     '/solve/set discretization-scheme k 6',
+        #     '/solve/set discretization-scheme omega 6',
+        #     '/solve/set discretization-scheme temperature 6',
+        #     f'/define/boundary-conditions velocity-inlet coflow y y n {coflowVel} n 0 n 1 n 0 n 300 n n y 5 10 n n 0',
+        #     '/solve/iterate 4000',
+        #     # EXPORT
+        #     f'/file/export cgns {self.datFile} n y velocity-mag scalar q',
+        #     'OK',
+        #     f'/file write-case-data {self.datFile}',
+        #     'OK',
+        #     '/exit',
+        #     'OK'
+        #     ]
+        # self.inputLines=lines
 
 import os
 import numpy as np
@@ -415,8 +412,8 @@ class RANSJetOpt(OptStudy):
     def __init__(self, algorithm, problem, baseCase,
                  *args, **kwargs):
         super().__init__(algorithm, problem, baseCase,
-                         baseCaseDir='rans-jet_base',
-                         optDatDir='jet-opt_run',
+                         baseCaseDir='base_cases/rans-jet_base',
+                         # optDatDir='jet-opt_run',
                          *args, **kwargs)
 
     # def execute(self, cases):
