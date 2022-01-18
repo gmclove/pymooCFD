@@ -338,7 +338,7 @@ class RANSJetOpt(OptStudy):
     # Define grid interpolation parameters and perform interpolation on high
     # quality simulation. These results can be compared to lower quality
     # simulations on a universal grid.
-    hqSim_dir='hq_sim'
+    hqSim_dir=os.path.join('rans_jet_opt', 'hq_sim')
     hqSim_y2DatDir=os.path.join(hqSim_dir, 'dump')
     y2DumpPrefix='pipe_expansion.sol'
     xmin, xmax=1.0, 2.0
