@@ -9,6 +9,15 @@ def saveTxt(path, fname, data, **kwargs):
     np.savetxt(datFile, data, **kwargs)
 
 
+def yes_or_no(question):
+    while "the answer is invalid":
+        reply = str(input(question + ' (y/n): ')).lower().strip()
+        if reply[:1] == 'y':
+            return True
+        if reply[:1] == 'n':
+            return False
+
+
 def makeDir(path):
     try:
         os.mkdir(path)
