@@ -65,7 +65,6 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                  *args, **kwargs
                  ):
         super().__init__()
-        self.logger = self.getLogger(caseDir)
         # self.complete = False
         self.restart = False
         self.parallelizeInit(self.externalSolver)
@@ -78,7 +77,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                 self.logger.info('RESTART CASE')
                 return
             except FileNotFoundError:
-                # self.logger = self.getLogger()
+                self.logger = self.getLogger()
                 self.logger.info(
                     f'OVERRIDE CASE - {caseDir} already exists but {self.cpPath} does not')
                 self.copy()
@@ -87,7 +86,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             #     raise err
         else:
             os.makedirs(caseDir, exist_ok=True)
-            # self.logger = self.getLogger()
+            self.logger = self.getLogger()
             self.logger.info(f'NEW CASE - {caseDir} did not exist')
             self.copy()
         # If solverExecCmd is provided use

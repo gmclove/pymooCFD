@@ -14,7 +14,7 @@ import copy
 # import shutil
 # import h5py
 # import matplotlib.pyplot as plt
-from pymooCFD.util.sysTools import emptyDir, copy_and_overwrite, saveTxt
+from pymooCFD.util.sysTools import emptyDir, copy_and_overwrite, saveTxt, yes_or_no
 
 
 class OptStudy:
@@ -33,27 +33,49 @@ class OptStudy:
                  *args, **kwargs
                  ):
         super().__init__()
-        self.logger = self.getLogger()
+        self.initLogger()
+        self.logger.info('TEST LOGGER')
         # self.restart = False
         # self.parallelizeInit(self.externalSolver)
-        self.CP_path = __name__
-        optDatDir = __name__
-        if os.path.exists(optDatDir):
+        self.optDatDir = self.__class__.__name__
+        print(self.__class__.__name__)
+        self.logger.info(self.optDatDir)
+        self.CP_path = os.path.join(self.optDatDir, self.__name__)
+        # if not restart:
+        # if os.path.exists(self.optDatDir):
+        #     if os.path.exists(self.CP_path):
+        #         self.loadCP()
+        #         self.logger.info('RESTARTED FROM', self.CP_path)
+        #         return
+        #     else:
+        #         question = f'{self.CP_path} does not exist.\nOVERWRITE {self.optDatDir}?'
+        #         overwrite = yes_or_no(question)
+        #         if overwrite:
+        #             os.removedirs(self.optDatDir)
+        #             os.makedirs(optDatDir, exist_ok=True)
+        #         else:
+        #             question = f'{self.CP_path} does not exist.\n?'
+        #             overwrite = yes_or_no(question)
+
+        if os.path.isdir(self.optDatDir):
             try:
                 self.loadCP()
                 self.logger.info('RESTARTED FROM', self.CP_path)
                 return
             except FileNotFoundError:
-                # self.logger = self.getLogger()
-                self.logger.warning(
-                    f'OVERRIDE OPTIMIZATION STUDY! - {optDatDir} already exists but {self.CP_path} does not')
-                self.copy()
+                question = f'{self.CP_path} does not exist.\nOVERWRITE {self.optDatDir}?'
+                overwrite = yes_or_no(question)
+                if overwrite:
+                    os.removedirs(self.optDatDir)
+                    os.mkdir(optDatDir)
+                    self.logger.info('EMPTIED -', self.optDatDir)
+                else:
+                    self.logger.info('KEEPING FILES')
+                self.logger.info('RE-INITIALIZING OPTIMIZATION ALGORITHM')
         else:
-            os.makedirs(optDatDir, exist_ok=True)
-            # self.logger = self.getLogger()
+            os.makedirs(optDatDir)
             self.logger.info(
-                f'NEW OPTIMIZATION STUDY - {optDatDir} did not exist')
-            self.copy()
+                f'NEW OPTIMIZATION STUDY - {self.optDatDir} did not exist')
             # except FileNotFoundError:
             #     print('OVERRIDE OPTIMIZATION STUDY -')
             #     print('\t{self.CP_path} already exists but {self.cpPath} does not')
@@ -217,19 +239,20 @@ class OptStudy:
     ################
     #    LOGGER    #
     ################
-    def getLogger(self):
+    def initLogger(self):
         logger = logging.getLogger(__name__)
         logger.setLevel(logging.DEBUG)
-        # define file handler and set formatter
-        fileHandler = logging.FileHandler(__name__)
+        # define handlers
+        fileHandler = logging.FileHandler(self.__class__.__name__)
         streamHandler = logging.StreamHandler(sys.stdout)
         streamHandler.setLevel(logging.INFO)
+        logger.addHandler(fileHandler)
+        logger.addHandler(streamHandler)
+        # define formatter
         formatter = logging.Formatter(
             '%(asctime)s : %(levelname)s : %(name)s : %(message)s')
         fileHandler.setFormatter(formatter)
-        logger.addHandler(fileHandler)
-        logger.addHandler(streamHandler)
-        return logger
+        self.logger = logger
 
     ####################
     #    MESH STUDY    #
@@ -265,26 +288,22 @@ class OptStudy:
     #     self.logger.info(f'\tCHECKPOINT LOADED - from {self.CP_path}.npy')
 
     def loadCP(self, hasTerminated=False):
-        try:
-            if os.path.exists(self.CP_path + '.old'):
-                os.rename(self.CP_path + '.old', self.CP_path + '.npy')
-            cp, = np.load(self.CP_path + '.npy', allow_pickle=True).flatten()
-            self.__dict__.update(cp.__dict__)
-            print(f'\tCHECKPOINT LOADED - from {self.CP_path}.npy')
-            # self.logger.info(f'\tCHECKPOINT LOADED - from {self.CP_path}.npy')
-            # only necessary if for the checkpoint the termination criterion has been met
-            self.algorithm.has_terminated = hasTerminated
-            alg = self.algorithm
-            # Update any changes made to the algorithms between runs
-            alg.termination = self.algorithm.termination
-            alg.pop_size = self.algorithm.pop_size
-            alg.n_offsprings = self.algorithm.n_offsprings
-            alg.problem.xl = np.array(self.problem.xl)
-            alg.problem.xu = np.array(self.problem.xu)
-            self.algorithm = alg
-        except FileNotFoundError as err:
-            print(err)
-            raise Exception(f'{self.CP_path} load failed.')
+        if os.path.exists(self.CP_path + '.old'):
+            os.rename(self.CP_path + '.old', self.CP_path + '.npy')
+        cp, = np.load(self.CP_path + '.npy', allow_pickle=True).flatten()
+        self.__dict__.update(cp.__dict__)
+        print(f'\tCHECKPOINT LOADED - from {self.CP_path}.npy')
+        # self.logger.info(f'\tCHECKPOINT LOADED - from {self.CP_path}.npy')
+        # only necessary if for the checkpoint the termination criterion has been met
+        self.algorithm.has_terminated = hasTerminated
+        # alg = self.algorithm
+        # # Update any changes made to the algorithms between runs
+        # alg.termination = self.algorithm.termination
+        # alg.pop_size = self.algorithm.pop_size
+        # alg.n_offsprings = self.algorithm.n_offsprings
+        # alg.problem.xl = np.array(self.problem.xl)
+        # alg.problem.xu = np.array(self.problem.xu)
+        # self.algorithm = alg
 
     def saveCP(self):  # , alg=None):
         # # default use self.algorithm
