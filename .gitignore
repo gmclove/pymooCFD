@@ -5,3 +5,9 @@ base_case/
 **/__pycache__/
 __pycache__/
 **/bin/
+optStudy-*/
+**/nohup.out
+**/*.log
+**/.ipynb_checkpoints
+**/scratch.py
+git_ignore_folder/
