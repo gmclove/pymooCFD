@@ -2,111 +2,290 @@
 # @Date:   2021-12-10T11:22:40-05:00
 # @Last modified by:   glove
 # @Last modified time: 2021-12-14T15:45:19-05:00
-import gmsh
+import numpy as np
+l = [4 , 3, 2 , 1]
+new_l = np.delete(l, 1)
+print(new_l)
 
-meshPath = './test.msh22'
-meshSF = 1
+
+# from setupOpt import optStudy
+#
+# print(optStudy.algorithm.has_next())
+# print(optStudy.algorithm.termination)
+# print(optStudy.algorithm.termination.n_gen)
+#optStudy.plotBndPts(optStudy.getBndPts())
 
 
-projName = '2D_cylinder'
-# dom_dx, dom_dy = 60, 25
-centX, centY, centZ = 0, 0, 0
-cylD = 1
-domD = cylD * 20
-meshSizeMax = 0.5
-#################################
-#          Initialize           #
-#################################
-gmsh.initialize()
-# By default Gmsh will not print out any messages: in order to output messages
-# on the terminal, just set the "General.Terminal" option to 1:
-gmsh.option.setNumber("General.Terminal", 0)
-gmsh.clear()
-gmsh.model.add(projName)
-gmsh.option.setNumber('Mesh.MeshSizeFactor', meshSF)
-#################################
-#      YALES2 Requirements      #
-#################################
-# Make sure "Recombine all triangular meshes" is unchecked so only triangular elements are produced
-gmsh.option.setNumber('Mesh.RecombineAll', 0)
-# Only save entities that are assigned to a physical group
-gmsh.option.setNumber('Mesh.SaveAll', 0)
-#################################
-#           Geometry            #
-#################################
-cyl = gmsh.model.occ.addCircle(centX, centY, centZ, cylD)
-topPt = gmsh.model.occ.addPoint(centX, centY + domD, centZ)
-botPt = gmsh.model.occ.addPoint(centX, centY - domD, centZ)
-centPt = gmsh.model.occ.addPoint(centX, centY, centZ)
-inlet = gmsh.model.occ.addCircleArc(botPt, centPt, topPt)
-outlet = gmsh.model.occ.addCircleArc(topPt, centPt, botPt)
-outerLoop = gmsh.model.occ.addCurveLoop([inlet, outlet])
-innerLoop = gmsh.model.occ.addCurveLoop([cyl])
-dom = gmsh.model.occ.addPlaneSurface([innerLoop, outerLoop])
-# We finish by synchronizing the data from OpenCASCADE CAD kernel with
-# the Gmsh model:
-gmsh.model.occ.synchronize()
-#################################
-#    Physical Group Naming      #
-#################################
-dim = 2
-grpTag = gmsh.model.addPhysicalGroup(dim, [dom])
-gmsh.model.setPhysicalName(dim, grpTag, 'dom')
-dim = 1
-grpTag = gmsh.model.addPhysicalGroup(dim, [inlet])
-gmsh.model.setPhysicalName(dim, grpTag, 'x0')
-grpTag = gmsh.model.addPhysicalGroup(dim, [outlet])
-gmsh.model.setPhysicalName(dim, grpTag, 'x1')
-grpTag = gmsh.model.addPhysicalGroup(dim, [cyl])
-gmsh.model.setPhysicalName(dim, grpTag, 'cyl')
-#################################
-#           MESHING             #
-#################################
-# We could also use a `Box' field to impose a step change in element
-# sizes inside a box
-# boxF = gmsh.model.mesh.field.add("Box")
-# gmsh.model.mesh.field.setNumber(boxF, "VIn", meshSizeMax/10)
-# gmsh.model.mesh.field.setNumber(boxF, "VOut", meshSizeMax)
-# gmsh.model.mesh.field.setNumber(boxF, "XMin", cylD/3)
-# gmsh.model.mesh.field.setNumber(boxF, "XMax", cylD/3+cylD*10)
-# gmsh.model.mesh.field.setNumber(boxF, "YMin", -cylD)
-# gmsh.model.mesh.field.setNumber(boxF, "YMax", cylD)
-# # Finally, let's use the minimum of all the fields as the background mesh field:
-# minF = gmsh.model.mesh.field.add("Min")
-# gmsh.model.mesh.field.setNumbers(minF, "FieldsList", [boxF])
-# gmsh.model.mesh.field.setAsBackgroundMesh(minF)
+# s = 'blank'
+# assert not isinstance(s, str)
 
-# Set minimum and maximum mesh size
-#gmsh.option.setNumber('Mesh.MeshSizeMin', meshSizeMin)
-gmsh.option.setNumber('Mesh.MeshSizeMax', meshSizeMax)
+# import time
+# import multiprocessing.pool
+# pool = multiprocessing.pool.ThreadPool(8)
+#
+# def wait():
+#     print('waiting')
+#     time.sleep(5)
+#     print('done waiting')
+#
+# for _ in range(10):
+#     pool.apply_async(wait, ())
+# pool.close()
+# pool.join()
 
-# Set number of nodes along cylinder wall
-gmsh.option.setNumber('Mesh.MeshSizeFromCurvature', 200)
-# gmsh.option.setNumber('Mesh.MeshSizeFromCurvatureIsotropic', 1)
+# import gmsh
+# import math
+#
+# meshPath = './test.msh22'
+# meshSF = 0.5
+#
+# mouthD = 0.02
+#
+# projName = 'jet_cone_axi-sym'
+#
+# cyl_r = mouthD / 2  # 0.02/2
+#
+# sph_r = (0.15 / 0.02) * cyl_r
+# sph_xc = -sph_r
+# sph_yc = 0
+#
+# cone_dx = 3.5
+# cone_r1 = 0.5 / 2
+# cone_r2 = cone_dx * (0.7 / 2.5) + cone_r1
+# cone_xc = -0.5
+#
+# # Meshing Scheme
+# NN_inlet = int((20 / 0.01) * cyl_r)
+# sph_wall_len = sph_r * math.pi - \
+#     math.asin(cyl_r / (2 * math.pi)) * sph_r
+# NN_sph_wall = int((100 / 0.2355) * sph_wall_len)
+# NN_axis_r = 500
+# axis_l_len = (sph_xc - sph_r) + 0.5
+# NN_axis_l = int((40 / 0.35) * axis_l_len)
+# NN_cyl_axis = int((70 / 0.075) * sph_r)
+# #################################
+# #          Initialize           #
+# #################################
+# gmsh.initialize()
+# gmsh.model.add(projName)
+# gmsh.option.setNumber('General.Terminal', 0)
+# gmsh.option.setNumber('Mesh.MeshSizeFactor', meshSF)
+# #################################
+# #      YALES2 Requirements      #
+# #################################
+# # Make sure "Recombine all triangular meshes" is unchecked so only triangular elements are produced
+# gmsh.option.setNumber('Mesh.RecombineAll', 0)
+# # Only save entities that are assigned to a physical group
+# gmsh.option.setNumber('Mesh.SaveAll', 0)
+# #################################
+# #           Geometry            #
+# #################################
+# ##### Points #####
+# # Cone
+# cone_ll = gmsh.model.occ.addPoint(cone_xc, 0, 0)
+# cone_lr = gmsh.model.occ.addPoint(cone_dx + cone_xc, 0, 0)
+# cone_ur = gmsh.model.occ.addPoint(cone_dx + cone_xc, cone_r2, 0)
+# cone_ul = gmsh.model.occ.addPoint(cone_xc, cone_r1, 0)
+# # sphere
+# sph_start = gmsh.model.occ.addPoint(sph_xc - sph_r, sph_yc, 0)
+# sph_cent = gmsh.model.occ.addPoint(sph_xc, sph_yc, 0)
+# sph_end_x = sph_xc + math.sqrt(sph_r**2 - cyl_r**2)
+# sph_end = gmsh.model.occ.addPoint(sph_end_x, sph_yc + cyl_r, 0)
+# # cylinder
+# cyl_ll = sph_cent
+# cyl_ul = gmsh.model.occ.addPoint(sph_xc, sph_yc + cyl_r, 0)
+# cyl_ur = sph_end
+# cyl_mid_outlet = gmsh.model.occ.addPoint(sph_xc + sph_r, 0, 0)
+# ##### Curves #####
+# # sphere wall
+# sph_wall = gmsh.model.occ.addCircleArc(sph_start, sph_cent, sph_end)
+# # cylinder wall
+# cyl_wall = gmsh.model.occ.addLine(cyl_ul, cyl_ur)
+# # cylinder axis (for meshing control)
+# axis_cyl = cyl_axis = gmsh.model.occ.addLine(cyl_ll, cyl_mid_outlet)
+# # inlet (cylinder back wall)
+# inlet = gmsh.model.occ.addLine(cyl_ul, cyl_ll)
+# # axis
+# axis_l = gmsh.model.occ.addLine(sph_start, cone_ll)
+# axis_r = gmsh.model.occ.addLine(cyl_mid_outlet, cone_lr)
+# axis = [axis_l, axis_cyl, axis_r]
+# # cone
+# back_wall = gmsh.model.occ.addLine(cone_ll, cone_ul)
+# cone_wall = gmsh.model.occ.addLine(cone_ul, cone_ur)
+# outlet = gmsh.model.occ.addLine(cone_ur, cone_lr)
+# # mesh field line
+# # field_line = gmsh.model.occ.addLine(sph_end, cone_ur)
+#
+# ##### Surfaces #####
+# # domain surface
+# curv_loop_tags = [sph_wall, cyl_wall, inlet, axis_cyl, axis_r, outlet,
+#                   cone_wall, back_wall, axis_l]
+# dom_loop = gmsh.model.occ.addCurveLoop(curv_loop_tags)
+# dom = gmsh.model.occ.addPlaneSurface([dom_loop])
+#
+# gmsh.model.occ.synchronize()
+# #################################
+# #           MESHING             #
+# #################################
+# gmsh.option.setNumber('Mesh.FlexibleTransfinite', 1)
+# gmsh.model.mesh.setTransfiniteCurve(sph_wall, NN_sph_wall)
+# gmsh.model.mesh.setTransfiniteCurve(cyl_wall, NN_cyl_axis)
+# gmsh.model.mesh.setTransfiniteCurve(cyl_axis, NN_cyl_axis)
+# gmsh.model.mesh.setTransfiniteCurve(inlet, NN_inlet)
+# gmsh.model.mesh.setTransfiniteCurve(
+#     axis_r, NN_axis_r, meshType='Progression', coef=1.005)
+# gmsh.model.mesh.setTransfiniteCurve(axis_l, NN_axis_l)
+# gmsh.model.mesh.setTransfiniteCurve(back_wall, 15)
+# gmsh.model.mesh.setTransfiniteCurve(
+#     outlet, 50, meshType='Progression', coef=0.99)
+# gmsh.model.mesh.setTransfiniteCurve(cone_wall, 100)
+# ##### Execute Meshing ######
+# gmsh.model.mesh.generate(1)
+# gmsh.model.mesh.generate(2)
+# # extract number of elements
+# # get all elementary entities in the model
+# entities = gmsh.model.getEntities()
+# e = entities[-1]
+# # get the mesh elements for each elementary entity
+# elemTypes, elemTags, elemNodeTags = gmsh.model.mesh.getElements(
+#     e[0], e[1])
+# # count number of elements
+# numElem = sum(len(i) for i in elemTags)
+# print(numElem)
+# #################################
+# #    Physical Group Naming      #
+# #################################
+# # 1-D physical groups
+# dim = 1
+# # inlet
+# grpTag = gmsh.model.addPhysicalGroup(dim, [inlet])
+# gmsh.model.setPhysicalName(dim, grpTag, 'inlet')
+# # outlet
+# grpTag = gmsh.model.addPhysicalGroup(dim, [outlet])
+# gmsh.model.setPhysicalName(dim, grpTag, 'outlet')
+# # axis of symmetry
+# grpTag = gmsh.model.addPhysicalGroup(dim, axis)
+# gmsh.model.setPhysicalName(dim, grpTag, 'axis')
+# # walls
+# grpTag = gmsh.model.addPhysicalGroup(dim, [sph_wall, cyl_wall])
+# gmsh.model.setPhysicalName(dim, grpTag, 'walls')
+# # coflow
+# grpTag = gmsh.model.addPhysicalGroup(dim, [back_wall, cone_wall])
+# gmsh.model.setPhysicalName(dim, grpTag, 'coflow')
+#
+# # 2-D physical groups
+# dim = 2
+# grpTag = gmsh.model.addPhysicalGroup(dim, [dom])
+# gmsh.model.setPhysicalName(dim, grpTag, 'dom')
+#
+# #################################
+# #        Write Mesh File        #
+# #################################
+# gmsh.write(meshPath)
+# # if '-nopopup' not in sys.argv:
+# gmsh.fltk.run()
+# gmsh.finalize()
 
-# Set size of mesh at every point in model
-# gmsh.model.mesh.setSize(gmsh.model.getEntities(0), meshSize)
-
-# gmsh.model.mesh.setTransfiniteCurve(cylCir, 150, coef=1.1)
-# We can then generate a 2D mesh...
-gmsh.model.mesh.generate(1)
-gmsh.model.mesh.generate(2)
-# extract number of elements
-# get all elementary entities in the model
-entities = gmsh.model.getEntities()
-e = entities[-1]
-# get the mesh elements for each elementary entity
-elemTypes, elemTags, elemNodeTags = gmsh.model.mesh.getElements(
-    e[0], e[1])
-# count number of elements
-numElem = sum(len(i) for i in elemTags)
-# ... and save it to disk
-gmsh.write(meshPath)
-# To visualize the model we can run the graphical user interface with
-# `gmsh.fltk.run()'.
-gmsh.fltk.run()
-# This should be called when you are done using the Gmsh Python API:
-gmsh.finalize()
+#
+# projName = '2D_cylinder'
+# # dom_dx, dom_dy = 60, 25
+# centX, centY, centZ = 0, 0, 0
+# cylD = 1
+# domD = cylD * 20
+# meshSizeMax = 0.5
+# #################################
+# #          Initialize           #
+# #################################
+# gmsh.initialize()
+# # By default Gmsh will not print out any messages: in order to output messages
+# # on the terminal, just set the "General.Terminal" option to 1:
+# gmsh.option.setNumber("General.Terminal", 0)
+# gmsh.clear()
+# gmsh.model.add(projName)
+# gmsh.option.setNumber('Mesh.MeshSizeFactor', meshSF)
+# #################################
+# #      YALES2 Requirements      #
+# #################################
+# # Make sure "Recombine all triangular meshes" is unchecked so only triangular elements are produced
+# gmsh.option.setNumber('Mesh.RecombineAll', 0)
+# # Only save entities that are assigned to a physical group
+# gmsh.option.setNumber('Mesh.SaveAll', 0)
+# #################################
+# #           Geometry            #
+# #################################
+# cyl = gmsh.model.occ.addCircle(centX, centY, centZ, cylD)
+# topPt = gmsh.model.occ.addPoint(centX, centY + domD, centZ)
+# botPt = gmsh.model.occ.addPoint(centX, centY - domD, centZ)
+# centPt = gmsh.model.occ.addPoint(centX, centY, centZ)
+# inlet = gmsh.model.occ.addCircleArc(botPt, centPt, topPt)
+# outlet = gmsh.model.occ.addCircleArc(topPt, centPt, botPt)
+# outerLoop = gmsh.model.occ.addCurveLoop([inlet, outlet])
+# innerLoop = gmsh.model.occ.addCurveLoop([cyl])
+# dom = gmsh.model.occ.addPlaneSurface([innerLoop, outerLoop])
+# # We finish by synchronizing the data from OpenCASCADE CAD kernel with
+# # the Gmsh model:
+# gmsh.model.occ.synchronize()
+# #################################
+# #    Physical Group Naming      #
+# #################################
+# dim = 2
+# grpTag = gmsh.model.addPhysicalGroup(dim, [dom])
+# gmsh.model.setPhysicalName(dim, grpTag, 'dom')
+# dim = 1
+# grpTag = gmsh.model.addPhysicalGroup(dim, [inlet])
+# gmsh.model.setPhysicalName(dim, grpTag, 'x0')
+# grpTag = gmsh.model.addPhysicalGroup(dim, [outlet])
+# gmsh.model.setPhysicalName(dim, grpTag, 'x1')
+# grpTag = gmsh.model.addPhysicalGroup(dim, [cyl])
+# gmsh.model.setPhysicalName(dim, grpTag, 'cyl')
+# #################################
+# #           MESHING             #
+# #################################
+# # We could also use a `Box' field to impose a step change in element
+# # sizes inside a box
+# # boxF = gmsh.model.mesh.field.add("Box")
+# # gmsh.model.mesh.field.setNumber(boxF, "VIn", meshSizeMax/10)
+# # gmsh.model.mesh.field.setNumber(boxF, "VOut", meshSizeMax)
+# # gmsh.model.mesh.field.setNumber(boxF, "XMin", cylD/3)
+# # gmsh.model.mesh.field.setNumber(boxF, "XMax", cylD/3+cylD*10)
+# # gmsh.model.mesh.field.setNumber(boxF, "YMin", -cylD)
+# # gmsh.model.mesh.field.setNumber(boxF, "YMax", cylD)
+# # # Finally, let's use the minimum of all the fields as the background mesh field:
+# # minF = gmsh.model.mesh.field.add("Min")
+# # gmsh.model.mesh.field.setNumbers(minF, "FieldsList", [boxF])
+# # gmsh.model.mesh.field.setAsBackgroundMesh(minF)
+#
+# # Set minimum and maximum mesh size
+# #gmsh.option.setNumber('Mesh.MeshSizeMin', meshSizeMin)
+# gmsh.option.setNumber('Mesh.MeshSizeMax', meshSizeMax)
+#
+# # Set number of nodes along cylinder wall
+# gmsh.option.setNumber('Mesh.MeshSizeFromCurvature', 200)
+# # gmsh.option.setNumber('Mesh.MeshSizeFromCurvatureIsotropic', 1)
+#
+# # Set size of mesh at every point in model
+# # gmsh.model.mesh.setSize(gmsh.model.getEntities(0), meshSize)
+#
+# # gmsh.model.mesh.setTransfiniteCurve(cylCir, 150, coef=1.1)
+# # We can then generate a 2D mesh...
+# gmsh.model.mesh.generate(1)
+# gmsh.model.mesh.generate(2)
+# # extract number of elements
+# # get all elementary entities in the model
+# entities = gmsh.model.getEntities()
+# e = entities[-1]
+# # get the mesh elements for each elementary entity
+# elemTypes, elemTags, elemNodeTags = gmsh.model.mesh.getElements(
+#     e[0], e[1])
+# # count number of elements
+# numElem = sum(len(i) for i in elemTags)
+# # ... and save it to disk
+# gmsh.write(meshPath)
+# # To visualize the model we can run the graphical user interface with
+# # `gmsh.fltk.run()'.
+# gmsh.fltk.run()
+# # This should be called when you are done using the Gmsh Python API:
+# gmsh.finalize()
 
 # import os
 # import subprocess

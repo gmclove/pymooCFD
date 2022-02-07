@@ -15,14 +15,14 @@ from pymooCFD.core.cfdCase import CFDCase
 
 
 class OscillCylinder(CFDCase):
+    baseCaseDir = 'base_cases/osc-cyl_base'
     ####### Define Design Space #########
     n_var = 2
     var_labels = ['Amplitude [1/s]', 'Frequency [1/s]']
     varType = ["real", "real"]  # options: 'int' or 'real'
     xl = [0.1, 0.1]  # lower limits of parameters/variables
     xu = [3.0, 1]  # upper limits of variables
-    if not len(xl) == len(xu) and len(xu) == len(var_labels) and len(var_labels) == n_var:
-        raise Exception("Design Space Definition Incorrect")
+
     ####### Define Objective Space ########
     obj_labels = ['Drag on Cylinder [N]', 'Energy Consumption [J/s]']
     n_obj = 2
@@ -34,16 +34,29 @@ class OscillCylinder(CFDCase):
     procLim = 60
     solverExecCmd = ['mpirun', '-n', str(nProc), '2D_cylinder']
 
-    def __init__(self, baseCaseDir, caseDir, x):
-        super().__init__(baseCaseDir, caseDir, x,
+    def __init__(self, caseDir, x):
+        super().__init__(caseDir, x,
                          meshFile='2D_cylinder.msh22',
                          datFile='ics_temporals.txt',
                          jobFile='jobslurm.sh',
                          inputFile='2D_cylinder.in',
                          meshSF=0.4,
-                         meshSFs=np.around(
-                             np.arange(0.2, 0.6, 0.05), decimals=2)
-                         )
+                         # meshSFs=[0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8],
+                         meshSFs=np.append(
+                                    np.around(
+                                        np.arange(0.3, 1.6, 0.1), decimals=2),
+                                        [0.25, 0.35, 0.45])
+                       )
+    def _execDone(self):
+        dumpDir = os.path.join(self.caseDir, 'dump')
+        finalSolnPath = os.path.join(dumpDir, '2D_cyl.sol000400.xmf')
+        if os.path.isfile(finalSolnPath) and os.path.isfile(self.datPath):
+            return True
+#            with open(self.datPath) as f:
+#                lines = f.readlines()
+#                if lines[-1][:5] == ' 2000':
+#                    return True
+#        return False
 
     def _preProc_restart(self):
         self._preProc()
@@ -340,9 +353,9 @@ class OscillCylinder(CFDCase):
     #     gmsh.finalize()
 
 class OscillCylinderOpt(OptStudy):
-    def __init__(self, algorithm, problem, baseCase,
+    def __init__(self, algorithm, problem, BaseCase,
                  *args, **kwargs):
-        super().__init__(algorithm, problem, baseCase,
+        super().__init__(algorithm, problem, BaseCase,
                          baseCaseDir='base_cases/osc-cyl_base',
                          # optDatDir='cyl-opt_run',
                          *args, **kwargs)

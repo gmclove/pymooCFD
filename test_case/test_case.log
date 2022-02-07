@@ -1,7 +1,0 @@
-2022-01-05 16:52:59,239 : INFO : test_case/test_case.log : NEW CASE - test_case did not exist
-2022-01-05 16:52:59,239 : WARNING : test_case/test_case.log : CASE OVERRIDE - self.caseDir already existed
-2022-01-05 16:52:59,377 : INFO : test_case/test_case.log : COPIED: base_cases/osc-cyl_base -> test_case
-2022-01-05 16:52:59,382 : INFO : test_case/test_case.log : COMPLETED: PRE-PROCESS
-2022-01-05 16:52:59,382 : INFO : test_case/test_case.log : SOLVING AS SUBPROCESS...
-2022-01-05 16:52:59,382 : INFO : test_case/test_case.log : 	command: ['mpirun', '-np', '10', '2D_cylinder']
-2022-01-05 16:53:00,836 : INFO : test_case/test_case.log : COMPLETED: SOLVE

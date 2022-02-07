@@ -13,8 +13,9 @@ n_offsprings = int(pop_size * (2 / 3))  # = num. of evaluations each generation
 #################
 #    PROBLEM    #
 #################
-from pymoo.core.problem import Problem
+# from pymooCFD.core.pymooBase import GA_CFD
 import numpy as np
+from pymoo.core.problem import Problem
 # from pymoo.core.problem import ElementwiseProblem
 
 class GA_CFD(Problem):
@@ -42,7 +43,7 @@ class MyDisplay(Display):
     def _do(self, problem, evaluator, algorithm):
         super()._do(problem, evaluator, algorithm)
         for obj in range(problem.n_obj):
-            self.output.append(f"mean obj.{obj + 1}", np.mean(algorithm.pop.get('F')[:, obj]))
+            self.output.append(f'mean obj.{obj + 1}', np.mean(algorithm.pop.get('F')[:, obj]))
             self.output.append(f"best obj.{obj+1}", algorithm.pop.get('F')[:, obj].min())
         self.output.header()
 
@@ -62,7 +63,7 @@ class MyCallback(Callback):
 
     def notify(self, alg):
         # save checkpoint
-        optStudy.saveCP(alg=alg)
+        optStudy.saveCP()
         # increment generation
         self.gen += 1
         self.data["best"].append(alg.pop.get("F").min())
@@ -143,6 +144,4 @@ algorithm.verbose = True
 ################################################################################
 ########  Optimization Study Object Initialization ##########
 optStudy = MyOptStudy(algorithm, problem, BaseCase,
-                    var_labels = BaseCase.var_labels,
-                    obj_labels = BaseCase.obj_labels,
                     procLim = 64)

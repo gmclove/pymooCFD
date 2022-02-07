@@ -5,20 +5,24 @@
 import numpy as np
 import os
 import subprocess
+import time
 import sys
 import shutil
 import logging
 import copy
 import matplotlib.pyplot as plt
+plt.set_loglevel("info")
 import multiprocessing as mp
 import multiprocessing.pool
-from pymooCFD.util.sysTools import saveTxt
+from pymooCFD.util.sysTools import saveTxt, yes_or_no
+from pymooCFD.util.loggingTools import MultiLineFormatter, DispNameFilter
 
 # import matplotlib.dates as mdates
 # from matplotlib.ticker import AutoMinorLocator
 
 
 class CFDCase:  # (PreProcCase, PostProcCase)
+    baseCaseDir = None
     ####### Define Design Space #########
     n_var = None
     var_labels = None
@@ -35,9 +39,18 @@ class CFDCase:  # (PreProcCase, PostProcCase)
 
     ##### External Solver #######
     externalSolver = False
+    onlyParallelizeSolve = False
     procLim = None
     nProc = None
+    nTasks = None
     solverExecCmd = None
+
+
+    # def plotVarSpace(cls, X, path):
+    #     plt.scatter(X[:,0]
+    #     plt.title('Design Space')
+
+
     # if procLim is None:
     #     nTasks = 1000000
     # else:
@@ -52,10 +65,10 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #     solve = _solve
     #     pool = Pool(nTasks)
 
-    def __init__(self, baseCaseDir, caseDir, x,
+    def __init__(self, caseDir, x,
                  meshSF=1, meshSFs=np.around(np.arange(0.5, 1.5, 0.1), decimals=2),
                  # externalSolver=False,
-                 # var_labels = None, obj_labels = None,
+                 var_labels = None, obj_labels = None,
                  meshFile=None,  # meshLines = None,
                  jobFile=None,  # jobLines = None,
                  inputFile=None,  # inputLines = None,
@@ -65,21 +78,37 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                  *args, **kwargs
                  ):
         super().__init__()
+        if not len(self.xl) == len(self.xu) and len(self.xu) == len(self.var_labels) and len(self.var_labels) == self.n_var:
+            raise Exception("Design Space Definition Incorrect")
+        if not isinstance(self.baseCaseDir, str):
+            raise TypeError(f'{self.baseCaseDir} - must be a string')
+        ## These attributes are not taken from checkpoint
+        self.caseDir = caseDir
+        # self.cpPath = os.path.join(self.caseDir, 'case')
+        # self.meshStudyDir = os.path.join(self.caseDir, 'meshStudy')
+        self.meshSF = meshSF
+
+        ###########################
+        #    RESTART VARIABLES    #
+        ###########################
         # self.complete = False
         self.restart = False
         self.parallelizeInit(self.externalSolver)
-        self.baseCaseDir = baseCaseDir
-        self.caseDir = caseDir
-        self.cpPath = os.path.join(caseDir, 'case')
+        self._x = np.array(x)
+
+        #########################
+        #    CHECKPOINT INIT    #
+        #########################
         if os.path.exists(caseDir):
+            self.logger = self.getLogger()
             try:
                 self.loadCP()
                 self.logger.info('RESTART CASE')
                 return
-            except FileNotFoundError:
-                self.logger = self.getLogger()
+            except FileNotFoundError as err:
+                self.logger.error(err)
                 self.logger.info(
-                    f'OVERRIDE CASE - {caseDir} already exists but {self.cpPath} does not')
+                    f'OVERRIDE CASE - case directory already exists but {self.cpPath} does not exist')
                 self.copy()
             # except ModuleNotFoundError as err:
             #     print(self.cpPath + '.npy')
@@ -87,34 +116,16 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         else:
             os.makedirs(caseDir, exist_ok=True)
             self.logger = self.getLogger()
-            self.logger.info(f'NEW CASE - {caseDir} did not exist')
+            self.logger.info('NEW CASE - directory did not exist')
             self.copy()
-        # If solverExecCmd is provided use
-        # if self.solverExecCmd is None:
-        #     externalSolver = False
-        # elif self.nProc is not None and self.procLim is not None:
-        #     externalSolver = True
-        # self.externalSolver = externalSolver
 
-        # if not os.path.exists(caseDir):
-        #     os.makedirs(caseDir)
-        #     msg = f'NEW CASE - {caseDir} did not exist'
-        #     print(msg)
-        # Required Arguments -> Attributes
-        # self.logger = self.getLogger()
-        # self.copy()  # create directory before start
-        self.x = x
-        # Default Attributes
-        # os.makedirs(self.baseCaseDir, exist_ok=True)
-        self.meshSF = meshSF
-        self.meshSFs = meshSFs
-        # Optional Attributes
+        #############################
+        #    Optional Attributes    #
+        #############################
         self.meshFile = meshFile
         self.jobFile = jobFile
         self.datFile = datFile
         self.inputFile = inputFile
-        # generate file path attributes when possible
-        self.meshStudyDir = os.path.join(self.caseDir, 'meshStudy')
 
         if inputFile is None:
             self.inputPath = None
@@ -135,22 +146,45 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             self.jobPath = None
         else:
             self.jobPath = os.path.join(self.caseDir, jobFile)
+        ####################
+        #    Attributes    #
+        ####################
+        self.x = np.array(x)
+        # Default Attributes
+        # os.makedirs(self.baseCaseDir, exist_ok=True)
+
+
+
+        ### Design and Objective Space Labels
+        if self.var_labels is None:
+            self.var_labels = [
+                f'var{x_i}' for x_i in range(self.n_var)]
+        # else:
+        #     self.var_labels = var_labels
+        if self.obj_labels is None:
+            self.obj_labels = [
+                f'obj{x_i}' for x_i in range(self.n_obj)]
+        # else:
+        #     self.obj_labels = obj_labels
         ###################################################
         #    Attributes To Be Set Later During Each Run   #
         ###################################################
         self.f = None  # if not None then case complete
+        # meshing attributes
         self.msCases = None
+        self._meshSF = None
+        self.meshSF = meshSF
+        self._meshSFs = meshSFs
         self.numElem = None
-        # self.sfToElem
-        # self.var_labels = None
-        # self.obj_labels = None
-        # self.n_var = None
-        # self.n_obj = None
-        # self.jobLines = None #???????????
-        # self.preProcComplete = False
-        # self.postProcComplete = False
-        # self.execComplete = False
 
+        self.inputLines = None
+        self.jobLines = None
+
+        self.logger.info('CASE INTITIALIZED')
+        self.logger.debug('INITIAL CASE DICTONARY')
+        for key in self.__dict__:
+            self.logger.debug(f'\t{key}: {self.__dict__[key]}')
+        # self.genMesh()
         ### Save Checkpoint ###
         # _, tail = os.path.split(caseDir)
         # self.cpPath = os.path.join(caseDir, tail+'.npy')
@@ -173,27 +207,44 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #     return proc
     ###  Parallel Processing  ###
     @classmethod
-    def parallelizeInit(cls, externalSolver):
+    def parallelizeInit(cls, externalSolver=None):
+        if externalSolver is None:
+            externalSolver = cls.externalSolver
         if cls.procLim is None:
             nTasks = 1000000
-        else:
+        elif cls.nTasks is None:
             nTasks = int(cls.procLim / cls.nProc)
+        else:
+            nTasks = cls.nTasks
         if externalSolver:
             assert cls.solverExecCmd is not None
             assert cls.nProc is not None
             assert cls.procLim is not None
-            cls.solve = cls.solveExternal
+            cls._solve = cls.solveExternal
             cls.pool = mp.pool.ThreadPool(nTasks)
         else:
-            cls.solve = cls._solve
-            cls.pool = cls.Pool(nTasks)
+            cls._solve = cls._solve
+            cls.pool = mp.Pool(nTasks)
 
     @classmethod
     def parallelize(cls, cases):
-        for case in cases:
-            cls.pool.apply_async(case.run, ())
-        cls.pool.close()
-        cls.pool.join()
+        cls.parallelizeInit()
+        #cls.logger.info('PARALLELIZING . . .')
+        if cls.onlyParallelizeSolve:
+            #cls.logger.info('\tParallelizing Only Solve')
+            for case in cases:
+                case.preProc()
+            for case in cases:
+                cls.pool.apply_async(case.solve, ())
+            cls.pool.close()
+            cls.pool.join()
+            for case in cases:
+                case.postProc()
+        else:
+            for case in cases:
+                cls.pool.apply_async(case.run, ())
+            cls.pool.close()
+            cls.pool.join()
 
     # def parallelizeCleanUp(self):
     #     self.pool.terminate()
@@ -202,16 +253,39 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #     if self.f is None:
     #         self._solve()
 
+    def solve(self):
+        self.restart = True
+        start = time.time()
+        self._solve()
+        end = time.time()
+        dt = end-start
+        if dt >= 3600:
+            hrs = int(dt/3600)
+            mins = dt%3600
+            secs = dt%60
+            t_str = '%i hrs | %i mins | %i secs'%(hrs, mins, secs)
+        elif dt >= 60:
+            mins = int(dt/60)
+            secs = dt%60
+            t_str = '%i mins | %i secs'%(mins, secs)
+        else:
+            t_str = '%i secs'%dt
+
+        self.logger.info(f'Solve Time: {t_str}')
+
     def solveExternal(self):
+        #self.restart = True
+        #start = time.time()
         self.logger.info('SOLVING AS SUBPROCESS...')
         self.logger.info(f'\tcommand: {self.solverExecCmd}')
         subprocess.run(self.solverExecCmd, cwd=self.caseDir,
                        stdout=subprocess.DEVNULL)
+        #end = time.time()
+        #self.logger.info(f'Solve Time: {start-end}')
 
     def run(self):
-        if self.f is None:
+        if self.f is None and not self._execDone():
             self.preProc()
-            self.logger.info('COMPLETE: PRE-PROCESS')
             self.solve()
             if self._execDone():
                 self.logger.info('COMPLETE: SOLVE')
@@ -220,14 +294,11 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                 self.logger.info('RE-RUNNING')
                 self.run()
             self.postProc()
-            if np.isnan(np.sum(self.f)) or self.f is None:
-                self.logger.error('INCOMPLETE: POST-PROCESS')
-            else:
-                self.logger.info('COMPLETE: POST-PROCESS')
-            # self.complete = True
+
+        elif self.f is None:
+            self.postProc()
         else:
-            self.logger.warning(
-                'RUN SKIPPED: self.run() called but case already complete')
+            self.logger.warning('SKIPPED: RUN: self.run() called but case already complete')
 
     def preProc(self):
         if self.restart:
@@ -239,7 +310,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             self._preProc()
         # save variables in case directory as text file after completing pre-processing
         # saveTxt(self.caseDir, 'var.txt', self.x)
-        self.restart = True  # ??????????????????
+        self.logger.info('COMPLETE: PRE-PROCESS')
+        #self.restart = True  # ??????????????????
         self.saveCP()
     # def pySolve(self):
     #     self.logger.info('SOLVING . . . ')
@@ -257,37 +329,41 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         #                    stdout=subprocess.DEVNULL)
 
     def postProc(self):
-        if self.f is None or np.isnan(self.f):
+        if self.f is None or np.isnan(np.sum(self.f)):
             self._postProc()
-            ###### SAVE VARIABLES AND OBJECTIVES TO TEXT FILES #######
-            # save variables in case directory as text file after completing post-processing
-            # saveTxt(self.caseDir, 'var.txt', self.x)
-            # save objectives in text file
-            # saveTxt(self.caseDir, 'obj.txt', self.f)
         else:
-            self.logger.info(
+            self.logger.info('SKIPPED: POST-PROCESSING')
+            self.logger.debug(
                 'self.postProc() called but self.f is not None or NaN so no action was taken')
+        # Check Completion
+        if self.f is None or np.isnan(np.sum(self.f)):
+            self.logger.error('INCOMPLETE: POST-PROCESS')
+        else:
+            self.logger.info('COMPLETE: POST-PROCESS')
         self.saveCP()
-        self.logger.info(f'\t{self.caseDir}: {self.f}')
-
+        self.logger.info(f'\tObjectives:{self.f}')
         return self.f
 
     def genMesh(self):
         if self.meshPath is None:
             self.logger.warning(
                 'self.genMesh() called but self.meshPath is None')
+        if self.meshSF is None:
+            self.logger.warning(
+                'self.genMesh() called but self.meshPath is None')
         else:
             self._genMesh()
-            self.logger.info('MESHING GENERATED')
-            self.logger.info(
-                f'\tMesh written to {self.meshPath} using self._genMesh()')
+            self.logger.info('MESH GENERATED - Using self._genMesh()')
 
     ####################
     #    MESH STUDY    #
     ####################
     def genMeshStudy(self):
-        print('\tGENERATING MESH STUDY . . .')
-        print('\t\t For Mesh Size Factors:', self.meshSFs)
+        if self.meshSFs is None:
+            self.logger.warning('self.meshSFs is None but self.genMeshStudy() called')
+            return
+        self.logger.info('\tGENERATING MESH STUDY . . .')
+        self.logger.info(f'\t\tFor Mesh Size Factors: {self.meshSFs}')
         # Pre-Process
         study = []
         var = []
@@ -295,14 +371,18 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         for sf in self.meshSFs:
             msCase = copy.deepcopy(self)
             self.msCases.append(msCase)
-            path = os.path.join(self.meshStudyDir, f'meshSF-{sf}')
-            self.logger.info(f'\t\tInitializing {path}. . .')
-            msCase.__init__(self.baseCaseDir, path, self.x)
-            if msCase.numElem is None:
-                msCase.meshSFs = None
-                msCase.meshSF = sf
+            fName = f'meshSF-{sf}'
+            path = os.path.join(self.meshStudyDir, fName)
+            self.logger.info(f'\t\tInitializing {path} . . .')
+            msCase.meshSFs = None
+            msCase.msCases = None
+            msCase.__init__(path, self.x)
+            msCase.meshSFs = None
+            msCase.msCases = None
+            if msCase.meshSF != sf or msCase.numElem is None:
                 # only pre-processing needed is generating mesh
-                msCase.genMesh()
+                msCase.meshSF = sf
+                msCase.genMesh() # NOT NESSECESARY BECAUSE FULL PRE-PROCESS DONE AT RUN
             else:
                 self.logger.info(f'\t\t\t{msCase} already has number of elements: {msCase.numElem}')
             # sfToElem.append([msCase.meshSF, msCase.numElem])
@@ -311,7 +391,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                 msCase.numElem), str(msCase.meshSF)])
             var.append(msCase.x)
         study = np.array(study)
-        print('\tStudy:\n\t\t', str(study).replace('\n', '\n\t\t'))
+        self.logger.info('\tStudy:\n\t\t'+str(study).replace('\n', '\n\t\t'))
         # self.sfToElem = np.array(sfToElem)
         # print('\t' + str(study).replace('\n', '\n\t'))
         path = os.path.join(self.meshStudyDir, 'study.txt')
@@ -327,7 +407,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         # np.savetxt(path, obj)
 
     def plotMeshStudy(self):
-        print('\tPLOTTING MESH STUDY')
+        self.logger.info('\tPLOTTING MESH STUDY')
         _, tail = os.path.split(self.caseDir)
         a_numElem = np.array([case.numElem for case in self.msCases])
         a_sf = [case.meshSF for case in self.msCases]
@@ -335,8 +415,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         # Plot
         for obj_i, obj_label in enumerate(self.obj_labels):
             # Number of Elements Plot
-            print(f'\t\tPlotting Objective {obj_i}: {obj_label}')
-            plt.plot(a_numElem, msObj[:, obj_i])
+            self.logger.info(f'\t\tPlotting Objective {obj_i}: {obj_label}')
+            plt.plot(a_numElem, msObj[:, obj_i], 'o')
             plt.suptitle('Mesh Sensitivity Study')
             plt.title(tail)
             plt.xlabel('Number of Elements')
@@ -344,88 +424,28 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             plt.ticklabel_format(axis="x", style="sci", scilimits=(0, 0))
             fName = f'ms_plot-{tail}-obj{obj_i}-numElem.png'
             fPath = os.path.join(self.meshStudyDir, fName)
-            plt.savefig(fPath)
+            plt.tight_layout()
+            plt.savefig(fPath, bbox_inches='tight')
             plt.clf()
             # Mesh Size Factor Plot
-            plt.plot(a_sf, msObj[:, obj_i])
+            plt.plot(a_sf, msObj[:, obj_i], 'o')
             plt.suptitle('Mesh Sensitivity Study')
             plt.title(tail)
             plt.xlabel('Mesh Size Factor')
             plt.ylabel(obj_label)
             fName = f'ms_plot-{tail}-obj{obj_i}-meshSFs.png'
             fPath = os.path.join(self.meshStudyDir, fName)
+            plt.tight_layout()
             plt.savefig(fPath)
             plt.clf()
         self.saveCP()
-        # for obj_i, obj_label in enumerate(self.obj_labels):
-        #     print(f'\tPLOTTING OBJECTIVE {obj_i}: {obj_label}')
-        #     fig, ax1 = plt.subplots()  # constrained_layout=True)
-        #     ax2 = ax1.twiny()
-        #     ax1.plot(a_numElem, msObj[:, obj_i])
-        #     ax2.plot(a_sf, msObj[:, obj_i])
-        #     xl1, xu1 = ax1.get_xlim()
-        #     print(xl1)
-        #     print(xu1)
-        #     # xl2 = a_sf[0]
-        #     # xu2 =
-        #     # ax2.clear()
-        #     ax2.set_xlabel('Mesh Size Factor')
-        #     # ax2.set_xlim(ax1.get_xlim())
-        #     ax1.set_xlabel('Number of Elements')
-        #     ax1.set_ylabel(obj_label)
-        #     ax1.ticklabel_format(axis="x", style="sci", scilimits=(0, 0))
-        #     ax1.set_title(tail)
-        #     fig.suptitle('Mesh Sensitivity Study')
-        #     fig.tight_layout(rect=[0, 0.03, 1, 0.95])
-
-        # def elem2sf(numElem):
-        #     print('numElem', numElem)
-        #     return [case.meshSF for case in self.msCases]
-        #     # for case in self.msCases:
-        #     #     if case.numElem == numElem:
-        #     #         return case.meshSF
-        #
-        # def sf2elem(sf):
-        #     print('sf', sf)
-        #     return [case.numElem for case in self.msCases]
-        #     # for case in self.msCases:
-        #     #     if case.meshSF == sf:
-        #     #         return case.numElem
-        # secax = ax.secondary_xaxis('top', functions=(elem2sf, sf2elem))
-        # secax.set_xlabel('Mesh Size Factor')
-        #######################################
-        # Define a closure function to register as a callback
-        #
-        # def convert_ax_c_to_celsius(ax_f):
-        #     """
-        #     Update second axis according with first axis.
-        #     """
-        #     y1, y2 = ax_f.get_ylim()
-        #     ax_c.set_ylim(fahrenheit2celsius(y1), fahrenheit2celsius(y2))
-        #     ax_c.figure.canvas.draw()
-        #
-        # fig, ax_f = plt.subplots()
-        # ax_elem = ax_f.twinx()
-        #
-        # # automatically update ylim of ax2 when ylim of ax1 changes.
-        # ax_f.callbacks.connect("ylim_changed", convert_ax_c_to_celsius)
-        # ax_f.plot(np.linspace(-40, 120, 100))
-        # ax_f.set_xlim(0, 100)
-        #
-        # ax_f.set_title('Two scales: Fahrenheit and Celsius')
-        # ax_f.set_ylabel('Fahrenheit')
-        # ax_elem.set_ylabel('Celsius')
-        #################################################
-        # fName = f'ms_plot-{tail}-obj{obj_i}.png'
-        # fPath = os.path.join(self.meshStudyDir, fName)
-        # fig.savefig(fPath)
-        # fig.clf()
 
     def execMeshStudy(self):
-        print('\tEXECUTING MESH STUDY')
+        self.logger.info('\tEXECUTING MESH STUDY')
+        # self.logger.info(f'\t\tPARALLELIZING:\n\t\t {self.msCases}')
         self.parallelize(self.msCases)
         obj = np.array([case.f for case in self.msCases])
-        print('\tObjectives:\n\t\t', str(obj).replace('\n', '\n\t\t'))
+        self.logger.info('\tObjectives:\n\t\t'+str(obj).replace('\n', '\n\t\t'))
         self.saveCP()
         # nTask = int(self.procLim/self.BaseCase.nProc)
         # pool = mp.Pool(nTask)
@@ -435,18 +455,29 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         # pool.join()
 
     def meshStudy(self, restart=True):  # , meshSFs=None):
+        if self.meshSFs is None:
+            self.logger.error('EXITING MESH STUDY: Mesh Size Factors set to None. May be trying to do mesh study on a mesh study case.')
+            return
         # if meshSFs is None:
         #     meshSFs = self.meshSFs
         # if self.msCases is None:
         #     self.genMeshStudy()
-        print('MESH STUDY -', self)
-        if self.msCases is not None:
-            print('\t', [case.meshSF for case in self.msCases])
-            if all(self.meshSFs) != all([case.meshSF for case in self.msCases]):
-                print(
-                    '\t\t\t all(self.meshSFs) != all([case.meshSF for case in self.msCases])')
+        self.logger.info(f'MESH STUDY')
+        if self.msCases is None:
+            self.logger.info('\tNo Mesh Cases Found: self.msCases is None')
+            self.logger.info(f'\t {self.meshSFs}')
         else:
-            print('\t', self.meshSFs)
+            prev_meshSFs = [case.meshSF for case in self.msCases]
+            self.logger.info(f'\tCurrent Mesh Size Factors:\n\t\t{self.meshSFs}')
+            self.logger.info(f'\tPrevious Mesh Study Size Factors:\n\t\t{prev_meshSFs}')
+            if all(sf in prev_meshSFs for sf in self.meshSFs):
+                self.logger.info('\tALL CURRENT MESH SIZE FACTORS IN PREVIOUS MESH SIZE FACTORS')
+                self.plotMeshStudy()
+                self.logger.info('SKIPPED: MESH STUDY')
+                return
+            else:
+                self.logger.info(
+                    '\t\tOLD MESH SIZE FACTORS != NEW MESH SIZE FACTORS')
         # if not restart or self.msCases is None:
         #     self.genMeshStudy()
         # else:
@@ -459,11 +490,11 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         a_sf = [case.meshSF for case in self.msCases]
         dat = np.column_stack((a_numElem, a_sf))
         # Print
-        print('\tMesh Size Factors:', self.meshSFs)
-        print('\tNumber of Elements:', a_numElem)
-        print('\tNumber of Elements | Mesh Size Factor\n\t\t',
-              str(dat).replace('\n', '\n\t\t'))
-        saveTxt(self.meshStudyDir, 'numElem-vs-meshSFs.txt', dat)
+        self.logger.info(f'\tMesh Size Factors: {self.meshSFs}')
+        self.logger.info(f'\tNumber of Elements: {a_numElem}')
+        with np.printoptions(suppress=True):
+            self.logger.info('\tNumber of Elements | Mesh Size Factor\n\t\t'+str(dat).replace('\n', '\n\t\t'))
+            saveTxt(self.meshStudyDir, 'numElem-vs-meshSFs.txt', dat)
 
         self.execMeshStudy()
         self.plotMeshStudy()
@@ -479,6 +510,16 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #     os.makedirs(caseDir, exist_ok)
     #     self.
     #     self.caseDir = caseDir
+
+    @property
+    def meshStudyDir(self):
+        return os.path.join(self.caseDir, 'meshStudy')
+
+    @property
+    def cpPath(self):
+        return os.path.join(self.caseDir, 'case.npy')
+
+
     ### Job Lines ###
     @property
     def jobLines(self):
@@ -490,6 +531,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     def jobLines(self, lines):
         if self.jobPath is None:
             self.logger.info('self.jobPath is None: self.jobLines not written')
+        elif lines is None:
+            pass
         else:
             for i, line in enumerate(lines):
                 if not line.endswith('\n'):
@@ -508,6 +551,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     def inputLines(self, lines):
         if self.inputPath is None:
             self.logger.info('self.inputPath is None: Input lines not written')
+        elif lines is None:
+            pass
         else:
             for i, line in enumerate(lines):
                 if not line.endswith('\n'):
@@ -528,7 +573,6 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     ### Variables ###
     @property
     def x(self): return self._x
-
     @x.setter
     def x(self, x):
         x = np.array(x)
@@ -539,7 +583,6 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     ### Objectives ###
     @property
     def f(self): return self._f
-
     @f.setter
     def f(self, f):
         if f is not None:
@@ -548,6 +591,39 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             np.savetxt(path, f)
         self._f = f
 
+    @property
+    def meshSFs(self):return self._meshSFs
+    @meshSFs.setter
+    def meshSFs(self, meshSFs):
+        if meshSFs is None:
+            self._meshSFs = meshSFs
+            return
+        meshSFs, counts = np.unique(meshSFs, return_counts=True)
+        for sf_i, n_sf in enumerate(counts):
+            if n_sf > 1:
+                self.logger.warning(f'REPEATED MESH SIZE FACTOR - {meshSFs[sf_i]} repeated {n_sf} times')
+
+        if self.msCases is None:
+            self._meshSFs = meshSFs
+        else:
+            prev_meshSFs = [case.meshSF for case in self.msCases]
+            self.logger.debug(f'Current Mesh Size Factors:\n\t{self.meshSFs}')
+            self.logger.debug(f'Previous Mesh Study Size Factors:\n\t{prev_meshSFs}')
+            if all(sf in prev_meshSFs for sf in self.meshSFs):
+                self.logger.debug('ALL CURRENT MESH SIZE FACTORS IN PREVIOUS MESH SIZE FACTORS')
+                self._meshSFs = meshSFs
+            else:
+                self.logger.debug('OLD MESH SIZE FACTORS != NEW MESH SIZE FACTORS')
+                self._meshSFs = meshSFs
+                self.genMeshStudy()
+
+    # @property
+    # def meshSF(self): return self._meshSF
+    # @meshSF.setter
+    # def meshSF(self, meshSF):
+    #     if meshSF != self._meshSF:
+    #         self._meshSF = meshSF
+    #         self.genMesh()
     # @property
     # def msCases(self): return self._msCases
     # @msCases.setter
@@ -559,40 +635,104 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #    LOGGER    #
     ################
     def getLogger(self):
-        logger = logging.getLogger(__name__)
-        logger.setLevel(logging.DEBUG)
-        # File Handle
         _, tail = os.path.split(self.caseDir)
+        ## Get Child Logger using hierarchical "dot" convention
+        logger = logging.getLogger(__name__+'.'+self.caseDir)
+        logger.setLevel(logging.DEBUG)
+        ### Filters
+        ## Filters added to logger do not propogate up logger hierarchy
+        ## Filters added to handlers do propogate
+        # filt = DispNameFilter(self.caseDir)
+        # logger.addFilter(filt)
+        ## File Handle
         logFile = os.path.join(self.caseDir, f'{tail}.log')
         fileHandler = logging.FileHandler(logFile)
         logger.addHandler(fileHandler)
-        # Stream Handler
-        streamHandler = logging.StreamHandler(sys.stdout)
-        streamHandler.setLevel(logging.INFO)
-        logger.addHandler(streamHandler)
-        # Formatter
-        formatter = logging.Formatter(
-            '%(asctime)s : %(levelname)s : %(name)s : %(message)s')
+        ### Stream Handler
+        ## parent root logger takes care of stream display
+        ### Formatter
+        formatter = MultiLineFormatter(
+            '%(asctime)s :: %(levelname)-8s :: %(name)s :: %(message)s')
         fileHandler.setFormatter(formatter)
+        ### Initial Message
+        logger.info('-'*30)
+        logger.info('LOGGER INITIALIZED')
         return logger
 
     #######################
     #    CHECKPOINTING    #
     #######################
     def saveCP(self):
-        np.save(self.cpPath + '.temp.npy', self)
-        if os.path.exists(self.cpPath + '.npy'):
-            os.rename(self.cpPath + '.npy', self.cpPath + '.old.npy')
-        os.rename(self.cpPath + '.temp.npy', self.cpPath + '.npy')
-        if os.path.exists(self.cpPath + '.old.npy'):
-            os.remove(self.cpPath + '.old.npy')
+        try:
+            np.save(self.cpPath + '.temp.npy', self)
+            if os.path.exists(self.cpPath + '.npy'):
+                os.rename(self.cpPath + '.npy', self.cpPath + '.old.npy')
+            os.rename(self.cpPath + '.temp.npy', self.cpPath + '.npy')
+            if os.path.exists(self.cpPath + '.old.npy'):
+                os.remove(self.cpPath + '.old.npy')
+        except FileNotFoundError as err:
+            self.logger.error(str(err))
 
     def loadCP(self):
         if os.path.exists(self.cpPath + '.old'):
             os.rename(self.cpPath + '.old', self.cpPath + '.npy')
         cp, = np.load(self.cpPath + '.npy', allow_pickle=True).flatten()
-        self.__dict__.update(cp.__dict__)
-        self.logger.info(f'\tCHECKPOINT LOADED - from {self.cpPath}.npy')
+        self.logger.debug('\tRESTART DICTONARY:')
+        for key in self.__dict__:
+            self.logger.debug(f'\t\t{key}: {self.__dict__[key]}')
+        self.logger.debug('\tCHECKPOINT DICTONARY:')
+        for key in cp.__dict__:
+            self.logger.debug(f'\t\t{key}: {cp.__dict__[key]}')
+        # print(cp._x)
+        if np.array_equal(self._x, cp._x):
+            if self.caseDir != cp.caseDir:
+                self.logger.warning('CASE DIRECTORY CHANGED BETWEEN CHECKPOINTS')
+                self.logger.debug(str(cp.caseDir)+' -> '+str(self.caseDir))
+            if cp.cpPath != self.cpPath:
+                self.logger.warning(f'{cp.cpPath} != {self.cpPath}')
+            if cp.meshSF != self.meshSF:
+                self.logger.warning(f'{cp.meshSF} != {self.meshSF}')
+                self.logger.warning('Running genMesh() to reflect change in mesh size factor')
+                self.numElem = None
+                self.genMesh()
+                cp.meshSF = self.meshSF
+                self.logger.info('Mesh size factor changed, mesh generated, self.f and self.numElem set to None')
+                cp.f = None
+            cp.caseDir = self.caseDir
+            # cp.cpPath = self.cpPath
+            # cp.meshStudyDir = self.meshStudyDir
+            # cp.meshSFs = self.meshSFs
+            cp.baseCaseDir = self.baseCaseDir
+            # cp.logger = self.getLogger()
+            self.__dict__.update(cp.__dict__)
+            self.logger.info(f'CHECKPOINT LOADED - {self.cpPath}.npy')
+        else:
+            self.logger.info(f'Given Parameters: {self._x}')
+            self.logger.info(f'Checkpoint Parameters: {cp._x}')
+            question = f'\nCASE PARAMETERS DO NOT MATCH.\nEMPTY AND RESET {self.caseDir}?'
+            delete = yes_or_no(question)
+            if delete:
+                shutil.rmtree(self.caseDir)
+                self.__init__(self.caseDir, self.x)
+            else:
+                self.logger.exception('GIVEN PARAMETERS DO NOT MATCH CHECKPOINT PARAMETERS.')
+        # del_keys = []
+        # for cp_key in cp.__dict__:
+        #     if cp_key in self.__dict__:
+        #         print(cp_key, 'in self.__dict__')
+        #         print(self.__dict__[cp_key])
+        #         print(cp.__dict__[cp_key])
+        #         print(f'Updating - {cp_key}: {cp.__dict__[cp_key]} -> {self.__dict__[cp_key]}')
+        #         del_keys.append(cp_key)
+        #         del cp.__dict__[cp_key]
+        # for key in del_keys:
+        #     del cp.__dict__[key]
+        # print('self.__dict__', self.__dict__)
+        # print()
+        # print('cp.__dict__', cp.__dict__)
+        # cp.__dict__.update(self.__dict__)
+        ## Directory Name Changes
+
 
     ########################
     #    HELPER METHODS    #
@@ -601,7 +741,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         # if os.path.exists(self.caseDir):
         #     self.logger.warning('CASE OVERRIDE - self.caseDir already existed')
         shutil.copytree(self.baseCaseDir, self.caseDir, dirs_exist_ok=True)
-        self.logger.info(f'COPIED: {self.baseCaseDir} -> {self.caseDir}')
+        self.logger.info(f'COPIED FROM: {self.baseCaseDir}')
 
     def findKeywordLine(self, kw, file_lines):
         kw_line = -1
@@ -640,8 +780,11 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #    DUNDER METHODS    #
     ########################
     def __str__(self):
-        # with np.printoptions(suppress=True):
-        return f'Directory: {self.caseDir} | Parameters: {self.x}'
+        s = f'Directory: {self.caseDir} | Parameters: {self.x}'
+        if self._f is not None:
+            s += f' | Objectives: {self._f}'
+        return s
+
     # __repr__ = __str__
 
     # def __deepcopy__(self, memo):
@@ -675,7 +818,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #     pass
 
     def _solve(self):
-        print('OVERRIDE _solve(self) method to execute internal python solver OR use externalSolver=True')
+        self.logger.error('OVERRIDE _solve(self) method to execute internal python solver OR use CFDCase.externalSolver=True')
 
     def _execDone(self):
         return True

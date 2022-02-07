@@ -4,7 +4,7 @@ import os
 import time
 import h5py
 import warnings
-import matplotlib 
+import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
@@ -18,27 +18,27 @@ def radialAvg(grid3D, gridInterp3D, gridInterp2D, num_x_slices=None):
     zGrid = gridInterp3D.grid_z[::x_step]
     grid3D = grid3D[::x_step]
 
-    cylDat = [] 
+    cylDat = []
     for x_i, x_plane in enumerate(grid3D):
         xx = xGrid[x_i]
         assert np.all(xx == xx[0,0])
         yy = yGrid[x_i]
         zz = zGrid[x_i]
-    
+
         R = np.sqrt(yy**2+zz**2)
         R = R.round(decimals=10)
         R_unq = np.unique(R)
-        
+
         for r in R_unq:
             bool_mat = (R == r)
             radial_avg = grid3D[x_i][bool_mat].mean()
             # print('num. points used for calc.:', grid3D[x_i][bool_mat].shape[0])
             cylDat.append([xx[0,0], r, radial_avg])
-        
+
     cylDat = np.array(cylDat)
-    dat = cylDat[:,2] 
+    dat = cylDat[:,2]
     cylCoor = np.delete(cylDat, 2, axis=1)
-    
+
     # gridInterp2D boundary warning system
     rmin, rmax = min(cylCoor[:,1]), max(cylCoor[:,1])
     xmin, xmax = min(cylCoor[:,0]), max(cylCoor[:,0])
@@ -50,7 +50,7 @@ def radialAvg(grid3D, gridInterp3D, gridInterp2D, num_x_slices=None):
         warnings.warn(f'gridInterp2D.xmin < xmin : {gridInterp2D.xmin} > {xmin}')
     if gridInterp2D.xmax > xmax:
         warnings.warn(f'gridInterp2D.xmax > xmax : {gridInterp2D.xmax} > {xmax}')
-    # interoplate cylinderical coordinates onto universal grid 
+    # interoplate cylinderical coordinates onto universal grid
     radAvg_grid = gridInterp2D.getInterpGrid(cylCoor, dat)
     # gridInterp2D.plotGrid(radAvg_grid, 'Grid-rad_avg')
     return radAvg_grid
@@ -58,7 +58,7 @@ def radialAvg(grid3D, gridInterp3D, gridInterp2D, num_x_slices=None):
 
 
 class GridInterp2D:
-    def __init__(self, y2DumpPrefix, xmin, xmax, ymin, ymax, 
+    def __init__(self, y2DumpPrefix, xmin, xmax, ymin, ymax,
                  t_begin, t_end, t_resol, x_resol = 100j):
         self.xmin = xmin
         self.xmax = xmax
@@ -69,47 +69,55 @@ class GridInterp2D:
         dx = abs(xmax - xmin)
         dy = abs(ymax - ymin)
         y_resol = x_resol*(dy/dx)
-        self.grid_x, self.grid_y = np.mgrid[xmin:xmax:x_resol, 
+        self.grid_x, self.grid_y = np.mgrid[xmin:xmax:x_resol,
                                             ymin:ymax:y_resol]
         self.y2DumpPrefix = y2DumpPrefix
         self.t_begin = t_begin
         self.t_end = t_end
         self.t_resol = t_resol
-    
+
     def getInterpGrid(self, coor, val): # vals):
         print('     2D Interoplating...')
         start = time.time()
         # only linear interpolation available for 3D domains
-        grid = griddata(coor, val, (self.grid_x, self.grid_y), 
-                        method='cubic')
+        try:
+            grid = griddata(coor, val, (self.grid_x, self.grid_y),
+                            method='cubic')
+        except ValueError as err:
+            print(err)
+            grid = []
         # make NaN values zeros
         grid[np.isnan(grid)] = 0
         end = time.time()
         print('          interpolation time: %d seconds' %(end - start))
         return grid
-    
+
     def getCGNSData(self, cgnsPath, datID): # datIDs):
         print(f'     Getting CGNS data... {cgnsPath} {datID}')
-        with h5py.File(cgnsPath, 'r') as f:
-            xCoor = f['Base']['Zone']['GridCoordinates']['CoordinateX'][' data'][:]
-            yCoor = f['Base']['Zone']['GridCoordinates']['CoordinateY'][' data'][:]
-            
-            dat = f['Base']['Zone']['FlowSolution.N:1'][datID][' data'][:]
-            # dat = []
-            # for datID in datIDs: 
-            #     dat.append(f['Base']['Zone']['FlowSolution.N:1'][datID][' data'][:]) #'VelocityMagnitude'
-        coor = np.array([xCoor, yCoor]).T
-        # print('CGNS coor.shape', coor.shape)
-        return coor, dat
-    
+        try:
+            with h5py.File(cgnsPath, 'r') as f:
+                xCoor = f['Base']['Zone']['GridCoordinates']['CoordinateX'][' data'][:]
+                yCoor = f['Base']['Zone']['GridCoordinates']['CoordinateY'][' data'][:]
+
+                dat = f['Base']['Zone']['FlowSolution.N:1'][datID][' data'][:]
+                # dat = []
+                # for datID in datIDs:
+                #     dat.append(f['Base']['Zone']['FlowSolution.N:1'][datID][' data'][:]) #'VelocityMagnitude'
+            coor = np.array([xCoor, yCoor]).T
+            # print('CGNS coor.shape', coor.shape)
+            return coor, dat
+        except FileNotFoundError as err:
+            print(f'\t\t{err}')
+            return None, None
+
     def getY2SolnPaths(self, y2DatDir):
         '''
         Same as 3D no need to overwrite if class inheritence in place.
         Returns
         -------
         solnPaths : <list>
-            Each item structured as [solnDatPath, solnMeshPath] evenly spaced 
-            through time based on self.t_start, self.t_end and self.t_resol. 
+            Each item structured as [solnDatPath, solnMeshPath] evenly spaced
+            through time based on self.t_start, self.t_end and self.t_resol.
         '''
         # sort data files to find latest mesh and solution files
         ents = os.listdir(y2DatDir)
@@ -123,12 +131,12 @@ class GridInterp2D:
         i_final = ents.index(f'{self.y2DumpPrefix}{t_end_str}.xmf')
         ents_bnd = ents[i_init:i_final]
         # print(f'Interpreting from {ents[i_init]} to {ents[i_final]}')
-        
+
         # store latest mesh from dump before t_begin
         for ent in ents[:i_init]:
             if ent.endswith('.mesh.h5'):
                 latestMesh = ent
-        
+
         solnFiles = []
         for ent in ents_bnd:
             if ent.endswith('.mesh.h5'):
@@ -136,9 +144,9 @@ class GridInterp2D:
             if ent.endswith('.sol.h5'):
                 latestSoln = ent
                 solnFiles.append([latestSoln, latestMesh])
-        
+
         n_solns = len(solnFiles)
-        # use t_resol to reduce number of solution files 
+        # use t_resol to reduce number of solution files
         if self.t_resol > n_solns:
             warnings.warn(f't_resol too high, make t_resol <= {n_solns}')
         t_indices = np.linspace(0, n_solns-1, self.t_resol)
@@ -147,10 +155,10 @@ class GridInterp2D:
         solnPaths = [[os.path.join(y2DatDir, solnFile[0]), os.path.join(y2DatDir, solnFile[1])]
                       for solnFile in solnFiles]
         return solnPaths
-    
+
     # def getY2Grids(self, y2DatDir, datID): #, t_resol):
     #     '''
-    #     Same as 3D no need to overwrite if class inheritence in place 
+    #     Same as 3D no need to overwrite if class inheritence in place
     #     '''
     #     solnPaths = self.getY2SolnPaths(y2DatDir)
     #     # print(f'Interpreting grid with solution files: {solnFiles}')
@@ -160,13 +168,13 @@ class GridInterp2D:
     #         solnMeshPath = soln[1]
     #         grid, t = self.getY2Grid(solnDatPath, solnMeshPath, datID)
     #         grids.append([grid, t])
-        
+
     #     grids = np.array(grids, dtype=object)
     #     return grids
-    
+
     def getY2Data(self, solnPaths, datID):
         '''
-        Requires overwrite for 3D 
+        Requires overwrite for 3D
         '''
         print(f'     Getting YALES2 data... {datID}')
         print(f'          {solnPaths}')
@@ -187,10 +195,10 @@ class GridInterp2D:
         # t = np.array(t)
         return coor, dat, t
 
-    
+
     # def getY2Data(self, solnDatPath, solnMeshPath, datID):
     #     '''
-    #     Requires overwrite for 3D 
+    #     Requires overwrite for 3D
     #     '''
     #     print(f'Interoplating... {solnDatPath}, {solnMeshPath}')
     #     with h5py.File(solnDatPath, 'r') as f:
@@ -237,12 +245,12 @@ class GridInterp2D:
         mean_diff_all = np.mean(mean_diffs)
         mean_diffs = np.array(mean_diffs)
         return mean_diff_all
-    
+
     def getTimeStr(self, t):
         t_str = str(int(t*1)) # need attribute or parameter to adjust
         t_str = t_str.zfill(6)
         return t_str
-    
+
     def plot2DGrid(self, grid, title):
         plt.imshow(grid.T, extent=(self.xmin, self.xmax, self.ymin, self.ymax), origin='lower')
         plt.colorbar()
@@ -251,7 +259,7 @@ class GridInterp2D:
 
 
 class GridInterp3D(GridInterp2D):
-    def __init__(self, y2DumpPrefix, xmin, xmax, ymin, ymax, zmin, zmax, 
+    def __init__(self, y2DumpPrefix, xmin, xmax, ymin, ymax, zmin, zmax,
                  t_begin, t_end, t_resol, x_resol = 100j):
         super().__init__(y2DumpPrefix, xmin, xmax, ymin, ymax,
                          t_begin, t_end, t_resol, x_resol = x_resol)
@@ -259,24 +267,24 @@ class GridInterp3D(GridInterp2D):
         # self.xmax = xmax
         # self.ymin = ymin
         # self.ymax = ymax
-        ## new attributes 
-        self.zmin = zmin 
+        ## new attributes
+        self.zmin = zmin
         self.zmax = zmax
         # new grid to interpolate onto
-        ## overwite GridInterp2D attributes 
+        ## overwite GridInterp2D attributes
         dx = abs(xmax - xmin)
         dy = abs(ymax - ymin)
         dz = abs(zmax - zmin)
         y_resol = self.x_resol*(dy/dx)
         z_resol = self.x_resol*(dz/dx)
         self.grid_x, self.grid_y, self.grid_z = np.mgrid[xmin:xmax:x_resol,
-                                                         ymin:ymax:y_resol, 
+                                                         ymin:ymax:y_resol,
                                                          zmin:zmax:z_resol]
         # self.y2DumpPrefix = y2DumpPrefix
         # self.t_begin = t_begin
         # self.t_end = t_end
         # self.t_resol = t_resols
-    
+
     def getInterpGrid(self, coor, val): # vals):
         '''
         Overwite of GridInterp2D.getInterpGrid()
@@ -284,14 +292,14 @@ class GridInterp3D(GridInterp2D):
         print('     3D Interoplating...')
         start = time.time()
         # only linear interpolation available for 3D domains
-        grid = griddata(coor, val, (self.grid_x, self.grid_y, self.grid_z), 
+        grid = griddata(coor, val, (self.grid_x, self.grid_y, self.grid_z),
                         method='linear')
         # make NaN values zeros
         grid[np.isnan(grid)] = 0
         end = time.time()
         print('          interpolation time: %d seconds' %(end - start))
         return grid
-        
+
     def getCGNSData(cgnsPath, datID): # datIDs):
         '''
         Overwite of GridInterp2D.getCGNSData()
@@ -301,14 +309,14 @@ class GridInterp3D(GridInterp2D):
             xCoor = f['Base']['Zone']['GridCoordinates']['CoordinateX'][' data'][:]
             yCoor = f['Base']['Zone']['GridCoordinates']['CoordinateY'][' data'][:]
             zCoor = f['Base']['Zone']['GridCoordinates']['CoordinateZ'][' data'][:]
-            
+
             dat = f['Base']['Zone']['FlowSolution.N:1'][datID][' data'][:]
             # dat = []
-            # for datID in datIDs: 
+            # for datID in datIDs:
             #     dat.append(f['Base']['Zone']['FlowSolution.N:1'][datID][' data'][:]) #'VelocityMagnitude'
         coor = np.array([xCoor, yCoor, zCoor]).T
         return coor, dat
-    
+
     # def getY2Data(self, solnDatPath, solnMeshPath, datID):
         # '''
         # Overwrite of GridInterp2D.getY2Data()
@@ -316,11 +324,11 @@ class GridInterp3D(GridInterp2D):
         # Parameters
         # ----------
         # solnDatPath : str
-        #     system path to yales2 solution data file. 
+        #     system path to yales2 solution data file.
         # solnMeshPath : str
         #     system path to yales2 solution mesh file that accompanies solution data file.
         # datID : str
-        #     ID used in yales2 HDF5 solution data file. 
+        #     ID used in yales2 HDF5 solution data file.
 
         # Returns
         # -------
@@ -342,10 +350,10 @@ class GridInterp3D(GridInterp2D):
         Parameters
         ----------
         solnDatPaths : <list>
-            Each item structured as [solnDatPath, solnMeshPath] evenly spaced 
-            through time based on self.t_start, self.t_end and self.t_resol. 
+            Each item structured as [solnDatPath, solnMeshPath] evenly spaced
+            through time based on self.t_start, self.t_end and self.t_resol.
         datID : str
-            ID used in yales2 HDF5 solution data file. 
+            ID used in yales2 HDF5 solution data file.
 
         Returns
         -------
@@ -393,19 +401,19 @@ class GridInterp3D(GridInterp2D):
     #     mean_diff_all = np.mean(mean_diffs)
     #     mean_diffs = np.array(mean_diffs)
     #     return mean_diff_all
-    
+
     # def getTimeStr(self, t):
     #     t_str = str(int(t*1))
     #     t_str = t_str.zfill(6)
     #     return t_str
-    
+
     # def plotGrid(self, grid, title):
     #     plt.imshow(grid.T) #, extent=(self.xmin, self.xmax, self.ymin, self.ymax), origin='lower')
     #     plt.colorbar()
     #     plt.savefig(f'interp_grid-{title.replace(" ", "_")}.png')
     #     plt.clf()
-        
-# import time    
+
+# import time
 # #### TEST #####
 # xmin = -0.5
 # xmax = 0.5
@@ -416,7 +424,7 @@ class GridInterp3D(GridInterp2D):
 # t_end = 1
 # t_resol = 2 # evaluate t_resol time steps
 
-# gridInterp = GridInterp('droplet_convection', 
+# gridInterp = GridInterp('droplet_convection',
 #                         xmin, xmax, ymin, ymax,
 #                         t_begin, t_end, t_resol
 #                         )
