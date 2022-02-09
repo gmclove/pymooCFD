@@ -1,3 +1,4 @@
+import numpy as np
 # #################
 # #    PROBLEM    #
 # #################
@@ -60,22 +61,22 @@
 # problem = GA_CFD()
 #
 #
-# #################
-# #    DISPLAY    #
-# #################
-# from pymoo.util.display import Display
-#
-# class MyDisplay(Display):
-#     def _do(self, problem, evaluator, algorithm):
-#         super()._do(problem, evaluator, algorithm)
-#         for obj in range(problem.n_obj):
-#             self.output.append(f"mean obj.{obj + 1}", np.mean(algorithm.pop.get('F')[:, obj]))
-#             self.output.append(f"best obj.{obj+1}", algorithm.pop.get('F')[:, obj].min())
-#         self.output.header()
-#
-# display = MyDisplay()
-#
-#
+#################
+#    DISPLAY    #
+#################
+from pymoo.util.display import Display
+
+class MyDisplay(Display):
+    def _do(self, problem, evaluator, algorithm):
+        super()._do(problem, evaluator, algorithm)
+        for obj in range(problem.n_obj):
+            self.output.append(f"mean obj.{obj + 1}", np.mean(algorithm.pop.get('F')[:, obj]))
+            self.output.append(f"best obj.{obj+1}", algorithm.pop.get('F')[:, obj].min())
+        self.output.header()
+
+display = MyDisplay()
+
+
 # ##################
 # #    CALLBACK    #
 # ##################

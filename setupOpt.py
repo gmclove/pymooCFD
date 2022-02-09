@@ -119,7 +119,7 @@ termination = get_termination("n_gen", n_gen)
 #    ALGORITHM    #
 ###################
 from pymoo.algorithms.moo.nsga2 import NSGA2
-from pymoo.factory import get_sampling, get_crossover, get_mutation
+# from pymoo.factory import get_sampling, get_crossover, get_mutation
 ### initialize algorithm here
 ## will be overwritten in runOpt() if checkpoint already exists
 algorithm = NSGA2(pop_size=pop_size,

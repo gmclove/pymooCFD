@@ -3,6 +3,7 @@
 # @Last modified by:   glove
 # @Last modified time: 2021-12-16T09:33:00-05:00
 import numpy as np
+from glob import glob
 import os
 import subprocess
 import time
@@ -23,6 +24,9 @@ from pymooCFD.util.loggingTools import MultiLineFormatter, DispNameFilter
 
 class CFDCase:  # (PreProcCase, PostProcCase)
     baseCaseDir = None
+    datFile = None
+    inputFile = None
+    meshFile = None
     ####### Define Design Space #########
     n_var = None
     var_labels = None
@@ -132,7 +136,10 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         else:
             self.inputPath = os.path.join(self.caseDir, inputFile)
 
-        if datFile is None:
+        # # if class level variable is None then assign instance attribute
+        # if self.datFile is None:
+        #     self.datFile = datFile
+        if self.datFile is None:
             self.datPath = None
         else:
             self.datPath = os.path.join(self.caseDir, datFile)
@@ -170,12 +177,14 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         #    Attributes To Be Set Later During Each Run   #
         ###################################################
         self.f = None  # if not None then case complete
-        # meshing attributes
+        ## meshing attributes
         self.msCases = None
+        self.numElem = None
+        # class properties
         self._meshSF = None
         self.meshSF = meshSF
-        self._meshSFs = meshSFs
-        self.numElem = None
+        self._meshSFs = None
+        self.meshSFs = meshSFs
 
         self.inputLines = None
         self.jobLines = None
@@ -211,27 +220,28 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         if externalSolver is None:
             externalSolver = cls.externalSolver
         if cls.procLim is None:
-            nTasks = 1000000
+            cls.nTasks = 1000000
         elif cls.nTasks is None:
-            nTasks = int(cls.procLim / cls.nProc)
-        else:
-            nTasks = cls.nTasks
+            cls.nTasks = int(cls.procLim / cls.nProc)
+        # else:
+        #     nTasks = cls.nTasks
         if externalSolver:
             assert cls.solverExecCmd is not None
-            assert cls.nProc is not None
-            assert cls.procLim is not None
+            assert cls.nTasks is not None
             cls._solve = cls.solveExternal
-            cls.pool = mp.pool.ThreadPool(nTasks)
+            cls.pool = mp.pool.ThreadPool(cls.nTasks)
         else:
             cls._solve = cls._solve
-            cls.pool = mp.Pool(nTasks)
+            cls.pool = mp.Pool(cls.nTasks)
 
     @classmethod
     def parallelize(cls, cases):
         cls.parallelizeInit()
+        print('PARALLELIZING')
+        print(cases)
         #cls.logger.info('PARALLELIZING . . .')
         if cls.onlyParallelizeSolve:
-            #cls.logger.info('\tParallelizing Only Solve')
+            print('\tParallelizing Only Solve')
             for case in cases:
                 case.preProc()
             for case in cases:
@@ -284,6 +294,10 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         #self.logger.info(f'Solve Time: {start-end}')
 
     def run(self):
+        print('RUNNING', self)
+        self._execDone()
+        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+        print(self._execDone())
         if self.f is None and not self._execDone():
             self.preProc()
             self.solve()
@@ -294,7 +308,6 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                 self.logger.info('RE-RUNNING')
                 self.run()
             self.postProc()
-
         elif self.f is None:
             self.postProc()
         else:
@@ -663,13 +676,14 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #    CHECKPOINTING    #
     #######################
     def saveCP(self):
+        cpPath = self.cpPath.replace('.npy', '')
         try:
-            np.save(self.cpPath + '.temp.npy', self)
-            if os.path.exists(self.cpPath + '.npy'):
-                os.rename(self.cpPath + '.npy', self.cpPath + '.old.npy')
-            os.rename(self.cpPath + '.temp.npy', self.cpPath + '.npy')
-            if os.path.exists(self.cpPath + '.old.npy'):
-                os.remove(self.cpPath + '.old.npy')
+            np.save(cpPath + '.temp.npy', self)
+            if os.path.exists(cpPath + '.npy'):
+                os.rename(cpPath + '.npy', cpPath + '.old.npy')
+            os.rename(cpPath + '.temp.npy', cpPath + '.npy')
+            if os.path.exists(cpPath + '.old.npy'):
+                os.remove(cpPath + '.old.npy')
         except FileNotFoundError as err:
             self.logger.error(str(err))
 
@@ -829,7 +843,87 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     def _genMesh(self):
         pass
 
+from pymooCFD.util.handleData import findKeywordLine
+import re
 
+class YALES2Case(CFDCase):
+    # def __init__(self, caseDir, x, *args, **kwargs):
+    #     super().__init__(caseDir, x, *args, **kwargs)
+
+    def solve(self):
+        super().solve()
+        self.wallTime = self.getWallTime()
+
+    def getWallTime(self):
+        fName, = glob('solver01_rank*.log')
+        with open(fName, 'rb') as f:
+            try:  # catch OSError in case of a one line file
+                f.seek(-1020, os.SEEK_END)
+            except OSError:
+                f.seek(0)
+            clock_line = f.readline().decode()
+        if 'WALL CLOCK TIME' in clock_line:
+            wall_time = int(float(clock_line[-13:]))
+            self.logger.info(f'YALES2 Wall Clock Time: {wall_time} seconds')
+        else:
+            self.logger.warning('no wall clock time found')
+            wall_time = None
+        return wall_time
+
+    def getLatestXMF(self):
+        ents = os.listdir(self.dumpDir)
+        ents.sort()
+        for ent in ents:
+            if ent.endswith('.xmf') and not re.search('.sol.+_.+\\.xmf', ent):
+                latestXMF = ent
+        return latestXMF
+
+    def getLatestMesh(self):
+        ents = os.listdir(self.dumpDir)
+        ents.sort()
+        for ent in ents:
+            if ent.endswith('.mesh.h5'):
+                latestMesh = ent
+        return latestMesh
+
+    def getLatestSoln(self):
+        ents = os.listdir(self.dumpDir)
+        ents.sort()
+        for ent in ents:
+            if ent.endswith('.sol.h5'):
+                latestSoln = ent
+        return latestSoln
+
+    def getLatestDataFiles(self):
+        latestMesh = self.getLatestMesh()
+        latestSoln = self.getLatestSoln()
+        return latestMesh, latestSoln
+
+    # def setRestart(self):
+    #     # latestMesh, latestSoln = self.getLatestDataFiles()
+    #     latestMesh = self.getLatestMesh()
+    #     latestSoln = self.getLatestSoln()
+    #     # with open(self.inputPath, 'r') as f:
+    #     #     in_lines = f.readlines()
+    #     in_lines = self.inputLines
+    #     kw = 'RESTART_TYPE = GMSH'
+    #     kw_line, kw_line_i = findKeywordLine(kw, in_lines)
+    #     in_lines[kw_line_i] = '#' + kw
+    #     kw = "RESTART_GMSH_FILE = '2D_cylinder.msh22'"
+    #     kw_line, kw_line_i = findKeywordLine(kw, in_lines)
+    #     in_lines[kw_line_i] = '#' + kw
+    #     kw = "RESTART_GMSH_NODE_SWAPPING = TRUE"
+    #     kw_line, kw_line_i = findKeywordLine(kw, in_lines)
+    #     in_lines[kw_line_i] = '#' + kw
+    #     in_lines.append('RESTART_TYPE = XMF')
+    #     in_lines.append('RESTART_XMF_SOLUTION = dump/' + latestXMF)
+    #     # with open(self.inputPath, 'w') as f:
+    #     #     f.writelines(in_lines)
+    #     self.inputLines = in_lines
+
+    @property
+    def dumpDir(self):
+        return os.path.join(self.caseDir, 'dump')
 ###################
 #    FUNCTIONS    #
 ###################

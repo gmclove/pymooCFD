@@ -1,6 +1,7 @@
 from pymooCFD.util.handleData import findKeywordLine
 import os
 import re
+from glob import glob
 
 def getLatestMesh(dumpDir):
     ents = os.listdir(dumpDir)
@@ -38,7 +39,7 @@ def setRestart(inPath, dumpDir):
     # latestMesh, latestSoln = getLatestDataFiles(dumpDir)
     latestMesh = getLatestMesh(dumpDir)
     latestSoln = getLatestSoln(dumpDir)
-    
+
     with open(inPath, 'r') as f:
         in_lines = f.readlines()
     kw = 'RESTART_TYPE = GMSH'
@@ -53,8 +54,19 @@ def setRestart(inPath, dumpDir):
     with open(inPath, 'w') as f:
         f.writelines(in_lines)
 
-    
-    
-    
-
-    
+def getWallTime(caseDir):
+    search_str = os.path.join(caseDir, 'solver01_rank*.log')
+    fName, = glob(search_str)
+    with open(fName, 'rb') as f:
+        try:  # catch OSError in case of a one line file
+            f.seek(-1020, os.SEEK_END)
+        except OSError:
+            f.seek(0)
+        clock_line = f.readline().decode()
+    if 'WALL CLOCK TIME' in clock_line:
+        wall_time = int(float(clock_line[-13:]))
+        print(f'YALES2 Wall Clock Time: {wall_time} seconds')
+    else:
+        print('no wall clock time found')
+        wall_time = None
+    return wall_time

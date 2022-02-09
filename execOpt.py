@@ -3,11 +3,12 @@
 # @Last modified by:   glove
 # @Last modified time: 2021-12-16T09:37:30-05:00
 
-from setupOpt import optStudy
+#from setupOpt import optStudy
 import numpy as np
-from pymooCFD.studies.oscillCyl import BaseCase
-from pymoo.factory import get_termination
+#from pymooCFD.studies.oscillCyl import BaseCase
+#from pymoo.factory import get_termination
 import os
+from pymooCFD.studies.oscillCyl_soo import optStudy
 
 def main():
     '''
@@ -15,8 +16,13 @@ def main():
 
     import your optimization study object/instance from setupOpt.py and execute
     '''
-    noOscCase = optStudy.BaseCase('no_osc_case', [0, 0])
-    noOscCase.run()
+    print(optStudy.algorithm.__dict__)
+    print(optStudy.problem.__dict__)
+    print(optStudy.BaseCase.__dict__)
+    print(optStudy.__dict__)
+    optStudy.run()
+    #noOscCase = optStudy.BaseCase('no_osc_case', [0, 0])
+    #noOscCase.run()
 
     #optStudy.runDir = os.path.join(optStudy.optDatDir, 'run')
     #optStudy.saveCP()

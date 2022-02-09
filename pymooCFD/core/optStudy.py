@@ -240,6 +240,7 @@ class OptStudy:
             self.saveCP()
             # evaluate the individuals using the algorithm's evaluator (necessary to count evaluations for termination)
             self.algorithm.evaluator.eval(self.problem, evalPop)
+            print(evalPop.get('F'))
             # returned the evaluated individuals which have been evaluated or even modified
             self.algorithm.tell(infills=evalPop)
 
@@ -644,11 +645,15 @@ class OptStudy:
         '''
         if self.cornerCases is None:
             self.genCornerCases()
+        else:
+            self.logger.warning('SKIPPED: GENERATE CORNER CASES - call self.genCornerCases() directly to create new corner cases')
         self.BaseCase.parallelize(self.cornerCases)
 
     def runBndCases(self, n_pts=2, getDiags=False, doMeshStudy=False):
         if self.bndCases is None:
             self.genBndCases(n_pts=n_pts, getDiags=getDiags)
+        else:
+            self.logger.warning('SKIPPED: GENERATE BOUNDARY CASES - call self.genBndCases() directly to create new boundary cases')
         self.BaseCase.parallelize(self.bndCases)
         self.saveCP()
         obj = [case.f for case in self.bndCases]
@@ -662,7 +667,16 @@ class OptStudy:
         plot = Scatter(title= 'Objective Space: Boundary Cases',
                        legend = True, labels = self.BaseCase.obj_labels)
         for obj in F:
-            plot.add(obj, label='[%.2f, %.2f]'%(obj[0],obj[1]))
+            # nComp = len(obj)
+            # label = '['
+            # for i in range(nComp):
+            #     if i != nComp-1:
+            #         label += '%.2g, '%obj[i]
+            #     else:
+            #         label += '%.2g'%obj[i]
+            # label += ']'
+            # plot.add(obj, label=label)
+            plot.add(obj, label=self.getPointLabel(obj))
         path = os.path.join(self.runDir, 'boundary-cases', 'bndPts_plot-objSpace.png')
         plot.save(path)
         # plot.show()
@@ -690,15 +704,16 @@ class OptStudy:
                        # grid=True
                        )
         for var in bndPts:
-            nComp = len(var)
-            label = '['
-            for i in range(nComp):
-                if i != nComp-1:
-                    label += '%.2g, '%var[i]
-                else:
-                    label += '%.2g'%var[i]
-            label += ']'
-            plot.add(var, label=label)
+            # nComp = len(var)
+            # label = '['
+            # for i in range(nComp):
+            #     if i != nComp-1:
+            #         label += '%.2g, '%var[i]
+            #     else:
+            #         label += '%.2g'%var[i]
+            # label += ']'
+            # plot.add(var, label=label)
+            plot.add(var, label=self.getPointLabel(var))
         path = os.path.join(self.runDir, 'boundary-cases', 'bndPts_plot-varSpace.png')
         plot.save(path)
         # bndPts = np.array(bndPts)
@@ -896,6 +911,18 @@ class OptStudy:
             case = self.BaseCase(paths[x_i], x)
             cases.append(case)
         return cases
+
+    @staticmethod
+    def getPointLabel(pt):
+        nComp = len(pt)
+        label = '['
+        for i in range(nComp):
+            if i != nComp-1:
+                label += '%.2g, '%pt[i]
+            else:
+                label += '%.2g'%pt[i]
+        label += ']'
+        return label
 
     @staticmethod
     def loadCases(directory):
