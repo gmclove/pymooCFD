@@ -4,6 +4,7 @@ test_case/
 base_case/
 **/__pycache__/
 __pycache__/
+**/__pycache__
 **/bin/
 optStudy-*/
 **/nohup.out
