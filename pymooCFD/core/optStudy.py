@@ -554,8 +554,13 @@ class OptStudy:
         # shutil.rmtree('test_case', ignore_errors=True)
         xl = self.problem.xl
         xu = self.problem.xu
-        x_mid = [xl[x_i] + (xu[x_i] - xl[x_i]) /
-                 2 for x_i in range(self.problem.n_var)]
+        x_mid = [xl[x_i] + (xu[x_i] - xl[x_i]) / 2
+                 for x_i in range(self.problem.n_var)]
+        # for x_i, type in enumerate(self.BaseCase.varType):
+        #     if type == 'int':
+        #         x_mid[x_i] = int(x_mid[x_i])
+        x_mid = [int(x_mid[x_i]) for x_i, type in enumerate(self.BaseCase.varType)
+                 if type == 'int']
         testCaseDir = os.path.join(self.runDir, testCaseDir)
         self.testCase = self.BaseCase(testCaseDir, x_mid)  # , restart=True)
 
