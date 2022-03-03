@@ -80,11 +80,11 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                  meshSF=1,
                  meshSFs=np.around(np.arange(0.5, 1.5, 0.1), decimals=2),
                  # externalSolver=False,
-                 var_labels=None, obj_labels=None,
-                 meshFile=None,  # meshLines = None,
-                 jobFile=None,  # jobLines = None,
-                 inputFile=None,  # inputLines = None,
-                 datFile=None,
+                 # var_labels=None, obj_labels=None,
+                 # meshFile=None,  # meshLines = None,
+                 # jobFile=None,  # jobLines = None,
+                 # inputFile=None,  # inputLines = None,
+                 # datFile=None,
                  # restart=False,
                  # solverExecCmd=None,
                  *args, **kwargs
@@ -99,6 +99,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         # self.cpPath = os.path.join(self.caseDir, 'case')
         # self.meshStudyDir = os.path.join(self.caseDir, 'meshStudy')
         self.meshSF = meshSF
+        # Using kwargs
         # self.meshSF = kwargs.get('meshSF', 1)
 
         ###########################
@@ -137,15 +138,19 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         #############################
         #    Optional Attributes    #
         #############################
-        self.meshFile = meshFile
-        self.jobFile = jobFile
-        self.datFile = datFile
-        self.inputFile = inputFile
+        # self.meshFile = meshFile
+        # self.jobFile = jobFile
+        # self.datFile = datFile
+        # self.inputFile = inputFile
+        self.jobFile = kwargs.get('jobFile')
+        self.inputFile = kwargs.get('inputFile')
+        self.datFile = kwargs.get('datFile')
+        self.meshFile = kwargs.get('meshFile')
 
-        if inputFile is None:
+        if self.inputFile is None:
             self.inputPath = None
         else:
-            self.inputPath = os.path.join(self.caseDir, inputFile)
+            self.inputPath = os.path.join(self.caseDir, self.inputFile)
 
         # # if class level variable is None then assign instance attribute
         # if self.datFile is None:
@@ -153,23 +158,26 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         if self.datFile is None:
             self.datPath = None
         else:
-            self.datPath = os.path.join(self.caseDir, datFile)
+            self.datPath = os.path.join(self.caseDir, self.datFile)
 
-        if meshFile is None:
+        if self.meshFile is None:
             self.meshPath = None
         else:
-            self.meshPath = os.path.join(self.caseDir, meshFile)
+            self.meshPath = os.path.join(self.caseDir, self.meshFile)
 
-        if jobFile is None:
+        if self.jobFile is None:
             self.jobPath = None
         else:
-            self.jobPath = os.path.join(self.caseDir, jobFile)
+            self.jobPath = os.path.join(self.caseDir, self.jobFile)
         ####################
         #    Attributes    #
         ####################
         self.x = np.array(x)
         # Default Attributes
         # os.makedirs(self.baseCaseDir, exist_ok=True)
+        # Using kwargs (not an option with labels as class variables)
+        # self.var_labels = kwargs.get('var_labels')
+        # self.obj_labels = kwargs.get('obj_labels')
 
         # Design and Objective Space Labels
         if self.var_labels is None:
@@ -1090,7 +1098,7 @@ class YALES2Case(CFDCase):
 
     def solve(self):
         super().solve()
-        # self.wallTime = self.getWallTime()
+        self.wallTime = self.getWallTime()
 
     def getWallTime(self):
         search_str = os.path.join(self.caseDir, 'solver01_rank*.log')
@@ -1168,58 +1176,60 @@ class FluentCase(CFDCase):
     pass
 
 
-class YALES2Case(CFDCase):
-    # def __init__(self, caseDir, x, *args, **kwargs):
-    #     super().__init__(caseDir, x, *args, **kwargs)
-
-    def solve(self):
-        super().solve()
-        self.wallTime = self.getWallTime()
-
-    # def getWallTime(self):
-    #     fName, = glob('solver01_rank*.log')
-    #     with open(fName, 'rb') as f:
-    #         try:  # catch OSError in case of a one line file
-    #             f.seek(-1020, os.SEEK_END)
-    #         except OSError:
-    #             f.seek(0)
-    #         clock_line = f.readline().decode()
-    #     if 'WALL CLOCK TIME' in clock_line:
-    #         wall_time = int(float(clock_line[-13:]))
-    #         self.logger.info(f'YALES2 Wall Clock Time: {wall_time} seconds')
-    #     else:
-    #         self.logger.warning('no wall clock time found')
-    #         wall_time = None
-    #     return wall_time
-
-    def getLatestXMF(self):
-        ents = os.listdir(self.dumpDir)
-        ents.sort()
-        for ent in ents:
-            if ent.endswith('.xmf') and not re.search('.sol.+_.+\\.xmf', ent):
-                latestXMF = ent
-        return latestXMF
-
-    def getLatestMesh(self):
-        ents = os.listdir(self.dumpDir)
-        ents.sort()
-        for ent in ents:
-            if ent.endswith('.mesh.h5'):
-                latestMesh = ent
-        return latestMesh
-
-    def getLatestSoln(self):
-        ents = os.listdir(self.dumpDir)
-        ents.sort()
-        for ent in ents:
-            if ent.endswith('.sol.h5'):
-                latestSoln = ent
-        return latestSoln
-
-    def getLatestDataFiles(self):
-        latestMesh = self.getLatestMesh()
-        latestSoln = self.getLatestSoln()
-        return latestMesh, latestSoln
+# class YALES2Case(CFDCase):
+#     # def __init__(self, caseDir, x, *args, **kwargs):
+#     #     super().__init__(caseDir, x, *args, **kwargs)
+#
+#     def solve(self):
+#         super().solve()
+#         self.wallTime = self.getWallTime()
+#
+#     def getWallTime(self):
+#         search_str = os.path.join(self.caseDir, 'solver01_rank*.log')
+#         fPaths = glob(search_str)
+#         for fPath in fPaths:
+#             with open(fPath, 'rb') as f:
+#                 try:  # catch OSError in case of a one line file
+#                     f.seek(-1020, os.SEEK_END)
+#                 except OSError:
+#                     f.seek(0)
+#                 clock_line = f.readline().decode()
+#             if 'WALL CLOCK TIME' in clock_line:
+#                 wall_time = int(float(clock_line[-13:]))
+#                 self.logger.info(f'YALES2 Wall Clock Time: {wall_time} seconds')
+#             else:
+#                 self.logger.warning('no wall clock time found')
+#                 wall_time = None
+#             return wall_time
+#
+#     def getLatestXMF(self):
+#         ents = os.listdir(self.dumpDir)
+#         ents.sort()
+#         for ent in ents:
+#             if ent.endswith('.xmf') and not re.search('.sol.+_.+\\.xmf', ent):
+#                 latestXMF = ent
+#         return latestXMF
+#
+#     def getLatestMesh(self):
+#         ents = os.listdir(self.dumpDir)
+#         ents.sort()
+#         for ent in ents:
+#             if ent.endswith('.mesh.h5'):
+#                 latestMesh = ent
+#         return latestMesh
+#
+#     def getLatestSoln(self):
+#         ents = os.listdir(self.dumpDir)
+#         ents.sort()
+#         for ent in ents:
+#             if ent.endswith('.sol.h5'):
+#                 latestSoln = ent
+#         return latestSoln
+#
+#     def getLatestDataFiles(self):
+#         latestMesh = self.getLatestMesh()
+#         latestSoln = self.getLatestSoln()
+#         return latestMesh, latestSoln
 
     # def setRestart(self):
     #     # latestMesh, latestSoln = self.getLatestDataFiles()
@@ -1242,11 +1252,11 @@ class YALES2Case(CFDCase):
     #     # with open(self.inputPath, 'w') as f:
     #     #     f.writelines(in_lines)
     #     self.inputLines = in_lines
-
-    @property
-    def dumpDir(self):
-        return os.path.join(self.caseDir, 'dump')
-###################
+#
+#     @property
+#     def dumpDir(self):
+#         return os.path.join(self.caseDir, 'dump')
+# ###################
 #    FUNCTIONS    #
 ###################
 # def saveTxt(path, fname, data):

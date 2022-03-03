@@ -5,10 +5,17 @@
 import numpy as np
 import os
 
-path = None
+l = ['0', '1', '2', '3']
+print(l)
+l.insert(1, 'new-1')
+print(l)
+l.insert(2, 'new-2')
+print(l)
 
-with open(path, 'r') as f:
-    lines = f.readlines()
+# path = None
+#
+# with open(path, 'r') as f:
+#     lines = f.readlines()
 
 # val1 = None
 # val2 = 2
@@ -29,7 +36,6 @@ with open(path, 'r') as f:
 # for x, y in l:
 #     print(x)
 #     print(y)
-
 
 
 # path = os.path.join('.', 'case.npy')
@@ -65,7 +71,7 @@ with open(path, 'r') as f:
 # print(optStudy.algorithm.has_next())
 # print(optStudy.algorithm.termination)
 # print(optStudy.algorithm.termination.n_gen)
-#optStudy.plotBndPts(optStudy.getBndPts())
+# optStudy.plotBndPts(optStudy.getBndPts())
 
 
 # s = 'blank'
