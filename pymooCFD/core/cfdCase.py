@@ -953,14 +953,38 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         self.logger.info(f'COPIED FROM: {self.baseCaseDir}')
 
     # @staticmethod
-    def findKeywordLines(self, kw, file_lines, exact=False):
+    def findKeywordLines(self, kw, file_lines, exact=False, stripKW=True):
         kw_lines = []
+        if stripKW:
+            kw = kw.rstrip().lstrip()
         for line_i, line in enumerate(file_lines):
-            if exact and kw.rstrip().lstrip() == line:
+            if exact and kw == line:
                 kw_lines.append([line_i, line])
             elif line.find(kw) >= 0:
                 kw_lines.append([line_i, line])
         return kw_lines
+
+    def findAndReplaceKeywordLines(file_lines, newLine, kws, replaceOnce=False, exact=False, stripKW=True):
+        '''
+        Finds and replaces any file_lines with newLine that match keywords (kws) give.
+        If no keyword lines are found the newLine is inserted at the beginning of the file_lines.
+        '''
+        kw_lines_array = []
+        for kw in kws:
+            kw_lines_array.append(self.findKeywordLines(
+                kw, file_lines, exact=exact, stripKW=stripKW))
+        print(kw_lines_array)
+        if sum([len(kw_lines) for kw_lines in kw_lines_array]) > 0:
+            def replace():
+                for kw_lines in kw_lines_array:
+                    for line_i, line in kw_lines:
+                        file_lines[line_i] = newLine
+                        if replaceOnce:
+                            return
+            replace()
+        else:
+            file_lines.insert(0, newLine)
+        return file_lines
 
     def commentKeywordLines(self, kw, file_lines, marker='#', exact=False):
         kw_lines = self.findKeywordLines(kw, file_lines, exact=exact)

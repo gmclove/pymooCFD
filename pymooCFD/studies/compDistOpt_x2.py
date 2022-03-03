@@ -58,19 +58,35 @@ class CompDistSLURM(YALES2Case):
         # read job lines
         job_lines = self.jobLines
         if len(job_lines) > 0:
-            kw_lines = self.findKeywordLines(
-                '#SBATCH --cpus-per-task', job_lines)
-            for line_i, line in kw_lines:
-                job_lines[line_i] = f'#SBATCH --cpus-per-task={c}'
-            kw_lines = self.findKeywordLines('#SBATCH -c', job_lines)
-            for line_i, line in kw_lines:
-                job_lines[line_i] = f'#SBATCH --cpus-per-task={c}'
-            kw_lines = self.findKeywordLines('#SBATCH --ntasks', job_lines)
-            for line_i, line in kw_lines:
-                job_lines[line_i] = f'#SBATCH --ntasks={ntasks}'
-            kw_lines = self.findKeywordLines('#SBATCH -n', job_lines)
-            for line_i, line in kw_lines:
-                job_lines[line_i] = f'#SBATCH --ntasks={ntasks}'
+            newLine = f'#SBATCH --cpus-per-task={c}'
+            kws = ['#SBATCH --cpus-per-task', '#SBATCH -c']
+            job_lines = self.findAndReplaceKeywordLines(
+                job_lines, newLine, kws)
+
+            newLine = f'#SBATCH --ntasks={ntasks}'
+            kws = ['#SBATCH --ntasks', '#SBATCH -n']
+            job_lines = self.findAndReplaceKeywordLines(
+                job_lines, newLine, kws)
+            # kw_lines_1 = self.findKeywordLines(
+            #     '#SBATCH --cpus-per-task', job_lines)
+            # kw_lines_2 = self.findKeywordLines('#SBATCH -c', job_lines)
+            # if len(kw_lines_1) > 0 or len(kw_lines_2) > 0:
+            #     for line_i, line in kw_lines_1:
+            #         job_lines[line_i] = newLine
+            #     for line_i, line in kw_lines_2:
+            #         job_lines[line_i] = newLine
+            # else:
+            #     job_lines.insert(0, newLine)
+            # newLine = f'#SBATCH --ntasks={ntasks}'
+            # kw_lines_1 = self.findKeywordLines('#SBATCH --ntasks', job_lines)
+            # kw_lines_2 = self.findKeywordLines('#SBATCH -n', job_lines)
+            # if len(job_lines) > 0:
+            #     for line_i, line in kw_lines_1:
+            #         job_lines[line_i] = newLine
+            #     for line_i, line in kw_lines_2:
+            #         job_lines[line_i] = newLine
+            # else:
+            #     job_lines.insert(0, newLine)
             # write job lines
             self.jobLines = job_lines
         elif self.jobFile in self.solverExecCmd:
