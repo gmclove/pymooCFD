@@ -973,7 +973,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         for kw in kws:
             kw_lines_array.append(self.findKeywordLines(
                 kw, file_lines, exact=exact, stripKW=stripKW))
-        print(kw_lines_array)
+        # print(kw_lines_array)
         if sum([len(kw_lines) for kw_lines in kw_lines_array]) > 0:
             def replace():
                 for kw_lines in kw_lines_array:
