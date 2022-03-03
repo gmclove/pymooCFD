@@ -49,6 +49,7 @@ class CompDistSLURM(YALES2Case):
                          meshSF=meshSF,
                          jobFile='jobslurm.sh',
                          meshFile='2D_cylinder.msh22',
+                         inputFile='2D_cylinder.in'
                          # *args, **kwargs
                          )
 
@@ -66,7 +67,7 @@ class CompDistSLURM(YALES2Case):
             newLine = f'#SBATCH --ntasks={ntasks}'
             kws = ['#SBATCH --ntasks', '#SBATCH -n']
             job_lines = self.findAndReplaceKeywordLines(
-                job_lines, newLine, kws)
+                job_lines, newLine, kws, insertIndex=1)
             # kw_lines_1 = self.findKeywordLines(
             #     '#SBATCH --cpus-per-task', job_lines)
             # kw_lines_2 = self.findKeywordLines('#SBATCH -c', job_lines)
