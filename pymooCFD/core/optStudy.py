@@ -332,11 +332,14 @@ class OptStudy:
         logger.setLevel(config.OPT_STUDY_LOGGER_LEVEL)
         # define handlers
         # if not logger.handlers:
+        # file handler
         fileHandler = logging.FileHandler(f'{self.optName}.log')
+        logger.addHandler(fileHandler)
+        # stream handler
         streamHandler = logging.StreamHandler()  # sys.stdout)
         streamHandler.setLevel(logging.DEBUG)
-        logger.addHandler(fileHandler)
-        logger.addHandler(streamHandler)
+        if streamHandler not in logger.handlers:
+            logger.addHandler(streamHandler)
         # define filter
         # filt = DispNameFilter(self.optName)
         # logger.addFilter(filt)
