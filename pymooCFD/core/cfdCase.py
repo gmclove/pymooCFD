@@ -964,7 +964,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                 kw_lines.append([line_i, line])
         return kw_lines
 
-    def findAndReplaceKeywordLines(file_lines, newLine, kws, replaceOnce=False, exact=False, stripKW=True):
+    def findAndReplaceKeywordLines(self, file_lines, newLine, kws, replaceOnce=False, exact=False, stripKW=True):
         '''
         Finds and replaces any file_lines with newLine that match keywords (kws) give.
         If no keyword lines are found the newLine is inserted at the beginning of the file_lines.

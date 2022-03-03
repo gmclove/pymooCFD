@@ -50,11 +50,12 @@ class OscillCylinder(YALES2Case):
                          jobFile='jobslurm.sh',
                          inputFile='2D_cylinder.in',
                          meshSF=meshSF,
+                         meshSF=[0.5, 0.75, 1.5, 2, 3, 4, 5]
                          # meshSFs=[0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8],
-                         meshSFs=np.append(
-                             np.around(
-                                 np.arange(0.3, 1.6, 0.1), decimals=2),
-                             [0.25, 0.35, 0.45]),
+                         # meshSFs=np.append(
+                         #     np.around(
+                         #         np.arange(0.3, 1.6, 0.1), decimals=2),
+                         #     [0.25, 0.35, 0.45]),
                          # *args, **kwargs
                          )
 
