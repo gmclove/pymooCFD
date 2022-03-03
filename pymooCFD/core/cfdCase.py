@@ -1098,12 +1098,6 @@ class YALES2Case(CFDCase):
         for fPath in fPaths:
             with open(fPath, 'rb') as f:
                 final_lines = self.tail(f, lines=10)
-                # try:  # catch OSError in case of a one line file
-                #     f.seek(-1020, os.SEEK_END)
-                # except OSError:
-                #     f.seek(0)
-                # clock_line = f.readline().decode()
-            # print(clock_line)
             for line in final_lines:
                 if 'WALL CLOCK TIME' in line:
                     wall_time = int(float(line[-13:]))
