@@ -12,7 +12,7 @@ from glob import glob
 from scipy.integrate import quad
 
 from pymooCFD.util.yales2Tools import getLatestXMF
-from pymooCFD.core.cfdCase import YALES2Case #CFDCase
+from pymooCFD.core.cfdCase import YALES2Case  # CFDCase
 
 
 class OscillCylinder(YALES2Case):
@@ -44,10 +44,10 @@ class OscillCylinder(YALES2Case):
                          meshSF=0.4,
                          # meshSFs=[0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8],
                          meshSFs=np.append(
-                                    np.around(
-                                        np.arange(0.3, 1.6, 0.1), decimals=2),
-                                        [0.25, 0.35, 0.45])
-                       )
+                             np.around(
+                                 np.arange(0.3, 1.6, 0.1), decimals=2),
+                             [0.25, 0.35, 0.45])
+                         )
 
     def _execDone(self):
         fPath = os.path.join(self.caseDir, 'solver01_rank00.log')
@@ -367,13 +367,16 @@ class OscillCylinder(YALES2Case):
     #     # This should be called when you are done using the Gmsh Python API:
     #     gmsh.finalize()
 
+
 class OscillCylinderOpt(OptStudy):
     def __init__(self, algorithm, problem, BaseCase,
-                 *args, **kwargs):
+                 # *args, **kwargs
+                 ):
         super().__init__(algorithm, problem, BaseCase,
-                         baseCaseDir='base_cases/osc-cyl_base',
+                         # baseCaseDir='base_cases/osc-cyl_base',
                          # optDatDir='cyl-opt_run',
-                         *args, **kwargs)
+                         # *args, **kwargs
+                         )
 
     # def execute(self, cases):
     #     self.singleNodeExec(cases)

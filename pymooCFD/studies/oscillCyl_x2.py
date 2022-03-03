@@ -43,8 +43,7 @@ class OscillCylinder(YALES2Case):
     procLim = 40
     solverExecCmd = ['mpirun', '-n', str(nProc), '2D_cylinder']
 
-    def __init__(self, caseDir, x, meshSF=0.4, *args, **kwargs):
-        # kwargs['meshSF'] = kwargs.get('meshSF', 0.4)
+    def __init__(self, caseDir, x, meshSF=1):  # , *args, **kwargs):
         super().__init__(caseDir, x,
                          meshFile='2D_cylinder.msh22',
                          datFile='FORCES_temporal.txt',
@@ -56,25 +55,9 @@ class OscillCylinder(YALES2Case):
                              np.around(
                                  np.arange(0.3, 1.6, 0.1), decimals=2),
                              [0.25, 0.35, 0.45]),
-                         *args,
-                         **kwargs
+                         # *args, **kwargs
                          )
 
-    def _execDone(self):
-        # print('EXECUTION DONE?')
-        searchPath = os.path.join(self.caseDir, 'solver01_rank*.log')
-        resPaths = glob(searchPath)
-        for fPath in resPaths:
-            with open(fPath, 'rb') as f:
-                try:  # catch OSError in case of a one line file
-                    f.seek(-2, os.SEEK_END)
-                    while f.read(1) != b'\n':
-                        f.seek(-2, os.SEEK_CUR)
-                except OSError:
-                    f.seek(0)
-                last_line = f.readline().decode()
-            if 'in destroy_mpi' in last_line:
-                return True
         # fPath = os.path.join(self.caseDir, 'solver01_rank00.log')
         # if os.path.exists(fPath):
         #     with open(fPath, 'rb') as f:
@@ -562,13 +545,15 @@ class OscillCylinder(YALES2Case):
 
 class OscillCylinderOpt(OptStudy):
     def __init__(self, algorithm, problem, BaseCase,
-                 *args, **kwargs):
+                 # *args, **kwargs
+                 ):
         super().__init__(algorithm, problem, BaseCase,
                          optName='OscCylX2',
                          # n_opt = 20,
                          # baseCaseDir='base_cases/osc-cyl_base',
                          # optDatDir='cyl-opt_run',
-                         *args, **kwargs)
+                         # *args, **kwargs
+                         )
 
 
 MyOptStudy = OscillCylinderOpt

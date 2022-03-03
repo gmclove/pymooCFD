@@ -150,13 +150,15 @@ class CompDistSLURM_YALES2(CFDCase):
 
 class SOO(OptStudy):
     def __init__(self, algorithm, problem, BaseCase,
-                 *args, **kwargs):
+                 # *args, **kwargs
+                 ):
         super().__init__(algorithm, problem, BaseCase,
                          optName='CompDistSOO-test',
                          n_opt=20,
                          # baseCaseDir='base_cases/osc-cyl_base',
                          # optDatDir='cyl-opt_run',
-                         *args, **kwargs)
+                         # *args, **kwargs
+                         )
 
 
 MyOptStudy = SOO

@@ -35,7 +35,7 @@ class OptStudy:
                  # procLim=os.cpu_count(),
                  # var_labels=None, obj_labels=None,
                  # client=None,
-                 *args, **kwargs
+                 # *args, **kwargs
                  ):
         super().__init__()
         #######################################

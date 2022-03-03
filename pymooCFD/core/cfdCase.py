@@ -80,14 +80,14 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                  meshSF=1,
                  meshSFs=np.around(np.arange(0.5, 1.5, 0.1), decimals=2),
                  # externalSolver=False,
-                 # var_labels=None, obj_labels=None,
-                 # meshFile=None,  # meshLines = None,
-                 # jobFile=None,  # jobLines = None,
-                 # inputFile=None,  # inputLines = None,
-                 # datFile=None,
+                 var_labels=None, obj_labels=None,
+                 meshFile=None,  # meshLines = None,
+                 jobFile=None,  # jobLines = None,
+                 inputFile=None,  # inputLines = None,
+                 datFile=None,
                  # restart=False,
                  # solverExecCmd=None,
-                 *args, **kwargs
+                 # *args, **kwargs
                  ):
         super().__init__()
         if not len(self.xl) == len(self.xu) and len(self.xu) == len(self.var_labels) and len(self.var_labels) == self.n_var:
@@ -138,14 +138,14 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         #############################
         #    Optional Attributes    #
         #############################
-        # self.meshFile = meshFile
-        # self.jobFile = jobFile
-        # self.datFile = datFile
-        # self.inputFile = inputFile
-        self.jobFile = kwargs.get('jobFile')
-        self.inputFile = kwargs.get('inputFile')
-        self.datFile = kwargs.get('datFile')
-        self.meshFile = kwargs.get('meshFile')
+        self.meshFile = meshFile
+        self.jobFile = jobFile
+        self.datFile = datFile
+        self.inputFile = inputFile
+        # self.jobFile = kwargs.get('jobFile')
+        # self.inputFile = kwargs.get('inputFile')
+        # self.datFile = kwargs.get('datFile')
+        # self.meshFile = kwargs.get('meshFile')
 
         if self.inputFile is None:
             self.inputPath = None
@@ -1075,6 +1075,22 @@ class YALES2Case(CFDCase):
     #     else:
     #         self.logger.error('YALES2 input file (.in) can not be read')
     #     super().preProc()
+    def _execDone(self):
+        # print('EXECUTION DONE?')
+        searchPath = os.path.join(self.caseDir, 'solver01_rank*.log')
+        resPaths = glob(searchPath)
+        for fPath in resPaths:
+            with open(fPath, 'rb') as f:
+                try:  # catch OSError in case of a one line file
+                    f.seek(-2, os.SEEK_END)
+                    while f.read(1) != b'\n':
+                        f.seek(-2, os.SEEK_CUR)
+                except OSError:
+                    f.seek(0)
+                last_line = f.readline().decode()
+            if 'in destroy_mpi' in last_line:
+                return True
+
     def _preProc_restart(self):
         self._preProc()
         # read input lines
@@ -1099,6 +1115,7 @@ class YALES2Case(CFDCase):
     def solve(self):
         super().solve()
         self.wallTime = self.getWallTime()
+        self.saveCP()
 
     def getWallTime(self):
         search_str = os.path.join(self.caseDir, 'solver01_rank*.log')

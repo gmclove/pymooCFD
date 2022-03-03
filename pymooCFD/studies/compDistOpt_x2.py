@@ -42,25 +42,29 @@ class CompDistSLURM(YALES2Case):
     externalSolver = True
     solverExecCmd = ['sbatch', '--wait', 'jobslurm.sh']
 
-    # def __init__(self, baseCaseDir, caseDir, x,
-    #              *args, **kwargs):
-    #     super().__init__(baseCaseDir, caseDir, x,
-    #                      *args, **kwargs)
+    def __init__(self, caseDir, x, meshSF=1.0,
+                 # *args, **kwargs
+                 ):
+        super().__init__(caseDir, x,
+                         meshSF=meshSF,
+                         jobFile='jobslurm.sh',
+                         meshFile='2D_cylinder.msh22',
+                         # *args, **kwargs
+                         )
 
     def _preProc(self):
         ntasks = self.x[0]
         c = self.x[1]
         # read job lines
         job_lines = self.jobLines
-        print(job_lines)
-        if job_lines:
+        if len(job_lines) > 0:
             kw_lines = self.findKeywordLines(
                 '#SBATCH --cpus-per-task', job_lines)
             for line_i, line in kw_lines:
                 job_lines[line_i] = f'#SBATCH --cpus-per-task={c}'
             kw_lines = self.findKeywordLines('#SBATCH -c', job_lines)
             for line_i, line in kw_lines:
-                job_lines[line_i] = f'#SBATCH --cpu-per-task={c}'
+                job_lines[line_i] = f'#SBATCH --cpus-per-task={c}'
             kw_lines = self.findKeywordLines('#SBATCH --ntasks', job_lines)
             for line_i, line in kw_lines:
                 job_lines[line_i] = f'#SBATCH --ntasks={ntasks}'
@@ -69,10 +73,11 @@ class CompDistSLURM(YALES2Case):
                 job_lines[line_i] = f'#SBATCH --ntasks={ntasks}'
             # write job lines
             self.jobLines = job_lines
+        elif self.jobFile in self.solverExecCmd:
+            self.solverExecCmd.insert(
+                1, '-c').insert(2, str(c)).insert(3, '-n').insert(4, str(ntasks))
         else:
             self.logger.warning('INCOMPLETE: PRE-PROCESSING')
-        #     self.solverExecCmd.insert(
-        #         '-c', 1).insert(str(c), 2).insert('-n', 3).insert(str(ntasks), 4)
 
     def _postProc(self):
         self.f = self.solnTime
@@ -83,13 +88,15 @@ class CompDistSLURM(YALES2Case):
 
 class SOO(OptStudy):
     def __init__(self, algorithm, problem, BaseCase,
-                 *args, **kwargs):
+                 # *args, **kwargs
+                 ):
         super().__init__(algorithm, problem, BaseCase,
                          optName='CompDistSOO-test',
                          n_opt=20,
                          # baseCaseDir='base_cases/osc-cyl_base',
                          # optDatDir='cyl-opt_run',
-                         *args, **kwargs)
+                         # *args, **kwargs
+                         )
 
 
 MyOptStudy = SOO

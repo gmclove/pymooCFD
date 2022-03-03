@@ -59,37 +59,22 @@ class OscillCylinder(OscCylX2):
     #                          [0.25, 0.35, 0.45])
     #                      )
 
-    def _execDone(self):
-        # print('EXECUTION DONE?')
-        searchPath = os.path.join(self.caseDir, 'solver01_rank*.log')
-        resPaths = glob(searchPath)
-        for fPath in resPaths:
-            with open(fPath, 'rb') as f:
-                try:  # catch OSError in case of a one line file
-                    f.seek(-2, os.SEEK_END)
-                    while f.read(1) != b'\n':
-                        f.seek(-2, os.SEEK_CUR)
-                except OSError:
-                    f.seek(0)
-                last_line = f.readline().decode()
-            if 'in destroy_mpi' in last_line:
-                return True
-        # fPath = os.path.join(self.caseDir, 'solver01_rank00.log')
-        # if os.path.exists(fPath):
-        #     with open(fPath, 'rb') as f:
-        #         print(f)
-        #         try:  # catch OSError in case of a one line file
-        #             f.seek(-2, os.SEEK_END)
-        #             while f.read(1) != b'\n':
-        #                 f.seek(-2, os.SEEK_CUR)
-        #         except OSError:
-        #             f.seek(0)
-        #         last_line = f.readline().decode()
-        #     return bool('in destroy_mpi' in last_line)
-        # dumpDir = os.path.join(self.caseDir, 'dump')
-        # finalSolnPath = os.path.join(dumpDir, '2D_cyl.sol000400.xmf')
-        # if os.path.isfile(finalSolnPath) and os.path.isfile(self.datPath):
-        #     return True
+    # fPath = os.path.join(self.caseDir, 'solver01_rank00.log')
+    # if os.path.exists(fPath):
+    #     with open(fPath, 'rb') as f:
+    #         print(f)
+    #         try:  # catch OSError in case of a one line file
+    #             f.seek(-2, os.SEEK_END)
+    #             while f.read(1) != b'\n':
+    #                 f.seek(-2, os.SEEK_CUR)
+    #         except OSError:
+    #             f.seek(0)
+    #         last_line = f.readline().decode()
+    #     return bool('in destroy_mpi' in last_line)
+    # dumpDir = os.path.join(self.caseDir, 'dump')
+    # finalSolnPath = os.path.join(dumpDir, '2D_cyl.sol000400.xmf')
+    # if os.path.isfile(finalSolnPath) and os.path.isfile(self.datPath):
+    #     return True
 #            with open(self.datPath) as f:
 #                lines = f.readlines()
 #                if lines[-1][:5] == ' 2000':
@@ -227,13 +212,15 @@ class OscillCylinder(OscCylX2):
 
 class OscillCylinderOpt(OptStudy):
     def __init__(self, algorithm, problem, BaseCase,
-                 *args, **kwargs):
+                 # *args, **kwargs
+                 ):
         super().__init__(algorithm, problem, BaseCase,
                          optName='OscCylX3',
                          # n_opt = 20,
                          # baseCaseDir='base_cases/osc-cyl_base',
                          # optDatDir='cyl-opt_run',
-                         *args, **kwargs)
+                         # *args, **kwargs
+                         )
 
 
 MyOptStudy = OscillCylinderOpt

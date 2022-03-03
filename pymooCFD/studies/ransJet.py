@@ -10,6 +10,7 @@
 #         super().__init__(externalSolver)
 
 
+from pymooCFD.core.optStudy import OptStudy
 import gmsh
 import math
 from pymooCFD.core.cfdCase import FluentCase
@@ -29,21 +30,21 @@ class RANSJet(FluentCase):
     # Define grid interpolation parameters and perform interpolation on high
     # quality simulation. These results can be compared to lower quality
     # simulations on a universal grid.
-    hqSim_dir=os.path.join('rans_jet_opt', 'hq_sim')
-    hqSim_y2DatDir=os.path.join(hqSim_dir, 'dump')
-    y2DumpPrefix='pipe_expansion.sol'
-    xmin, xmax=1.0, 2.0
-    ymin, ymax=-0.5, 0.5
-    zmin, zmax=-0.5, 0.5
-    t_begin, t_end=80, 100
-    t_resol=t_end - t_begin  # highest quality
-    gridInterp3D=GridInterp3D(y2DumpPrefix, xmin, xmax, ymin, ymax, zmin, zmax,
+    hqSim_dir = os.path.join('rans_jet_opt', 'hq_sim')
+    hqSim_y2DatDir = os.path.join(hqSim_dir, 'dump')
+    y2DumpPrefix = 'pipe_expansion.sol'
+    xmin, xmax = 1.0, 2.0
+    ymin, ymax = -0.5, 0.5
+    zmin, zmax = -0.5, 0.5
+    t_begin, t_end = 80, 100
+    t_resol = t_end - t_begin  # highest quality
+    gridInterp3D = GridInterp3D(y2DumpPrefix, xmin, xmax, ymin, ymax, zmin, zmax,
                                 t_begin, t_end, t_resol,
                                 x_resol=200j)
     # SPECIAL CASE: Radial Averaging
     # initialize 2D gridInterp object for interpolating onto after getting
     # radial average
-    gridInterp2D=GridInterp2D(gridInterp3D.y2DumpPrefix,
+    gridInterp2D = GridInterp2D(gridInterp3D.y2DumpPrefix,
                                 gridInterp3D.xmin, gridInterp3D.xmax,
                                 0.01, gridInterp3D.ymax,
                                 gridInterp3D.t_begin, gridInterp3D.t_end,
@@ -51,54 +52,53 @@ class RANSJet(FluentCase):
                                 x_resol=gridInterp3D.x_resol)
     # stop expensive spatiotemporal interoplation from being performed each time
     # by checking if path exists already
-    hqGrid_uMag_path_3D=os.path.join(hqSim_dir, 'hqGrid_uMag-3D.npy')
+    hqGrid_uMag_path_3D = os.path.join(hqSim_dir, 'hqGrid_uMag-3D.npy')
     if not os.path.exists(hqGrid_uMag_path_3D):
         with h5py.File(os.path.join(hqSim_dir, 'merged-mesh.h5')) as h5f:
-            coor=h5f['XYZ'][:]
+            coor = h5f['XYZ'][:]
             print(coor.shape)
         with h5py.File(os.path.join(hqSim_dir, 'merged-u_mean.h5')) as h5f:
-            dset1=list(h5f.keys())[0]
-            uMean=h5f[dset1][:]
-        mag_uMean=np.linalg.norm(uMean, axis=1)
-        hqGrid_mag_uMean=gridInterp3D.getInterpGrid(coor, mag_uMean)
+            dset1 = list(h5f.keys())[0]
+            uMean = h5f[dset1][:]
+        mag_uMean = np.linalg.norm(uMean, axis=1)
+        hqGrid_mag_uMean = gridInterp3D.getInterpGrid(coor, mag_uMean)
         np.save(hqGrid_uMag_path_3D, hqGrid_mag_uMean)
         gridInterp3D.plot3DGrid(hqGrid_mag_uMean, 'hqGrid_uMag-3D')
     else:
-        hqGrid_uMag_3D=np.load(hqGrid_uMag_path_3D)
+        hqGrid_uMag_3D = np.load(hqGrid_uMag_path_3D)
 
-    hqGrid_uMag_path=os.path.join(hqSim_dir, 'hqGrid_uMag.npy')
+    hqGrid_uMag_path = os.path.join(hqSim_dir, 'hqGrid_uMag.npy')
     if not os.path.exists(hqGrid_uMag_path):
         # radial average
-        hqGrid_uMag=radialAvg(hqGrid_uMag_3D, gridInterp3D, gridInterp2D)
+        hqGrid_uMag = radialAvg(hqGrid_uMag_3D, gridInterp3D, gridInterp2D)
         gridInterp2D.plot2DGrid(hqGrid_uMag, 'hqGrid_uMag_radAvg')
         # save binary
         np.save(hqGrid_uMag_path, hqGrid_uMag)
     else:
-        hqGrid_uMag=np.load(hqGrid_uMag_path)
+        hqGrid_uMag = np.load(hqGrid_uMag_path)
 
-
-    hqGrid_phi_path_3D=os.path.join(hqSim_dir, 'hqGrid_phi-3D.npy')
+    hqGrid_phi_path_3D = os.path.join(hqSim_dir, 'hqGrid_phi-3D.npy')
     if not os.path.exists(hqGrid_phi_path_3D):
         with h5py.File(os.path.join(hqSim_dir, 'merged-mesh.h5')) as h5f:
-            coor=h5f['XYZ'][:]
+            coor = h5f['XYZ'][:]
         with h5py.File(os.path.join(hqSim_dir, 'merged-phi_mean.h5')) as h5f:
-            dset1=list(h5f.keys())[0]
-            phiMean=h5f[dset1][:]
-        hqGrid_phi_3D=gridInterp3D.getInterpGrid(coor, phiMean)
+            dset1 = list(h5f.keys())[0]
+            phiMean = h5f[dset1][:]
+        hqGrid_phi_3D = gridInterp3D.getInterpGrid(coor, phiMean)
         np.save(hqGrid_phi_path_3D, hqGrid_phi_3D)
         gridInterp3D.plot3DGrid(hqGrid_phi_3D, 'hqGrid_phi-3D')
     else:
-        hqGrid_phi_3D=np.load(hqGrid_phi_path_3D)
+        hqGrid_phi_3D = np.load(hqGrid_phi_path_3D)
 
-    hqGrid_phi_path=os.path.join(hqSim_dir, 'hqGrid_phi.npy')
+    hqGrid_phi_path = os.path.join(hqSim_dir, 'hqGrid_phi.npy')
     if not os.path.exists(hqGrid_phi_path):
         # radial average
-        hqGrid_phi=radialAvg(hqGrid_phi_3D, gridInterp3D, gridInterp2D)
+        hqGrid_phi = radialAvg(hqGrid_phi_3D, gridInterp3D, gridInterp2D)
         gridInterp2D.plot2DGrid(hqGrid_phi, 'hqGrid_phi_radAvg')
         # save binary
         np.save(hqGrid_phi_path, hqGrid_phi)
     else:
-        hqGrid_phi=np.load(hqGrid_phi_path)
+        hqGrid_phi = np.load(hqGrid_phi_path)
 
     ####### Define Design Space #########
     n_var = 2
@@ -129,8 +129,8 @@ class RANSJet(FluentCase):
         super().__init__(caseDir, x,
                          meshSF=0.4,
                          meshSFs=np.append(
-                                     np.around(np.arange(0.3, 1.6, 0.1), decimals=2),
-                                     [0.25, 0.35, 0.45]),
+                             np.around(np.arange(0.3, 1.6, 0.1), decimals=2),
+                             [0.25, 0.35, 0.45]),
                          meshFile='jet_rans-axi_sym.unv',
                          datFile='jet_rans-axi_sym.cgns',
                          jobFile='jobslurm.sh',
@@ -303,7 +303,7 @@ class RANSJet(FluentCase):
             f'/file/import ideas-universal {self.meshFile}',
             # AUTO-SAVE
             '/file/auto-save case-frequency if-case-is-modified',
-    	    '/file/auto-save data-frequency 1000',
+            '/file/auto-save data-frequency 1000',
             # MODEL
             '/define/models axisymmetric y',
             '/define/models/viscous kw-sst y',
@@ -343,7 +343,7 @@ class RANSJet(FluentCase):
             'OK',
             '/exit',
             'OK'
-            ]
+        ]
         self.inputLines = lines
         ####### Slurm Job Lines #########
         lines = ['#!/bin/bash',
@@ -367,7 +367,7 @@ class RANSJet(FluentCase):
         #     # f'/file/import ideas-universal {self.meshFile}',
         #     # # AUTO-SAVE
         #     # '/file/auto-save case-frequency if-case-is-modified',
-    	#     # '/file/auto-save data-frequency 1000',
+        #     # '/file/auto-save data-frequency 1000',
         #     # # MODEL
         #     # '/define/models axisymmetric y',
         #     # '/define/models/viscous kw-sst y',
@@ -421,7 +421,7 @@ class RANSJet(FluentCase):
         #     f'/file/import ideas-universal {self.meshFile}',
         #     # AUTO-SAVE
         #     '/file/auto-save case-frequency if-case-is-modified',
-    	#     '/file/auto-save data-frequency 1000',
+        #     '/file/auto-save data-frequency 1000',
         #     # MODEL
         #     '/define/models axisymmetric y',
         #     '/define/models/viscous kw-sst y',
@@ -471,13 +471,15 @@ class RANSJet(FluentCase):
 
         ######## Compute Objectives ##########
         ######## Objective 1: Mean Difference in Scalar Distribution #########
-        coor, dat = self.gridInterp2D.getCGNSData(self.datPath, 'Mass_fraction_of_scalar')
+        coor, dat = self.gridInterp2D.getCGNSData(
+            self.datPath, 'Mass_fraction_of_scalar')
         ransGrid_phi = self.gridInterp2D.getInterpGrid(coor, dat)
         dnsGrid_phi = self.hqGrid_phi
         phi_meanDiff = np.mean(abs(ransGrid_phi - dnsGrid_phi))
 
         ######## Objective 2: Mean Difference in Velocity Magnitude #########
-        coor, dat = self.gridInterp2D.getCGNSData(self.datPath, 'VelocityMagnitude')
+        coor, dat = self.gridInterp2D.getCGNSData(
+            self.datPath, 'VelocityMagnitude')
         ransGrid_uMag = self.gridInterp2D.getInterpGrid(coor, dat)
         dnsGrid_uMag = self.hqGrid_uMag
         uMag_meanDiff = np.mean(abs(ransGrid_uMag - dnsGrid_uMag))
@@ -487,7 +489,8 @@ class RANSJet(FluentCase):
 
         ##### SAVE DATA VISUALIZATION ######
         # phi grid plot
-        plt.imshow(ransGrid_phi.T, extent=(self.gridInterp2D.xmin, self.gridInterp2D.xmax, self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
+        plt.imshow(ransGrid_phi.T, extent=(self.gridInterp2D.xmin, self.gridInterp2D.xmax,
+                   self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
         plt.colorbar()
         plt.title('RANS - Mass Fraction of Scalar')
         path = os.path.join(self.caseDir, 'RANS-phi-grid.png')
@@ -495,14 +498,16 @@ class RANSJet(FluentCase):
         plt.clf()
         # phi difference plot
         phiDiffGrid = ransGrid_phi - dnsGrid_phi
-        plt.imshow(phiDiffGrid.T, extent=(self.gridInterp2D.xmin, self.gridInterp2D.xmax, self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
+        plt.imshow(phiDiffGrid.T, extent=(self.gridInterp2D.xmin, self.gridInterp2D.xmax,
+                   self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
         plt.colorbar()
         plt.title('RANS DNS Difference - Mass Fraction of Scalar')
         path = os.path.join(self.caseDir, 'diff-phi-grid.png')
         plt.savefig(path)
         plt.clf()
         # uMag grid plot
-        plt.imshow(ransGrid_uMag.T, extent=(self.gridInterp2D.xmin, self.gridInterp2D.xmax, self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
+        plt.imshow(ransGrid_uMag.T, extent=(self.gridInterp2D.xmin, self.gridInterp2D.xmax,
+                   self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
         plt.colorbar()
         plt.title('RANS - Velocity Magnitude')
         path = os.path.join(self.caseDir, 'RANS-uMag-grid.png')
@@ -510,7 +515,8 @@ class RANSJet(FluentCase):
         plt.clf()
         # uMag difference plot
         uMagDiffGrid = ransGrid_uMag - dnsGrid_uMag
-        plt.imshow(uMagDiffGrid.T, extent=(self.gridInterp2D.xmin, self.gridInterp2D.xmax, self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
+        plt.imshow(uMagDiffGrid.T, extent=(self.gridInterp2D.xmin, self.gridInterp2D.xmax,
+                   self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
         plt.colorbar()
         plt.title('RANS DNS Difference - Velocity Magnitude')
         path = os.path.join(self.caseDir, 'diff-uMag-grid.png')
@@ -518,15 +524,14 @@ class RANSJet(FluentCase):
         plt.clf()
 
 
-
-from pymooCFD.core.optStudy import OptStudy
 class RANSJetOpt(OptStudy):
     def __init__(self, algorithm, problem, BaseCase,
-                 *args, **kwargs):
-
+                 # *args, **kwargs
+                 ):
         super().__init__(algorithm, problem, BaseCase,
                          # optDatDir='jet-opt_run',
-                         *args, **kwargs)
+                         # *args, **kwarg
+                         )
 
     # def execute(self, cases):
     #     self.slurmExec(cases)
@@ -534,5 +539,6 @@ class RANSJetOpt(OptStudy):
     def preProc(self):
         pass
 
-MyOptStudy=RANSJetOpt
-BaseCase=RANSJet
+
+MyOptStudy = RANSJetOpt
+BaseCase = RANSJet

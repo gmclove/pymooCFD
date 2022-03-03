@@ -22,17 +22,21 @@ def main():
     # print(optStudy.BaseCase.__dict__)
     # print(optStudy.__dict__)
 
-    noOscCase_Re100 = optStudy.BaseCase('no_osc_x3_Re100_case', [0, 0, 1])
-    noOscCase_Re200 = optStudy.BaseCase('no_osc_x3_Re200_case', [0, 0, 2])
-    noOscCase_Re300 = optStudy.BaseCase('no_osc_x3_Re300_case', [0, 0, 3])
-    noOscCase_Re400 = optStudy.BaseCase('no_osc_x3_Re400_case', [0, 0, 4])
-    noOscCase_Re500 = optStudy.BaseCase('no_osc_x3_Re500_case', [0, 0, 5])   
+    noOscCase_Re100 = optStudy.BaseCase('no_osc_x3_Re100_case', [0, 0, 1])#, meshFile='2D_cylinder.msh22')
+    noOscCase_Re200 = optStudy.BaseCase('no_osc_x3_Re200_case', [0, 0, 2])#, meshFile='2D_cylinder.msh22')
+    noOscCase_Re300 = optStudy.BaseCase('no_osc_x3_Re300_case', [0, 0, 3])#, meshFile='2D_cylinder.msh22')
+    noOscCase_Re400 = optStudy.BaseCase('no_osc_x3_Re400_case', [0, 0, 4])#, meshFile='2D_cylinder.msh22')
+    noOscCase_Re500 = optStudy.BaseCase('no_osc_x3_Re500_case', [0, 0, 5])#, meshFile='2D_cylinder.msh22')   
 #    del noOscCase_Re200.msCases[0]
     cases = [noOscCase_Re100, noOscCase_Re200,
              noOscCase_Re300, noOscCase_Re400, noOscCase_Re500]
-    optStudy.BaseCase.parallelize(cases)
     
-    #for case in cases:
+    #optStudy.BaseCase.parallelize(cases)
+    
+    for case in cases:
+        case.meshFile = '2D_cylinder.msh22'
+        case.meshPath = os.path.join(case.caseDir, case.meshFile)
+        case.saveCP()
         #for msCase in case.msCases:
          #   print(msCase.f)
           #  path = os.path.join(msCase.caseDir, 'obj.txt')
