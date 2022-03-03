@@ -52,6 +52,7 @@ class CompDistSLURM(YALES2Case):
         c = self.x[1]
         # read job lines
         job_lines = self.jobLines
+        print(job_lines)
         if job_lines:
             kw_lines = self.findKeywordLines(
                 '#SBATCH --cpus-per-task', job_lines)
@@ -68,9 +69,9 @@ class CompDistSLURM(YALES2Case):
                 job_lines[line_i] = f'#SBATCH --ntasks={ntasks}'
             # write job lines
             self.jobLines = job_lines
-        else:
-            self.solverExecCmd.insert(
-                '-c', 1).insert(str(c), 2).insert('-n', 3).insert(str(ntasks), 4)
+        # else:
+        #     self.solverExecCmd.insert(
+        #         '-c', 1).insert(str(c), 2).insert('-n', 3).insert(str(ntasks), 4)
 
     def _postProc(self):
         self.f = self.solnTime
