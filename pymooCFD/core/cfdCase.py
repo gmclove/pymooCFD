@@ -1182,21 +1182,21 @@ class YALES2Case(CFDCase):
         super().solve()
         self.wallTime = self.getWallTime()
 
-    def getWallTime(self):
-        fName, = glob('solver01_rank*.log')
-        with open(fName, 'rb') as f:
-            try:  # catch OSError in case of a one line file
-                f.seek(-1020, os.SEEK_END)
-            except OSError:
-                f.seek(0)
-            clock_line = f.readline().decode()
-        if 'WALL CLOCK TIME' in clock_line:
-            wall_time = int(float(clock_line[-13:]))
-            self.logger.info(f'YALES2 Wall Clock Time: {wall_time} seconds')
-        else:
-            self.logger.warning('no wall clock time found')
-            wall_time = None
-        return wall_time
+    # def getWallTime(self):
+    #     fName, = glob('solver01_rank*.log')
+    #     with open(fName, 'rb') as f:
+    #         try:  # catch OSError in case of a one line file
+    #             f.seek(-1020, os.SEEK_END)
+    #         except OSError:
+    #             f.seek(0)
+    #         clock_line = f.readline().decode()
+    #     if 'WALL CLOCK TIME' in clock_line:
+    #         wall_time = int(float(clock_line[-13:]))
+    #         self.logger.info(f'YALES2 Wall Clock Time: {wall_time} seconds')
+    #     else:
+    #         self.logger.warning('no wall clock time found')
+    #         wall_time = None
+    #     return wall_time
 
     def getLatestXMF(self):
         ents = os.listdir(self.dumpDir)
