@@ -39,7 +39,7 @@ class CompDistSLURM(YALES2Case):
 
     n_constr = 0
 
-    solveExternal = True
+    externalSolver = True
     solverExecCmd = ['sbatch', '--wait', 'jobslurm.sh']
 
     # def __init__(self, baseCaseDir, caseDir, x,
