@@ -199,7 +199,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         self.numElem = None
         # class properties
         self._meshSF = None
-        self.meshSF = kwargs.get('meshSF', 1)
+        self.meshSF = meshSF  # kwargs.get('meshSF', 1)
         self._meshSFs = None
         self.meshSFs = meshSFs
 

@@ -3,7 +3,7 @@
 # @Last modified by:   glove
 # @Last modified time: 2021-12-16T09:37:30-05:00
 
-from pymooCFD.studies.oscillCyl_x3 import optStudy
+from pymooCFD.studies.oscillCyl_x3 import optStudy, BaseCase
 import numpy as np
 #from pymooCFD.studies.oscillCyl import BaseCase
 #from pymoo.factory import get_termination
@@ -21,7 +21,7 @@ def main():
     # print(optStudy.problem.__dict__)
     # print(optStudy.BaseCase.__dict__)
     # print(optStudy.__dict__)
-
+    optStudy.BaseCase = BaseCase
     noOscCase_Re100 = optStudy.BaseCase('no_osc_x3_Re100_case', [0, 0, 1])#, meshFile='2D_cylinder.msh22')
     noOscCase_Re200 = optStudy.BaseCase('no_osc_x3_Re200_case', [0, 0, 2])#, meshFile='2D_cylinder.msh22')
     noOscCase_Re300 = optStudy.BaseCase('no_osc_x3_Re300_case', [0, 0, 3])#, meshFile='2D_cylinder.msh22')
