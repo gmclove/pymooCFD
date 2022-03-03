@@ -21,6 +21,9 @@ import shutil
 #         return 0
 
 def saveTxt(path, fname, data):
+    data = np.array(data)
+    if not data.shape:
+        data = [data]
     datFile = os.path.join(path, fname)
     # save data as text file in directory
     np.savetxt(datFile, data)

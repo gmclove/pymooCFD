@@ -4,6 +4,9 @@ import numpy as np
 
 
 def saveTxt(path, fname, data, **kwargs):
+    data = np.array(data)
+    if not data.shape:
+        data = [data]
     datFile = os.path.join(path, fname)
     # save data as text file in directory
     np.savetxt(datFile, data, **kwargs)

@@ -3,9 +3,61 @@
 # @Last modified by:   glove
 # @Last modified time: 2021-12-14T15:45:19-05:00
 import numpy as np
-l = [4 , 3, 2 , 1]
-new_l = np.delete(l, 1)
-print(new_l)
+import os
+
+path = None
+
+with open(path, 'r') as f:
+    lines = f.readlines()
+
+# val1 = None
+# val2 = 2
+# if val1 is None or val2 is None:
+#     print('is None')
+
+# def fun():
+#     return val
+# print(fun())
+
+# sentence = "The cat is brown"
+# q = "  The cat is brown   "
+# print(q.rstrip().lstrip())
+# if q.rstrip().lstrip() == sentence:
+#     print('strings equal')
+
+# l = [['val1', 2], ['val2', 3]]
+# for x, y in l:
+#     print(x)
+#     print(y)
+
+
+
+# path = os.path.join('.', 'case.npy')
+# new_path = path.replace('.npy', '')
+# print(path)
+# print(new_path)
+# print(new_path+'.npy')
+# val = 1.2345
+# a = np.array(val)
+# print(a)
+# print(a.shape)
+# print(bool(a.shape))
+# b= np.array([1,2])
+# print(bool(b.shape))
+# if a.shape:
+#     print('a',a.shape)
+# if b.shape:
+#     print('b', b.shape)
+#
+# if a.shape is None:
+#     print('a.shape is None')
+#
+# if a.shape[0] is None:
+#     print('a.shape[0] is None')
+
+# l = [4 , 3, 2 , 1]
+# new_l = np.delete(l, 1)
+# print(new_l)
 
 
 # from setupOpt import optStudy

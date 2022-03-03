@@ -18,6 +18,7 @@ import copy
 from pymoo.visualization.scatter import Scatter
 from pymooCFD.util.sysTools import emptyDir, copy_and_overwrite, saveTxt, yes_or_no
 from pymooCFD.util.loggingTools import MultiLineFormatter, DispNameFilter
+import pymooCFD.config as config
 from pymoo.util.misc import termination_from_tuple
 
 
@@ -48,7 +49,7 @@ class OptStudy:
             self.optName = optName
         self.logger = self.getLogger()
         self.logger.info(f'OPTIMIZATION STUDY - {self.optName}')
-        self.optDatDir = 'optStudy-'+self.optName
+        self.optDatDir = 'optStudy-' + self.optName
         self.logger.info(f'\tData Directory: {self.optDatDir}')
         self.CP_path = os.path.join(self.optDatDir, f'{self.optName}-CP')
         self.logger.info(f'\tCheckpoint Path: {self.CP_path}')
@@ -122,7 +123,8 @@ class OptStudy:
         # directory to save optimal solutions (a.k.a. Pareto Front)
         # self.pfDir = os.path.join(self.runDir, pfDir)
         os.makedirs(self.pfDir, exist_ok=True)
-        self.n_opt = int(n_opt)  # number of optimal points along Pareto front to save
+        # number of optimal points along Pareto front to save
+        self.n_opt = int(n_opt)
         # Plots Directory
         self.plotDir = os.path.join(self.runDir, plotsDir)
         os.makedirs(self.plotDir, exist_ok=True)
@@ -157,6 +159,7 @@ class OptStudy:
                              save_history=self.algorithm.save_history,
                              return_least_infeasible=self.algorithm.return_least_infeasible
                              )
+        self.algorithm.callback.__init__()
 
     def initAlg(self):
         if self.algorithm.is_initialized:
@@ -167,7 +170,7 @@ class OptStudy:
         else:
             self.newAlg()
 
-    def run(self, restart=True):
+    def run(self, delPrevGen=False):
         self.logger.info('STARTING: OPTIMIZATION ALGORITHM RUN')
         self.algorithm.save_history = True
         self.initAlg()
@@ -180,19 +183,19 @@ class OptStudy:
         #
         # else:
         #     self.newStudy()
-            # self.logger.info('STARTING NEW OPTIMIZATION STUDY')
-            # # archive/empty previous runs data directory
-            # emptyDir(self.optDatDir)
-            # self.algorithm.setup(self.problem,
-            #                      seed=self.algorithm.seed,
-            #                      verbose=self.algorithm.verbose,
-            #                      save_history=self.algorithm.save_history,
-            #                      return_least_infeasible=self.algorithm.return_least_infeasible
-            #                      )
-            # restart client if being used
-            # if self.client is not None:
-            #     self.client.restart()
-            #     self.logger.info("CLIENT RESTARTED")
+        # self.logger.info('STARTING NEW OPTIMIZATION STUDY')
+        # # archive/empty previous runs data directory
+        # emptyDir(self.optDatDir)
+        # self.algorithm.setup(self.problem,
+        #                      seed=self.algorithm.seed,
+        #                      verbose=self.algorithm.verbose,
+        #                      save_history=self.algorithm.save_history,
+        #                      return_least_infeasible=self.algorithm.return_least_infeasible
+        #                      )
+        # restart client if being used
+        # if self.client is not None:
+        #     self.client.restart()
+        #     self.logger.info("CLIENT RESTARTED")
 
         ######    OPTIMIZATION    ######
         # until the algorithm has not terminated
@@ -203,10 +206,10 @@ class OptStudy:
             # print('alg. off.:', self.algorithm.off)
             # print('opt:', self.algorithm.opt)
             # if self.algorithm.pop is not None:
-                # print('BEFORE ASK:')
-                # print('gen', self.algorithm.callback.gen)
-                # print(self.algorithm.pop.get('F'))
-                # print('history[-1].off', self.algorithm.history[-1].off)
+            # print('BEFORE ASK:')
+            # print('gen', self.algorithm.callback.gen)
+            # print(self.algorithm.pop.get('F'))
+            # print('history[-1].off', self.algorithm.history[-1].off)
             # First generation
             # population is None so ask for new pop
             if self.algorithm.pop is None:
@@ -228,6 +231,7 @@ class OptStudy:
             else:
                 self.logger.info('\tSTART-UP: mid-generation')
                 evalPop = self.algorithm.off
+                # self.algorithm.callback.gen -= 1
             # print('AFTER ASK:')
             # print('n_gen:', self.algorithm.n_gen)
             # print('gen', self.algorithm.callback.gen)
@@ -240,9 +244,13 @@ class OptStudy:
             self.saveCP()
             # evaluate the individuals using the algorithm's evaluator (necessary to count evaluations for termination)
             self.algorithm.evaluator.eval(self.problem, evalPop)
+            # print('self.algorithm.callback.gen:', self.algorithm.callback.gen)
+            # print('self.algorithm.n_gen:', self.algorithm.n_gen)
+
             # returned the evaluated individuals which have been evaluated or even modified
             self.algorithm.tell(infills=evalPop)
-
+            # print('self.algorithm.callback.gen:', self.algorithm.callback.gen)
+            # print('self.algorithm.n_gen:', self.algorithm.n_gen)
             # save top {n_opt} optimal evaluated cases in pf directory
             for off_i, off in enumerate(self.algorithm.off):
                 for opt_i, opt in enumerate(self.algorithm.opt[:self.n_opt]):
@@ -252,7 +260,11 @@ class OptStudy:
                             self.runDir, f'gen{self.algorithm.n_gen}', f'ind{off_i+1}')
                         self.logger.info(
                             f'\tUpdating Pareto front folder: {offDir} -> {optDir}')
-                        copy_and_overwrite(offDir, optDir)
+                        try:
+                            copy_and_overwrite(offDir, optDir)
+                        except FileNotFoundError as err:
+                            self.logger.error(str(err))
+                            self.logger.warning('SKIPPED: UPDATE PARETO FRONT')
             # do some more things, printing, logging, storing or even modifying the algorithm object
             # self.logger.info(algorithm.n_gen, algorithm.evaluator.n_eval)
             # self.logger.info('Parameters:')
@@ -273,6 +285,10 @@ class OptStudy:
             # input('any key to continue')
             self.algorithm.off = None
             self.saveCP()
+            if delPrevGen:
+                direct = os.path.join(
+                    self.runDir, f'gen{self.algorithm.n_gen}')
+                shutil.rmtree(direct)
         # obtain the result objective from the algorithm
         res = self.algorithm.result()
         # calculate a hash to show that all executions end with the same result
@@ -294,7 +310,8 @@ class OptStudy:
             popF = gen1Alg.pop.get('F')
             self.logger.info('\tCurrent Generation 1:')
             for i in len(popX):
-                self.logger.info(f'\t\tParameters-{popX[i]} | Objectives- {popF[i]}')
+                self.logger.info(
+                    f'\t\tParameters-{popX[i]} | Objectives- {popF[i]}')
         except TypeError:
             self.logger.info('\tNo Generation 1 Population Found')
             self.logger.info(f'\tAlgorithm History: {self.algorithm.history}')
@@ -305,24 +322,24 @@ class OptStudy:
         self.logger.info('COMPLETE: RUN GENERATION 1')
         self.saveCP()
 
-
     ################
     #    LOGGER    #
     ################
+
     def getLogger(self):
         # create root logger
         logger = logging.getLogger()
-        logger.setLevel(logging.DEBUG)
+        logger.setLevel(config.OPT_STUDY_LOGGER_LEVEL)
         # define handlers
+        # if not logger.handlers:
         fileHandler = logging.FileHandler(f'{self.optName}.log')
-        streamHandler = logging.StreamHandler() #sys.stdout)
+        streamHandler = logging.StreamHandler()  # sys.stdout)
         streamHandler.setLevel(logging.DEBUG)
         logger.addHandler(fileHandler)
         logger.addHandler(streamHandler)
         # define filter
         # filt = DispNameFilter(self.optName)
         # logger.addFilter(filt)
-
         # define formatter
         formatter = MultiLineFormatter(
             '%(asctime)s :: %(levelname)-8s :: %(name)s :: %(message)s')
@@ -330,11 +347,12 @@ class OptStudy:
         #     f'%(asctime)s :: %(levelname)-8s :: {self.optName} :: %(message)s')
         # formatter = logging.Formatter(
         #     f'%(asctime)s.%(msecs)03d :: %(levelname)-8s :: {self.optName} :: %(message)s')
-                        # ' %(name)s :: %(levelname)-8s :: %(message)s')
+        # ' %(name)s :: %(levelname)-8s :: %(message)s')
         fileHandler.setFormatter(formatter)
         streamHandler.setFormatter(formatter)
-        logger.info('~'*30)
+        logger.info('~' * 30)
         logger.info('NEW RUN')
+        print(logger.handlers)
         return logger
 
     ####################
@@ -396,7 +414,7 @@ class OptStudy:
         # cp.logger = self.logger
         # cp.logger = self.getLogger()
         #### TEMPORARY CODE ##########
-        #### TRANSITION BETWEEN CHECKPOINTS
+        # TRANSITION BETWEEN CHECKPOINTS
 
         self.__dict__.update(cp.__dict__)
         # self.logger.info(f'\tCHECKPOINT LOADED - from {self.CP_path}.npy')
@@ -471,7 +489,6 @@ class OptStudy:
         # # if give alg assign it to self.algorithm
         # else:
         #     self.algorithm = alg
-
 
         # genDir = f'gen{gen}'
         # os.path.join(optDatDir, 'checkpoint')
@@ -548,6 +565,7 @@ class OptStudy:
         self.logger.info(f'\tParameters: {self.testCase.x}')
         self.logger.info(f'\tObjectives: {self.testCase.f}')
         self.logger.info('TEST CASE COMPLETE ')
+        self.saveCP()
         return self.testCase
 
     #################################
@@ -562,7 +580,7 @@ class OptStudy:
         cases = self.genCases(indDirs, X)
         self.BaseCase.parallelize(cases)
         # self.runPop(cases)
-        out['F'] = [case.f for case in cases]
+        out['F'] = np.array([case.f for case in cases])
         if gen == 1:
             self.gen1Pop = cases
         return out
@@ -644,11 +662,17 @@ class OptStudy:
         '''
         if self.cornerCases is None:
             self.genCornerCases()
+        else:
+            self.logger.warning(
+                'SKIPPED: GENERATE CORNER CASES - call self.genCornerCases() directly to create new corner cases')
         self.BaseCase.parallelize(self.cornerCases)
 
     def runBndCases(self, n_pts=2, getDiags=False, doMeshStudy=False):
         if self.bndCases is None:
             self.genBndCases(n_pts=n_pts, getDiags=getDiags)
+        else:
+            self.logger.warning(
+                'SKIPPED: GENERATE BOUNDARY CASES - call self.genBndCases() directly to create new boundary cases')
         self.BaseCase.parallelize(self.bndCases)
         self.saveCP()
         obj = [case.f for case in self.bndCases]
@@ -659,11 +683,21 @@ class OptStudy:
             self.saveCP()
 
     def plotBndPtsObj(self, F):
-        plot = Scatter(title= 'Objective Space: Boundary Cases',
-                       legend = True, labels = self.BaseCase.obj_labels)
+        plot = Scatter(title='Objective Space: Boundary Cases',
+                       legend=True, labels=self.BaseCase.obj_labels)
         for obj in F:
-            plot.add(obj, label='[%.2f, %.2f]'%(obj[0],obj[1]))
-        path = os.path.join(self.runDir, 'boundary-cases', 'bndPts_plot-objSpace.png')
+            # nComp = len(obj)
+            # label = '['
+            # for i in range(nComp):
+            #     if i != nComp-1:
+            #         label += '%.2g, '%obj[i]
+            #     else:
+            #         label += '%.2g'%obj[i]
+            # label += ']'
+            # plot.add(obj, label=label)
+            plot.add(np.array(obj), label=self.getPointLabel(obj))
+        path = os.path.join(self.runDir, 'boundary-cases',
+                            'bndPts_plot-objSpace.png')
         plot.save(path)
         # plot.show()
         # if F.shape[1] == 2:
@@ -684,22 +718,24 @@ class OptStudy:
         #     self.logger.info('Boundary points not plotted: F.shape[1] != 2')
 
     def plotBndPts(self, bndPts):
-        plot = Scatter(title= 'Design Space: Boundary Cases',
-                       legend = True,
-                       labels = self.BaseCase.var_labels
+        plot = Scatter(title='Design Space: Boundary Cases',
+                       legend=True,
+                       labels=self.BaseCase.var_labels
                        # grid=True
                        )
         for var in bndPts:
-            nComp = len(var)
-            label = '['
-            for i in range(nComp):
-                if i != nComp-1:
-                    label += '%.2g, '%var[i]
-                else:
-                    label += '%.2g'%var[i]
-            label += ']'
-            plot.add(var, label=label)
-        path = os.path.join(self.runDir, 'boundary-cases', 'bndPts_plot-varSpace.png')
+            # nComp = len(var)
+            # label = '['
+            # for i in range(nComp):
+            #     if i != nComp-1:
+            #         label += '%.2g, '%var[i]
+            #     else:
+            #         label += '%.2g'%var[i]
+            # label += ']'
+            # plot.add(var, label=label)
+            plot.add(var, label=self.getPointLabel(var))
+        path = os.path.join(self.runDir, 'boundary-cases',
+                            'bndPts_plot-varSpace.png')
         plot.save(path)
         # bndPts = np.array(bndPts)
         # if bndPts.shape[1] == 2:
@@ -718,7 +754,6 @@ class OptStudy:
         #     plt.clf()
         # else:
         #     self.logger.info('Boundary points not plotted: bndPts.shape[1] != 2')
-
 
     def genBndCases(self, n_pts=2, getDiags=False):
         self.logger.info('GENERATING BOUNDARY CASES')
@@ -896,6 +931,18 @@ class OptStudy:
             case = self.BaseCase(paths[x_i], x)
             cases.append(case)
         return cases
+
+    @staticmethod
+    def getPointLabel(pt):
+        nComp = len(pt)
+        label = '['
+        for i in range(nComp):
+            if i != nComp - 1:
+                label += '%.2g, ' % pt[i]
+            else:
+                label += '%.2g' % pt[i]
+        label += ']'
+        return label
 
     @staticmethod
     def loadCases(directory):

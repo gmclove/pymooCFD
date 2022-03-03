@@ -3,7 +3,7 @@
 # @Last modified by:   glove
 # @Last modified time: 2021-12-16T09:37:30-05:00
 
-from pymooCFD.studies.oscillCyl_x2 import optStudy
+from pymooCFD.studies.oscillCyl_x3 import optStudy
 import numpy as np
 #from pymooCFD.studies.oscillCyl import BaseCase
 #from pymoo.factory import get_termination
@@ -22,11 +22,28 @@ def main():
     # print(optStudy.BaseCase.__dict__)
     # print(optStudy.__dict__)
 
-    noOscCase = optStudy.BaseCase('no_osc_case', [0, 0])
+    noOscCase_Re100 = optStudy.BaseCase('no_osc_x3_Re100_case', [0, 0, 1])
+    noOscCase_Re200 = optStudy.BaseCase('no_osc_x3_Re200_case', [0, 0, 2])
+    noOscCase_Re300 = optStudy.BaseCase('no_osc_x3_Re300_case', [0, 0, 3])
+    noOscCase_Re400 = optStudy.BaseCase('no_osc_x3_Re400_case', [0, 0, 4])
+    noOscCase_Re500 = optStudy.BaseCase('no_osc_x3_Re500_case', [0, 0, 5])   
+#    del noOscCase_Re200.msCases[0]
+    cases = [noOscCase_Re100, noOscCase_Re200,
+             noOscCase_Re300, noOscCase_Re400, noOscCase_Re500]
+    optStudy.BaseCase.parallelize(cases)
+    
+    #for case in cases:
+        #for msCase in case.msCases:
+         #   print(msCase.f)
+          #  path = os.path.join(msCase.caseDir, 'obj.txt')
+           # msCase.f = np.loadtxt(path)
+        #case.genMeshStudy()
+        #case.meshStudy()
+        # exit()
     # noOscCase.genMesh()
     # noOscCase.f = None
     # noOscCase.postProc()
-    noOscCase.run()
+    # noOscCase.run()
     # noOscCase.msCases = None
     # noOscCase.meshStudy()
 
@@ -38,7 +55,7 @@ def main():
     # print(optStudy.algorithm.callback.gen)
     ### Pre-Proccess ###
     # optStudy.preProc()
-    # optStudy.runTestCase()
+#    optStudy.runTestCase()
     # optStudy.testCase.meshSFs = np.around(
     #                        np.arange(0.3, 1.6, 0.1), decimals=2)
     #optStudy.BaseCase = BaseCase
@@ -46,7 +63,7 @@ def main():
     #optStudy.testCase.caseDir = os.path.join(optStudy.runDir, 'test_case')
     # optStudy.saveCP()
 
-    # optStudy.testCase.meshStudy()
+#    optStudy.testCase.meshStudy()
     # optStudy.genBndCases()
     # for case in optStudy.bndCases:
     #   case.meshSFs = np.around(

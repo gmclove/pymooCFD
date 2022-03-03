@@ -22,13 +22,13 @@ def main():
     # print(optStudy.BaseCase.__dict__)
     # print(optStudy.__dict__)
 
-    noOscCase = optStudy.BaseCase('no_osc_case', [0, 0])
+    #noOscCase = optStudy.BaseCase('no_osc_case', [0, 0])
     # noOscCase.genMesh()
     # noOscCase.f = None
     # noOscCase.postProc()
-    noOscCase.run()
+    #noOscCase.run()
     # noOscCase.msCases = None
-    # noOscCase.meshStudy()
+    #noOscCase.meshStudy()
 
     #optStudy.runDir = os.path.join(optStudy.optDatDir, 'run')
     # optStudy.saveCP()
@@ -38,7 +38,7 @@ def main():
     # print(optStudy.algorithm.callback.gen)
     ### Pre-Proccess ###
     # optStudy.preProc()
-    # optStudy.runTestCase()
+    #optStudy.runTestCase()
     # optStudy.testCase.meshSFs = np.around(
     #                        np.arange(0.3, 1.6, 0.1), decimals=2)
     #optStudy.BaseCase = BaseCase
@@ -46,16 +46,16 @@ def main():
     #optStudy.testCase.caseDir = os.path.join(optStudy.runDir, 'test_case')
     # optStudy.saveCP()
 
-    # optStudy.testCase.meshStudy()
+    #optStudy.testCase.meshStudy()
     # optStudy.genBndCases()
     # for case in optStudy.bndCases:
     #   case.meshSFs = np.around(
     #                         np.arange(0.3, 1.6, 0.1), decimals=2)
     # optStudy.saveCP()
-    #optStudy.runBndCases(n_pts=3, getDiags=True, doMeshStudy=True)
+    optStudy.runBndCases(n_pts=3, getDiags=True, doMeshStudy=True)
     # for case in optStudy.gen1Pop:
     #     case.logger = case.getLogger()
-    # optStudy.runGen1()
+    optStudy.runGen1()
     # optStudy.run()
     # optStudy.meshStudy(optStudy.gen1Pop)
 

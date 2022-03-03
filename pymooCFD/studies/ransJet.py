@@ -12,7 +12,7 @@
 
 import gmsh
 import math
-from pymooCFD.core.cfdCase import CFDCase
+from pymooCFD.core.cfdCase import FluentCase
 import matplotlib.pyplot as plt
 import os
 import numpy as np
@@ -21,7 +21,7 @@ import h5py
 from pymooCFD.util.gridInterp import GridInterp2D, GridInterp3D, radialAvg
 
 
-class RANSJet(CFDCase):
+class RANSJet(FluentCase):
     baseCaseDir = 'rans_jet_opt/rans_jet-base'
     ###################################################
     #      High Quality Simulation Interpolation      #
@@ -348,8 +348,8 @@ class RANSJet(CFDCase):
         ####### Slurm Job Lines #########
         lines = ['#!/bin/bash',
                  "#SBATCH --partition=ib --constraint='ib&haswell_1'",
-                 '#SBATCH --nodes=1',
-                 '#SBATCH --ntasks=20',
+                 '#SBATCH --cpus-per-task=20',
+                 '#SBATCH --ntasks=10',
                  '#SBATCH --time=00:30:00',
                  '#SBATCH --mem-per-cpu=2G',
                  '#SBATCH --job-name=jet_rans',

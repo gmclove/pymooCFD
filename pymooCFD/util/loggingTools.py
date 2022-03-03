@@ -36,3 +36,20 @@ class DispNameFilter(logging.Filter):
     def filter(self, record):
         record.msg = f'{self.dispName} :: {record.msg}'
         return True
+
+
+
+# from colorlog import ColoredFormatter
+#
+# formatter = ColoredFormatter(
+#         "%(log_color)s%(levelname)-8s%(reset)s %(blue)s%(message)s",
+#         datefmt=None,
+#         reset=True,
+#         log_colors={
+#                 'DEBUG':    'cyan',
+#                 'INFO':     'green',
+#                 'WARNING':  'yellow',
+#                 'ERROR':    'red',
+#                 'CRITICAL': 'red',
+#         }
+# )

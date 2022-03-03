@@ -1,9 +1,8 @@
 # @Author: glove
-# @Date:   2021-12-14T16:02:45-05:00
+# @Date:   2021-12-15T14:59:23-05:00
 # @Last modified by:   glove
-# @Last modified time: 2021-12-15T16:36:54-05:00
+# @Last modified time: 2021-12-15T17:20:34-05:00
 
-from pymooCFD.core.optStudy import OptStudy
 from pymoo.algorithms.soo.nonconvex.ga import GA
 from pymoo.factory import get_termination
 from pymoo.operators.mixed_variable_operator import MixedVariableSampling, MixedVariableMutation, MixedVariableCrossover
@@ -11,77 +10,87 @@ from pymoo.factory import get_sampling, get_crossover, get_mutation
 from pymoo.core.callback import Callback
 from pymoo.util.display import Display
 from pymoo.core.problem import Problem
-import os
-import gmsh
 import numpy as np
-# import scipy
-from scipy.integrate import quad
-
-# from pymooCFD.util.yales2Tools import getLatestXMF
-# from pymooCFD.core.cfdCase import YALES2Case #CFDCase
-from pymooCFD.studies.oscillCyl_x2 import OscillCylinder
+from pymooCFD.core.cfdCase import CFDCase
+from pymooCFD.core.optStudy import OptStudy
 
 
-class OscillCylinderSOO(OscillCylinder):
-    ####### Define Objective Space ########
-    obj_labels = ['Drag on Cylinder [N]']
+class LocalCompDistOpt(OptStudy):
+    pass
+    # def __init__(self):
+    #     super().__init__()
+
+
+class CompDistSLURM(CFDCase):
+    baseCaseDir = 'base_cases/osc-cyl_base'
+    inputFile = '2D_cylinder.in'
+    jobFile = 'jobslurm.sh'
+
+    n_var = 2
+    # , 'Time Step']
+    var_labels = ['Number of Tasks', 'Number of CPUs per Task']
+    varType = ['int', 'int']
+    xl = [1, 1]
+    xu = [30, 30]
+
     n_obj = 1
+    obj_labels = ['Solve Time']  # , 'Fidelity']
 
-    nProc = 10
-    procLim = 40
+    n_constr = 0
+
+    solveExternal = True
+    solverExecCmd = ['sbatch', '--wait', 'jobslurm.sh']
+
+    # def __init__(self, baseCaseDir, caseDir, x,
+    #              *args, **kwargs):
+    #     super().__init__(baseCaseDir, caseDir, x,
+    #                      *args, **kwargs)
 
     def _preProc(self):
-        ### EXTRACT VAR ###
-        # Extract parameters for each individual
-        omega = self.x[0]
-        freq = self.x[1]
-        ### SIMULATION INPUT PARAMETERS ###
-        # open and read YALES2 input file to array of strings for each line
-        in_lines = self.inputLines
-        # find line that must change using a keyword
-        keyword = 'CYL_ROTATION_PROP'
-        kw_lines = self.findKeywordLines(keyword, in_lines)
-        for line_i, line in kw_lines:
-            # create new string to replace line
-            newLine = f'{line[:line.index("=")]}= {omega} {freq} \n'
-            in_lines[line_i] = newLine
-        # REPEAT FOR EACH LINE THAT MUST BE CHANGED
-        self.inputLines = in_lines
+        ntasks = self.x[0]
+        c = self.x[1]
+        # read job lines
+        job_lines = self.jobLines
+        if job_lines:
+            kw_lines = self.findKeywordLines(
+                '#SBATCH --cpus-per-task', job_lines)
+            for line_i, line in kw_lines:
+                job_lines[line_i] = f'#SBATCH --cpu-per-task={c}'
+            kw_lines = self.findKeywordLines('#SBATCH -c', job_lines)
+            for line_i, line in kw_lines:
+                job_lines[line_i] = f'#SBATCH --cpu-per-task={c}'
+            kw_lines = self.findKeywordLines('#SBATCH --ntasks', job_lines)
+            for line_i, line in kw_lines:
+                job_lines[line_i] = f'#SBATCH --ntasks={ntasks}'
+            kw_lines = self.findKeywordLines('#SBATCH -n', job_lines)
+            for line_i, line in kw_lines:
+                job_lines[line_i] = f'#SBATCH --ntasks={ntasks}'
+            # write job lines
+            self.jobLines = job_lines
+        else:
+            self.solverExecCmd.insert(
+                '-c', 1).insert(str(c), 2).insert('-n', 3).insert(str(ntasks), 4)
 
     def _postProc(self):
-        ######## Compute Objectives ##########
-        ### Objective 1: Drag on Cylinder ###
-        U = 1
-        rho = 1
-        D = 1  # [m] cylinder diameter
-        # create string for directory of individual's data file
-        data = np.genfromtxt(self.datPath, skip_header=1)
-        # collect data after 100 seconds of simulation time
-        mask = np.where(data[:, 3] > 100)
-        # Surface integrals of Cp and Cf
-        # DRAG: x-direction integrals
-        F_P1, = data[mask, 4]
-        F_S1, = data[mask, 6]
-        F_drag = np.mean(F_P1 - F_S1)
-        C_drag = F_drag / ((1 / 2) * rho * U**2 * D**2)
+        self.f = self.solnTime
 
-        self.f = C_drag
-        # print(self.f)
+    def _execDone(self):
+        return True
 
 
-class OscillCylinderOptSOO(OptStudy):
+class SOO(OptStudy):
     def __init__(self, algorithm, problem, BaseCase,
                  *args, **kwargs):
         super().__init__(algorithm, problem, BaseCase,
-                         optName='SOO-test',
+                         optName='CompDistSOO-test',
                          n_opt=20,
                          # baseCaseDir='base_cases/osc-cyl_base',
                          # optDatDir='cyl-opt_run',
                          *args, **kwargs)
 
 
-MyOptStudy = OscillCylinderOptSOO
-BaseCase = OscillCylinderSOO
+MyOptStudy = SOO
+BaseCase = CompDistSLURM
 
 ####################################
 #    Genetic Algorithm Criteria    #
