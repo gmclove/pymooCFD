@@ -57,7 +57,7 @@ class CompDistSLURM(YALES2Case):
             kw_lines = self.findKeywordLines(
                 '#SBATCH --cpus-per-task', job_lines)
             for line_i, line in kw_lines:
-                job_lines[line_i] = f'#SBATCH --cpu-per-task={c}'
+                job_lines[line_i] = f'#SBATCH --cpus-per-task={c}'
             kw_lines = self.findKeywordLines('#SBATCH -c', job_lines)
             for line_i, line in kw_lines:
                 job_lines[line_i] = f'#SBATCH --cpu-per-task={c}'
@@ -69,7 +69,8 @@ class CompDistSLURM(YALES2Case):
                 job_lines[line_i] = f'#SBATCH --ntasks={ntasks}'
             # write job lines
             self.jobLines = job_lines
-        # else:
+        else:
+            self.logger.warning('INCOMPLETE: PRE-PROCESSING')
         #     self.solverExecCmd.insert(
         #         '-c', 1).insert(str(c), 2).insert('-n', 3).insert(str(ntasks), 4)
 
