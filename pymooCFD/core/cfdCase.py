@@ -1030,7 +1030,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             'OVERRIDE _solve(self) method to execute internal python solver OR use CFDCase.externalSolver=True')
 
     def _execDone(self):
-        return True
+        if self.f is not None and np.isnan(np.sum(self.f)):
+            return True
 
     def _postProc(self):
         pass

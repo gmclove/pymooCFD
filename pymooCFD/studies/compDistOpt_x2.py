@@ -22,7 +22,7 @@ class LocalCompDistOpt(OptStudy):
     #     super().__init__()
 
 
-class CompDistSLURM(CFDCase):
+class CompDistSLURM(YALES2Case):
     baseCaseDir = 'base_cases/osc-cyl_base'
     inputFile = '2D_cylinder.in'
     jobFile = 'jobslurm.sh'
