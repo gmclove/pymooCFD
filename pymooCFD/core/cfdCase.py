@@ -231,7 +231,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         if externalSolver is None:
             externalSolver = cls.externalSolver
         if cls.procLim is None:
-            cls.nTasks = 500
+            cls.nTasks = config.MP_POOL_NTASKS_MAX
         elif cls.nTasks is None:
             cls.nTasks = int(cls.procLim / cls.nProc)
         # else:
