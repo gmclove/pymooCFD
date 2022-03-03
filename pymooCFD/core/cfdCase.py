@@ -186,16 +186,12 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         #    Attributes To Be Set Later During Each Run   #
         ###################################################
         self.f = None  # if not None then case complete
-        ## meshing attributes
+        # meshing attributes
         self.msCases = None
         self.numElem = None
         # class properties
         self._meshSF = None
-<<<<<<< HEAD
         self.meshSF = kwargs.get('meshSF', 1)
-=======
-        self.meshSF = meshSF
->>>>>>> a6d66a2165c828f45319bd0b44b55e542c6f9ad3
         self._meshSFs = None
         self.meshSFs = meshSFs
 
@@ -252,18 +248,10 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     @classmethod
     def parallelize(cls, cases):
         cls.parallelizeInit()
-<<<<<<< HEAD
         print('PARALLELIZING . . .')
         #cls.logger.info('PARALLELIZING . . .')
         if cls.onlyParallelizeSolve:
             # print('\tParallelizing Only Solve')
-=======
-        print('PARALLELIZING')
-        print(cases)
-        #cls.logger.info('PARALLELIZING . . .')
-        if cls.onlyParallelizeSolve:
-            print('\tParallelizing Only Solve')
->>>>>>> a6d66a2165c828f45319bd0b44b55e542c6f9ad3
             for case in cases:
                 case.preProc()
             for case in cases:
@@ -315,16 +303,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         #end = time.time()
         #self.logger.info(f'Solve Time: {start-end}')
 
-<<<<<<< HEAD
     def run(self, max_reruns=3, n_reruns=0):
         # print('RUNNING:', self)
-=======
-    def run(self):
-        print('RUNNING', self)
-        self._execDone()
-        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-        print(self._execDone())
->>>>>>> a6d66a2165c828f45319bd0b44b55e542c6f9ad3
         if self.f is None and not self._execDone():
             self.preProc()
             self.solve()
@@ -1058,7 +1038,6 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     def _genMesh(self):
         pass
 
-<<<<<<< HEAD
     def _getObj(self, f):
         return f
 
@@ -1192,10 +1171,7 @@ class YALES2Case(CFDCase):
 
 class FluentCase(CFDCase):
     pass
-=======
-from pymooCFD.util.handleData import findKeywordLine
-import re
->>>>>>> a6d66a2165c828f45319bd0b44b55e542c6f9ad3
+
 
 class YALES2Case(CFDCase):
     # def __init__(self, caseDir, x, *args, **kwargs):
