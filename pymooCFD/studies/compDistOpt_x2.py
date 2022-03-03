@@ -32,7 +32,7 @@ class CompDistSLURM(YALES2Case):
     var_labels = ['Number of Tasks', 'Number of CPUs per Task']
     varType = ['int', 'int']
     xl = [1, 1]
-    xu = [30, 30]
+    xu = [25, 25]
 
     n_obj = 1
     obj_labels = ['Solve Time']  # , 'Fidelity']
