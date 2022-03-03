@@ -304,7 +304,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         #self.logger.info(f'Solve Time: {start-end}')
 
     def run(self, max_reruns=3, n_reruns=0):
-        # print('RUNNING:', self)
+        # print('RUNNING')
         if self.f is None and not self._execDone():
             self.preProc()
             self.solve()

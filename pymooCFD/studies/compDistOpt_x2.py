@@ -11,7 +11,8 @@ from pymoo.core.callback import Callback
 from pymoo.util.display import Display
 from pymoo.core.problem import Problem
 import numpy as np
-from pymooCFD.core.cfdCase import CFDCase
+# from pymooCFD.core.cfdCase import CFDCase
+from pymooCFD.core.cfdCase import YALES2Case
 from pymooCFD.core.optStudy import OptStudy
 
 
@@ -74,8 +75,8 @@ class CompDistSLURM(CFDCase):
     def _postProc(self):
         self.f = self.solnTime
 
-    def _execDone(self):
-        return True
+    # def _execDone(self):
+    #     return True
 
 
 class SOO(OptStudy):
