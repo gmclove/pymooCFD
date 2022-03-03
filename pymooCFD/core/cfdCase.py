@@ -1090,7 +1090,7 @@ class YALES2Case(CFDCase):
 
     def solve(self):
         super().solve()
-        self.wallTime = self.getWallTime()
+        # self.wallTime = self.getWallTime()
 
     def getWallTime(self):
         search_str = os.path.join(self.caseDir, 'solver01_rank*.log')
