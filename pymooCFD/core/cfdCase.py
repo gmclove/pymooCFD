@@ -231,7 +231,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         if externalSolver is None:
             externalSolver = cls.externalSolver
         if cls.procLim is None:
-            cls.nTasks = 1000000
+            cls.nTasks = 500
         elif cls.nTasks is None:
             cls.nTasks = int(cls.procLim / cls.nProc)
         # else:
