@@ -14,7 +14,6 @@ If you choose miniconda there may be python packages not mentioned here that wil
 ## Build Conda Environment
 https://docs.conda.io/projects/conda/en/4.6.0/_downloads/52a95608c49671267e40c689e0bc00ca/conda-cheatsheet.pdf
 
-<<<<<<< HEAD
 If you already have anaconda installed make sure to update it before continuing. First activate the anaconda (base) environment.
 ```bash
 conda activate base
@@ -26,19 +25,6 @@ conda update conda
 Now to create a new conda environment with Python 3.9 installed and numPy. Check https://pymoo.org/installation.html#Conda for the latest instructions on the conda enviroment setup.
 ```bash
 conda create -n pymooCFD -y python==3.9 numpy
-=======
-If you already have anaconda installed make sure to update it before continuing.
-```bash
-conda update conda
-```
-Create a new conda environment with Python 3.9 installed and numPy.
-Next activate the environment, so we can continue the build.  
-```bash
-conda create -n pymooCFD -y python==3.9 numpy
-```
-```bash
-conda activate pymooCFD
->>>>>>> a6d66a2165c828f45319bd0b44b55e542c6f9ad3
 ```
 Next activate the environment, so we can continue the build.  
 ```bash
@@ -48,22 +34,14 @@ conda activate pymooCFD
 
 
 #### PIP Installation
-<<<<<<< HEAD
 This package should already exist in any conda python environment but to make sure execute command:
-=======
-This package should come with the base anaconda python environment but to make sure execute command:
->>>>>>> a6d66a2165c828f45319bd0b44b55e542c6f9ad3
 ```bash
 conda install pip
 ```
 PIP, or preferred installer program, is similar to conda in that it is a package manager for virtual environments. PIP essentially works within or on top of the conda environment. Conda installs are always preferred in a conda environment but some programs are only packaged for PIP. Conda packages are designed to check dependencies between, not only different python packages, but other programs as well. This means that a virtual environment built using conda will be more likely to work across different machines with different operating systems.
 
 #### pymoo Installation
-<<<<<<< HEAD
 Next install pymoo using PIP.
-=======
-Next install pymoo using pip.
->>>>>>> a6d66a2165c828f45319bd0b44b55e542c6f9ad3
 
 ```bash
 pip install -U pymoo
