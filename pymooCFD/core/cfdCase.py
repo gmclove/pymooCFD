@@ -186,12 +186,16 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         #    Attributes To Be Set Later During Each Run   #
         ###################################################
         self.f = None  # if not None then case complete
-        # meshing attributes
+        ## meshing attributes
         self.msCases = None
         self.numElem = None
         # class properties
         self._meshSF = None
+<<<<<<< HEAD
         self.meshSF = kwargs.get('meshSF', 1)
+=======
+        self.meshSF = meshSF
+>>>>>>> a6d66a2165c828f45319bd0b44b55e542c6f9ad3
         self._meshSFs = None
         self.meshSFs = meshSFs
 
@@ -248,10 +252,18 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     @classmethod
     def parallelize(cls, cases):
         cls.parallelizeInit()
+<<<<<<< HEAD
         print('PARALLELIZING . . .')
         #cls.logger.info('PARALLELIZING . . .')
         if cls.onlyParallelizeSolve:
             # print('\tParallelizing Only Solve')
+=======
+        print('PARALLELIZING')
+        print(cases)
+        #cls.logger.info('PARALLELIZING . . .')
+        if cls.onlyParallelizeSolve:
+            print('\tParallelizing Only Solve')
+>>>>>>> a6d66a2165c828f45319bd0b44b55e542c6f9ad3
             for case in cases:
                 case.preProc()
             for case in cases:
@@ -303,8 +315,16 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         #end = time.time()
         #self.logger.info(f'Solve Time: {start-end}')
 
+<<<<<<< HEAD
     def run(self, max_reruns=3, n_reruns=0):
         # print('RUNNING:', self)
+=======
+    def run(self):
+        print('RUNNING', self)
+        self._execDone()
+        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+        print(self._execDone())
+>>>>>>> a6d66a2165c828f45319bd0b44b55e542c6f9ad3
         if self.f is None and not self._execDone():
             self.preProc()
             self.solve()
@@ -1038,6 +1058,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     def _genMesh(self):
         pass
 
+<<<<<<< HEAD
     def _getObj(self, f):
         return f
 
@@ -1171,7 +1192,89 @@ class YALES2Case(CFDCase):
 
 class FluentCase(CFDCase):
     pass
+=======
+from pymooCFD.util.handleData import findKeywordLine
+import re
+>>>>>>> a6d66a2165c828f45319bd0b44b55e542c6f9ad3
 
+class YALES2Case(CFDCase):
+    # def __init__(self, caseDir, x, *args, **kwargs):
+    #     super().__init__(caseDir, x, *args, **kwargs)
+
+    def solve(self):
+        super().solve()
+        self.wallTime = self.getWallTime()
+
+    def getWallTime(self):
+        fName, = glob('solver01_rank*.log')
+        with open(fName, 'rb') as f:
+            try:  # catch OSError in case of a one line file
+                f.seek(-1020, os.SEEK_END)
+            except OSError:
+                f.seek(0)
+            clock_line = f.readline().decode()
+        if 'WALL CLOCK TIME' in clock_line:
+            wall_time = int(float(clock_line[-13:]))
+            self.logger.info(f'YALES2 Wall Clock Time: {wall_time} seconds')
+        else:
+            self.logger.warning('no wall clock time found')
+            wall_time = None
+        return wall_time
+
+    def getLatestXMF(self):
+        ents = os.listdir(self.dumpDir)
+        ents.sort()
+        for ent in ents:
+            if ent.endswith('.xmf') and not re.search('.sol.+_.+\\.xmf', ent):
+                latestXMF = ent
+        return latestXMF
+
+    def getLatestMesh(self):
+        ents = os.listdir(self.dumpDir)
+        ents.sort()
+        for ent in ents:
+            if ent.endswith('.mesh.h5'):
+                latestMesh = ent
+        return latestMesh
+
+    def getLatestSoln(self):
+        ents = os.listdir(self.dumpDir)
+        ents.sort()
+        for ent in ents:
+            if ent.endswith('.sol.h5'):
+                latestSoln = ent
+        return latestSoln
+
+    def getLatestDataFiles(self):
+        latestMesh = self.getLatestMesh()
+        latestSoln = self.getLatestSoln()
+        return latestMesh, latestSoln
+
+    # def setRestart(self):
+    #     # latestMesh, latestSoln = self.getLatestDataFiles()
+    #     latestMesh = self.getLatestMesh()
+    #     latestSoln = self.getLatestSoln()
+    #     # with open(self.inputPath, 'r') as f:
+    #     #     in_lines = f.readlines()
+    #     in_lines = self.inputLines
+    #     kw = 'RESTART_TYPE = GMSH'
+    #     kw_line, kw_line_i = findKeywordLine(kw, in_lines)
+    #     in_lines[kw_line_i] = '#' + kw
+    #     kw = "RESTART_GMSH_FILE = '2D_cylinder.msh22'"
+    #     kw_line, kw_line_i = findKeywordLine(kw, in_lines)
+    #     in_lines[kw_line_i] = '#' + kw
+    #     kw = "RESTART_GMSH_NODE_SWAPPING = TRUE"
+    #     kw_line, kw_line_i = findKeywordLine(kw, in_lines)
+    #     in_lines[kw_line_i] = '#' + kw
+    #     in_lines.append('RESTART_TYPE = XMF')
+    #     in_lines.append('RESTART_XMF_SOLUTION = dump/' + latestXMF)
+    #     # with open(self.inputPath, 'w') as f:
+    #     #     f.writelines(in_lines)
+    #     self.inputLines = in_lines
+
+    @property
+    def dumpDir(self):
+        return os.path.join(self.caseDir, 'dump')
 ###################
 #    FUNCTIONS    #
 ###################

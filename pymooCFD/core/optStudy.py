@@ -733,7 +733,7 @@ class OptStudy:
             #         label += '%.2g'%var[i]
             # label += ']'
             # plot.add(var, label=label)
-            plot.add(var, label=self.getPointLabel(var))
+            plot.add(np.array(var), label=self.getPointLabel(var))
         path = os.path.join(self.runDir, 'boundary-cases',
                             'bndPts_plot-varSpace.png')
         plot.save(path)

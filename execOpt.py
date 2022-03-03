@@ -3,13 +3,21 @@
 # @Last modified by:   glove
 # @Last modified time: 2021-12-16T09:37:30-05:00
 
+<<<<<<< HEAD
 from pymooCFD.studies.oscillCyl_x2 import optStudy
+=======
+#from setupOpt import optStudy
+>>>>>>> a6d66a2165c828f45319bd0b44b55e542c6f9ad3
 import numpy as np
 #from pymooCFD.studies.oscillCyl import BaseCase
 #from pymoo.factory import get_termination
 import os
+<<<<<<< HEAD
 #from pymooCFD.studies.oscillCyl_soo import optStudy
 
+=======
+from pymooCFD.studies.oscillCyl_soo import optStudy
+>>>>>>> a6d66a2165c828f45319bd0b44b55e542c6f9ad3
 
 def main():
     '''
@@ -17,6 +25,7 @@ def main():
 
     import your optimization study object/instance from setupOpt.py and execute
     '''
+<<<<<<< HEAD
     # print(optStudy.algorithm.__dict__)
     # print(optStudy.problem.__dict__)
     # print(optStudy.BaseCase.__dict__)
@@ -29,6 +38,15 @@ def main():
     noOscCase.run()
     # noOscCase.msCases = None
     # noOscCase.meshStudy()
+=======
+    print(optStudy.algorithm.__dict__)
+    print(optStudy.problem.__dict__)
+    print(optStudy.BaseCase.__dict__)
+    print(optStudy.__dict__)
+    optStudy.run()
+    #noOscCase = optStudy.BaseCase('no_osc_case', [0, 0])
+    #noOscCase.run()
+>>>>>>> a6d66a2165c828f45319bd0b44b55e542c6f9ad3
 
     #optStudy.runDir = os.path.join(optStudy.optDatDir, 'run')
     # optStudy.saveCP()

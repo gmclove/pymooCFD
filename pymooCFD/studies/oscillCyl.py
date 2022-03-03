@@ -7,14 +7,15 @@ from pymooCFD.core.optStudy import OptStudy
 import os
 import gmsh
 import numpy as np
+from glob import glob
 # import scipy
 from scipy.integrate import quad
 
 from pymooCFD.util.yales2Tools import getLatestXMF
-from pymooCFD.core.cfdCase import CFDCase
+from pymooCFD.core.cfdCase import YALES2Case #CFDCase
 
 
-class OscillCylinder(CFDCase):
+class OscillCylinder(YALES2Case):
     baseCaseDir = 'base_cases/osc-cyl_base'
     ####### Define Design Space #########
     n_var = 2
@@ -47,11 +48,24 @@ class OscillCylinder(CFDCase):
                                         np.arange(0.3, 1.6, 0.1), decimals=2),
                                         [0.25, 0.35, 0.45])
                        )
+
     def _execDone(self):
-        dumpDir = os.path.join(self.caseDir, 'dump')
-        finalSolnPath = os.path.join(dumpDir, '2D_cyl.sol000400.xmf')
-        if os.path.isfile(finalSolnPath) and os.path.isfile(self.datPath):
-            return True
+        fPath = os.path.join(self.caseDir, 'solver01_rank00.log')
+        if os.path.exists(fPath):
+            with open(fPath, 'rb') as f:
+                print(f)
+                try:  # catch OSError in case of a one line file
+                    f.seek(-2, os.SEEK_END)
+                    while f.read(1) != b'\n':
+                        f.seek(-2, os.SEEK_CUR)
+                except OSError:
+                    f.seek(0)
+                last_line = f.readline().decode()
+            return bool('in destroy_mpi' in last_line)
+        # dumpDir = os.path.join(self.caseDir, 'dump')
+        # finalSolnPath = os.path.join(dumpDir, '2D_cyl.sol000400.xmf')
+        # if os.path.isfile(finalSolnPath) and os.path.isfile(self.datPath):
+        #     return True
 #            with open(self.datPath) as f:
 #                lines = f.readlines()
 #                if lines[-1][:5] == ' 2000':
@@ -60,8 +74,8 @@ class OscillCylinder(CFDCase):
 
     def _preProc_restart(self):
         self._preProc()
-        dumpDir = os.path.join(self.caseDir, 'dump')
-        latestXMF = getLatestXMF(dumpDir)
+        latestXMF = self.getLatestXMF()
+        # read input lines
         in_lines = self.inputLines
         kw = 'RESTART_TYPE = GMSH'
         kw_line, kw_line_i = self.findKeywordLine(kw, in_lines)
@@ -74,6 +88,7 @@ class OscillCylinder(CFDCase):
         in_lines[kw_line_i] = '#' + kw + '\n'
         in_lines.append('RESTART_TYPE = XMF' + '\n')
         in_lines.append('RESTART_XMF_SOLUTION = dump/' + latestXMF + '\n')
+        # write input lines
         self.inputLines = in_lines
 
     def _preProc(self):
