@@ -158,6 +158,7 @@ class OptStudy:
                              return_least_infeasible=self.algorithm.return_least_infeasible
                              )
         self.algorithm.callback.__init__()
+        self.saveCP()
 
     def initAlg(self):
         if self.algorithm.is_initialized:
@@ -231,8 +232,8 @@ class OptStudy:
                 evalPop = self.algorithm.off
                 # self.algorithm.callback.gen -= 1
             # print('AFTER ASK:')
-            # print('n_gen:', self.algorithm.n_gen)
-            # print('gen', self.algorithm.callback.gen)
+            # print('\talgorithm.n_gen:', self.algorithm.n_gen)
+            # print('\tcallbck.gen:', self.algorithm.callback.gen)
             # print(self.algorithm.pop.get('F'))
             # print('alg. off.:', self.algorithm.off)
             # print('evalPop:', evalPop)
@@ -247,15 +248,18 @@ class OptStudy:
 
             # returned the evaluated individuals which have been evaluated or even modified
             self.algorithm.tell(infills=evalPop)
-            # print('self.algorithm.callback.gen:', self.algorithm.callback.gen)
-            # print('self.algorithm.n_gen:', self.algorithm.n_gen)
+            # print('AFTER TELL:')
+            # print('\tself.algorithm.callback.gen =',
+            #       self.algorithm.callback.gen)
+            # print('\tself.algorithm.n_gen =', self.algorithm.n_gen)
             # save top {n_opt} optimal evaluated cases in pf directory
+            compGen = self.algorithm.callback.n_gen - 1
             for off_i, off in enumerate(self.algorithm.off):
                 for opt_i, opt in enumerate(self.algorithm.opt[:self.n_opt]):
                     if np.array_equal(off.X, opt.X):
                         optDir = os.path.join(self.pfDir, f'opt{opt_i+1}')
                         offDir = os.path.join(
-                            self.runDir, f'gen{self.algorithm.n_gen}', f'ind{off_i+1}')
+                            self.runDir, f'gen{compGen}', f'ind{off_i+1}')
                         self.logger.info(
                             f'\tUpdating Pareto front folder: {offDir} -> {optDir}')
                         try:
@@ -285,7 +289,7 @@ class OptStudy:
             self.saveCP()
             if delPrevGen:
                 direct = os.path.join(
-                    self.runDir, f'gen{self.algorithm.n_gen}')
+                    self.runDir, f'gen{compGen}')
                 shutil.rmtree(direct)
         # obtain the result objective from the algorithm
         res = self.algorithm.result()

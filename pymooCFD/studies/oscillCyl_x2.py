@@ -43,14 +43,14 @@ class OscillCylinder(YALES2Case):
     procLim = 40
     solverExecCmd = ['mpirun', '-n', str(nProc), '2D_cylinder']
 
-    def __init__(self, caseDir, x, meshSF=1):  # , *args, **kwargs):
+    def __init__(self, caseDir, x, meshSF=0.75):  # , *args, **kwargs):
         super().__init__(caseDir, x,
                          meshFile='2D_cylinder.msh22',
                          datFile='FORCES_temporal.txt',
                          jobFile='jobslurm.sh',
                          inputFile='2D_cylinder.in',
                          meshSF=meshSF,
-                         meshSFs=[0.5, 0.75, 1.5, 2, 3, 4, 5]
+                         meshSFs=[0.5, 0.75, 0.8, 0.9, 1.5, 2, 3, 4, 5]
                          # meshSFs=[0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8],
                          # meshSFs=np.append(
                          #     np.around(
@@ -550,6 +550,7 @@ class OscillCylinderOpt(OptStudy):
                  ):
         super().__init__(algorithm, problem, BaseCase,
                          optName='OscCylX2',
+                         runDir='run'
                          # n_opt = 20,
                          # baseCaseDir='base_cases/osc-cyl_base',
                          # optDatDir='cyl-opt_run',
@@ -587,6 +588,7 @@ class GA_CFD(Problem):
 
     def _evaluate(self, X, out, *args, **kwargs):
         out = optStudy.runGen(X, out)
+        # out['F'] = np.zeros((BaseCase.n_obj, pop_size))
 
 
 problem = GA_CFD()

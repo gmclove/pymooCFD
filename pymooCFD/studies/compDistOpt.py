@@ -5,29 +5,31 @@
 
 from pymooCFD.core.optStudy import OptStudy
 
-class LocalCompDistOpt(OptStudy):
-
-    def __init__(self):
-        super().__init__()
-
-    def execute(self):
-        self.singleNodeExec()
+# class LocalCompDistOpt(OptStudy):
+#
+#     def __init__(self):
+#         super().__init__()
+#
+#     def execute(self):
+#         self.singleNodeExec()
 
 
 from pymooCFD.core.cfdCase import CFDCase
+
 
 class FluentCompDistSLURM(CFDCase):
     # baseCaseDir = 'base_cases/'
     # datFile = ''
 
     n_var = 2
-    var_labels = ['Number of Tasks', 'Number of CPUs per Task'] #, 'Time Step']
+    # , 'Time Step']
+    var_labels = ['Number of Tasks', 'Number of CPUs per Task']
     varType = ['int', 'int']
     xl = [1, 1]
     xu = [50, 50]
 
     n_obj = 1
-    obj_labels = ['Wall Time']#, 'Fidelity']
+    obj_labels = ['Wall Time']  # , 'Fidelity']
 
     n_constr = 0
 
@@ -35,7 +37,8 @@ class FluentCompDistSLURM(CFDCase):
     solverExecCmd = ['sbatch', '--wait', 'jobslurm.sh']
 
     def __init__(self, baseCaseDir, caseDir, x,
-                 *args, **kwargs):
+                 # *args, **kwargs
+                 ):
         super().__init__(baseCaseDir, caseDir, x,
                          *args, **kwargs)
 
@@ -54,7 +57,7 @@ class FluentCompDistSLURM(CFDCase):
             'module load ansys/fluent-21.2.0',
             'cd $SLURM_SUBMIT_DIR',
             'time fluent 2ddp -g -pdefault -t$SLURM_NTASKS -slurm -i jet_rans-axi_sym.jou > run.out'
-            ]
+        ]
         ##### Write Entire Input File #####
         # useful if input file is short enough
         x_mid = [1.55, 0.55]
@@ -65,7 +68,7 @@ class FluentCompDistSLURM(CFDCase):
             f'/file/import ideas-universal {self.meshFile}',
             # AUTO-SAVE
             '/file/auto-save case-frequency if-case-is-modified',
-    	    '/file/auto-save data-frequency 1000',
+            '/file/auto-save data-frequency 1000',
             # MODEL
             '/define/models axisymmetric y',
             '/define/models/viscous kw-sst y',
@@ -105,7 +108,7 @@ class FluentCompDistSLURM(CFDCase):
             'OK',
             '/exit',
             'OK'
-            ]
+        ]
 
     def _postProc(self):
         pass

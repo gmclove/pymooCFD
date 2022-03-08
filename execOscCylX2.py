@@ -3,7 +3,7 @@
 # @Last modified by:   glove
 # @Last modified time: 2021-12-16T09:37:30-05:00
 
-from pymooCFD.studies.oscillCyl_x2 import optStudy
+from pymooCFD.studies.oscillCyl_x2 import optStudy, algorithm, problem
 import numpy as np
 #from pymooCFD.studies.oscillCyl import BaseCase
 #from pymoo.factory import get_termination
@@ -22,13 +22,16 @@ def main():
     # print(optStudy.BaseCase.__dict__)
     # print(optStudy.__dict__)
 
+  #  optStudy.algorithm = algorithm
+ #   optStudy.problem = problem i
+#    optStudy.newAlg()
     #noOscCase = optStudy.BaseCase('no_osc_case', [0, 0])
     # noOscCase.genMesh()
     # noOscCase.f = None
     # noOscCase.postProc()
-    #noOscCase.run()
+    # noOscCase.run()
     # noOscCase.msCases = None
-    #noOscCase.meshStudy()
+    # noOscCase.meshStudy()
 
     #optStudy.runDir = os.path.join(optStudy.optDatDir, 'run')
     # optStudy.saveCP()
@@ -38,7 +41,7 @@ def main():
     # print(optStudy.algorithm.callback.gen)
     ### Pre-Proccess ###
     # optStudy.preProc()
-    #optStudy.runTestCase()
+    # optStudy.runTestCase()
     # optStudy.testCase.meshSFs = np.around(
     #                        np.arange(0.3, 1.6, 0.1), decimals=2)
     #optStudy.BaseCase = BaseCase
@@ -46,16 +49,19 @@ def main():
     #optStudy.testCase.caseDir = os.path.join(optStudy.runDir, 'test_case')
     # optStudy.saveCP()
 
-    #optStudy.testCase.meshStudy()
+    optStudy.testCase.meshSFs = [0.5, 0.75, 0.8, 0.9, 1.5, 2, 3, 4, 5]
+    # for case in optStudy.testCase.msCases:
+    #     case.preProc()
+    optStudy.testCase.meshStudy()
     # optStudy.genBndCases()
-    # for case in optStudy.bndCases:
-    #   case.meshSFs = np.around(
-    #                         np.arange(0.3, 1.6, 0.1), decimals=2)
+    for case in optStudy.bndCases:
+        case.meshSFs = [0.5, 0.75, 0.8, 0.9, 1.5, 2, 3, 4, 5]
+        case.meshStudy()
     # optStudy.saveCP()
-    optStudy.runBndCases(n_pts=3, getDiags=True, doMeshStudy=True)
+    #optStudy.runBndCases(n_pts=3, getDiags=True, doMeshStudy=True)
     # for case in optStudy.gen1Pop:
     #     case.logger = case.getLogger()
-    optStudy.runGen1()
+    # optStudy.runGen1()
     # optStudy.run()
     # optStudy.meshStudy(optStudy.gen1Pop)
 

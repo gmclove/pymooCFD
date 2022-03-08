@@ -256,12 +256,12 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     @classmethod
     def parallelize(cls, cases):
         cls.parallelizeInit()
-        print('PARALLELIZING . . .')
         #cls.logger.info('PARALLELIZING . . .')
         if cls.onlyParallelizeSolve:
             # print('\tParallelizing Only Solve')
             for case in cases:
                 case.preProc()
+            print('PARALLELIZING . . .')
             for case in cases:
                 cls.pool.apply_async(case.solve, ())
             cls.pool.close()
@@ -269,6 +269,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             for case in cases:
                 case.postProc()
         else:
+            print('PARALLELIZING . . .')
             for case in cases:
                 cls.pool.apply_async(case.run, ())
             cls.pool.close()
@@ -313,7 +314,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
 
     def run(self, max_reruns=3, n_reruns=0):
         # print('RUNNING')
-        if self.f is None and not self._execDone():
+        if self.f is None or np.isnan(np.sum(self.f)):
             self.preProc()
             self.solve()
             if self._execDone():
@@ -328,42 +329,43 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                     self.logger.warning(
                         f'MAX NUMBER OF RE-RUNS ({max_reruns}) REACHED')
             self.postProc()
-        elif self.f is None:
-            self.postProc()
         else:
             self.logger.warning(
-                'SKIPPED: RUN: self.run() called but case already complete')
+                'SKIPPED: RUN - self.run() called but case already complete')
 
     # def execDone(self):
     #     pass
 
     def preProc(self):
-        if self.restart:
-            # self.cpPath = os.path.join
-            self.logger.info(
-                'PRE-PROCESS RESTART - Using self._preProc_restart()')
-            self._preProc_restart()
+        if self.f is None or np.isnan(np.sum(self.f)):
+            if self.restart:
+                # self.cpPath = os.path.join
+                self.logger.info(
+                    'PRE-PROCESS RESTART - Using self._preProc_restart()')
+                self._preProc_restart()
+            else:
+                self._preProc()
+            # save variables in case directory as text file after completing pre-processing
+            # saveTxt(self.caseDir, 'var.txt', self.x)
+            self.logger.info('COMPLETE: PRE-PROCESS')
+            # self.restart = True  # ??????????????????
+            self.saveCP()
         else:
-            self._preProc()
-        # save variables in case directory as text file after completing pre-processing
-        # saveTxt(self.caseDir, 'var.txt', self.x)
-        self.logger.info('COMPLETE: PRE-PROCESS')
-        # self.restart = True  # ??????????????????
-        self.saveCP()
+            self.logger.info('SKIPPED: PRE-PROCESS')
     # def pySolve(self):
     #     self.logger.info('SOLVING . . . ')
     #     self._pySolve()
     #     self.logger.info('SOLVED')
-        # if self.solverExecCmd is None:
-        #     self.logger.error('No external solver execution command give. \
-        #                        Please override solve() method with python CFD \
-        #                        solver or add solverExecCmd to CFDCase object.')
-        #     raise Exception('No external solver execution command give. Please \
-        #                     override solve() method with python CFD solver or \
-        #                     add solverExecCmd to CFDCase object.')
-        # else:
-        #     subprocess.run(self.solverExecCmd, cwd=self.caseDir,
-        #                    stdout=subprocess.DEVNULL)
+    # if self.solverExecCmd is None:
+    #     self.logger.error('No external solver execution command give. \
+    #                        Please override solve() method with python CFD \
+    #                        solver or add solverExecCmd to CFDCase object.')
+    #     raise Exception('No external solver execution command give. Please \
+    #                     override solve() method with python CFD solver or \
+    #                     add solverExecCmd to CFDCase object.')
+    # else:
+    #     subprocess.run(self.solverExecCmd, cwd=self.caseDir,
+    #                    stdout=subprocess.DEVNULL)
 
     def postProc(self):
         if self.f is None or np.isnan(np.sum(self.f)):
@@ -1116,25 +1118,27 @@ class YALES2Case(CFDCase):
                 return True
 
     def _preProc_restart(self):
-        self._preProc()
+        pass
+        # self._preProc()
+        # XMF RESTARTS DO NOT WORK
         # read input lines
-        in_lines = self.inputLines
-        in_lines = self.commentKeywordLines('RESTART', in_lines)
-        # re-read lines
-        in_lines = self.inputLines
-        # delete all 'XMF' and "RESTART" lines
-        kw_lines = self.findKeywordLines('XMF', in_lines)
-        del_markers = [line_i for line_i, line in kw_lines
-                       if 'RESTART' in line]
-        in_lines = [line for line_i, line in enumerate(in_lines)
-                    if line_i in del_markers]
-        # append restart lines with lastest xmf file from dump directory
-        latestXMF = self.getLatestXMF()
-        in_lines.append('RESTART_TYPE = XMF')
-        path = os.path.join('dump', latestXMF)
-        in_lines.append('RESTART_XMF_SOLUTION = ' + path)
-        # write input lines
-        self.inputLines = in_lines
+        # in_lines = self.inputLines
+        # in_lines = self.commentKeywordLines('RESTART', in_lines)
+        # # re-read lines
+        # in_lines = self.inputLines
+        # # delete all 'XMF' and "RESTART" lines
+        # kw_lines = self.findKeywordLines('XMF', in_lines)
+        # del_markers = [line_i for line_i, line in kw_lines
+        #                if 'RESTART' in line]
+        # in_lines = [line for line_i, line in enumerate(in_lines)
+        #             if line_i in del_markers]
+        # # append restart lines with lastest xmf file from dump directory
+        # latestXMF = self.getLatestXMF()
+        # in_lines.append('RESTART_TYPE = XMF')
+        # path = os.path.join('dump', latestXMF)
+        # in_lines.append('RESTART_XMF_SOLUTION = ' + path)
+        # # write input lines
+        # self.inputLines = in_lines
 
     def solve(self):
         super().solve()

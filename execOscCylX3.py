@@ -22,27 +22,37 @@ def main():
     # print(optStudy.BaseCase.__dict__)
     # print(optStudy.__dict__)
     optStudy.BaseCase = BaseCase
-    noOscCase_Re100 = optStudy.BaseCase('no_osc_x3_Re100_case', [0, 0, 1])#, meshFile='2D_cylinder.msh22')
-    noOscCase_Re200 = optStudy.BaseCase('no_osc_x3_Re200_case', [0, 0, 2])#, meshFile='2D_cylinder.msh22')
-    noOscCase_Re300 = optStudy.BaseCase('no_osc_x3_Re300_case', [0, 0, 3])#, meshFile='2D_cylinder.msh22')
-    noOscCase_Re400 = optStudy.BaseCase('no_osc_x3_Re400_case', [0, 0, 4])#, meshFile='2D_cylinder.msh22')
-    noOscCase_Re500 = optStudy.BaseCase('no_osc_x3_Re500_case', [0, 0, 5])#, meshFile='2D_cylinder.msh22')   
+    # , meshFile='2D_cylinder.msh22')
+    noOscCase_Re100 = optStudy.BaseCase('no_osc_x3_Re100_case', [0, 0, 1])
+    # , meshFile='2D_cylinder.msh22')
+    noOscCase_Re200 = optStudy.BaseCase('no_osc_x3_Re200_case', [0, 0, 2])
+    # , meshFile='2D_cylinder.msh22')
+    noOscCase_Re300 = optStudy.BaseCase('no_osc_x3_Re300_case', [0, 0, 3])
+    # , meshFile='2D_cylinder.msh22')
+    noOscCase_Re400 = optStudy.BaseCase('no_osc_x3_Re400_case', [0, 0, 4])
+    # , meshFile='2D_cylinder.msh22')
+    noOscCase_Re500 = optStudy.BaseCase('no_osc_x3_Re500_case', [0, 0, 5])
 #    del noOscCase_Re200.msCases[0]
     cases = [noOscCase_Re100, noOscCase_Re200,
              noOscCase_Re300, noOscCase_Re400, noOscCase_Re500]
-    
-    #optStudy.BaseCase.parallelize(cases)
-    
+
+    # optStudy.BaseCase.parallelize(cases)
+
     for case in cases:
-        case.meshFile = '2D_cylinder.msh22'
-        case.meshPath = os.path.join(case.caseDir, case.meshFile)
+        case.meshSFs = [0.5, 0.75, 1.5, 2, 3, 4, 5]
         case.saveCP()
-        #for msCase in case.msCases:
-         #   print(msCase.f)
-          #  path = os.path.join(msCase.caseDir, 'obj.txt')
-           # msCase.f = np.loadtxt(path)
-        #case.genMeshStudy()
-        #case.meshStudy()
+
+    for case in cases:
+        case.meshStudy()
+        # case.meshFile = '2D_cylinder.msh22'
+        # case.meshPath = os.path.join(case.caseDir, case.meshFile)
+        # case.saveCP()
+        # for msCase in case.msCases:
+        #   print(msCase.f)
+        #  path = os.path.join(msCase.caseDir, 'obj.txt')
+        # msCase.f = np.loadtxt(path)
+        # case.genMeshStudy()
+        # case.meshStudy()
         # exit()
     # noOscCase.genMesh()
     # noOscCase.f = None
