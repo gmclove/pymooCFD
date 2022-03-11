@@ -19,8 +19,8 @@ import sys
 import shutil
 import logging
 import copy
-import matplotlib.pyplot as plt
-plt.set_loglevel("info")
+# import matplotlib.pyplot as plt
+# plt.set_loglevel("info")
 
 # import matplotlib.dates as mdates
 # from matplotlib.ticker import AutoMinorLocator
@@ -843,6 +843,9 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         # Initial Message
         logger.info('-' * 30)
         logger.info('LOGGER INITIALIZED')
+        # Plot logger
+        plot_logger = logging.getLogger(Scatter.__name__)
+        plot_logger.setLevel(config.PLOT_LOGGER_LEVEL)
         return logger
 
     #######################

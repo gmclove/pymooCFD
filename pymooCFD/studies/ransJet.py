@@ -23,7 +23,7 @@ from pymooCFD.util.gridInterp import GridInterp2D, GridInterp3D, radialAvg
 
 
 class RANSJet(FluentCase):
-    baseCaseDir = 'rans_jet_opt/rans_jet-base'
+    baseCaseDir = 'base_cases/rans_jet-base'
     ###################################################
     #      High Quality Simulation Interpolation      #
     ###################################################
@@ -56,7 +56,7 @@ class RANSJet(FluentCase):
     if not os.path.exists(hqGrid_uMag_path_3D):
         with h5py.File(os.path.join(hqSim_dir, 'merged-mesh.h5')) as h5f:
             coor = h5f['XYZ'][:]
-            print(coor.shape)
+            # print(coor.shape)
         with h5py.File(os.path.join(hqSim_dir, 'merged-u_mean.h5')) as h5f:
             dset1 = list(h5f.keys())[0]
             uMean = h5f[dset1][:]

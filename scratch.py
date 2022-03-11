@@ -2,19 +2,34 @@
 # @Date:   2021-12-10T11:22:40-05:00
 # @Last modified by:   glove
 # @Last modified time: 2021-12-14T15:45:19-05:00
+from pymoo.visualization.scatter import Scatter
 import numpy as np
 import os
 
 
-class A:
-    a = 1
-    b = 2
-    c = 3
+import logging
+import matplotlib.pyplot as plt
+plt_logger = logging.getLogger(plt.__name__)
+plt_logger.setLevel(logging.INFO)
+print(plt_logger)
+
+plot_logger = logging.getLogger(Scatter.__name__)
+print(scat_logger)
+plot_logger.setLevel(logging.INFO)
+print(scat_logger)
+# plt.set_loglevel("info")
 
 
-a_obj = [A() for _ in range(4)]
-a = [[obj.a, obj.b] for obj in a_obj]
-print(a)
+#
+# class A:
+#     a = 1
+#     b = 2
+#     c = 3
+#
+#
+# a_obj = [A() for _ in range(4)]
+# a = [[obj.a, obj.b] for obj in a_obj]
+# print(a)
 
 # def findAndReplaceKeywordLines(file_lines, newLine, kws, replaceOnce=False, exact=False, stripKW=True):
 #     def findKeywordLines(kw, file_lines, exact=False):
