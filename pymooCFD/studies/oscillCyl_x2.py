@@ -32,7 +32,8 @@ class OscillCylinder(YALES2Case):
     xu = [3.5, 1]  # upper limits of variables
 
     ####### Define Objective Space ########
-    obj_labels = ['Coefficient of Drag', 'Resistive Torque [N m]']
+    obj_labels = ['Change in Coefficient of Drag [%]',
+                  'Resistive Torque [N m]']
     n_obj = 2
     ####### Define Constraints ########
     n_constr = 0
@@ -43,14 +44,14 @@ class OscillCylinder(YALES2Case):
     procLim = 40
     solverExecCmd = ['mpirun', '-n', str(nProc), '2D_cylinder']
 
-    def __init__(self, caseDir, x, meshSF=0.75):  # , *args, **kwargs):
+    def __init__(self, caseDir, x, meshSF=1.0):  # , *args, **kwargs):
         super().__init__(caseDir, x,
                          meshFile='2D_cylinder.msh22',
                          datFile='FORCES_temporal.txt',
                          jobFile='jobslurm.sh',
                          inputFile='2D_cylinder.in',
                          meshSF=meshSF,
-                         meshSFs=[0.5, 0.75, 0.8, 0.9, 1.5, 2, 3, 4, 5]
+                         meshSFs=[1.0, 1.3, 1.5, 2, 3, 4, 5]
                          # meshSFs=[0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8],
                          # meshSFs=np.append(
                          #     np.around(
@@ -167,6 +168,8 @@ class OscillCylinder(YALES2Case):
         F_S1, = data[mask, 6]
         F_drag = np.mean(F_P1 - F_S1)
         C_drag = F_drag / ((1 / 2) * rho * U**2 * D**2)
+        C_drag_noOsc = 1.363317903314267276
+        prec_change = -((C_drag_noOsc - C_drag) / C_drag_noOsc) * 100
 
         ### Objective 2 ###
         # Objective 2: Power consumed by rotating cylinder
@@ -193,7 +196,7 @@ class OscillCylinder(YALES2Case):
         # print(A_star)
         # print(f_star)
         # print(KE_over_I)
-        self.f = [C_drag, F_res]
+        self.f = [prec_change, F_res]
 
     def _genMesh(self):
         projName = '2D_cylinder'
@@ -683,7 +686,7 @@ termination = get_termination("n_gen", n_gen)
 # will be overwritten in runOpt() if checkpoint already exists
 algorithm = NSGA2(pop_size=pop_size,
                   n_offsprings=n_offsprings,
-                  eliminate_duplicates=True,
+                  eliminate_duplicates=False,
 
                   termination=termination,
 

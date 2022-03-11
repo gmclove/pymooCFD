@@ -6,43 +6,53 @@ import numpy as np
 import os
 
 
-def findAndReplaceKeywordLines(file_lines, newLine, kws, replaceOnce=False, exact=False, stripKW=True):
-    def findKeywordLines(kw, file_lines, exact=False):
-        kw_lines = []
-        for line_i, line in enumerate(file_lines):
-            if exact and kw.rstrip().lstrip() == line:
-                kw_lines.append([line_i, line])
-            elif line.find(kw.rstrip().lstrip()) >= 0:
-                kw_lines.append([line_i, line])
-        return kw_lines
-    '''
-    Finds and replaces any file_lines with newLine that match keywords (kws) give.
-    If no keyword lines are found the newLine is inserted at the beginning of the file_lines.
-    '''
-    kw_lines_array = []
-    for kw in kws:
-        kw_lines_array.append(self.findKeywordLines(
-            kw, file_lines, exact=exact, stripKW=stripKW))
-    print(kw_lines_array)
-    if sum([len(kw_lines) for kw_lines in kw_lines_array]) > 0:
-        def replace():
-            for kw_lines in kw_lines_array:
-                for line_i, line in kw_lines:
-                    file_lines[line_i] = newLine
-                    if replaceOnce:
-                        return
-        replace()
-    else:
-        file_lines.insert(0, newLine)
-    return file_lines
+class A:
+    a = 1
+    b = 2
+    c = 3
 
 
-lines = ['1', '2', 'rggv4tr', 'v45v45']
-kws = ['1    ', '2']
-newLine = 'test'
-new_lines = findAndReplaceKeywordLines(
-    lines, newLine, kws)  # , replaceOnce=True)  # , exact=True)
-print(new_lines)
+a_obj = [A() for _ in range(4)]
+a = [[obj.a, obj.b] for obj in a_obj]
+print(a)
+
+# def findAndReplaceKeywordLines(file_lines, newLine, kws, replaceOnce=False, exact=False, stripKW=True):
+#     def findKeywordLines(kw, file_lines, exact=False):
+#         kw_lines = []
+#         for line_i, line in enumerate(file_lines):
+#             if exact and kw.rstrip().lstrip() == line:
+#                 kw_lines.append([line_i, line])
+#             elif line.find(kw.rstrip().lstrip()) >= 0:
+#                 kw_lines.append([line_i, line])
+#         return kw_lines
+#     '''
+#     Finds and replaces any file_lines with newLine that match keywords (kws) give.
+#     If no keyword lines are found the newLine is inserted at the beginning of the file_lines.
+#     '''
+#     kw_lines_array = []
+#     for kw in kws:
+#         kw_lines_array.append(self.findKeywordLines(
+#             kw, file_lines, exact=exact, stripKW=stripKW))
+#     print(kw_lines_array)
+#     if sum([len(kw_lines) for kw_lines in kw_lines_array]) > 0:
+#         def replace():
+#             for kw_lines in kw_lines_array:
+#                 for line_i, line in kw_lines:
+#                     file_lines[line_i] = newLine
+#                     if replaceOnce:
+#                         return
+#         replace()
+#     else:
+#         file_lines.insert(0, newLine)
+#     return file_lines
+#
+#
+# lines = ['1', '2', 'rggv4tr', 'v45v45']
+# kws = ['1    ', '2']
+# newLine = 'test'
+# new_lines = findAndReplaceKeywordLines(
+#     lines, newLine, kws)  # , replaceOnce=True)  # , exact=True)
+# print(new_lines)
 
 # kw_lines = []
 # for line_i, line in enumerate(file_lines):

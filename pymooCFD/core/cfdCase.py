@@ -283,24 +283,28 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #         self._solve()
 
     def solve(self):
-        self.restart = True
-        start = time.time()
-        self._solve()
-        end = time.time()
-        dt = end - start
-        if dt >= 3600:
-            hrs = int(dt / 3600)
-            mins = int(dt % 3600 / 60)
-            secs = dt % 60
-            t_str = '%i hrs | %i mins | %i secs' % (hrs, mins, secs)
-        elif dt >= 60:
-            mins = int(dt / 60)
-            secs = dt % 60
-            t_str = '%i mins | %i secs' % (mins, secs)
+        if self.f is None or np.isnan(np.sum(self.f)):
+            self.restart = True
+            start = time.time()
+            self._solve()
+            end = time.time()
+            dt = end - start
+            if dt >= 3600:
+                hrs = int(dt / 3600)
+                mins = int(dt % 3600 / 60)
+                secs = dt % 60
+                t_str = '%i hrs | %i mins | %i secs' % (hrs, mins, secs)
+            elif dt >= 60:
+                mins = int(dt / 60)
+                secs = dt % 60
+                t_str = '%i mins | %i secs' % (mins, secs)
+            else:
+                t_str = '%i secs' % dt
+            self.logger.info(f'Solve Time: {t_str}')
+            self.solnTime = dt
+            self.saveCP()
         else:
-            t_str = '%i secs' % dt
-        self.logger.info(f'Solve Time: {t_str}')
-        self.solnTime = dt
+            self.logger.warning('SKIPPED: SOLVE')
 
     def solveExternal(self):
         #self.restart = True
@@ -351,7 +355,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             # self.restart = True  # ??????????????????
             self.saveCP()
         else:
-            self.logger.info('SKIPPED: PRE-PROCESS')
+            self.logger.warning('SKIPPED: PRE-PROCESS')
     # def pySolve(self):
     #     self.logger.info('SOLVING . . . ')
     #     self._pySolve()
@@ -371,7 +375,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         if self.f is None or np.isnan(np.sum(self.f)):
             self._postProc()
         else:
-            self.logger.info('SKIPPED: POST-PROCESSING')
+            self.logger.warning('SKIPPED: POST-PROCESSING')
             self.logger.debug(
                 'self.postProc() called but self.f is not None or NaN so no action was taken')
         # Check Completion
@@ -380,7 +384,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         else:
             self.logger.info('COMPLETE: POST-PROCESS')
         self.saveCP()
-        self.logger.info(f'\tObjectives:{self.f}')
+        self.logger.info(f'\tObjectives: {self.f}')
         return self.f
 
     def genMesh(self):
@@ -632,15 +636,18 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         #     self.msCases =
         self.genMeshStudy()
         # Data
-        a_numElem = [case.numElem for case in self.msCases]
-        a_sf = [case.meshSF for case in self.msCases]
-        dat = np.column_stack((a_numElem, a_sf))
+        # a_numElem = [case.numElem for case in self.msCases]
+        # a_sf = [case.meshSF for case in self.msCases]
+        # s_solnTime = [case.solnTime for case in ]
+        # dat = np.column_stack((a_numElem, a_sf))
+        dat = np.array([[case.meshSF, case.numElem]
+                        for case in self.msCases])
         # Print
-        self.logger.info(f'\tMesh Size Factors: {self.meshSFs}')
-        self.logger.info(f'\tNumber of Elements: {a_numElem}')
+        # self.logger.info(f'\tMesh Size Factors: {self.meshSFs}')
+        # self.logger.info(f'\tNumber of Elements: {a_numElem}')
         with np.printoptions(suppress=True):
             self.logger.info(
-                '\tNumber of Elements | Mesh Size Factor\n\t\t' + str(dat).replace('\n', '\n\t\t'))
+                '\tMesh Size Factor | Number of Elements\n\t\t' + str(dat).replace('\n', '\n\t\t'))
             saveTxt(self.meshStudyDir, 'numElem-vs-meshSFs.txt', dat)
 
         self.execMeshStudy()

@@ -169,7 +169,7 @@ class OptStudy:
         else:
             self.newAlg()
 
-    def run(self, delPrevGen=False):
+    def run(self, delPrevGen=True):
         self.logger.info('STARTING: OPTIMIZATION ALGORITHM RUN')
         self.algorithm.save_history = True
         self.initAlg()
@@ -253,7 +253,7 @@ class OptStudy:
             #       self.algorithm.callback.gen)
             # print('\tself.algorithm.n_gen =', self.algorithm.n_gen)
             # save top {n_opt} optimal evaluated cases in pf directory
-            compGen = self.algorithm.callback.n_gen - 1
+            compGen = self.algorithm.callback.gen - 1
             for off_i, off in enumerate(self.algorithm.off):
                 for opt_i, opt in enumerate(self.algorithm.opt[:self.n_opt]):
                     if np.array_equal(off.X, opt.X):
