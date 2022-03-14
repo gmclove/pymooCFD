@@ -55,7 +55,8 @@ def main():
     # noOscCase.meshStudy()
     #
     # optStudy.testCase.meshSFs = meshSFs
-    # optStudy.testCase.meshStudy()
+    optStudy.testCase.meshStudy()
+    optStudy.runBndCases(n_pts=3, getDiags=True, doMeshStudy=True)
     #
     # optStudy.genBndCases()
 

@@ -3,7 +3,7 @@
 # @Last modified by:   glove
 # @Last modified time: 2021-12-15T17:20:34-05:00
 
-from pymoo.algorithms.soo.nonconvex.ga import GA
+from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.factory import get_termination
 from pymoo.operators.mixed_variable_operator import MixedVariableSampling, MixedVariableMutation, MixedVariableCrossover
 from pymoo.factory import get_sampling, get_crossover, get_mutation
@@ -12,17 +12,17 @@ from pymoo.util.display import Display
 from pymoo.core.problem import Problem
 import numpy as np
 # from pymooCFD.core.cfdCase import CFDCase
-from pymooCFD.core.cfdCase import YALES2Case
+from pymooCFD.core.cfdCase import CFDCase
 from pymooCFD.core.optStudy import OptStudy
 
 
-class LocalCompDistOpt(OptStudy):
-    pass
-    # def __init__(self):
-    #     super().__init__()
+# class LocalCompDistOpt(OptStudy):
+#     pass
+# def __init__(self):
+#     super().__init__()
 
 
-class CompDistSLURM(YALES2Case):
+class CompDistSLURM(CFDCase):
     baseCaseDir = 'base_cases/osc-cyl_base'
     inputFile = '2D_cylinder.in'
     jobFile = 'jobslurm.sh'
@@ -34,8 +34,8 @@ class CompDistSLURM(YALES2Case):
     xl = [1, 1]
     xu = [25, 25]
 
-    n_obj = 1
-    obj_labels = ['Solve Time']  # , 'Fidelity']
+    n_obj = 2
+    obj_labels = ['Solve Time', 'Total Number of CPUs']  # , 'Fidelity']
 
     n_constr = 0
 
@@ -97,18 +97,19 @@ class CompDistSLURM(YALES2Case):
             self.logger.warning('INCOMPLETE: PRE-PROCESSING')
 
     def _postProc(self):
-        self.f = self.solnTime
+        nCPUs = self.x[0] * self.x[1]
+        self.f = [self.solnTime, nCPUs]
 
     # def _execDone(self):
     #     return True
 
 
-class SOO(OptStudy):
+class CompDistOpt(OptStudy):
     def __init__(self, algorithm, problem, BaseCase,
                  # *args, **kwargs
                  ):
         super().__init__(algorithm, problem, BaseCase,
-                         optName='CompDistSOO-test',
+                         # optName='CompDistSOO-test',
                          n_opt=20,
                          # baseCaseDir='base_cases/osc-cyl_base',
                          # optDatDir='cyl-opt_run',
@@ -116,14 +117,14 @@ class SOO(OptStudy):
                          )
 
 
-MyOptStudy = SOO
+MyOptStudy = CompDistOpt
 BaseCase = CompDistSLURM
 
 ####################################
 #    Genetic Algorithm Criteria    #
 ####################################
-n_gen = 25
-pop_size = 50
+n_gen = 5
+pop_size = 10
 n_offsprings = int(pop_size * (1 / 2))  # = num. of evaluations each generation
 
 #################
@@ -223,7 +224,7 @@ termination = get_termination("n_gen", n_gen)
 ###################
 #    ALGORITHM    #
 ###################
-algorithm = GA(
+algorithm = NSGA2(
     pop_size=pop_size,
     n_offsprings=n_offsprings,
     eliminate_duplicates=True,

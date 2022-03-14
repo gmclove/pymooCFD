@@ -29,7 +29,7 @@ class OscillCylinder(YALES2Case):
     var_labels = ['Amplitude [radians/s]', 'Frequency [cycles/s]']
     varType = ["real", "real"]  # options: 'int' or 'real'
     xl = [0.1, 0.1]  # lower limits of parameters/variables
-    xu = [3.5, 1]  # upper limits of variables
+    xu = [4, 1]  # upper limits of variables
 
     ####### Define Objective Space ########
     obj_labels = ['Change in Coefficient of Drag [%]',
@@ -59,6 +59,33 @@ class OscillCylinder(YALES2Case):
                          #     [0.25, 0.35, 0.45]),
                          # *args, **kwargs
                          )
+    # @classmethod
+    # def parallelize(cls, cases, methNames=['preProc', 'solve', 'postProc']):
+    #     cls.parallelizeInit()
+    #     for case in cases:
+    #         case_methods = [method_name for method_name in dir(case)
+    #                           if callable(getattr(case, method_name))]
+    #         if methNames in case_methods:
+    #             exec = lambda self : getattr(self, meth)() for meth in methNames
+    #     for case in cases:
+    #         cls.pool.apply_async(case.exec, ())
+    #     cls.pool.close()
+    #     cls.pool.join()
+
+    @classmethod
+    def parallelize(cls, cases):
+        cls.parallelizeInit()
+        for case in cases:
+            case.preProc()
+        print('PARALLELIZING . . .')
+        for case in cases:
+            cls.pool.apply_async(case.solveAndPostProc, ())
+        cls.pool.close()
+        cls.pool.join()
+
+    def solveAndPostProc(self):
+        self.solve()
+        self.postProc()
 
         # fPath = os.path.join(self.caseDir, 'solver01_rank00.log')
         # if os.path.exists(fPath):
@@ -552,7 +579,8 @@ class OscillCylinderOpt(OptStudy):
                  # *args, **kwargs
                  ):
         super().__init__(algorithm, problem, BaseCase,
-                         optName='OscCylX2',
+                         # optName='OscCylX2',
+                         optName='oscCylX2-v2',
                          runDir='run'
                          # n_opt = 20,
                          # baseCaseDir='base_cases/osc-cyl_base',
@@ -569,7 +597,7 @@ BaseCase = OscillCylinder
 #####################################
 n_gen = 25
 pop_size = 50
-n_offsprings = int(pop_size * (2 / 3))  # = num. of evaluations each generation
+n_offsprings = int(pop_size * (1 / 3))  # = num. of evaluations each generation
 
 #################
 #    PROBLEM    #

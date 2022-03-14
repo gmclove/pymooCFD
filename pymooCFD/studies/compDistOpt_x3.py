@@ -3,7 +3,7 @@
 # @Last modified by:   glove
 # @Last modified time: 2021-12-15T17:20:34-05:00
 
-from pymoo.algorithms.soo.nonconvex.ga import GA
+from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.factory import get_termination
 from pymoo.operators.mixed_variable_operator import MixedVariableSampling, MixedVariableMutation, MixedVariableCrossover
 from pymoo.factory import get_sampling, get_crossover, get_mutation
@@ -11,70 +11,66 @@ from pymoo.core.callback import Callback
 from pymoo.util.display import Display
 from pymoo.core.problem import Problem
 import numpy as np
-from pymooCFD.core.cfdCase import CFDCase
+from pymooCFD.studies.compDistOpt_x2 import CompDistSLURM
 from pymooCFD.core.optStudy import OptStudy
 
 
-class LocalCompDistOpt(OptStudy):
-    pass
-    # def __init__(self):
-    #     super().__init__()
+# class LocalCompDistOpt(OptStudy):
+#     pass
+# def __init__(self):
+#     super().__init__()
 
 
-class CompDistSLURM_YALES2(CFDCase):
+class CompDistSLURM_YALES2(CompDistSLURM):
     baseCaseDir = 'base_cases/osc-cyl_base'
     inputFile = '2D_cylinder.in'
     jobFile = 'jobslurm.sh'
 
-    n_var = 2
+    n_var = 3
     # , 'Time Step']
-    var_labels = ['Number of Tasks', 'Number of CPUs per Task',
-                  'Number of Elements per Group']
-    varType = ['int', 'int', 'int']
-    xl = [1, 1, 100]
-    xu = [30, 30, 1000]
+    var_labels = super().var_labels.append('Number of Elements per Group')
+    varType = super().varType.append('float')
+    xl = super().xl.append(50)
+    xu = super().xu.append(1000)
 
-    n_obj = 1
-    obj_labels = ['Solve Time']  # , 'Fidelity']
-
-    n_constr = 0
-
-    solveExternal = True
-    solverExecCmd = ['sbatch', '--wait', 'jobslurm.sh']
-
+    # n_constr = 0
+    #
+    # solveExternal = True
+    # solverExecCmd = ['sbatch', '--wait', 'jobslurm.sh']
     # def __init__(self, baseCaseDir, caseDir, x,
     #              *args, **kwargs):
     #     super().__init__(baseCaseDir, caseDir, x,
     #                      *args, **kwargs)
 
     def _preProc(self):
-        ntasks = self.x[0]
-        c = self.x[1]
-        # read job lines
-        job_lines = self.jobLines
-        if job_lines:
-            kw_lines = self.findKeywordLines(
-                '#SBATCH --cpus-per-task', job_lines)
-            for line_i, line in kw_lines:
-                job_lines[line_i] = f'#SBATCH --cpu-per-task={c}'
-            kw_lines = self.findKeywordLines('#SBATCH -c', job_lines)
-            for line_i, line in kw_lines:
-                job_lines[line_i] = f'#SBATCH --cpu-per-task={c}'
-            kw_lines = self.findKeywordLines('#SBATCH --ntasks', job_lines)
-            for line_i, line in kw_lines:
-                job_lines[line_i] = f'#SBATCH --ntasks={ntasks}'
-            kw_lines = self.findKeywordLines('#SBATCH -n', job_lines)
-            for line_i, line in kw_lines:
-                job_lines[line_i] = f'#SBATCH --ntasks={ntasks}'
-            # write job lines
-            self.jobLines = job_lines
-        else:
-            self.solverExecCmd.insert(
-                '-c', 1).insert(str(c), 2).insert('-n', 3).insert(str(ntasks), 4)
+        # ntasks = self.x[0]
+        # c = self.x[1]
+        # # read job lines
+        # job_lines = self.jobLines
+        # if job_lines:
+        #     kw_lines = self.findKeywordLines(
+        #         '#SBATCH --cpus-per-task', job_lines)
+        #     for line_i, line in kw_lines:
+        #         job_lines[line_i] = f'#SBATCH --cpu-per-task={c}'
+        #     kw_lines = self.findKeywordLines('#SBATCH -c', job_lines)
+        #     for line_i, line in kw_lines:
+        #         job_lines[line_i] = f'#SBATCH --cpu-per-task={c}'
+        #     kw_lines = self.findKeywordLines('#SBATCH --ntasks', job_lines)
+        #     for line_i, line in kw_lines:
+        #         job_lines[line_i] = f'#SBATCH --ntasks={ntasks}'
+        #     kw_lines = self.findKeywordLines('#SBATCH -n', job_lines)
+        #     for line_i, line in kw_lines:
+        #         job_lines[line_i] = f'#SBATCH --ntasks={ntasks}'
+        #     # write job lines
+        #     self.jobLines = job_lines
+        # else:
+        #     self.solverExecCmd.insert(
+        #         '-c', 1).insert(str(c), 2).insert('-n', 3).insert(str(ntasks), 4)
 
+        super()._preProc()
         in_lines = self.inputLines
         kw_lines = self.findKeywordLines('NELEMENTPERGROUP', in_lines)
-        for line_i, line in kw_lines:
+        for line_i, _ in kw_lines:
             in_lines[line_i] = f'NELEMENTPERGROUP = {self.x[2]}'
         # self.jobLines = [
         #     '#!/bin/bash',
@@ -148,12 +144,12 @@ class CompDistSLURM_YALES2(CFDCase):
         return True
 
 
-class SOO(OptStudy):
+class CompDistOpt(OptStudy):
     def __init__(self, algorithm, problem, BaseCase,
                  # *args, **kwargs
                  ):
         super().__init__(algorithm, problem, BaseCase,
-                         optName='CompDistSOO-test',
+                         # optName='CompDistSOO-test',
                          n_opt=20,
                          # baseCaseDir='base_cases/osc-cyl_base',
                          # optDatDir='cyl-opt_run',
@@ -161,14 +157,14 @@ class SOO(OptStudy):
                          )
 
 
-MyOptStudy = SOO
+MyOptStudy = CompDistOpt
 BaseCase = CompDistSLURM
 
 ####################################
 #    Genetic Algorithm Criteria    #
 ####################################
-n_gen = 25
-pop_size = 50
+n_gen = 5
+pop_size = 10
 n_offsprings = int(pop_size * (1 / 2))  # = num. of evaluations each generation
 
 #################
@@ -268,7 +264,7 @@ termination = get_termination("n_gen", n_gen)
 ###################
 #    ALGORITHM    #
 ###################
-algorithm = GA(
+algorithm = NSGA2(
     pop_size=pop_size,
     n_offsprings=n_offsprings,
     eliminate_duplicates=True,

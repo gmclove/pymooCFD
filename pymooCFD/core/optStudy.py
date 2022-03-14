@@ -27,10 +27,9 @@ class OptStudy:
                  # restart=True,
                  # optDatDir='opt_run',
                  optName=None,
-                 archiveDir='archive', n_CP=10, n_opt=20,
+                 n_opt=20,  # n_CP=10,
                  # CP_fName='checkpoint',
-                 plotsDir='plots',
-                 mapGen1Dir='mapGen1',
+                 # plotsDir='plots', archiveDir='archive', mapGen1Dir='mapGen1',
                  runDir='run',
                  # procLim=os.cpu_count(),
                  # var_labels=None, obj_labels=None,
@@ -108,27 +107,30 @@ class OptStudy:
         #####################################
         #    Default/Optional Attributes    #
         #####################################
+        self.runDir = runDir
+        # self.runDir = os.path.join(self.optDatDir, runDir)
+        # os.makedirs(self.runDir, exist_ok=True)
+
         ### Data Handling ###
-        self.archiveDir = os.path.join(self.optDatDir, archiveDir)
-        os.makedirs(self.archiveDir, exist_ok=True)
-        self.n_CP = n_CP  # number of generations between extra checkpoints
-        self.runDir = os.path.join(self.optDatDir, runDir)
-        os.makedirs(self.runDir, exist_ok=True)
+        # self.archiveDir = os.path.join(self.optDatDir, archiveDir)
+        # os.makedirs(self.archiveDir, exist_ok=True)
+        # self.n_CP = n_CP  # number of generations between extra checkpoints
+
         ### Optimization Pre/Post Processing ###
         # self.procOptDir = os.path.join(self.optDatDir, procOptDir)
         # os.makedirs(self.procOptDir, exist_ok=True)
         # Pareto Front Directory
         # directory to save optimal solutions (a.k.a. Pareto Front)
         # self.pfDir = os.path.join(self.runDir, pfDir)
-        os.makedirs(self.pfDir, exist_ok=True)
+        # os.makedirs(self.pfDir, exist_ok=True)
         # number of optimal points along Pareto front to save
         self.n_opt = int(n_opt)
         # Plots Directory
-        self.plotDir = os.path.join(self.runDir, plotsDir)
-        os.makedirs(self.plotDir, exist_ok=True)
+        # self.plotDir = os.path.join(self.runDir, plotsDir)
+        # os.makedirs(self.plotDir, exist_ok=True)
         # Mapping Objectives vs. Variables Directory
-        self.mapDir = os.path.join(self.runDir, mapGen1Dir)
-        os.makedirs(self.mapDir, exist_ok=True)
+        # self.mapDir = os.path.join(self.runDir, mapGen1Dir)
+        # os.makedirs(self.mapDir, exist_ok=True)
         #### Mesh Sensitivity Studies ###
         # self.studyDir = os.path.join(self.optDatDir, meshStudyDir)
         # os.makedirs(self.studyDir, exist_ok=True)
@@ -357,7 +359,6 @@ class OptStudy:
         streamHandler.setFormatter(formatter)
         logger.info('~' * 30)
         logger.info('NEW RUN')
-        print(logger.handlers)
         return logger
 
     ####################
@@ -561,8 +562,11 @@ class OptStudy:
         # for x_i, type in enumerate(self.BaseCase.varType):
         #     if type == 'int':
         #         x_mid[x_i] = int(x_mid[x_i])
-        x_mid = [int(x_mid[x_i]) for x_i, type in enumerate(self.BaseCase.varType)
-                 if type == 'int']
+        # x_mid = [int(x_mid[x_i]) for x_i, type in enumerate(self.BaseCase.varType)
+        #          if type == 'int']
+        for x_i, varType in enumerate(self.BaseCase.varType):
+            if varType.lower() == 'int':
+                x_mid[x_i] = int(x_mid[x_i])
         testCaseDir = os.path.join(self.runDir, testCaseDir)
         self.testCase = self.BaseCase(testCaseDir, x_mid)  # , restart=True)
 
@@ -976,8 +980,42 @@ class OptStudy:
     #     PROPERTIES    #
     #####################
     @property
+    def runDir(self):
+        return self._runDir
+
+    @runDir.setter
+    def runDir(self, runDir):
+        head, tail = os.path.split(runDir)
+        if head == self.optDatDir:
+            self.logger.debug('runDir setter: head == self.optDatDir')
+            self._runDir = os.path.join(self.optDatDir, tail)
+        else:
+            self._runDir = os.path.join(self.optDatDir, runDir)
+        os.makedirs(self._runDir, exist_ok=True)
+
+    @property
+    def plotDir(self):
+        plotDir = os.path.join(self.runDir, 'plots')
+        os.makedirs(plotDir, exist_ok=True)
+        return plotDir
+
+    @property
+    def mapDir(self):
+        mapDir = os.path.join(self.runDir, 'mapGen1')
+        os.makedirs(mapDir, exist_ok=True)
+        return mapDir
+
+    @property
+    def archiveDir(self):
+        archiveDir = os.path.join(self.runDir, 'archive')
+        os.makedirs(archiveDir, exist_ok=True)
+        return archiveDir
+
+    @property
     def pfDir(self):
-        return os.path.join(self.runDir, 'pareto_front')
+        pfDir = os.path.join(self.runDir, 'pareto_front')
+        os.makedirs(pfDir, exist_ok=True)
+        return pfDir
     # @property
     # def algorithm(self):
     #     return self._algorithm

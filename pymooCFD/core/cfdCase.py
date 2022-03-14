@@ -147,28 +147,28 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         # self.datFile = kwargs.get('datFile')
         # self.meshFile = kwargs.get('meshFile')
 
-        if self.inputFile is None:
-            self.inputPath = None
-        else:
-            self.inputPath = os.path.join(self.caseDir, self.inputFile)
-
         # # if class level variable is None then assign instance attribute
         # if self.datFile is None:
         #     self.datFile = datFile
-        if self.datFile is None:
-            self.datPath = None
-        else:
-            self.datPath = os.path.join(self.caseDir, self.datFile)
-
-        if self.meshFile is None:
-            self.meshPath = None
-        else:
-            self.meshPath = os.path.join(self.caseDir, self.meshFile)
-
-        if self.jobFile is None:
-            self.jobPath = None
-        else:
-            self.jobPath = os.path.join(self.caseDir, self.jobFile)
+        # if self.inputFile is None:
+        #     self.inputPath = None
+        # else:
+        #     self.inputPath = os.path.join(self.caseDir, self.inputFile)
+        #
+        # if self.datFile is None:
+        #     self.datPath = None
+        # else:
+        #     self.datPath = os.path.join(self.caseDir, self.datFile)
+        #
+        # if self.meshFile is None:
+        #     self.meshPath = None
+        # else:
+        #     self.meshPath = os.path.join(self.caseDir, self.meshFile)
+        #
+        # if self.jobFile is None:
+        #     self.jobPath = None
+        # else:
+        #     self.jobPath = os.path.join(self.caseDir, self.jobFile)
         ####################
         #    Attributes    #
         ####################
@@ -436,12 +436,16 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                 msCase.numElem), str(msCase.meshSF)])
             var.append(msCase.x)
         study = np.array(study)
-        self.logger.info('\tStudy:\n\t\t' + str(study).replace('\n', '\n\t\t'))
-        # self.sfToElem = np.array(sfToElem)
-        # print('\t' + str(study).replace('\n', '\n\t'))
-        path = os.path.join(self.meshStudyDir, 'study.txt')
-        np.savetxt(path, study, fmt="%s")
         saveTxt(self.meshStudyDir, 'study.txt', study, fmt="%s")
+        # Data
+        dat = np.array([[case.meshSF, case.numElem]
+                        for case in self.msCases])
+        # Print
+        with np.printoptions(suppress=True):
+            self.logger.info(
+                '\tMesh Size Factor | Number of Elements\n\t\t' + str(dat).replace('\n', '\n\t\t'))
+            saveTxt(self.meshStudyDir, 'meshSFs-vs-numElem.txt', dat)
+
         self.saveCP()
         # path = os.path.join(self.meshStudyDir, 'studyX.txt')
         # np.savetxt(path, var)
@@ -636,15 +640,9 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         #     self.msCases =
         self.genMeshStudy()
         # Data
-        # a_numElem = [case.numElem for case in self.msCases]
-        # a_sf = [case.meshSF for case in self.msCases]
-        # s_solnTime = [case.solnTime for case in ]
-        # dat = np.column_stack((a_numElem, a_sf))
         dat = np.array([[case.meshSF, case.numElem]
                         for case in self.msCases])
         # Print
-        # self.logger.info(f'\tMesh Size Factors: {self.meshSFs}')
-        # self.logger.info(f'\tNumber of Elements: {a_numElem}')
         with np.printoptions(suppress=True):
             self.logger.info(
                 '\tMesh Size Factor | Number of Elements\n\t\t' + str(dat).replace('\n', '\n\t\t'))
@@ -656,14 +654,34 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     ##########################
     #    CLASS PROPERTIES    #
     ##########################
-    # @propert
-    # def caseDir(self):
-    #     return self.caseDir
-    # @caseDir.setter
-    # def caseDir(self, caseDir):
-    #     os.makedirs(caseDir, exist_ok)
-    #     self.
-    #     self.caseDir = caseDir
+    ### Case File Paths ###
+    @property
+    def inputPath(self):
+        if self.inputFile is None:
+            return None
+        else:
+            return os.path.join(self.caseDir, self.inputFile)
+
+    @property
+    def datPath(self):
+        if self.datFile is None:
+            return None
+        else:
+            return os.path.join(self.caseDir, self.datFile)
+
+    @property
+    def meshPath(self):
+        if self.meshFile is None:
+            return None
+        else:
+            return os.path.join(self.caseDir, self.meshFile)
+
+    @property
+    def jobPath(self):
+        if self.jobFile is None:
+            return None
+        else:
+            return os.path.join(self.caseDir, self.jobFile)
 
     @property
     def meshStudyDir(self):
@@ -674,7 +692,6 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         return os.path.join(self.caseDir, 'case.npy')
 
     ### Job Lines ###
-
     @property
     def jobLines(self):
         if self.jobPath is None:
