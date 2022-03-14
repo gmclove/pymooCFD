@@ -11,6 +11,7 @@ from pymoo.core.callback import Callback
 from pymoo.util.display import Display
 from pymoo.core.problem import Problem
 import numpy as np
+import os
 # from pymooCFD.core.cfdCase import CFDCase
 from pymooCFD.core.cfdCase import CFDCase
 from pymooCFD.core.optStudy import OptStudy
@@ -26,13 +27,14 @@ class CompDistSLURM(CFDCase):
     baseCaseDir = 'base_cases/rans-jet_base'
     inputFile = 'jet_rans-axi_sym.jou'
     jobFile = 'jobslurm.sh'
+    datFile = 'jet_rans-axi_sym.cgns'
 
     n_var = 2
     # , 'Time Step']
     var_labels = ['Number of Tasks', 'Number of CPUs per Task']
     varType = ['int', 'int']
     xl = [1, 1]
-    xu = [25, 25]
+    xu = [10, 10]
 
     n_obj = 2
     obj_labels = ['Solve Time', 'Total Number of CPUs']  # , 'Fidelity']
@@ -100,8 +102,9 @@ class CompDistSLURM(CFDCase):
         nCPUs = self.x[0] * self.x[1]
         self.f = [self.solnTime, nCPUs]
 
-    # def _execDone(self):
-    #     return True
+    def _execDone(self):
+        if os.path.exists(self.datFile):
+            return True
 
 
 class CompDistOpt(OptStudy):
