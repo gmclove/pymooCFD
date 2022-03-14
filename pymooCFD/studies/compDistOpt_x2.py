@@ -62,7 +62,7 @@ class CompDistSLURM(CFDCase):
             newLine = f'#SBATCH --cpus-per-task={c}'
             kws = ['#SBATCH --cpus-per-task', '#SBATCH -c']
             job_lines = self.findAndReplaceKeywordLines(
-                job_lines, newLine, kws)
+                job_lines, newLine, kws, insertIndex=1)
 
             newLine = f'#SBATCH --ntasks={ntasks}'
             kws = ['#SBATCH --ntasks', '#SBATCH -n']
