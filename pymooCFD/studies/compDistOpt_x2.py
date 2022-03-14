@@ -23,8 +23,8 @@ from pymooCFD.core.optStudy import OptStudy
 
 
 class CompDistSLURM(CFDCase):
-    baseCaseDir = 'base_cases/osc-cyl_base'
-    inputFile = '2D_cylinder.in'
+    baseCaseDir = 'base_cases/rans-jet_base'
+    inputFile = 'jet_rans-axi_sym.jou'
     jobFile = 'jobslurm.sh'
 
     n_var = 2
@@ -190,7 +190,7 @@ class MyCallback(Callback):
         # For longer runs to save memory may want to use callback.data
         # instead of using algorithm.save_history=True which stores deep
         # copy of algorithm object every generation.
-        ## Example: self.data['var'].append(alg.pop.get('X'))
+        # Example: self.data['var'].append(alg.pop.get('X'))
 
 
 callback = MyCallback()
