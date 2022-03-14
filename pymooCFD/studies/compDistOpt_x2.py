@@ -103,7 +103,10 @@ class CompDistSLURM(CFDCase):
         self.f = [self.solnTime, nCPUs]
 
     def _execDone(self):
-        if os.path.exists(self.datFile):
+        if self.datPath is not None:
+            if os.path.exists(self.datPath):
+                return True
+        else:
             return True
 
 

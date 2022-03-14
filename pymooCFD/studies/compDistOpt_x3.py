@@ -22,12 +22,18 @@ from pymooCFD.core.optStudy import OptStudy
 
 
 class CompDistSLURM_YALES2(CompDistSLURM):
+    baseCaseDir = 'base_cases/osc-cyl_base'
+    inputFile = '2D_cylinder.in'
+    jobFile = 'jobslurm.sh'
+    datFile = 'FORCES_temporal.txt'
+
     n_var = 3
     # , 'Time Step']
-    var_labels = super().var_labels.append('Number of Elements per Group')
-    varType = super().varType.append('float')
-    xl = super().xl.append(50)
-    xu = super().xu.append(1000)
+    var_labels = CompDistSLURM.var_labels.append(
+        'Number of Elements per Group')
+    varType = CompDistSLURM.varType.append('real')
+    xl = CompDistSLURM.xl.append(50)
+    xu = CompDistSLURM.xu.append(1000)
 
     # n_constr = 0
     #

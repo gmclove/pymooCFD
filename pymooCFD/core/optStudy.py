@@ -289,7 +289,7 @@ class OptStudy:
             # input('any key to continue')
             self.algorithm.off = None
             self.saveCP()
-            if delPrevGen:
+            if delPrevGen and not compGen == 1:
                 direct = os.path.join(
                     self.runDir, f'gen{compGen}')
                 shutil.rmtree(direct)
@@ -439,22 +439,19 @@ class OptStudy:
         # self.algorithm = alg
 
     def saveCP(self):  # , alg=None):
-
         gen = self.algorithm.callback.gen
         self.logger.info(f'SAVING CHECKPOINT - GENERATION {gen}')
         if self.algorithm.pop is not None:
             genX = self.algorithm.pop.get('X')
-            # print('genX\n', genX)
             if None not in genX:
                 saveTxt(self.runDir, f'gen{gen}X.txt', genX)
             genF = self.algorithm.pop.get('F')
-            # print('genF\n', genF)
             if None not in genF:
                 saveTxt(self.runDir, f'gen{gen}F.txt', genF)
+            if self.algorithm.off is None:
                 self.logger.info(f'\tgeneration {gen} complete')
-        # print('self.algorithm.off')
-        # print(self.algorithm.off)
-        if self.algorithm.pop is not None and None in self.algorithm.pop.get('F'):
+
+        elif self.algorithm.off is not None:  # and self.algorithm.pop is not None
             self.logger.info('\tmid-generation checkpoint')
         # except TypeError:
         #     self.logger.info('\tmid-generation')

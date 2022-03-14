@@ -515,7 +515,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             plot = Scatter(title='Mesh Study: ' + tail, legend=True, grid=True,
                            labels=['Number of Elements',
                                    obj_label, 'Solution Time [s]'],
-                           tight_layout=True, bbox_to_anchor=(1.05, 1.0)
+                           tight_layout=True  # , bbox_to_anchor=(1.05, 1.0)
                            )
             for i in range(len(a_numElem)):
                 pt = np.array([a_numElem[i], msObj[i, obj_i], solnTimes[i]])

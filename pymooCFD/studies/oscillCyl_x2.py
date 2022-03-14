@@ -33,7 +33,7 @@ class OscillCylinder(YALES2Case):
 
     ####### Define Objective Space ########
     obj_labels = ['Change in Coefficient of Drag [%]',
-                  'Resistive Torque [N m]']
+                  'Resistive Force [N]']
     n_obj = 2
     ####### Define Constraints ########
     n_constr = 0
@@ -46,6 +46,7 @@ class OscillCylinder(YALES2Case):
 
     def __init__(self, caseDir, x, meshSF=1.0):  # , *args, **kwargs):
         super().__init__(caseDir, x,
+                         # optName='OscCylX2',
                          meshFile='2D_cylinder.msh22',
                          datFile='FORCES_temporal.txt',
                          jobFile='jobslurm.sh',
@@ -87,76 +88,6 @@ class OscillCylinder(YALES2Case):
         self.solve()
         self.postProc()
 
-        # fPath = os.path.join(self.caseDir, 'solver01_rank00.log')
-        # if os.path.exists(fPath):
-        #     with open(fPath, 'rb') as f:
-        #         print(f)
-        #         try:  # catch OSError in case of a one line file
-        #             f.seek(-2, os.SEEK_END)
-        #             while f.read(1) != b'\n':
-        #                 f.seek(-2, os.SEEK_CUR)
-        #         except OSError:
-        #             f.seek(0)
-        #         last_line = f.readline().decode()
-        #     return bool('in destroy_mpi' in last_line)
-        # dumpDir = os.path.join(self.caseDir, 'dump')
-        # finalSolnPath = os.path.join(dumpDir, '2D_cyl.sol000400.xmf')
-        # if os.path.isfile(finalSolnPath) and os.path.isfile(self.datPath):
-        #     return True
-#            with open(self.datPath) as f:
-#                lines = f.readlines()
-#                if lines[-1][:5] == ' 2000':
-#                    return True
-#        return False
-    #
-    # def _preProc_restart(self):
-    #     self._preProc()
-    #     # read input lines
-    #     in_lines = self.inputLines
-    #     in_lines = self.commentKeywordLines('RESTART', in_lines)
-    #
-    #     # in_lines = self.commentKeywordLines('GMSH', in_lines)
-    #
-    #     # kw = 'GMSH'
-    #     # kw_lines = self.findKeywordLines(kw, in_lines)
-    #     # for kw_line, kw_line_i in kw_lines:
-    #     #     if  kw_line[-1] != '#':
-    #     #         in_lines[kw_line_i] = '#' + kw_line
-    #
-    #     # kw = 'RESTART_TYPE = GMSH'
-    #     # kw_lines = self.findKeywordLines(kw, in_lines, exact=True)
-    #     # for kw_line, kw_line_i in kw_lines:
-    #     #     in_lines[kw_line_i] = '#' + kw_line
-    #     # kw = "RESTART_GMSH_FILE = '2D_cylinder.msh22'"
-    #     # kw_lines = self.findKeywordLines(kw, in_lines, exact=True)
-    #     # for kw_line, kw_line_i in kw_lines:
-    #     #     in_lines[kw_line_i] = '#' + kw_line
-    #     # kw = "RESTART_GMSH_NODE_SWAPPING = TRUE"
-    #     # kw_lines = self.findKeywordLines(kw, in_lines, exact=True)
-    #     # for kw_line, kw_line_i in kw_lines:
-    #     #     in_lines[kw_line_i] = '#' + kw_line
-    #
-    #     # latestSolnFile = self.getLatestSoln()
-    #     # latestMeshFile = self.getLatestMesh()
-    #     # if latestMeshFile is None:
-    #     #     self.logger.error('Latest HDF mesh file not found')
-    #     #     return
-    #     # if latestSolnFile is None:
-    #     #     self.logger.error('Latest HDF solution file not found')
-    #     #     return
-    #
-    #     latestXMF = self.getLatestXMF()
-    #     kw_lines = self.findKeywordLines('XMF', in_lines)
-    #     for line_i, line in kw_lines:
-    #         if 'RESTART' in line:
-    #             del in_lines[line_i]
-    #     in_lines.append('RESTART_TYPE = XMF')
-    #     path = os.path.join('dump', latestXMF)
-    #     in_lines.append('RESTART_XMF_SOLUTION = ' + path)
-    #
-    #     # write input lines
-    #     self.inputLines = in_lines
-
     def _preProc(self):
         self.genMesh()
         ### EXTRACT VAR ###
@@ -196,7 +127,7 @@ class OscillCylinder(YALES2Case):
         F_drag = np.mean(F_P1 - F_S1)
         C_drag = F_drag / ((1 / 2) * rho * U**2 * D**2)
         C_drag_noOsc = 1.363317903314267276
-        prec_change = -((C_drag_noOsc - C_drag) / C_drag_noOsc) * 100
+        prec_change = ((C_drag - C_drag_noOsc) / C_drag_noOsc) * 100
 
         ### Objective 2 ###
         # Objective 2: Power consumed by rotating cylinder
@@ -385,193 +316,6 @@ class OscillCylinder(YALES2Case):
         # gmsh.fltk.run()
         # This should be called when you are done using the Gmsh Python API:
         gmsh.finalize()
-        #######################################################################
-        # projName = '2D_cylinder'
-        # # dom_dx, dom_dy = 60, 25
-        # centX, centY, centZ = 0, 0, 0
-        # cylD = 1
-        # domD = cylD * 20
-        # meshSizeMax = 0.5
-        # #################################
-        # #          Initialize           #
-        # #################################
-        # gmsh.initialize()
-        # # By default Gmsh will not print out any messages: in order to output messages
-        # # on the terminal, just set the "General.Terminal" option to 1:
-        # gmsh.option.setNumber("General.Terminal", 0)
-        # gmsh.clear()
-        # gmsh.model.add(projName)
-        # gmsh.option.setNumber('Mesh.MeshSizeFactor', self.meshSF)
-        # #################################
-        # #      YALES2 Requirements      #
-        # #################################
-        # # Make sure "Recombine all triangular meshes" is unchecked so only triangular elements are produced
-        # gmsh.option.setNumber('Mesh.RecombineAll', 0)
-        # # Only save entities that are assigned to a physical group
-        # gmsh.option.setNumber('Mesh.SaveAll', 0)
-        # #################################
-        # #           Geometry            #
-        # #################################
-        # cyl = gmsh.model.occ.addCircle(centX, centY, centZ, cylD/2)
-        # topPt = gmsh.model.occ.addPoint(centX, centY + domD, centZ)
-        # botPt = gmsh.model.occ.addPoint(centX, centY - domD, centZ)
-        # centPt = gmsh.model.occ.addPoint(centX, centY, centZ)
-        # inlet = gmsh.model.occ.addCircleArc(botPt, centPt, topPt)
-        # outlet = gmsh.model.occ.addCircleArc(topPt, centPt, botPt)
-        # outerLoop = gmsh.model.occ.addCurveLoop([inlet, outlet])
-        # innerLoop = gmsh.model.occ.addCurveLoop([cyl])
-        # dom = gmsh.model.occ.addPlaneSurface([innerLoop, outerLoop])
-        # # We finish by synchronizing the data from OpenCASCADE CAD kernel with
-        # # the Gmsh model:
-        # gmsh.model.occ.synchronize()
-        # #################################
-        # #    Physical Group Naming      #
-        # #################################
-        # dim = 2
-        # grpTag = gmsh.model.addPhysicalGroup(dim, [dom])
-        # gmsh.model.setPhysicalName(dim, grpTag, 'dom')
-        # dim = 1
-        # grpTag = gmsh.model.addPhysicalGroup(dim, [inlet])
-        # gmsh.model.setPhysicalName(dim, grpTag, 'x0')
-        # grpTag = gmsh.model.addPhysicalGroup(dim, [outlet])
-        # gmsh.model.setPhysicalName(dim, grpTag, 'x1')
-        # grpTag = gmsh.model.addPhysicalGroup(dim, [cyl])
-        # gmsh.model.setPhysicalName(dim, grpTag, 'cyl')
-        # #################################
-        # #           MESHING             #
-        # #################################
-        # # We could also use a `Box' field to impose a step change in element
-        # # sizes inside a box
-        # # boxF = gmsh.model.mesh.field.add("Box")
-        # # gmsh.model.mesh.field.setNumber(boxF, "VIn", meshSizeMax/10)
-        # # gmsh.model.mesh.field.setNumber(boxF, "VOut", meshSizeMax)
-        # # gmsh.model.mesh.field.setNumber(boxF, "XMin", cylD/3)
-        # # gmsh.model.mesh.field.setNumber(boxF, "XMax", cylD/3+cylD*10)
-        # # gmsh.model.mesh.field.setNumber(boxF, "YMin", -cylD)
-        # # gmsh.model.mesh.field.setNumber(boxF, "YMax", cylD)
-        # # # Finally, let's use the minimum of all the fields as the background mesh field:
-        # # minF = gmsh.model.mesh.field.add("Min")
-        # # gmsh.model.mesh.field.setNumbers(minF, "FieldsList", [boxF])
-        # # gmsh.model.mesh.field.setAsBackgroundMesh(minF)
-        #
-        # # Set minimum and maximum mesh size
-        # #gmsh.option.setNumber('Mesh.MeshSizeMin', meshSizeMin)
-        # gmsh.option.setNumber('Mesh.MeshSizeMax', meshSizeMax)
-        #
-        # # Set number of nodes along cylinder wall
-        # gmsh.option.setNumber('Mesh.MeshSizeFromCurvature', 200)
-        # # gmsh.option.setNumber('Mesh.MeshSizeFromCurvatureIsotropic', 1)
-        #
-        # # Set size of mesh at every point in model
-        # # gmsh.model.mesh.setSize(gmsh.model.getEntities(0), meshSize)
-        #
-        # # gmsh.model.mesh.setTransfiniteCurve(cylCir, 150, coef=1.1)
-        # # We can then generate a 2D mesh...
-        # gmsh.model.mesh.generate(1)
-        # gmsh.model.mesh.generate(2)
-        # # extract number of elements
-        # # get all elementary entities in the model
-        # entities = gmsh.model.getEntities()
-        # ##################
-        # #    FINALIZE    #
-        # ##################
-        # e = entities[-1]
-        # # get the mesh elements for each elementary entity
-        # elemTypes, elemTags, elemNodeTags = gmsh.model.mesh.getElements(
-        #     e[0], e[1])
-        # # count number of elements
-        # self.numElem = sum(len(i) for i in elemTags)
-        # # ... and save it to disk
-        # gmsh.write(self.meshPath)
-        # # To visualize the model we can run the graphical user interface with
-        # # `gmsh.fltk.run()'.
-        # # gmsh.fltk.run()
-        # # This should be called when you are done using the Gmsh Python API:
-        # gmsh.finalize()
-
-    # def _genMesh(self):
-    #     projName = '2D_cylinder'
-    #     dom_dx, dom_dy = 60, 25
-    #     cylD = 1
-    #     meshSizeMax = 0.5
-    #     #################################
-    #     #          Initialize           #
-    #     #################################
-    #     gmsh.initialize()
-    #     # By default Gmsh will not print out any messages: in order to output messages
-    #     # on the terminal, just set the "General.Terminal" option to 1:
-    #     gmsh.option.setNumber("General.Terminal", 0)
-    #     gmsh.clear()
-    #     gmsh.model.add(projName)
-    #     gmsh.option.setNumber('Mesh.MeshSizeFactor', self.meshSF)
-    #     #################################
-    #     #      YALES2 Requirements      #
-    #     #################################
-    #     # Make sure "Recombine all triangular meshes" is unchecked so only triangular elements are produced
-    #     gmsh.option.setNumber('Mesh.RecombineAll', 0)
-    #     # Only save entities that are assigned to a physical group
-    #     gmsh.option.setNumber('Mesh.SaveAll', 0)
-    #     #################################
-    #     #           Geometry            #
-    #     #################################
-    #     rect = gmsh.model.occ.addRectangle(0, 0, 0, dom_dx, dom_dy)
-    #     # add circle to rectangular domain to represent cylinder
-    #     cir = gmsh.model.occ.addCircle(dom_dx / 4, dom_dy / 2, 0, cylD)
-    #     # use 1-D circle to create curve loop entity
-    #     cir_loop = gmsh.model.occ.addCurveLoop([cir])
-    #     cir_plane = gmsh.model.occ.addPlaneSurface(
-    #         [cir_loop])  # creates 2-D entity
-    #     # cut circle out of a rectangle
-    #     domDimTags, domDimTagsMap = gmsh.model.occ.cut(
-    #         [(2, rect)], [(2, cir_plane)])
-    #     # dom = domDimTags
-    #     # We finish by synchronizing the data from OpenCASCADE CAD kernel with
-    #     # the Gmsh model:
-    #     gmsh.model.occ.synchronize()
-    #     #################################
-    #     #    Physical Group Naming      #
-    #     #################################
-    #     dim = 2
-    #     grpTag = gmsh.model.addPhysicalGroup(dim, [1])
-    #     gmsh.model.setPhysicalName(dim, grpTag, 'dom')
-    #     dim = 1
-    #     grpTag = gmsh.model.addPhysicalGroup(dim, [7])
-    #     gmsh.model.setPhysicalName(dim, grpTag, 'x0')
-    #     grpTag = gmsh.model.addPhysicalGroup(dim, [8])
-    #     gmsh.model.setPhysicalName(dim, grpTag, 'x1')
-    #     grpTag = gmsh.model.addPhysicalGroup(dim, [6])
-    #     gmsh.model.setPhysicalName(dim, grpTag, 'y0')
-    #     grpTag = gmsh.model.addPhysicalGroup(dim, [9])
-    #     gmsh.model.setPhysicalName(dim, grpTag, 'y1')
-    #     grpTag = gmsh.model.addPhysicalGroup(dim, [5])
-    #     gmsh.model.setPhysicalName(dim, grpTag, 'cyl')
-    #     #################################
-    #     #           MESHING             #
-    #     #################################
-    #     # We could also use a `Box' field to impose a step change in element
-    #     # sizes inside a box
-    #     # boxF = gmsh.model.mesh.field.add("Box")
-    #     # gmsh.model.mesh.field.setNumber(boxF, "VIn", meshSizeMax/10)
-    #     # gmsh.model.mesh.field.setNumber(boxF, "VOut", meshSizeMax)
-    #     # gmsh.model.mesh.field.setNumber(boxF, "XMin", cylD/3)
-    #     # gmsh.model.mesh.field.setNumber(boxF, "XMax", cylD/3+cylD*10)
-    #     # gmsh.model.mesh.field.setNumber(boxF, "YMin", -cylD)
-    #     # gmsh.model.mesh.field.setNumber(boxF, "YMax", cylD)
-    #     # # Finally, let's use the minimum of all the fields as the background mesh field:
-    #     # minF = gmsh.model.mesh.field.add("Min")
-    #     # gmsh.model.mesh.field.setNumbers(minF, "FieldsList", [boxF])
-    #     # gmsh.model.mesh.field.setAsBackgroundMesh(minF)
-    #
-    #     # Set minimum and maximum mesh size
-    #     #gmsh.option.setNumber('Mesh.MeshSizeMin', meshSizeMin)
-    #     gmsh.option.setNumber('Mesh.MeshSizeMax', meshSizeMax)
-    #
-    #     # Set number of nodes along cylinder wall
-    #     gmsh.option.setNumber('Mesh.MeshSizeFromCurvature', 200)
-    #     # gmsh.option.setNumber('Mesh.MeshSizeFromCurvatureIsotropic', 1)
-    #
-    #     # Set size of mesh at every point in model
-    #     # gmsh.model.mesh.setSize(gmsh.model.getEntities(0), meshSize)
 
 
 class OscillCylinderOpt(OptStudy):
@@ -591,6 +335,7 @@ class OscillCylinderOpt(OptStudy):
 
 MyOptStudy = OscillCylinderOpt
 BaseCase = OscillCylinder
+
 
 #####################################
 #### Genetic Algorithm Criteria #####
@@ -687,7 +432,6 @@ mutation = MixedVariableMutation(BaseCase.varType, {
     "real": get_mutation("real_pm", eta=3.0),
     "int": get_mutation("int_pm", eta=3.0)
 })
-
 
 ###############################
 #    TERMINATION CRITERION    #

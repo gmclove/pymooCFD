@@ -27,103 +27,12 @@ class OscillCylinder(OscCylX2):
     baseCaseDir = 'base_cases/osc-cyl_base'
     ####### Define Design Space #########
     n_var = 3
-    var_labels = ['Amplitude [radians/s]',
-                  'Frequency [cycles/s]', 'Reynolds Numbers']
-    varType = ["real", "real", 'int']  # options: 'int' or 'real'
-    xl = [0.1, 0.1, 1]  # lower limits of parameters/variables
-    xu = [3.5, 1, 5]  # upper limits of variables
-
-    # ####### Define Objective Space ########
-    # obj_labels = ['Coefficient of Drag', 'Resistive Torque [N m]']
-    # n_obj = 2
-    # ####### Define Constraints ########
-    # n_constr = 0
-    # ##### Local Execution Command #####
-    # externalSolver = True
-    # onlyParallelizeSolve = True
-    # nProc = 10
-    # procLim = 40
-    # solverExecCmd = ['mpirun', '-n', str(nProc), '2D_cylinder']
-
-    # def __init__(self, caseDir, x):
-    #     super().__init__(caseDir, x,
-    #                      meshFile='2D_cylinder.msh22',
-    #                      datFile='FORCES_temporal.txt',
-    #                      jobFile='jobslurm.sh',
-    #                      inputFile='2D_cylinder.in',
-    #                      meshSF=0.4,
-    #                      # meshSFs=[0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8],
-    #                      meshSFs=np.append(
-    #                          np.around(
-    #                              np.arange(0.3, 1.6, 0.1), decimals=2),
-    #                          [0.25, 0.35, 0.45])
-    #                      )
-
-    # fPath = os.path.join(self.caseDir, 'solver01_rank00.log')
-    # if os.path.exists(fPath):
-    #     with open(fPath, 'rb') as f:
-    #         print(f)
-    #         try:  # catch OSError in case of a one line file
-    #             f.seek(-2, os.SEEK_END)
-    #             while f.read(1) != b'\n':
-    #                 f.seek(-2, os.SEEK_CUR)
-    #         except OSError:
-    #             f.seek(0)
-    #         last_line = f.readline().decode()
-    #     return bool('in destroy_mpi' in last_line)
-    # dumpDir = os.path.join(self.caseDir, 'dump')
-    # finalSolnPath = os.path.join(dumpDir, '2D_cyl.sol000400.xmf')
-    # if os.path.isfile(finalSolnPath) and os.path.isfile(self.datPath):
-    #     return True
-#            with open(self.datPath) as f:
-#                lines = f.readlines()
-#                if lines[-1][:5] == ' 2000':
-#                    return True
-#        return False
-
-    # def _preProc_restart(self):
-    #     self._preProc()
-    #     # read input lines
-    #     in_lines = self.inputLines
-    #     in_lines = self.commentKeywordLines('RESTART', in_lines)
-    #
-    #     # in_lines = self.commentKeywordLines('GMSH', in_lines)
-    #
-    #     # kw = 'GMSH'
-    #     # kw_lines = self.findKeywordLines(kw, in_lines)
-    #     # for kw_line, kw_line_i in kw_lines:
-    #     #     if  kw_line[-1] != '#':
-    #     #         in_lines[kw_line_i] = '#' + kw_line
-    #
-    #     # kw = 'RESTART_TYPE = GMSH'
-    #     # kw_lines = self.findKeywordLines(kw, in_lines, exact=True)
-    #     # for kw_line, kw_line_i in kw_lines:
-    #     #     in_lines[kw_line_i] = '#' + kw_line
-    #     # kw = "RESTART_GMSH_FILE = '2D_cylinder.msh22'"
-    #     # kw_lines = self.findKeywordLines(kw, in_lines, exact=True)
-    #     # for kw_line, kw_line_i in kw_lines:
-    #     #     in_lines[kw_line_i] = '#' + kw_line
-    #     # kw = "RESTART_GMSH_NODE_SWAPPING = TRUE"
-    #     # kw_lines = self.findKeywordLines(kw, in_lines, exact=True)
-    #     # for kw_line, kw_line_i in kw_lines:
-    #     #     in_lines[kw_line_i] = '#' + kw_line
-    #
-    #     # latestSolnFile = self.getLatestSoln()
-    #     # latestMeshFile = self.getLatestMesh()
-    #     # if latestMeshFile is None:
-    #     #     self.logger.error('Latest HDF mesh file not found')
-    #     #     return
-    #     # if latestSolnFile is None:
-    #     #     self.logger.error('Latest HDF solution file not found')
-    #     #     return
-    #
-    #     latestXMF = self.getLatestXMF()
-    #     in_lines.append('RESTART_TYPE = XMF')
-    #     path = os.path.join('dump', latestXMF)
-    #     in_lines.append('RESTART_XMF_SOLUTION = ' + path)
-    #
-    #     # write input lines
-    #     self.inputLines = in_lines
+    var_labels = np.append(OscCylX2.var_labels, 'Reynolds Number')
+    # options: 'int' or 'real'
+    varType = np.append(OscCylX2.varType, 'int')
+    # lower limits of parameters/variables
+    xl = np.append(OscCylX2.xl, 1)
+    xu = np.append(OscCylX2.xu, 5)  # upper limits of variables
 
     def _preProc(self):
         self.genMesh()
@@ -176,11 +85,16 @@ class OscillCylinder(OscCylX2):
         F_S1, = data[mask, 6]
         F_drag = np.mean(F_P1 - F_S1)
         C_drag = F_drag / ((1 / 2) * rho * U**2 * D**2)
+        C_drag_noOsc = [1.363317903314267276, 1.359490209650251247,
+                        1.398579950573592079, 1.429212801757665297, 1.451893683272913238]
+        Re_i = int(Re / 100)
+        prec_change = (C_drag - C_drag_noOsc[Re_i]) * 100 / C_drag_noOsc[Re_i]
 
         ### Objective 2 ###
         # Objective 2: Power consumed by rotating cylinder
         res_torque = data[mask, 9]
         abs_mean_res_torque = np.mean(abs(res_torque))
+        F_res = abs_mean_res_torque * D / 2
         # F_res = abs_mean_res_torque * D / 2
         # t = 1  # [sec]
         # D = 1  # [m] cylinder diameter
@@ -202,7 +116,7 @@ class OscillCylinder(OscCylX2):
         # print(A_star)
         # print(f_star)
         # print(KE_over_I)
-        self.f = [C_drag, abs_mean_res_torque]
+        self.f = [prec_change, F_res]
 
     def _getVar(self, x):
         if x[2] < 10:
@@ -225,6 +139,7 @@ class OscillCylinderOpt(OptStudy):
 
 MyOptStudy = OscillCylinderOpt
 BaseCase = OscillCylinder
+
 
 #####################################
 #### Genetic Algorithm Criteria #####
@@ -306,6 +221,9 @@ callback = MyCallback()
 #    OPERATORS    #
 ###################
 
+print(BaseCase.varType)
+
+
 sampling = MixedVariableSampling(BaseCase.varType, {
     "real": get_sampling("real_lhs"),  # "real_random"),
     "int": get_sampling("int_random")
@@ -347,7 +265,7 @@ termination = get_termination("n_gen", n_gen)
 # will be overwritten in runOpt() if checkpoint already exists
 algorithm = NSGA2(pop_size=pop_size,
                   n_offsprings=n_offsprings,
-                  eliminate_duplicates=True,
+                  eliminate_duplicates=False,
 
                   termination=termination,
 
