@@ -87,7 +87,7 @@ class OscillCylinder(OscCylX2):
         C_drag = F_drag / ((1 / 2) * rho * U**2 * D**2)
         C_drag_noOsc = [1.363317903314267276, 1.359490209650251247,
                         1.398579950573592079, 1.429212801757665297, 1.451893683272913238]
-        Re_i = int(Re / 100)
+        Re_i = int(Re / 100) - 1
         prec_change = (C_drag - C_drag_noOsc[Re_i]) * 100 / C_drag_noOsc[Re_i]
 
         ### Objective 2 ###

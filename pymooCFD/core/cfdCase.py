@@ -284,6 +284,16 @@ class CFDCase:  # (PreProcCase, PostProcCase)
 
     def solve(self):
         if self.f is None or np.isnan(np.sum(self.f)):
+            # try to prevent re-run if execution done
+            if self._execDone() and self.restart:
+                self.logger.debug(
+                    'self.solve() called but self._execDone() and self.restart are both True')
+                self.logger.warning('TRYING: POST-PROCESS BEFORE SOLVE')
+                try:
+                    self.postProc()
+                except FileNotFoundError as err:
+                    self.logger.error(err)
+        if self.f is None or np.isnan(np.sum(self.f)):
             self.restart = True
             start = time.time()
             self._solve()
@@ -515,7 +525,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             plot = Scatter(title='Mesh Study: ' + tail, legend=True, grid=True,
                            labels=['Number of Elements',
                                    obj_label, 'Solution Time [s]'],
-                           tight_layout=True  # , bbox_to_anchor=(1.05, 1.0)
+                           tight_layout=True, bbox_to_anchor=(1.05, 1.0)
                            )
             for i in range(len(a_numElem)):
                 pt = np.array([a_numElem[i], msObj[i, obj_i], solnTimes[i]])

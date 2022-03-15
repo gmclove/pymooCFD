@@ -21,12 +21,14 @@ def main():
     # print(optStudy.problem.__dict__)
     # print(optStudy.BaseCase.__dict__)
     # print(optStudy.__dict__)
+    valid_case = optStudy.BaseCase('validation_case-2.0-0.4', [2, 0.4])
+    valid_case.run()
 
-    noOscCase = optStudy.BaseCase('no_osc_case', [0, 0])
+#    noOscCase = optStudy.BaseCase('no_osc_case', [0, 0])
     # noOscCase.genMesh()
     # noOscCase.f = None
     # noOscCase.postProc()
-    noOscCase.run()
+#    noOscCase.run()
     # noOscCase.msCases = None
     # noOscCase.meshStudy()
 

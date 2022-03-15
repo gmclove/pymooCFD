@@ -34,7 +34,7 @@ class CompDistSLURM(CFDCase):
     var_labels = ['Number of Tasks', 'Number of CPUs per Task']
     varType = ['int', 'int']
     xl = [1, 1]
-    xu = [25, 25]
+    xu = [10, 10]
 
     n_obj = 2
     obj_labels = ['Solve Time', 'Total Number of CPUs']  # , 'Fidelity']

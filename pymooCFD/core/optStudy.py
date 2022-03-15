@@ -591,6 +591,9 @@ class OptStudy:
         cases = self.genCases(indDirs, X)
         self.BaseCase.parallelize(cases)
         # self.runPop(cases)
+        for case in cases:
+            print(case.caseDir, case.f, case.x)
+        print(np.array([case.f for case in cases]))
         out['F'] = np.array([case.f for case in cases])
         if gen == 1:
             self.gen1Pop = cases
