@@ -39,10 +39,11 @@ class CompDistSLURM(CFDCase):
     n_obj = 2
     obj_labels = ['Solve Time', 'Total Number of CPUs']  # , 'Fidelity']
 
-    n_constr = 0
+    n_constr = 1
 
     externalSolver = True
     solverExecCmd = ['sbatch', '--wait', 'jobslurm.sh']
+    nTasks = 4
 
     def __init__(self, caseDir, x, meshSF=1.0,
                  # *args, **kwargs
@@ -101,6 +102,7 @@ class CompDistSLURM(CFDCase):
     def _postProc(self):
         nCPUs = self.x[0] * self.x[1]
         self.f = [self.solnTime, nCPUs]
+        self.g = self.solnTime - 500
 
     def _execDone(self):
         if self.datPath is not None:
@@ -129,9 +131,9 @@ BaseCase = CompDistSLURM
 ####################################
 #    Genetic Algorithm Criteria    #
 ####################################
-n_gen = 5
-pop_size = 10
-n_offsprings = int(pop_size * (1 / 2))  # = num. of evaluations each generation
+n_gen = 20
+pop_size = 40
+n_offsprings = int(pop_size * (2 / 3))  # = num. of evaluations each generation
 
 #################
 #    PROBLEM    #
@@ -226,6 +228,13 @@ mutation = MixedVariableMutation(BaseCase.varType, {
 ###############################
 # https://pymoo.org/interface/termination.html
 termination = get_termination("n_gen", n_gen)
+
+################
+#    REPAIR    #
+################
+# from pymoo.core.repair import Repair
+# class ConsiderMaximumWeightRepair(Repair):
+#     def _do(self, problem, pop, **kwargs):
 
 ###################
 #    ALGORITHM    #

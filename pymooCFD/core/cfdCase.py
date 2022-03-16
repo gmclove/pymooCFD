@@ -194,6 +194,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         #    Attributes To Be Set Later During Each Run   #
         ###################################################
         self.f = None  # if not None then case complete
+        self.g = None
         # meshing attributes
         self.msCases = None
         self.numElem = None
@@ -238,12 +239,13 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     def parallelizeInit(cls, externalSolver=None):
         if externalSolver is None:
             externalSolver = cls.externalSolver
-        if cls.procLim is None:
-            cls.nTasks = config.MP_POOL_NTASKS_MAX
-        elif cls.nTasks is None:
-            cls.nTasks = int(cls.procLim / cls.nProc)
-        # else:
-        #     nTasks = cls.nTasks
+        if cls.nTasks is None:
+            if cls.nProc is not None and cls.nProc is not None:
+                cls.nTasks = int(cls.procLim / cls.nProc)
+            else:
+                cls.nTasks = config.MP_POOL_NTASKS_MAX
+        else:
+            nTasks = cls.nTasks
         if externalSolver:
             assert cls.solverExecCmd is not None
             assert cls.nTasks is not None
@@ -777,6 +779,27 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             # path = os.path.join(self.caseDir, 'var.txt')
             # np.savetxt(path, x)
 
+    @property
+    def g(self): return self._g
+
+    @g.setter
+    def g(self, g):
+        # g = self._getObj(g)
+        self._g = g
+        if g is not None:
+            g = np.array(g)
+            if not g.shape:  # for single objective studies
+                g = np.array([g])
+            # path = os.path.join(self.caseDir, 'const.txt')
+            # np.savetxt(path, g)
+            saveTxt(self.caseDir, 'const.txt', g)
+            if np.isnan(np.sum(g)):
+                self.logger.warning(f'CONSTRAINT(S) CONTAINS NaN VALUE - {g}')
+                for const_i, const in enumerate(g):
+                    if np.isnan(const):
+                        g[const_i] = np.inf
+                        self.logger.warning(
+                            f'\t Constraint {const_i}: {const} -> {np.inf}')
     ### Objectives ###
     @property
     def f(self): return self._f
