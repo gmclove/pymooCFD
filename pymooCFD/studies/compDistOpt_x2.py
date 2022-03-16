@@ -129,9 +129,9 @@ BaseCase = CompDistSLURM
 ####################################
 #    Genetic Algorithm Criteria    #
 ####################################
-n_gen = 5
-pop_size = 10
-n_offsprings = int(pop_size * (1 / 2))  # = num. of evaluations each generation
+n_gen = 20
+pop_size = 40
+n_offsprings = int(pop_size * (2 / 3))  # = num. of evaluations each generation
 
 #################
 #    PROBLEM    #

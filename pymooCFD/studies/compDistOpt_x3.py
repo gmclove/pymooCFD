@@ -28,12 +28,11 @@ class CompDistSLURM_YALES2(CompDistSLURM):
     datFile = 'FORCES_temporal.txt'
 
     n_var = 3
-    # , 'Time Step']
-    var_labels = CompDistSLURM.var_labels.append(
-        'Number of Elements per Group')
-    varType = CompDistSLURM.varType.append('real')
-    xl = CompDistSLURM.xl.append(50)
-    xu = CompDistSLURM.xu.append(1000)
+    var_labels = np.append(CompDistSLURM.var_labels,
+                           'Number of Elements per Group')
+    varType = np.append(CompDistSLURM.varType, 'real')
+    xl = np.append(CompDistSLURM.xl, 50)
+    xu = np.append(CompDistSLURM.xu, 1000)
 
     # n_constr = 0
     #
@@ -165,9 +164,9 @@ BaseCase = CompDistSLURM
 ####################################
 #    Genetic Algorithm Criteria    #
 ####################################
-n_gen = 5
-pop_size = 10
-n_offsprings = int(pop_size * (1 / 2))  # = num. of evaluations each generation
+n_gen = 20
+pop_size = 40
+n_offsprings = int(pop_size * (2 / 3))  # = num. of evaluations each generation
 
 #################
 #    PROBLEM    #
