@@ -712,7 +712,7 @@ class OptStudy:
             plot.add(np.array(obj), label=self.getPointLabel(obj))
         path = os.path.join(self.runDir, 'boundary-cases',
                             'bndPts_plot-objSpace.png')
-        plot.save(path)
+        plot.save(path, dpi=100)
         # plot.show()
         # if F.shape[1] == 2:
         #     # self.logger.debug(f'Plotting:\n\t{str(F).replace('\n', '\n\t')}')
@@ -750,7 +750,7 @@ class OptStudy:
             plot.add(np.array(var), label=self.getPointLabel(var))
         path = os.path.join(self.runDir, 'boundary-cases',
                             'bndPts_plot-varSpace.png')
-        plot.save(path)
+        plot.save(path, dpi=100)
         # bndPts = np.array(bndPts)
         # if bndPts.shape[1] == 2:
         #     plt.scatter(bndPts[:,0], bndPts[:,1])
