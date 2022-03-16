@@ -43,6 +43,7 @@ class CompDistSLURM(CFDCase):
 
     externalSolver = True
     solverExecCmd = ['sbatch', '--wait', 'jobslurm.sh']
+    nTasks = 4
 
     def __init__(self, caseDir, x, meshSF=1.0,
                  # *args, **kwargs
