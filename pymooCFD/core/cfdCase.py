@@ -238,12 +238,13 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     def parallelizeInit(cls, externalSolver=None):
         if externalSolver is None:
             externalSolver = cls.externalSolver
-        if cls.procLim is None:
-            cls.nTasks = config.MP_POOL_NTASKS_MAX
-        elif cls.nTasks is None:
-            cls.nTasks = int(cls.procLim / cls.nProc)
-        # else:
-        #     nTasks = cls.nTasks
+        if cls.nTasks is None:
+            if cls.nProc is not None and cls.nProc is not None:
+                cls.nTasks = int(cls.procLim / cls.nProc)
+            else:
+                cls.nTasks = config.MP_POOL_NTASKS_MAX
+        else:
+            nTasks = cls.nTasks
         if externalSolver:
             assert cls.solverExecCmd is not None
             assert cls.nTasks is not None
