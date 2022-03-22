@@ -135,6 +135,32 @@ n_gen = 20
 pop_size = 40
 n_offsprings = int(pop_size * (2 / 3))  # = num. of evaluations each generation
 
+
+#################
+#    PROBLEM    #
+#################
+# from pymooCFD.core.pymooBase import GA_CFD
+# from pymoo.core.problem import ElementwiseProblem
+
+
+class GA_CFD(Problem):
+    def __init__(self, *args, **kwargs):
+        super().__init__(n_var=BaseCase.n_var,
+                         n_obj=BaseCase.n_obj,
+                         n_constr=BaseCase.n_constr,
+                         xl=np.array(BaseCase.xl),
+                         xu=np.array(BaseCase.xu),
+                         *args,
+                         **kwargs
+                         )
+
+    def _evaluate(self, X, out, *args, **kwargs):
+        out = optStudy.runGen(X, out)
+        # out['F'] = np.zeros((BaseCase.n_obj, pop_size))
+
+
+problem = GA_CFD()
+
 #################
 #    DISPLAY    #
 #################
