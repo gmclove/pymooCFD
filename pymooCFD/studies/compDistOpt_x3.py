@@ -146,10 +146,10 @@ class CompDistSLURM_YALES2(CompDistSLURM):
 
 
 class CompDistOpt(OptStudy):
-    def __init__(self, algorithm, problem, BaseCase,
+    def __init__(self, algorithm, BaseCase,
                  # *args, **kwargs
                  ):
-        super().__init__(algorithm, problem, BaseCase,
+        super().__init__(algorithm, BaseCase,
                          # optName='CompDistSOO-test',
                          n_opt=20,
                          # baseCaseDir='base_cases/osc-cyl_base',
@@ -167,30 +167,6 @@ BaseCase = CompDistSLURM
 n_gen = 20
 pop_size = 40
 n_offsprings = int(pop_size * (2 / 3))  # = num. of evaluations each generation
-
-#################
-#    PROBLEM    #
-#################
-# from pymooCFD.core.pymooBase import GA_CFD
-# from pymoo.core.problem import ElementwiseProblem
-
-
-class GA_CFD(Problem):
-    def __init__(self, *args, **kwargs):
-        super().__init__(n_var=BaseCase.n_var,
-                         n_obj=BaseCase.n_obj,
-                         n_constr=BaseCase.n_constr,
-                         xl=np.array(BaseCase.xl),
-                         xu=np.array(BaseCase.xu),
-                         *args,
-                         **kwargs
-                         )
-
-    def _evaluate(self, X, out, *args, **kwargs):
-        out = optStudy.runGen(X, out)
-
-
-problem = GA_CFD()
 
 #################
 #    DISPLAY    #
@@ -289,4 +265,4 @@ algorithm.verbose = True
 
 ################################################################################
 ########  Optimization Study Object Initialization ##########
-optStudy = MyOptStudy(algorithm, problem, BaseCase)
+optStudy = MyOptStudy(algorithm, BaseCase)
