@@ -16,6 +16,8 @@ import copy
 # import h5py
 # import matplotlib.pyplot as plt
 from pymoo.visualization.scatter import Scatter
+from pymoo.core.problem import Problem
+from pymoo.core.evaluator import set_cv
 from pymooCFD.util.sysTools import emptyDir, copy_and_overwrite, saveTxt, yes_or_no
 from pymooCFD.util.loggingTools import MultiLineFormatter, DispNameFilter
 import pymooCFD.config as config
@@ -23,7 +25,7 @@ from pymoo.util.misc import termination_from_tuple
 
 
 class OptStudy:
-    def __init__(self, algorithm, problem, BaseCase,
+    def __init__(self, algorithm, BaseCase,
                  # restart=True,
                  # optDatDir='opt_run',
                  optName=None,
@@ -99,6 +101,14 @@ class OptStudy:
         #    Required Attributes    #
         #############################
         self.problem = problem
+        self.problem = Problem(n_var=BaseCase.n_var,
+                               n_obj=BaseCase.n_obj,
+                               n_constr=BaseCase.n_constr,
+                               xl=np.array(BaseCase.xl),
+                               xu=np.array(BaseCase.xu),
+                               # *args,
+                               # **kwargs
+                               )
         self.algorithm = algorithm  # algorithm.setup(problem)
         # initialize baseCase
         self.BaseCase = BaseCase
@@ -244,7 +254,9 @@ class OptStudy:
             # save checkpoint before evaluation
             self.saveCP()
             # evaluate the individuals using the algorithm's evaluator (necessary to count evaluations for termination)
-            self.algorithm.evaluator.eval(self.problem, evalPop)
+            # self.algorithm.evaluator.eval(self.problem, evalPop)
+
+            evalPop = self.runGen(evalPop)
             # print('self.algorithm.callback.gen:', self.algorithm.callback.gen)
             # print('self.algorithm.n_gen:', self.algorithm.n_gen)
 
@@ -449,7 +461,7 @@ class OptStudy:
             if None not in genF:
                 saveTxt(self.runDir, f'gen{gen}F.txt', genF)
             if self.algorithm.off is None:
-                self.logger.info(f'\tgeneration {gen} complete')
+                self.logger.info(f'\tgeneration {gen-1} complete')
 
         elif self.algorithm.off is not None:  # and self.algorithm.pop is not None
             self.logger.info('\tmid-generation checkpoint')
@@ -582,7 +594,27 @@ class OptStudy:
     #################################
     #    RUN POPULATION OF CASES    #
     #################################
-    def runGen(self, X, out):
+    # def runGen(self, X, out):
+    #     gen = self.algorithm.callback.gen
+    #     # create generation directory for storing data/executing simulations
+    #     genDir = os.path.join(self.runDir, f'gen{gen}')
+    #     # create sub-directories for each individual
+    #     indDirs = [os.path.join(genDir, f'ind{i+1}') for i in range(len(X))]
+    #     cases = self.genCases(indDirs, X)
+    #     self.BaseCase.parallelize(cases)
+    #     # self.runPop(cases)
+    #     for case in cases:
+    #         print(case.caseDir, case.f, case.x)
+    #     print(np.array([case.f for case in cases]))
+    #     out['F'] = np.array([case.f for case in cases])
+    #     if gen == 1:
+    #         self.gen1Pop = cases
+    #     return out
+
+    def runGen(self, pop):
+        # get the design space values of the algorithm
+        X = pop.get("X")
+        # implement your evluation
         gen = self.algorithm.callback.gen
         # create generation directory for storing data/executing simulations
         genDir = os.path.join(self.runDir, f'gen{gen}')
@@ -590,14 +622,17 @@ class OptStudy:
         indDirs = [os.path.join(genDir, f'ind{i+1}') for i in range(len(X))]
         cases = self.genCases(indDirs, X)
         self.BaseCase.parallelize(cases)
-        # self.runPop(cases)
-        for case in cases:
-            print(case.caseDir, case.f, case.x)
-        print(np.array([case.f for case in cases]))
-        out['F'] = np.array([case.f for case in cases])
+        F = np.array([case.f for case in cases])
+        G = np.array([case.g for case in cases])
+        # objectives
+        pop.set("F", F)
+        # for constraints
+        pop.set("G", G)
+        # this line is necessary to set the CV and feasbility status - even for unconstrained
+        set_cv(pop)
         if gen == 1:
             self.gen1Pop = cases
-        return out
+        return pop
 
     # def runPop(self, cases):
     #     nTask = int(self.procLim/self.BaseCase.nProc)
@@ -622,6 +657,7 @@ class OptStudy:
     ########################
     #    BOUNDARY CASES    #
     ########################
+
     def getLimPerms(self):
         from itertools import product
         xl = self.problem.xl
@@ -689,16 +725,15 @@ class OptStudy:
                 'SKIPPED: GENERATE BOUNDARY CASES - call self.genBndCases() directly to create new boundary cases')
         self.BaseCase.parallelize(self.bndCases)
         self.saveCP()
-        obj = [case.f for case in self.bndCases]
-        self.plotBndPtsObj(obj)
-        self.saveCP()
+        self.plotBndPtsObj()
         if doMeshStudy:
             self.meshStudy(self.bndCases)
             self.saveCP()
 
-    def plotBndPtsObj(self, F):
+    def plotBndPtsObj(self):
         plot = Scatter(title='Objective Space: Boundary Cases',
                        legend=True, labels=self.BaseCase.obj_labels)
+        F = np.array([case.f for case in self.bndCases])
         for obj in F:
             # nComp = len(obj)
             # label = '['
@@ -709,7 +744,7 @@ class OptStudy:
             #         label += '%.2g'%obj[i]
             # label += ']'
             # plot.add(obj, label=label)
-            plot.add(np.array(obj), label=self.getPointLabel(obj))
+            plot.add(obj, label=self.getPointLabel(obj))
         path = os.path.join(self.runDir, 'boundary-cases',
                             'bndPts_plot-objSpace.png')
         plot.save(path, dpi=100)
@@ -731,12 +766,13 @@ class OptStudy:
         # else:
         #     self.logger.info('Boundary points not plotted: F.shape[1] != 2')
 
-    def plotBndPts(self, bndPts):
+    def plotBndPts(self):
         plot = Scatter(title='Design Space: Boundary Cases',
                        legend=True,
                        labels=self.BaseCase.var_labels
                        # grid=True
                        )
+        bndPts = np.array([case.x for case in self.bndCases])
         for var in bndPts:
             # nComp = len(var)
             # label = '['
@@ -747,7 +783,7 @@ class OptStudy:
             #         label += '%.2g'%var[i]
             # label += ']'
             # plot.add(var, label=label)
-            plot.add(np.array(var), label=self.getPointLabel(var))
+            plot.add(var, label=self.getPointLabel(var))
         path = os.path.join(self.runDir, 'boundary-cases',
                             'bndPts_plot-varSpace.png')
         plot.save(path, dpi=100)
@@ -781,7 +817,7 @@ class OptStudy:
                                      'boundary-cases', caseName))
         cases = self.genCases(dirs, bndPts)
         self.bndCases = cases
-        self.plotBndPts(bndPts)
+        self.plotBndPts()
         self.saveCP()
 
     def getBndPts(self, n_pts=2, getDiags=False):

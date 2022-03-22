@@ -319,10 +319,10 @@ class OscillCylinder(YALES2Case):
 
 
 class OscillCylinderOpt(OptStudy):
-    def __init__(self, algorithm, problem, BaseCase,
+    def __init__(self, algorithm, BaseCase,
                  # *args, **kwargs
                  ):
-        super().__init__(algorithm, problem, BaseCase,
+        super().__init__(algorithm, BaseCase,
                          # optName='OscCylX2',
                          optName='oscCylX2-v2',
                          runDir='run'
@@ -340,7 +340,7 @@ BaseCase = OscillCylinder
 #####################################
 #### Genetic Algorithm Criteria #####
 #####################################
-n_gen = 25
+n_gen = 30
 pop_size = 50
 n_offsprings = int(pop_size * (1 / 3))  # = num. of evaluations each generation
 
@@ -477,4 +477,4 @@ algorithm.verbose = True
 
 ################################################################################
 ########  Optimization Study Object Initialization ##########
-optStudy = MyOptStudy(algorithm, problem, BaseCase)
+optStudy = MyOptStudy(algorithm, BaseCase)

@@ -125,10 +125,10 @@ class OscillCylinder(OscCylX2):
 
 
 class OscillCylinderOpt(OptStudy):
-    def __init__(self, algorithm, problem, BaseCase,
+    def __init__(self, algorithm, BaseCase,
                  # *args, **kwargs
                  ):
-        super().__init__(algorithm, problem, BaseCase,
+        super().__init__(algorithm, BaseCase,
                          optName='OscCylX3',
                          # n_opt = 20,
                          # baseCaseDir='base_cases/osc-cyl_base',
@@ -284,4 +284,4 @@ algorithm.verbose = True
 
 ################################################################################
 ########  Optimization Study Object Initialization ##########
-optStudy = MyOptStudy(algorithm, problem, BaseCase)
+optStudy = MyOptStudy(algorithm, BaseCase)
