@@ -1,3 +1,4 @@
+from pymoo.util.display import Display
 import numpy as np
 import os
 
@@ -5,9 +6,19 @@ from pymoo.core.problem import Problem
 # from pymoo.core.problem import ElementwiseProblem
 
 
+#####################################
+#### Genetic Algorithm Criteria #####
+#####################################
+n_gen = 2
+pop_size = 2
+# = number of evaluations each generation
+n_offsprings = int(pop_size * (2 / 3))
+
 #################
 #    PROBLEM    #
 #################
+
+
 class CFDProblem_GA(Problem):
     def __init__(self, BaseCase, *args, **kwargs):
         super().__init__(n_var=BaseCase.n_var,
@@ -20,6 +31,7 @@ class CFDProblem_GA(Problem):
                          )
         self.BaseCase = BaseCase
         self.gen1Pop = None
+
     def _evaluate(self, X, out, *args, **kwargs):
         runDir = kwargs.get('runDir')
         gen = kwargs.get('gen')
@@ -41,53 +53,9 @@ class CFDProblem_GA(Problem):
         if gen == 1:
             self.gen1Pop = cases
 
-# problem = GA_CFD()
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-# #### Genetic Algorithm Criteria #####
-# #####################################
-# n_gen = 2
-# pop_size = 2
-# n_offsprings = int(pop_size * (2 / 3)) # = number of evaluations each generation
-#
-# #################
-# #    PROBLEM    #
-# #################
-# from pymoo.core.problem import Problem
-# import numpy as np
-# # from pymoo.core.problem import ElementwiseProblem
-#
-# class GA_CFD(Problem):
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(n_var=BaseCase.n_var,
-#                          n_obj=BaseCase.n_obj,
-#                          n_constr=BaseCase.n_constr,
-#                          xl=np.array(BaseCase.xl),
-#                          xu=np.array(BaseCase.xu),
-#                          *args,
-#                          **kwargs
-#                          )
-#     def _evaluate(self, X, out, *args, **kwargs):
-#         out = optStudy.runGen(X, out)
-#
-# problem = GA_CFD()
-#
-#
 #################
 #    DISPLAY    #
 #################
-from pymoo.util.display import Display
-
-
 class MyDisplay(Display):
     def _do(self, problem, evaluator, algorithm):
         super()._do(problem, evaluator, algorithm)
@@ -98,34 +66,32 @@ class MyDisplay(Display):
                 f"best obj.{obj+1}", algorithm.pop.get('F')[:, obj].min())
         self.output.header()
 
-
 display = MyDisplay()
 
+##################
+#    CALLBACK    #
+##################
+from pymoo.core.callback import Callback
 
-# ##################
-# #    CALLBACK    #
-# ##################
-# from pymoo.core.callback import Callback
-#
-# class MyCallback(Callback):
-#     def __init__(self) -> None:
-#         super().__init__()
-#         self.gen = 1
-#         self.data['best'] = []
-#
-#     def notify(self, alg):
-#         # save checkpoint
-#         optStudy.saveCP(alg=alg)
-#         # increment generation
-#         self.gen += 1
-#         self.data["best"].append(alg.pop.get("F").min())
-#         ### For longer runs to save memory may want to use callback.data
-#         ## instead of using algorithm.save_history=True which stores deep
-#         ## copy of algorithm object every generation.
-#         ## Example: self.data['var'].append(alg.pop.get('X'))
-#
-# callback = MyCallback()
-#
+class PymooCFDCallback(Callback):
+    def __init__(self) -> None:
+        super().__init__()
+        self.gen = 1
+        self.data['best'] = []
+
+    def notify(self, alg):
+        # save checkpoint
+        # optStudy.saveCP(alg=alg)
+        # increment generation
+        self.gen += 1
+        self.data["best"].append(alg.pop.get("F").min())
+        ### For longer runs to save memory may want to use callback.data
+        ## instead of using algorithm.save_history=True which stores deep
+        ## copy of algorithm object every generation.
+        ## Example: self.data['var'].append(alg.pop.get('X'))
+
+callback = PymooCFDCallback()
+
 # ###################
 # #    OPERATORS    #
 # ###################

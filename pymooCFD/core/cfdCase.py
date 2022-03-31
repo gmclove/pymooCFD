@@ -10,7 +10,7 @@ from pymooCFD.util.loggingTools import MultiLineFormatter, DispNameFilter
 from pymooCFD.util.sysTools import saveTxt, yes_or_no
 from pymooCFD.util.handleData import saveObj
 import pymooCFD.config as config
-from pymooCFD.core.caseDatabase import CaseDB
+from pymooCFD.core.caseDatabase import CFDCaseDB
 import multiprocessing.pool
 import multiprocessing as mp
 import numpy as np
@@ -61,27 +61,10 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     nTasks = None
     solverExecCmd = None
 
-    # def plotVarSpace(cls, X, path):
-    #     plt.scatter(X[:,0]
-    #     plt.title('Design Space')
-
-    # if procLim is None:
-    #     nTasks = 1000000
-    # else:
-    #     nTasks = int(procLim/nProc)
-    # if externalSolver:
-    #     assert solverExecCmd is not None
-    #     assert nProc is not None
-    #     assert procLim is not None
-    #     solve = solveExternal
-    #     pool = mp.pool.ThreadPool(nTasks)
-    # else:
-    #     solve = _solve
-    #     pool = Pool(nTasks)
-
     def __init__(self, caseDir, x,
                  database=None,
                  database_precision=30,
+                 database_location=None,
                  meshSF=1,
                  meshStudy=None,
                  var_labels=None, obj_labels=None,
@@ -91,7 +74,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                  datFile=None,
                  # restart=False,
                  # solverExecCmd=None,
-                 # *args, **kwargs
+                 # *args,
+                 **kwargs
                  ):
         super().__init__()
         if not len(self.xl) == len(self.xu) and len(self.xu) == len(self.var_labels) and len(self.var_labels) == self.n_var:
@@ -102,9 +86,9 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         self.caseDir = caseDir
         # self.cpPath = os.path.join(self.caseDir, 'case')
         # self.meshStudyDir = os.path.join(self.caseDir, 'meshStudy')
-        self.meshSF = meshSF
+        # self.meshSF = meshSF
         # Using kwargs
-        # self.meshSF = kwargs.get('meshSF', 1)
+        self.meshSF = kwargs.get('meshSF', 1)
 
         ###########################
         #    RESTART VARIABLES    #
@@ -128,8 +112,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                 self.logger.error(err)
                 self.logger.info(
                     f'OVERRIDE CASE - case directory already exists but {self.cpPath} does not exist')
-                self.copy()
-                saveTxt(self.caseDir, 'var.txt', self.x)
+                # self.copy()
             # except ModuleNotFoundError as err:
             #     print(self.cpPath + '.npy')
             #     raise err
@@ -137,7 +120,9 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             os.makedirs(caseDir, exist_ok=True)
             self.logger = self.getLogger()
             self.logger.info('NEW CASE - directory did not exist')
-            self.copy()
+        # copy files from base case directory to self.caseDir
+        self.copy()
+        saveTxt(self.caseDir, 'var.txt', self.x)
 
         #############################
         #    Optional Attributes    #
@@ -149,7 +134,6 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         ####################
         #    Attributes    #
         ####################
-        # self.x = np.array(x)
         # Default Attributes
         if meshStudy is None:
             self.meshStudy = MeshStudy(self)
@@ -184,9 +168,9 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         self.infill_DB = False
         if database_location is None:
             database_location = os.path.join('CFDCase-DB', self.__class__.__name__)
-        self.database = self.CFDCaseDB(self.__class__, db_location, precision=database_precision)
+        self.database = CFDCaseDB(self.__class__, database_location, precision=database_precision)
         db_load = self.database.load(self)
-        if db_load is not None:
+        if db_load is not None and db_load.meshSF == self.meshSF:
             self.f = db_load.f
             if db_load.meshStudy is not None:
                 self.meshStudy = db_load.meshStudy
@@ -367,6 +351,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             self.logger.info('COMPLETE: POST-PROCESS')
             if self.infill_DB:
                 self.database.save(self)
+                self.logger.info(f'\tCase added to database - {self.database}')
         self.saveCP()
         self.logger.info(f'\tObjectives: {self.f}')
         return self.f
@@ -540,38 +525,6 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                         f[obj_i] = np.inf
                         self.logger.warning(
                             f'\t Objective {obj_i}: {obj} -> {np.inf}')
-
-    # @property
-    # def meshSFs(self): return self._meshSFs
-    #
-    # @meshSFs.setter
-    # def meshSFs(self, meshSFs):
-    #     if meshSFs is None:
-    #         self._meshSFs = meshSFs
-    #         return
-    #     meshSFs, counts = np.unique(meshSFs, return_counts=True)
-    #     for sf_i, n_sf in enumerate(counts):
-    #         if n_sf > 1:
-    #             self.logger.warning(
-    #                 f'REPEATED MESH SIZE FACTOR - {meshSFs[sf_i]} repeated {n_sf} times')
-    #
-    #     if self.msCases is None:
-    #         self._meshSFs = meshSFs
-    #     else:
-    #         prev_meshSFs = [case.meshSF for case in self.msCases]
-    #         self.logger.debug(f'Current Mesh Size Factors:\n\t{self.meshSFs}')
-    #         self.logger.debug(
-    #             f'Previous Mesh Study Size Factors:\n\t{prev_meshSFs}')
-    #         if all(sf in prev_meshSFs for sf in self.meshSFs):
-    #             self.logger.debug(
-    #                 'ALL CURRENT MESH SIZE FACTORS IN PREVIOUS MESH SIZE FACTORS')
-    #             self._meshSFs = meshSFs
-    #         else:
-    #             self.logger.debug(
-    #                 'OLD MESH SIZE FACTORS != NEW MESH SIZE FACTORS')
-    #             self._meshSFs = meshSFs
-    #             self.genMeshStudy()
-
 
     ################
     #    LOGGER    #

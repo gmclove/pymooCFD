@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 from pymoo.visualization.scatter import Scatter
 # from pymoo.core.problem import Problem
 from pymoo.core.evaluator import set_cv
-from pymooCFD.core.pymooBase import
+from pymooCFD.core.pymooBase import CFDProblem_GA
 from pymooCFD.util.sysTools import emptyDir, copy_and_overwrite, saveTxt, yes_or_no
 from pymooCFD.util.handleData import saveObj
 from pymooCFD.util.loggingTools import MultiLineFormatter, DispNameFilter
