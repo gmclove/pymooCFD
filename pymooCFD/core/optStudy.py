@@ -1005,11 +1005,10 @@ class OptStudy:
         for ent in ents:
             ent_path = os.path.join(directory, ent)
             if os.path.isdir(ent_path):
-                for e in os.listdir(ent_path):
-                    caseCP = os.path.join(ent_path, 'case.npy')
-                    if os.path.exists(caseCP):
-                        case, = np.load(caseCP, allow_pickle=True).flatten()
-                        cases.append(case)
+                caseCP = os.path.join(ent_path, 'case.npy')
+                if os.path.exists(caseCP):
+                    case, = np.load(caseCP, allow_pickle=True).flatten()
+                    cases.append(case)
         return cases
 
     #####################
