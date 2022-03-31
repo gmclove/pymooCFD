@@ -139,6 +139,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             self.logger.info('NEW CASE - directory did not exist')
             self.copy()
 
+
+
         #############################
         #    Optional Attributes    #
         #############################
@@ -149,11 +151,9 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         ####################
         #    Attributes    #
         ####################
-        self.x = np.array(x)
+        # self.x = np.array(x)
         # Default Attributes
-        if database_location is None:
-            database_location = os.path.join('CFDCase-DB', self.__class__.__name__)
-        self.database = self.CFDCaseDB(self, db_location, precision=database_precision)
+
 
         # Design and Objective Space Labels
         if self.var_labels is None:
@@ -181,6 +181,20 @@ class CFDCase:  # (PreProcCase, PostProcCase)
 
         self.solnTime = None
 
+        ######################
+        #    Datbase Init    #
+        ######################
+        if database_location is None:
+            database_location = os.path.join('CFDCase-DB', self.__class__.__name__)
+        self.database = self.CFDCaseDB(self, db_location, precision=database_precision)
+        db_load = self.database.load(self)
+        if db_load is not None:
+            self.f = db_load.f
+            self.logger.info(f'DATABASE LOAD: Objectives - {self.f}')
+
+        #################
+        #    WRAP UP    #
+        #################
         self.logger.info('CASE INTITIALIZED')
         self.logger.debug('INITIAL CASE DICTONARY')
         for key in self.__dict__:
@@ -349,9 +363,9 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             self.logger.error('INCOMPLETE: POST-PROCESS')
         else:
             self.logger.info('COMPLETE: POST-PROCESS')
+            self.database.save(self)
         self.saveCP()
         self.logger.info(f'\tObjectives: {self.f}')
-        self.database._save(self)
         return self.f
 
     def genMesh(self):
@@ -414,13 +428,6 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             saveTxt(self.meshStudyDir, 'meshSFs-vs-numElem.txt', dat)
 
         self.saveCP()
-        # path = os.path.join(self.meshStudyDir, 'studyX.txt')
-        # np.savetxt(path, var)
-
-        # obj = np.array([case.f for case in self.msCases])
-        # print('Objectives:\n\t', obj)
-        # path = os.path.join(self.meshStudyDir, 'studyF.txt')
-        # np.savetxt(path, obj)
 
     def plotMeshStudy(self):
         self.logger.info('\tPLOTTING MESH STUDY')
@@ -493,59 +500,6 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             fName = f'ms_plot-{tail}-numElem_v_obj{obj_i}_v_time.png'
             fPath = os.path.join(self.meshStudyDir, fName)
             plot.save(fPath, dpi=100)
-            # obj = msObj[:, obj_i]
-            # abs_min_obj = min(abs(obj))
-            # obj_norm = obj / abs_min_obj
-            # saveTxt(self.meshStudyDir,
-            #         f'obj{obj_i}-normalized_by.txt', abs_min_obj)
-            # # Normalized Number of Elements Plot
-            # self.logger.info(f'\t\tPlotting Objective {obj_i}: {obj_label}')
-            # plt.plot(a_numElem, obj_norm, 'o')
-            # plt.suptitle('Mesh Sensitivity Study')
-            # plt.title(tail)
-            # plt.xlabel('Number of Elements')
-            # plt.ylabel('Normalized ' + obj_label)
-            # plt.ticklabel_format(axis="x", style="sci", scilimits=(0, 0))
-            # fName = f'ms_plot-{tail}-obj{obj_i}-numElem-norm.png'
-            # fPath = os.path.join(self.meshStudyDir, fName)
-            # plt.tight_layout()
-            # plt.savefig(fPath, bbox_inches='tight')
-            # plt.clf()
-            # # Number of Elements
-            # self.logger.info(f'\t\tPlotting Objective {obj_i}: {obj_label}')
-            # plt.plot(a_numElem, obj, 'o')
-            # plt.suptitle('Mesh Sensitivity Study')
-            # plt.title(tail)
-            # plt.xlabel('Number of Elements')
-            # plt.ylabel(obj_label)
-            # plt.ticklabel_format(axis="x", style="sci", scilimits=(0, 0))
-            # fName = f'ms_plot-{tail}-obj{obj_i}-numElem.png'
-            # fPath = os.path.join(self.meshStudyDir, fName)
-            # plt.tight_layout()
-            # plt.savefig(fPath, bbox_inches='tight')
-            # plt.clf()
-            # # Normalized Mesh Size Factor Plot
-            # plt.plot(a_sf, obj_norm, 'o')
-            # plt.suptitle('Mesh Sensitivity Study')
-            # plt.title(tail)
-            # plt.xlabel('Mesh Size Factor')
-            # plt.ylabel('Normalized ' + obj_label)
-            # fName = f'ms_plot-{tail}-obj{obj_i}-meshSFs-norm.png'
-            # fPath = os.path.join(self.meshStudyDir, fName)
-            # plt.tight_layout()
-            # plt.savefig(fPath)
-            # plt.clf()
-            # # Mesh Size Factor Plot
-            # plt.plot(a_sf, obj, 'o')
-            # plt.suptitle('Mesh Sensitivity Study')
-            # plt.title(tail)
-            # plt.xlabel('Mesh Size Factor')
-            # plt.ylabel(obj_label)
-            # fName = f'ms_plot-{tail}-obj{obj_i}-meshSFs.png'
-            # fPath = os.path.join(self.meshStudyDir, fName)
-            # plt.tight_layout()
-            # plt.savefig(fPath)
-            # plt.clf()
         self.saveCP()
 
     def execMeshStudy(self):

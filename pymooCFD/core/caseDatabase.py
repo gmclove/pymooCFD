@@ -30,30 +30,44 @@ class PyClassDB:
         return os.path.join(self.location, fName)
 
     def exists(self, obj):
-        fName = self.objToFileName(obj)
-        path = os.path.join(self.location, fName)
-        if os.path.exists(path):
+        fPath = self.objToFilePath(obj)
+        if os.path.exists(fPath):
             return True
 
     def load(self, obj):
-        fPath = self.objToFilePath(obj)
-        loaded_obj, = np.load(fPath, allow_pickle=True).flatten()
-        if self.objToFileName(obj) == self.objToFileName(loaded_obj):
-            return loaded_obj
-        else:
-            self.logger.error('object -> file name != loaded object -> file name')
-
-    def loadIfExists(self, obj):
         if self.exists(obj):
-            self.load(obj)
+            fPath = self.objToFilePath(obj)
+            loaded_obj = self.loadNumpyFile(fPath)
+            if self.objToFileName(obj) == self.objToFileName(loaded_obj):
+                return loaded_obj
+            else:
+                self.logger.error('object -> file name != loaded object -> file name')
+
+    def remove(self, obj):
+        fPath = self.objToFilePath(obj)
+        try:
+            os.remove(fPath)
+        except FileNotFoundError as err:
+            self.logger.error(err)
 
     def save(self, obj):
-        if isinstance(obj, self.PyClass):
+        if type(obj) == self.PyClass:
             fPath = self.objToFilePath(obj)
             self.saveNumpyFile(fPath, obj)
         else:
             self.logger.error(
-                f'PyDB: {obj} not an instance of {self.PyClass}')
+                f'PyDB: {obj} not of type {self.PyClass}')
+
+    @staticmethod
+    def loadNumpyFile(path):
+        if not path.endswith('.npy'):
+            path = path + '.npy'
+        old_path = path.replace('.npy', '.old.npy')
+        if os.path.exists(old_path):
+            os.rename(old_path, path)
+        files = np.load(path, allow_pickle=True).flatten()
+        latest_file = files[0]
+        return latest_file
 
     @staticmethod
     def saveNumpyFile(path, data):
@@ -86,6 +100,9 @@ class CFDCaseDB(PyClassDB):
         self.precision = precision
         cp_path = os.path.join(self.location, 'cfdCaseDB.npy')
         self.saveNumpyFile(cp_path, self)
+
+    def stochasticSave(self, obj):
+        pass
 
     def _objToFileName(self, obj):
         vars = obj.x
