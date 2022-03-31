@@ -16,8 +16,9 @@ import copy
 # import h5py
 import matplotlib.pyplot as plt
 from pymoo.visualization.scatter import Scatter
-from pymoo.core.problem import Problem
+# from pymoo.core.problem import Problem
 from pymoo.core.evaluator import set_cv
+from pymooCFD.core.pymooBase import
 from pymooCFD.util.sysTools import emptyDir, copy_and_overwrite, saveTxt, yes_or_no
 from pymooCFD.util.handleData import saveObj
 from pymooCFD.util.loggingTools import MultiLineFormatter, DispNameFilter
@@ -102,51 +103,27 @@ class OptStudy:
         #############################
         #    Required Attributes    #
         #############################
-        self.problem = Problem(n_var=BaseCase.n_var,
-                               n_obj=BaseCase.n_obj,
-                               n_constr=BaseCase.n_constr,
-                               xl=np.array(BaseCase.xl),
-                               xu=np.array(BaseCase.xu),
-                               # *args,
-                               # **kwargs
-                               )
+        # self.problem = Problem(n_var=BaseCase.n_var,
+        #                        n_obj=BaseCase.n_obj,
+        #                        n_constr=BaseCase.n_constr,
+        #                        xl=np.array(BaseCase.xl),
+        #                        xu=np.array(BaseCase.xu),
+        #                        # *args,
+        #                        # **kwargs
+        #                        )
+        self.problem = CFDProblem_GA(BaseCase)
         self.algorithm = algorithm  # algorithm.setup(problem)
-        # initialize baseCase
-        self.BaseCase = BaseCase
+        # self.BaseCase = BaseCase
         # self.baseCaseDir = baseCaseDir
         # self.genTestCase()
         #####################################
         #    Default/Optional Attributes    #
         #####################################
         self.runDir = runDir
-        # self.runDir = os.path.join(self.optDatDir, runDir)
-        # os.makedirs(self.runDir, exist_ok=True)
-
-        ### Data Handling ###
-        # self.archiveDir = os.path.join(self.optDatDir, archiveDir)
-        # os.makedirs(self.archiveDir, exist_ok=True)
-        # self.n_CP = n_CP  # number of generations between extra checkpoints
 
         ### Optimization Pre/Post Processing ###
-        # self.procOptDir = os.path.join(self.optDatDir, procOptDir)
-        # os.makedirs(self.procOptDir, exist_ok=True)
-        # Pareto Front Directory
-        # directory to save optimal solutions (a.k.a. Pareto Front)
-        # self.pfDir = os.path.join(self.runDir, pfDir)
-        # os.makedirs(self.pfDir, exist_ok=True)
         # number of optimal points along Pareto front to save
         self.n_opt = int(n_opt)
-        # Plots Directory
-        # self.plotDir = os.path.join(self.runDir, plotsDir)
-        # os.makedirs(self.plotDir, exist_ok=True)
-        # Mapping Objectives vs. Variables Directory
-        # self.mapDir = os.path.join(self.runDir, mapGen1Dir)
-        # os.makedirs(self.mapDir, exist_ok=True)
-        #### Mesh Sensitivity Studies ###
-        # self.studyDir = os.path.join(self.optDatDir, meshStudyDir)
-        # os.makedirs(self.studyDir, exist_ok=True)
-        # self.meshSFs = meshSFs  # mesh size factors
-        # self.procLim = procLim
         ##### Processing #####
         # self.client = client
         ###################################
@@ -160,16 +137,9 @@ class OptStudy:
         self.genTestCase()
         self.saveCP()
 
-    def newProb(self):
+    def newProb(self, BaseCase):
         self.logger.info('INITIALIZING NEW OPTIMIZATION PROBLEM')
-        self.problem = Problem(n_var=self.BaseCase.n_var,
-                               n_obj=self.BaseCase.n_obj,
-                               n_constr=self.BaseCase.n_constr,
-                               xl=np.array(self.BaseCase.xl),
-                               xu=np.array(self.BaseCase.xu),
-                               # *args,
-                               # **kwargs
-                               )
+        self.problem = CFDProblem_GA(BaseCase)
         self.saveCP()
 
     def newAlg(self):
@@ -198,42 +168,10 @@ class OptStudy:
         self.logger.info('STARTING: OPTIMIZATION ALGORITHM RUN')
         self.algorithm.save_history = True
         self.initAlg()
-        # if self.algorithm.problem is None or not restart:
-        # if self.algorithm.is_initialized:
-        #     self.loadCP()
-        #     self.logger.info(f'Loaded Checkpoint: {self.algorithm}')
-        #     self.logger.info(
-        #         f'Last checkpoint at generation {self.algorithm.callback.gen}')
-        #
-        # else:
-        #     self.newStudy()
-        # self.logger.info('STARTING NEW OPTIMIZATION STUDY')
-        # # archive/empty previous runs data directory
-        # emptyDir(self.optDatDir)
-        # self.algorithm.setup(self.problem,
-        #                      seed=self.algorithm.seed,
-        #                      verbose=self.algorithm.verbose,
-        #                      save_history=self.algorithm.save_history,
-        #                      return_least_infeasible=self.algorithm.return_least_infeasible
-        #                      )
-        # restart client if being used
-        # if self.client is not None:
-        #     self.client.restart()
-        #     self.logger.info("CLIENT RESTARTED")
 
         ######    OPTIMIZATION    ######
         # until the algorithm has not terminated
         while self.algorithm.has_next():
-            # print('RESTART WHILE LOOP')
-            # print('n_gen:', self.algorithm.n_gen)
-            # print('history:', self.algorithm.history)
-            # print('alg. off.:', self.algorithm.off)
-            # print('opt:', self.algorithm.opt)
-            # if self.algorithm.pop is not None:
-            # print('BEFORE ASK:')
-            # print('gen', self.algorithm.callback.gen)
-            # print(self.algorithm.pop.get('F'))
-            # print('history[-1].off', self.algorithm.history[-1].off)
             # First generation
             # population is None so ask for new pop
             if self.algorithm.pop is None:
@@ -245,7 +183,6 @@ class OptStudy:
             # If current objective does not have None values then get new pop
             # ie previous pop is complete
             # evaluate new pop
-            # elif None not in self.algorithm.pop.get('F'):
             elif self.algorithm.off is None:
                 self.logger.info('\tSTART-UP: new generation')
                 evalPop = self.algorithm.ask()
@@ -255,19 +192,14 @@ class OptStudy:
             else:
                 self.logger.info('\tSTART-UP: mid-generation')
                 evalPop = self.algorithm.off
-                # self.algorithm.callback.gen -= 1
-            # print('AFTER ASK:')
-            # print('\talgorithm.n_gen:', self.algorithm.n_gen)
-            # print('\tcallbck.gen:', self.algorithm.callback.gen)
-            # print(self.algorithm.pop.get('F'))
-            # print('alg. off.:', self.algorithm.off)
-            # print('evalPop:', evalPop)
-            # print('opt:', self.algorithm.opt)
-            # input('any key to continue')
             # save checkpoint before evaluation
             self.saveCP()
             # evaluate the individuals using the algorithm's evaluator (necessary to count evaluations for termination)
-            # self.algorithm.evaluator.eval(self.problem, evalPop)
+            pop = self.algorithm.evaluator.eval(self.problem, evalPop,
+                                                runDir=self.runDir,
+                                                gen=self.algorithm.callback.gen
+                                                # alg=self.algorithm
+                                                )
 
             evalPop = self.runGen(evalPop)
             # print('self.algorithm.callback.gen:', self.algorithm.callback.gen)
@@ -584,16 +516,16 @@ class OptStudy:
         xu = self.problem.xu
         x_mid = [xl[x_i] + (xu[x_i] - xl[x_i]) / 2
                  for x_i in range(self.problem.n_var)]
-        # for x_i, type in enumerate(self.BaseCase.varType):
+        # for x_i, type in enumerate(self.problem.BaseCase.varType):
         #     if type == 'int':
         #         x_mid[x_i] = int(x_mid[x_i])
-        # x_mid = [int(x_mid[x_i]) for x_i, type in enumerate(self.BaseCase.varType)
+        # x_mid = [int(x_mid[x_i]) for x_i, type in enumerate(self.problem.BaseCase.varType)
         #          if type == 'int']
-        for x_i, varType in enumerate(self.BaseCase.varType):
+        for x_i, varType in enumerate(self.problem.BaseCase.varType):
             if varType.lower() == 'int':
                 x_mid[x_i] = int(x_mid[x_i])
         testCaseDir = os.path.join(self.runDir, testCaseDir)
-        self.testCase = self.BaseCase(testCaseDir, x_mid)  # , restart=True)
+        self.testCase = self.problem.BaseCase(testCaseDir, x_mid)  # , restart=True)
 
     def runTestCase(self):
         self.logger.info('TEST CASE RUN . . .')
@@ -617,7 +549,7 @@ class OptStudy:
     #     # create sub-directories for each individual
     #     indDirs = [os.path.join(genDir, f'ind{i+1}') for i in range(len(X))]
     #     cases = self.genCases(indDirs, X)
-    #     self.BaseCase.parallelize(cases)
+    #     self.problem.BaseCase.parallelize(cases)
     #     # self.runPop(cases)
     #     for case in cases:
     #         print(case.caseDir, case.f, case.x)
@@ -637,7 +569,7 @@ class OptStudy:
         # create sub-directories for each individual
         indDirs = [os.path.join(genDir, f'ind{i+1}') for i in range(len(X))]
         cases = self.genCases(indDirs, X)
-        self.BaseCase.parallelize(cases)
+        self.problem.BaseCase.parallelize(cases)
         F = np.array([case.f for case in cases])
         G = np.array([case.g for case in cases])
         # objectives
@@ -647,11 +579,11 @@ class OptStudy:
         # this line is necessary to set the CV and feasbility status - even for unconstrained
         set_cv(pop)
         if gen == 1:
-            self.gen1Pop = cases
+            self.gen1_cases = cases
         return pop
 
     # def runPop(self, cases):
-    #     nTask = int(self.procLim/self.BaseCase.nProc)
+    #     nTask = int(self.procLim/self.problem.BaseCase.nProc)
     #     pool = mp.Pool(nTask)
     #     for case in cases:
     #         pool.apply_async(case.run, ())
@@ -676,8 +608,8 @@ class OptStudy:
             leg = True
         else:
             leg = False
-        obj_plot = Scatter(title='Objective Space', legend=leg, labels=self.BaseCase.obj_labels)
-        var_plot = Scatter(title='Design Space', legend=leg, labels=self.BaseCase.var_labels)
+        obj_plot = Scatter(title='Objective Space', legend=leg, labels=self.problem.BaseCase.obj_labels)
+        var_plot = Scatter(title='Design Space', legend=leg, labels=self.problem.BaseCase.var_labels)
         for g, alg in enumerate(algs):  # range(algorithm.n_gen)
             obj_plot.add(alg.pop.get('F'), label=f'GEN {g+1}')
             var_plot.add(alg.pop.get('X'), label=f'GEN {g+1}')
@@ -718,7 +650,7 @@ class OptStudy:
                         '[', '').replace(']', '').replace(' ', '_')
                 cornerCaseDir = os.path.join(
                     self.optDatDir, 'corner-cases', caseName)
-                cornerCase = self.BaseCase(cornerCaseDir, perm)
+                cornerCase = self.problem.BaseCase(cornerCaseDir, perm)
                 cornerCases.append(cornerCase)
         self.cornerCases = cornerCases
 
@@ -746,7 +678,7 @@ class OptStudy:
         else:
             self.logger.warning(
                 'SKIPPED: GENERATE CORNER CASES - call self.genCornerCases() directly to create new corner cases')
-        self.BaseCase.parallelize(self.cornerCases)
+        self.problem.BaseCase.parallelize(self.cornerCases)
 
     def runBndCases(self, n_pts=2, getDiags=False, doMeshStudy=False):
         if self.bndCases is None:
@@ -754,7 +686,7 @@ class OptStudy:
         else:
             self.logger.warning(
                 'SKIPPED: GENERATE BOUNDARY CASES - call self.genBndCases() directly to create new boundary cases')
-        self.BaseCase.parallelize(self.bndCases)
+        self.problem.BaseCase.parallelize(self.bndCases)
         self.saveCP()
         self.plotBndPtsObj()
         if doMeshStudy:
@@ -763,7 +695,7 @@ class OptStudy:
 
     def plotBndPtsObj(self):
         plot = Scatter(title='Objective Space: Boundary Cases',
-                       legend=True, labels=self.BaseCase.obj_labels)
+                       legend=True, labels=self.problem.BaseCase.obj_labels)
         F = np.array([case.f for case in self.bndCases])
         for obj in F:
             # nComp = len(obj)
@@ -785,8 +717,8 @@ class OptStudy:
         #     plt.scatter(F[:,0], F[:,1])
         #     plt.suptitle('Boundary Points')
         #     plt.title('Objective Space')
-        #     plt.xlabel(self.BaseCase.obj_labels[0])
-        #     plt.ylabel(self.BaseCase.obj_labels[1])
+        #     plt.xlabel(self.problem.BaseCase.obj_labels[0])
+        #     plt.ylabel(self.problem.BaseCase.obj_labels[1])
         #     for pt in F:
         #         label = f'[{pt[0]}, {pt[1]}]'
         #         plt.annotate(label, pt, textcoords='offset points', xytext=(1,50), color='r')
@@ -800,7 +732,7 @@ class OptStudy:
     def plotBndPts(self):
         plot = Scatter(title='Design Space: Boundary Cases',
                        legend=True,
-                       labels=self.BaseCase.var_labels
+                       labels=self.problem.BaseCase.var_labels
                        # grid=True
                        )
         bndPts = np.array([case.x for case in self.bndCases])
@@ -823,8 +755,8 @@ class OptStudy:
         #     plt.scatter(bndPts[:,0], bndPts[:,1])
         #     plt.suptitle('Boundary Points')
         #     plt.title('Design Space')
-        #     plt.xlabel(self.BaseCase.var_labels[0])
-        #     plt.ylabel(self.BaseCase.var_labels[1])
+        #     plt.xlabel(self.problem.BaseCase.var_labels[0])
+        #     plt.ylabel(self.problem.BaseCase.var_labels[1])
         #     for pt in bndPts:
         #         label = f'[{pt[0]}, {pt[1]}]'
         #         plt.annotate(label, pt, textcoords='offset points', color='r')
@@ -1005,11 +937,11 @@ class OptStudy:
 
     def genCases(self, paths, X):  # , baseCase=None):
         # if baseCase is None:
-        #     baseCase = self.BaseCase
+        #     baseCase = self.problem.BaseCase
         assert len(paths) == len(X), 'genCases(paths, X): len(paths) == len(X)'
         cases = []
         for x_i, x in enumerate(X):
-            case = self.BaseCase(paths[x_i], x)
+            case = self.problem.BaseCase(paths[x_i], x)
             cases.append(case)
         return cases
 
@@ -1104,7 +1036,7 @@ class OptStudy:
     # def gen1Pop(self, cases):
     #     if cases is not None:
     #         for case in cases:
-    #             if isinstance(case, self.BaseCase):
+    #             if isinstance(case, self.problem.BaseCase):
     #                 case.saveCP()
     #     # path = os.path.join(self.optDatDir, 'gen1Pop.npy')
     #     # np.save(path, cases, allow_pickle=True)
@@ -1121,7 +1053,7 @@ class OptStudy:
     # def cornerCases(self, cases):
     #     if cases is not None:
     #         for case in cases:
-    #             if isinstance(case, self.BaseCase):
+    #             if isinstance(case, self.problem.BaseCase):
     #                 case.saveCP()
     #     # path = os.path.join(self.optDatDir, 'cornerCases.npy')
     #     # np.save(path, cases, allow_pickle=True)
@@ -1139,7 +1071,7 @@ class OptStudy:
     # def bndCases(self, cases):
     #     if cases is not None:
     #         for case in cases:
-    #             if isinstance(case, self.BaseCase):
+    #             if isinstance(case, self.problem.BaseCase):
     #                 case.saveCP()
     #     # path = os.path.join(self.optDatDir, 'bndCases.npy')
     #     # np.save(path, cases, allow_pickle=True)
@@ -1154,7 +1086,7 @@ class OptStudy:
     #
     # @testCase.setter
     # def testCase(self, case):
-    #     if isinstance(case, self.BaseCase):
+    #     if isinstance(case, self.problem.BaseCase):
     #         case.saveCP()
     #     self._testCase = case
         # path = os.path.join(self.optDatDir, 'testCase.npy')

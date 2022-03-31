@@ -1,11 +1,13 @@
 import numpy as np
+import os
+
+from pymoo.core.problem import Problem
+# from pymoo.core.problem import ElementwiseProblem
+
+
 #################
 #    PROBLEM    #
 #################
-from pymoo.core.problem import Problem
-import numpy as np
-# from pymoo.core.problem import ElementwiseProblem
-
 class CFDProblem_GA(Problem):
     def __init__(self, BaseCase, *args, **kwargs):
         super().__init__(n_var=BaseCase.n_var,
@@ -16,9 +18,28 @@ class CFDProblem_GA(Problem):
                          *args,
                          **kwargs
                          )
+        self.BaseCase = BaseCase
+        self.gen1Pop = None
     def _evaluate(self, X, out, *args, **kwargs):
-        out = self.BaseCase.runGen(X, out)
-
+        runDir = kwargs.get('runDir')
+        gen = kwargs.get('gen')
+        # create generation directory for storing data/executing simulations
+        genDir = os.path.join(runDir, f'gen{gen}')
+        # create sub-directories for each individual
+        indDirs = [os.path.join(genDir, f'ind{i+1}') for i in range(len(X))]
+        # cases = self.genCases(indDirs, X)
+        assert len(indDirs) == len(X), 'len(paths) == len(X)'
+        cases = []
+        for x_i, x in enumerate(X):
+            case = self.BaseCase(indDirs[x_i], x)
+            cases.append(case)
+        self.BaseCase.parallelize(cases)
+        F = np.array([case.f for case in cases])
+        G = np.array([case.g for case in cases])
+        out['F'] = F
+        out['G'] = G
+        if gen == 1:
+            self.gen1Pop = cases
 
 # problem = GA_CFD()
 #

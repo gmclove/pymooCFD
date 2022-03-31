@@ -5,6 +5,7 @@
 # from pymooCFD.util.handleData import findKeywordLine
 from pymoo.visualization.scatter import Scatter
 import re
+from pymooCFD.core.meshStudy import MeshStudy
 from pymooCFD.util.loggingTools import MultiLineFormatter, DispNameFilter
 from pymooCFD.util.sysTools import saveTxt, yes_or_no
 from pymooCFD.util.handleData import saveObj
@@ -82,8 +83,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                  database=None,
                  database_precision=30,
                  meshSF=1,
-                 meshSFs=np.around(np.arange(0.5, 1.5, 0.1), decimals=2),
-                 # externalSolver=False,
+                 meshStudy=None,
                  var_labels=None, obj_labels=None,
                  meshFile=None,  # meshLines = None,
                  jobFile=None,  # jobLines = None,
@@ -139,8 +139,6 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             self.logger.info('NEW CASE - directory did not exist')
             self.copy()
 
-
-
         #############################
         #    Optional Attributes    #
         #############################
@@ -153,7 +151,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         ####################
         # self.x = np.array(x)
         # Default Attributes
-
+        if meshStudy is None:
+            self.meshStudy = MeshStudy(self)
 
         # Design and Objective Space Labels
         if self.var_labels is None:
@@ -173,8 +172,6 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         # class properties
         self._meshSF = None
         self.meshSF = meshSF  # kwargs.get('meshSF', 1)
-        self._meshSFs = None
-        self.meshSFs = meshSFs
 
         self.inputLines = None
         self.jobLines = None
@@ -184,12 +181,15 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         ######################
         #    Datbase Init    #
         ######################
+        self.infill_DB = False
         if database_location is None:
             database_location = os.path.join('CFDCase-DB', self.__class__.__name__)
-        self.database = self.CFDCaseDB(self, db_location, precision=database_precision)
+        self.database = self.CFDCaseDB(self.__class__, db_location, precision=database_precision)
         db_load = self.database.load(self)
         if db_load is not None:
             self.f = db_load.f
+            if db_load.meshStudy is not None:
+                self.meshStudy = db_load.meshStudy
             self.logger.info(f'DATABASE LOAD: Objectives - {self.f}')
 
         #################
@@ -296,7 +296,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         #end = time.time()
         #self.logger.info(f'Solve Time: {start-end}')
 
-    def run(self, max_reruns=3, n_reruns=0):
+    def run(self,max_reruns=3, n_reruns=0):
         # print('RUNNING')
         if self.f is None or np.isnan(np.sum(self.f)):
             self.preProc()
@@ -317,6 +317,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             self.logger.warning(
                 'SKIPPED: RUN - self.run() called but case already complete')
 
+    def runPop(self, X, out):
+        pass
     # def execDone(self):
     #     pass
 
@@ -363,7 +365,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             self.logger.error('INCOMPLETE: POST-PROCESS')
         else:
             self.logger.info('COMPLETE: POST-PROCESS')
-            self.database.save(self)
+            if self.infill_DB:
+                self.database.save(self)
         self.saveCP()
         self.logger.info(f'\tObjectives: {self.f}')
         return self.f
@@ -378,199 +381,6 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         else:
             self._genMesh()
             self.logger.info('MESH GENERATED - Using self._genMesh()')
-
-    ####################
-    #    MESH STUDY    #
-    ####################
-    def genMeshStudy(self):
-        if self.meshSFs is None:
-            self.logger.warning(
-                'self.meshSFs is None but self.genMeshStudy() called')
-            return
-        self.logger.info('\tGENERATING MESH STUDY . . .')
-        self.logger.info(f'\t\tFor Mesh Size Factors: {self.meshSFs}')
-        # Pre-Process
-        study = []
-        var = []
-        self.msCases = []
-        for sf in self.meshSFs:
-            msCase = copy.deepcopy(self)
-            self.msCases.append(msCase)
-            fName = f'meshSF-{sf}'
-            path = os.path.join(self.meshStudyDir, fName)
-            self.logger.info(f'\t\tInitializing {path} . . .')
-            msCase.meshSFs = None
-            msCase.msCases = None
-            msCase.__init__(path, self.x, meshSF=sf)
-            msCase.meshSFs = None
-            msCase.msCases = None
-            if msCase.meshSF != sf or msCase.numElem is None:
-                # only pre-processing needed is generating mesh
-                msCase.meshSF = sf
-                msCase.genMesh()  # NOT NESSECESARY BECAUSE FULL PRE-PROCESS DONE AT RUN
-            else:
-                self.logger.info(
-                    f'\t\t\t{msCase} already has number of elements: {msCase.numElem}')
-            # sfToElem.append([msCase.meshSF, msCase.numElem])
-            saveTxt(msCase.caseDir, 'numElem.txt', [msCase.numElem])
-            study.append([msCase.caseDir, str(
-                msCase.numElem), str(msCase.meshSF)])
-            var.append(msCase.x)
-        study = np.array(study)
-        saveTxt(self.meshStudyDir, 'study.txt', study, fmt="%s")
-        # Data
-        dat = np.array([[case.meshSF, case.numElem]
-                        for case in self.msCases])
-        # Print
-        with np.printoptions(suppress=True):
-            self.logger.info(
-                '\tMesh Size Factor | Number of Elements\n\t\t' + str(dat).replace('\n', '\n\t\t'))
-            saveTxt(self.meshStudyDir, 'meshSFs-vs-numElem.txt', dat)
-
-        self.saveCP()
-
-    def plotMeshStudy(self):
-        self.logger.info('\tPLOTTING MESH STUDY')
-        _, tail = os.path.split(self.caseDir)
-        a_numElem = np.array([case.numElem for case in self.msCases])
-        a_sf = [case.meshSF for case in self.msCases]
-        msObj = np.array([case.f for case in self.msCases])
-        solnTimes = np.array([case.solnTime for case in self.msCases])
-        # Plot
-        # number of elements vs time
-        plot = Scatter(title='Mesh Study: ' + tail, legend=True, grid=True,
-                       labels=['Number of Elements', 'Solution Time [s]'],
-                       tight_layout=True
-                       )
-        for i in range(len(a_numElem)):
-            pt = np.array([a_numElem[i], solnTimes[i]])
-            plot.add(pt, label=a_sf[i], marker='o', linestyle="-")
-        plot.do()
-        plot.ax.legend(title='Mesh Size Factor',
-                       bbox_to_anchor=(1.01, 1.0))
-        # plot.ax.get_legend().set_title('Mesh Size Factors')
-        fName = f'ms_plot-{tail}-numElem_v_time.png'
-        fPath = os.path.join(self.meshStudyDir, fName)
-        plot.save(fPath, dpi=100)
-        for obj_i, obj_label in enumerate(self.obj_labels):
-            # Number of elements vs Objective
-            plot = Scatter(title='Mesh Study: ' + tail, legend=True, grid=True,
-                           labels=['Number of Elements', obj_label],
-                           tight_layout=True
-                           )
-            for i in range(len(a_numElem)):
-                pt = np.array([a_numElem[i], msObj[i, obj_i]])
-                plot.add(pt, label=a_sf[i], marker='o', linestyle="-")
-            plot.do()
-            # plot.ax.get_legend().set_title('Mesh Size Factors')
-            plot.ax.legend(title='Mesh Size Factor',
-                           bbox_to_anchor=(1.01, 1.0))
-            fName = f'ms_plot-{tail}-obj{obj_i}.png'
-            fPath = os.path.join(self.meshStudyDir, fName)
-            plot.save(fPath, dpi=100)
-
-            # Time vs Objective
-            plot = Scatter(title='Mesh Study: ' + tail, legend=True, grid=True,
-                           labels=['Solution Time [s]', obj_label],
-                           tight_layout=True
-                           )
-            for i in range(len(a_numElem)):
-                pt = np.array([solnTimes[i], msObj[i, obj_i]])
-                plot.add(pt, label=a_sf[i], marker='o', linestyle="-")
-            plot.do()
-            plot.ax.legend(title='Mesh Size Factor',
-                           bbox_to_anchor=(1.01, 1.0))
-            # plot.ax.get_legend().set_title('Mesh Size Factors')
-            fName = f'ms_plot-{tail}-solnTime_v_obj{obj_i}.png'
-            fPath = os.path.join(self.meshStudyDir, fName)
-            plot.save(fPath, dpi=100)
-
-            # Number of Elements vs Objective vs time
-            plot = Scatter(title='Mesh Study: ' + tail, legend=True, grid=True,
-                           labels=['Number of Elements',
-                                   obj_label, 'Solution Time [s]'],
-                           tight_layout=True, bbox_to_anchor=(1.05, 1.0)
-                           )
-            for i in range(len(a_numElem)):
-                pt = np.array([a_numElem[i], msObj[i, obj_i], solnTimes[i]])
-                plot.add(pt, label=a_sf[i], marker='o', linestyle="-")
-            plot.do()
-            plot.ax.legend(title='Mesh Size Factor',
-                           bbox_to_anchor=(1.01, 1.0))
-            fName = f'ms_plot-{tail}-numElem_v_obj{obj_i}_v_time.png'
-            fPath = os.path.join(self.meshStudyDir, fName)
-            plot.save(fPath, dpi=100)
-        self.saveCP()
-
-    def execMeshStudy(self):
-        self.logger.info('\tEXECUTING MESH STUDY')
-        # self.logger.info(f'\t\tPARALLELIZING:\n\t\t {self.msCases}')
-        self.parallelize(self.msCases)
-        obj = np.array([case.f for case in self.msCases])
-        self.logger.info('\tObjectives:\n\t\t' +
-                         str(obj).replace('\n', '\n\t\t'))
-        self.saveCP()
-        # nTask = int(self.procLim/self.BaseCase.nProc)
-        # pool = mp.Pool(nTask)
-        # for case in self.msCases:
-        #     pool.apply_async(case.run, ())
-        # pool.close()
-        # pool.join()
-
-    def meshStudy(self, restart=True):  # , meshSFs=None):
-        if self.meshSFs is None:
-            self.logger.error(
-                'EXITING MESH STUDY: Mesh Size Factors set to None. May be trying to do mesh study on a mesh study case.')
-            return
-        # if meshSFs is None:
-        #     meshSFs = self.meshSFs
-        # if self.msCases is None:
-        #     self.genMeshStudy()
-        self.logger.info(f'MESH STUDY')
-        if self.msCases is None:
-            self.logger.info('\tNo Mesh Cases Found: self.msCases is None')
-            self.logger.info(f'\t {self.meshSFs}')
-        else:
-            prev_meshSFs = [case.meshSF for case in self.msCases]
-            self.logger.info(
-                f'\tCurrent Mesh Size Factors:\n\t\t{self.meshSFs}')
-            self.logger.info(
-                f'\tPrevious Mesh Study Size Factors:\n\t\t{prev_meshSFs}')
-            if all(sf in prev_meshSFs for sf in self.meshSFs):
-                self.logger.info(
-                    '\tALL CURRENT MESH SIZE FACTORS IN PREVIOUS MESH SIZE FACTORS')
-                for msCase in self.msCases:
-                    incomp_cases = []
-                    if msCase.f is None or np.isnan(np.sum(msCase.f)):
-                        self.logger.info(f'INCOMPLETE: Mesh Case - {msCase}')
-                        self.logger.debug('\t msCase.f has None or NaN value')
-                        incomp_cases.append(msCase)
-                    self.logger.info('RUNNING: Incomplete mesh study cases')
-                    self.parallelize(incomp_cases)
-                self.plotMeshStudy()
-                self.logger.info('SKIPPED: MESH STUDY')
-                return
-            else:
-                self.logger.info(
-                    '\t\tOLD MESH SIZE FACTORS != NEW MESH SIZE FACTORS')
-        # if not restart or self.msCases is None:
-        #     self.genMeshStudy()
-        # else:
-        #     print('\tRESTARTING MESH STUDY')
-        # else:genMeshStudy
-        #     self.msCases =
-        self.genMeshStudy()
-        # Data
-        dat = np.array([[case.meshSF, case.numElem]
-                        for case in self.msCases])
-        # Print
-        with np.printoptions(suppress=True):
-            self.logger.info(
-                '\tMesh Size Factor | Number of Elements\n\t\t' + str(dat).replace('\n', '\n\t\t'))
-            saveTxt(self.meshStudyDir, 'numElem-vs-meshSFs.txt', dat)
-
-        self.execMeshStudy()
-        self.plotMeshStudy()
 
     ##########################
     #    CLASS PROPERTIES    #
@@ -731,50 +541,37 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                         self.logger.warning(
                             f'\t Objective {obj_i}: {obj} -> {np.inf}')
 
-    @property
-    def meshSFs(self): return self._meshSFs
-
-    @meshSFs.setter
-    def meshSFs(self, meshSFs):
-        if meshSFs is None:
-            self._meshSFs = meshSFs
-            return
-        meshSFs, counts = np.unique(meshSFs, return_counts=True)
-        for sf_i, n_sf in enumerate(counts):
-            if n_sf > 1:
-                self.logger.warning(
-                    f'REPEATED MESH SIZE FACTOR - {meshSFs[sf_i]} repeated {n_sf} times')
-
-        if self.msCases is None:
-            self._meshSFs = meshSFs
-        else:
-            prev_meshSFs = [case.meshSF for case in self.msCases]
-            self.logger.debug(f'Current Mesh Size Factors:\n\t{self.meshSFs}')
-            self.logger.debug(
-                f'Previous Mesh Study Size Factors:\n\t{prev_meshSFs}')
-            if all(sf in prev_meshSFs for sf in self.meshSFs):
-                self.logger.debug(
-                    'ALL CURRENT MESH SIZE FACTORS IN PREVIOUS MESH SIZE FACTORS')
-                self._meshSFs = meshSFs
-            else:
-                self.logger.debug(
-                    'OLD MESH SIZE FACTORS != NEW MESH SIZE FACTORS')
-                self._meshSFs = meshSFs
-                self.genMeshStudy()
-
     # @property
-    # def meshSF(self): return self._meshSF
-    # @meshSF.setter
-    # def meshSF(self, meshSF):
-    #     if meshSF != self._meshSF:
-    #         self._meshSF = meshSF
-    #         self.genMesh()
-    # @property
-    # def msCases(self): return self._msCases
-    # @msCases.setter
-    # def msCases(self, cases):
-    #     if cases is not None:
-    #         path = os.path.join(self.caseDir, 'msCases.npy')
+    # def meshSFs(self): return self._meshSFs
+    #
+    # @meshSFs.setter
+    # def meshSFs(self, meshSFs):
+    #     if meshSFs is None:
+    #         self._meshSFs = meshSFs
+    #         return
+    #     meshSFs, counts = np.unique(meshSFs, return_counts=True)
+    #     for sf_i, n_sf in enumerate(counts):
+    #         if n_sf > 1:
+    #             self.logger.warning(
+    #                 f'REPEATED MESH SIZE FACTOR - {meshSFs[sf_i]} repeated {n_sf} times')
+    #
+    #     if self.msCases is None:
+    #         self._meshSFs = meshSFs
+    #     else:
+    #         prev_meshSFs = [case.meshSF for case in self.msCases]
+    #         self.logger.debug(f'Current Mesh Size Factors:\n\t{self.meshSFs}')
+    #         self.logger.debug(
+    #             f'Previous Mesh Study Size Factors:\n\t{prev_meshSFs}')
+    #         if all(sf in prev_meshSFs for sf in self.meshSFs):
+    #             self.logger.debug(
+    #                 'ALL CURRENT MESH SIZE FACTORS IN PREVIOUS MESH SIZE FACTORS')
+    #             self._meshSFs = meshSFs
+    #         else:
+    #             self.logger.debug(
+    #                 'OLD MESH SIZE FACTORS != NEW MESH SIZE FACTORS')
+    #             self._meshSFs = meshSFs
+    #             self.genMeshStudy()
+
 
     ################
     #    LOGGER    #
