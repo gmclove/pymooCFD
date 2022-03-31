@@ -29,7 +29,7 @@ class OscillCylinder(YALES2Case):
     var_labels = ['Amplitude [radians/s]', 'Frequency [cycles/s]']
     varType = ["real", "real"]  # options: 'int' or 'real'
     xl = [0.1, 0.1]  # lower limits of parameters/variables
-    xu = [4, 1]  # upper limits of variables
+    xu = [6, 1]  # upper limits of variables
 
     ####### Define Objective Space ########
     obj_labels = ['Change in Coefficient of Drag [%]',
@@ -41,7 +41,7 @@ class OscillCylinder(YALES2Case):
     externalSolver = True
     onlyParallelizeSolve = True
     nProc = 10
-    procLim = 40
+    procLim = 60
     solverExecCmd = ['mpirun', '-n', str(nProc), '2D_cylinder']
 
     def __init__(self, caseDir, x, meshSF=1.0):  # , *args, **kwargs):
@@ -392,8 +392,6 @@ display = MyDisplay()
 ##################
 #    CALLBACK    #
 ##################
-
-
 class MyCallback(Callback):
     def __init__(self) -> None:
         super().__init__()

@@ -20,14 +20,27 @@ import shutil
 #         print(err)
 #         return 0
 
-def saveTxt(path, fname, data):
+def saveTxt(path, fname, data, **kwargs):
     data = np.array(data)
     if not data.shape:
         data = [data]
     datFile = os.path.join(path, fname)
     # save data as text file in directory
-    np.savetxt(datFile, data)
+    np.savetxt(datFile, data, **kwargs)
 
+
+def saveObj(path, obj):
+    if not path.endswith('.npy'):
+        path = path + '.npy'
+    temp_path = path.replace('.npy', '.temp.npy')
+    old_path = path.replace('.npy', '.old.npy')
+    np.save(temp_path, obj)
+    if os.path.exists(path):
+        os.rename(path, old_path)
+    os.rename(temp_path, path)
+    if os.path.exists(old_path):
+        os.remove(old_path)
+    return path
 
 def findKeywordLine(kw, file_lines):
     kw_line = -1

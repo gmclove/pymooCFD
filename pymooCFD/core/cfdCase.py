@@ -7,7 +7,9 @@ from pymoo.visualization.scatter import Scatter
 import re
 from pymooCFD.util.loggingTools import MultiLineFormatter, DispNameFilter
 from pymooCFD.util.sysTools import saveTxt, yes_or_no
+from pymooCFD.util.handleData import saveObj
 import pymooCFD.config as config
+from pymooCFD.core.caseDatabase import CaseDB
 import multiprocessing.pool
 import multiprocessing as mp
 import numpy as np
@@ -77,6 +79,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #     pool = Pool(nTasks)
 
     def __init__(self, caseDir, x,
+                 database=None,
+                 database_precision=30,
                  meshSF=1,
                  meshSFs=np.around(np.arange(0.5, 1.5, 0.1), decimals=2),
                  # externalSolver=False,
@@ -142,54 +146,22 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         self.jobFile = jobFile
         self.datFile = datFile
         self.inputFile = inputFile
-        # self.jobFile = kwargs.get('jobFile')
-        # self.inputFile = kwargs.get('inputFile')
-        # self.datFile = kwargs.get('datFile')
-        # self.meshFile = kwargs.get('meshFile')
-
-        # # if class level variable is None then assign instance attribute
-        # if self.datFile is None:
-        #     self.datFile = datFile
-        # if self.inputFile is None:
-        #     self.inputPath = None
-        # else:
-        #     self.inputPath = os.path.join(self.caseDir, self.inputFile)
-        #
-        # if self.datFile is None:
-        #     self.datPath = None
-        # else:
-        #     self.datPath = os.path.join(self.caseDir, self.datFile)
-        #
-        # if self.meshFile is None:
-        #     self.meshPath = None
-        # else:
-        #     self.meshPath = os.path.join(self.caseDir, self.meshFile)
-        #
-        # if self.jobFile is None:
-        #     self.jobPath = None
-        # else:
-        #     self.jobPath = os.path.join(self.caseDir, self.jobFile)
         ####################
         #    Attributes    #
         ####################
         self.x = np.array(x)
         # Default Attributes
-        # os.makedirs(self.baseCaseDir, exist_ok=True)
-        # Using kwargs (not an option with labels as class variables)
-        # self.var_labels = kwargs.get('var_labels')
-        # self.obj_labels = kwargs.get('obj_labels')
+        if database_location is None:
+            database_location = os.path.join('CFDCase-DB', self.__class__.__name__)
+        self.database = self.CFDCaseDB(self, db_location, precision=database_precision)
 
         # Design and Objective Space Labels
         if self.var_labels is None:
             self.var_labels = [
                 f'var{x_i}' for x_i in range(self.n_var)]
-        # else:
-        #     self.var_labels = var_labels
         if self.obj_labels is None:
             self.obj_labels = [
                 f'obj{x_i}' for x_i in range(self.n_obj)]
-        # else:
-        #     self.obj_labels = obj_labels
         ###################################################
         #    Attributes To Be Set Later During Each Run   #
         ###################################################
@@ -213,27 +185,9 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         self.logger.debug('INITIAL CASE DICTONARY')
         for key in self.__dict__:
             self.logger.debug(f'\t{key}: {self.__dict__[key]}')
-        # self.genMesh()
         ### Save Checkpoint ###
-        # _, tail = os.path.split(caseDir)
-        # self.cpPath = os.path.join(caseDir, tail+'.npy')
         self.saveCP()
 
-    # def run(self):
-    #     self.preProc()
-    #     proc = self.solve()
-    #     proc.wait()
-    #     obj = self.postProc()
-    #     return obj
-
-    # def solve(self):
-    #     proc = self._solve()
-    #     return proc
-    # def slurmSolve(self):
-    #     cmd = ['sbatch', '--wait', self.jobFile]
-    #     proc = subprocess.Popen(cmd, cwd=self.caseDir,
-    #                             stdout=subprocess.DEVNULL)
-    #     return proc
     ###  Parallel Processing  ###
     @classmethod
     def parallelizeInit(cls, externalSolver=None):
@@ -397,6 +351,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             self.logger.info('COMPLETE: POST-PROCESS')
         self.saveCP()
         self.logger.info(f'\tObjectives: {self.f}')
+        self.database._save(self)
         return self.f
 
     def genMesh(self):
@@ -902,14 +857,9 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #    CHECKPOINTING    #
     #######################
     def saveCP(self):
-        cpPath = self.cpPath.replace('.npy', '')
         try:
-            np.save(cpPath + '.temp.npy', self)
-            if os.path.exists(cpPath + '.npy'):
-                os.rename(cpPath + '.npy', cpPath + '.old.npy')
-            os.rename(cpPath + '.temp.npy', cpPath + '.npy')
-            if os.path.exists(cpPath + '.old.npy'):
-                os.remove(cpPath + '.old.npy')
+            # saveObj(self.cpPath, self)
+            np.save(self.cpPath, self)
         except FileNotFoundError as err:
             self.logger.error(str(err))
 
@@ -1055,28 +1005,23 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                 file_lines[kw_line_i] = marker + kw_line
         return file_lines
 
-        # @run_once# import functools
-    # def run_once(f):
-    #     """Runs a function (successfully) only once.
-    #     The running can be reset by setting the `has_run` attribute to False
-    #     """
-    #     @functools.wraps(f)
-    #     def wrapper(*args, **kwargs):
-    #         if not wrapper.complete:
-    #             result = f(*args, **kwargs)
-    #             wrapper.complete = True
-    #             return result
-    #     wrapper.complete = False
-    #     return wrapper
+    #####################
+    #    INNER CLASS    #
+    #####################
+    # class CFDCaseDB(PyClassDB):
+    #     def __init__(self, CFDCase, location, precision=30):
+    #         super().__init__(CFDCase, location)
+    #         self.precision = precision
+    #         cp_path = os.path.join(self.location, 'cfdCaseDB.npy')
+    #         self.saveNumpyFile(cp_path, self)
     #
-    # def calltracker(func):
-    #     @functools.wraps(func)
-    #     def wrapper(*args, **kwargs):
-    #         result = func(*args, **kwargs)
-    #         wrapper.complete = True
-    #         return result
-    #     wrapper.complete = False
-    #     return wrapper
+    #     def _objToFileName(self, obj):
+    #         vars = obj.x
+    #         with np.printoptions(precision=self.precision, suppress=True, floatmode='fixed'):
+    #             fName = str(vars).replace(
+    #                 '[', '').replace(']', '').replace(' ', '_')
+    #         return fName
+
 
     ########################
     #    DUNDER METHODS    #
@@ -1086,25 +1031,6 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         if self._f is not None:
             s += f' | Objectives: {self._f}'
         return s
-
-    # __repr__ = __str__
-
-    # def __deepcopy__(self, memo):
-    #     # shutil.copytree(self.baseCaseDir, self.caseDir, dirs_exist_ok=True)
-    #     # print('COPIED:', self.baseCaseDir, '->', self.caseDir)
-    #     cls = self.__class__
-    #     result = cls.__new__(cls)
-    #     memo[id(self)] = result
-    #     for k, v in self.__dict__.items():
-    #         setattr(result, k, copy.deepcopy(v, memo))
-    #     return result
-
-    # Calling destructor
-    # def __del__(self):
-    #     # self.saveCP()
-    #     # shutil.rmtree(caseDir)
-    #     self.logger.info('EXITED')
-    #     print('EXITED:', self.caseDir)
 
     # ==========================================================================
     # TO BE OVERWRITTEN

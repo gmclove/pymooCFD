@@ -1,26 +1,26 @@
 import numpy as np
-# #################
-# #    PROBLEM    #
-# #################
-# # from pymoo.core.problem import Problem
-# # import numpy as np
-# # # from pymoo.core.problem import ElementwiseProblem
-# #
-# # class GA_CFD(Problem):
-# #     def __init__(self, n_var, n_obj, n_constr, xl, xu, *args, **kwargs):
-# #         super().__init__(n_var=n_var,
-# #                          n_obj=n_obj,
-# #                          n_constr=n_constr,
-# #                          xl=np.array(xl),
-# #                          xu=np.array(xu),
-# #                          *args,
-# #                          **kwargs
-# #                          )
-# #     def _evaluate(self, X, out, *args, **kwargs):
-# #         out = optStudy.runGen(X, out)
-# #
-# #
-# # problem = GA_CFD()
+#################
+#    PROBLEM    #
+#################
+from pymoo.core.problem import Problem
+import numpy as np
+# from pymoo.core.problem import ElementwiseProblem
+
+class CFDProblem_GA(Problem):
+    def __init__(self, BaseCase, *args, **kwargs):
+        super().__init__(n_var=BaseCase.n_var,
+                         n_obj=BaseCase.n_obj,
+                         n_constr=BaseCase.n_constr,
+                         xl=np.array(BaseCase.xl),
+                         xu=np.array(BaseCase.xu),
+                         *args,
+                         **kwargs
+                         )
+    def _evaluate(self, X, out, *args, **kwargs):
+        out = self.BaseCase.runGen(X, out)
+
+
+# problem = GA_CFD()
 #
 #
 #

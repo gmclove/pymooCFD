@@ -29,7 +29,7 @@ class CompDistSLURM_YALES2(CompDistSLURM):
 
     n_var = 3
     var_labels = np.append(CompDistSLURM.var_labels,
-                           'Number of Elements per Group')
+                           'Number of Elements per Group').tolist()
     varType = np.append(CompDistSLURM.varType, 'real')
     xl = np.append(CompDistSLURM.xl, 50)
     xu = np.append(CompDistSLURM.xu, 1000)
@@ -159,7 +159,7 @@ class CompDistOpt(OptStudy):
 
 
 MyOptStudy = CompDistOpt
-BaseCase = CompDistSLURM
+BaseCase = CompDistSLURM_YALES2
 
 ####################################
 #    Genetic Algorithm Criteria    #

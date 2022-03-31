@@ -27,7 +27,7 @@ class OscillCylinder(OscCylX2):
     baseCaseDir = 'base_cases/osc-cyl_base'
     ####### Define Design Space #########
     n_var = 3
-    var_labels = np.append(OscCylX2.var_labels, 'Reynolds Number')
+    var_labels = np.append(OscCylX2.var_labels, 'Reynolds Number').tolist()
     # options: 'int' or 'real'
     varType = np.append(OscCylX2.varType, 'int')
     # lower limits of parameters/variables

@@ -14,11 +14,12 @@ import shutil
 import copy
 # import shutil
 # import h5py
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 from pymoo.visualization.scatter import Scatter
 from pymoo.core.problem import Problem
 from pymoo.core.evaluator import set_cv
 from pymooCFD.util.sysTools import emptyDir, copy_and_overwrite, saveTxt, yes_or_no
+from pymooCFD.util.handleData import saveObj
 from pymooCFD.util.loggingTools import MultiLineFormatter, DispNameFilter
 import pymooCFD.config as config
 from pymoo.util.misc import termination_from_tuple
@@ -39,6 +40,7 @@ class OptStudy:
                  # *args, **kwargs
                  ):
         super().__init__()
+        plt.set_loglevel('INFO')
         #######################################
         #    ATTRIBUTES NEEDED FOR RESTART    #
         #######################################
@@ -100,7 +102,6 @@ class OptStudy:
         #############################
         #    Required Attributes    #
         #############################
-        self.problem = problem
         self.problem = Problem(n_var=BaseCase.n_var,
                                n_obj=BaseCase.n_obj,
                                n_constr=BaseCase.n_constr,
@@ -157,6 +158,18 @@ class OptStudy:
         ### Test Case ###
         self.testCase = None
         self.genTestCase()
+        self.saveCP()
+
+    def newProb(self):
+        self.logger.info('INITIALIZING NEW OPTIMIZATION PROBLEM')
+        self.problem = Problem(n_var=self.BaseCase.n_var,
+                               n_obj=self.BaseCase.n_obj,
+                               n_constr=self.BaseCase.n_constr,
+                               xl=np.array(self.BaseCase.xl),
+                               xu=np.array(self.BaseCase.xu),
+                               # *args,
+                               # **kwargs
+                               )
         self.saveCP()
 
     def newAlg(self):
@@ -468,12 +481,13 @@ class OptStudy:
         # except TypeError:
         #     self.logger.info('\tmid-generation')
         # save checkpoint
-        np.save(self.CP_path + '.temp.npy', self)
-        if os.path.exists(self.CP_path + '.npy'):
-            os.rename(self.CP_path + '.npy', self.CP_path + '.old.npy')
-        os.rename(self.CP_path + '.temp.npy', self.CP_path + '.npy')
-        if os.path.exists(self.CP_path + '.old.npy'):
-            os.remove(self.CP_path + '.old.npy')
+        saveObj(self.CP_path, self)
+        # np.save(self.CP_path + '.temp.npy', self)
+        # if os.path.exists(self.CP_path + '.npy'):
+        #     os.rename(self.CP_path + '.npy', self.CP_path + '.old.npy')
+        # os.rename(self.CP_path + '.temp.npy', self.CP_path + '.npy')
+        # if os.path.exists(self.CP_path + '.old.npy'):
+        #     os.remove(self.CP_path + '.old.npy')
         # Checkpoint each cfdCase object stored in optStudy
         try:
             self.testCase.saveCP()
@@ -497,7 +511,9 @@ class OptStudy:
         except AttributeError:
             self.logger.debug('No Corner Cases to Save Checkpoints for')
             # self.logger.error(e)
-
+        ### Save algorithm in run directory
+        path = os.path.join(self.runDir, 'algorithm-CP.npy')
+        path = saveObj(path, self.algorithm)
         # # default use self.algorithm
         # if alg is None:
         #     alg = self.algorithm
@@ -653,6 +669,21 @@ class OptStudy:
     # def postProcPop(self, cases):
     #     for case in cases:
     #         case.postProc()
+    def plotOptSpaces(self, algs, fileName, folder=None , maxLegLen=15):
+        if folder is None:
+            folder = self.plotDir
+        if len(algs) < maxLegLen:
+            leg = True
+        else:
+            leg = False
+        obj_plot = Scatter(title='Objective Space', legend=leg, labels=self.BaseCase.obj_labels)
+        var_plot = Scatter(title='Design Space', legend=leg, labels=self.BaseCase.var_labels)
+        for g, alg in enumerate(algs):  # range(algorithm.n_gen)
+            obj_plot.add(alg.pop.get('F'), label=f'GEN {g+1}')
+            var_plot.add(alg.pop.get('X'), label=f'GEN {g+1}')
+        obj_plot.save(os.path.join(folder, fileName+'-obj_space.png'), dpi=100)
+        var_plot.save(os.path.join(folder, fileName+'-var_space.png'), dpi=100)
+        return var_plot, obj_plot
 
     ########################
     #    BOUNDARY CASES    #

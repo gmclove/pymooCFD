@@ -23,8 +23,8 @@ def main():
     # print(optStudy.BaseCase.__dict__)
     # print(optStudy.__dict__)
 
-    # optStudy.BaseCase = BaseCase
-    # optStudy.algorithm = algorithm
+    optStudy.BaseCase = BaseCase
+    optStudy.algorithm = algorithm
     # optStudy.problem = problem
     # optStudy.newAlg()
     # noOscCase = optStudy.BaseCase('no_osc_case', [0, 0])
@@ -58,7 +58,8 @@ def main():
     # optStudy.testCase.meshStudy()
     # optStudy.runBndCases(n_pts=3, getDiags=True, doMeshStudy=True)
     #
-    # optStudy.genBndCases()
+    optStudy.genBndCases()
+    optStudy.runBndCases(n_pts=3, getDiags=True, doMeshStudy=True)
     #
     # def _postProc(self):
     #     ####### EXTRACT VAR ########
@@ -109,7 +110,7 @@ def main():
     #     case.obj_labels = ['Coefficient of Drag', 'Resistive Torque [N m]']
     #optStudy.testCase.plotMeshStudy()
     #optStudy.plotBndPts()
-    #optStudy.plotBndPtsObj()    
+    #optStudy.plotBndPtsObj()
 #
     # for case in optStudy.bndCases:
     #     case.f = None
@@ -118,6 +119,8 @@ def main():
  #   for case in optStudy.loadCases(os.path.join(optStudy.runDir, 'gen21')):
 #         case.postProc()
     # optStudy.runGen1()
+    optStudy.newProb()
+    optStudy.newAlg()
     optStudy.run()
     # optStudy.meshStudy(optStudy.gen1Pop)
 

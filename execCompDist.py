@@ -1,4 +1,5 @@
-from pymooCFD.studies.compDistOpt_x2 import optStudy
+# from pymooCFD.studies.compDistOpt_x2 import optStudy
+from pymooCFD.studies.compDistOpt_x3 import optStudy
 
 
 def main():
