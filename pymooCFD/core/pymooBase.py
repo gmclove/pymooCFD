@@ -92,9 +92,9 @@ class PymooCFDCallback(Callback):
 
 callback = PymooCFDCallback()
 
-# ###################
-# #    OPERATORS    #
-# ###################
+###################
+#    OPERATORS    #
+###################
 # from pymoo.factory import get_sampling, get_crossover, get_mutation
 # from pymoo.operators.mixed_variable_operator import MixedVariableSampling, MixedVariableMutation, MixedVariableCrossover
 #
@@ -112,30 +112,30 @@ callback = PymooCFDCallback()
 #     "real": get_mutation("real_pm", eta=3.0),
 #     "int": get_mutation("int_pm", eta=3.0)
 # })
-#
-#
-# ###############################
-# #    TERMINATION CRITERION    #
-# ###############################
-# # https://pymoo.org/interface/termination.html
+
+
+###############################
+#    TERMINATION CRITERION    #
+###############################
+# https://pymoo.org/interface/termination.html
 # from pymoo.factory import get_termination
 # termination = get_termination("n_gen", n_gen)
-#
-# # from pymoo.util.termination.default import MultiObjectiveDefaultTermination
-# # termination = MultiObjectiveDefaultTermination(
-# #     x_tol=1e-8,
-# #     cv_tol=1e-6,
-# #     f_tol=0.0025,
-# #     nth_gen=5,
-# #     n_last=30,
-# #     n_max_gen=1000,
-# #     n_max_evals=100000
-# # )
-#
-#
-# ###################
-# #    ALGORITHM    #
-# ###################
+
+# from pymoo.util.termination.default import MultiObjectiveDefaultTermination
+# termination = MultiObjectiveDefaultTermination(
+#     x_tol=1e-8,
+#     cv_tol=1e-6,
+#     f_tol=0.0025,
+#     nth_gen=5,
+#     n_last=30,
+#     n_max_gen=1000,
+#     n_max_evals=100000
+# )
+
+
+###################
+#    ALGORITHM    #
+###################
 # from pymoo.algorithms.moo.nsga2 import NSGA2
 # from pymoo.factory import get_sampling, get_crossover, get_mutation
 # ### initialize algorithm here

@@ -1,6 +1,11 @@
 import numpy as np
 import os
 import logging
+import glob
+import shutil
+
+from pymooCFD.util.sysTools import copy_and_overwrite
+
 
 class PyClassDB:
     def __init__(self, PyClass, location=None,
@@ -9,7 +14,7 @@ class PyClassDB:
                  ):
         if location is None:
             location = 'PyDB-' + self.__class__.__name__
-        self.logger = logging.getLogger()
+        self.logger = logging.getLogger(__name__+'.'+location)
         self.location = os.path.abspath(location)
         os.makedirs(self.location, exist_ok=True)
         self.PyClass = PyClass
@@ -95,11 +100,46 @@ class PyClassDB:
 
 
 class CFDCaseDB(PyClassDB):
-    def __init__(self, CFDCase, location, precision=30):
+    def __init__(self, CFDCase, location, precision=30, collect_all_data=True):
         super().__init__(CFDCase, location)
         self.precision = precision
         cp_path = os.path.join(self.location, 'cfdCaseDB.npy')
         self.saveNumpyFile(cp_path, self)
+
+    def save(self, obj):
+        super().save(obj)
+        if type(obj) == self.PyClass and collect_all_data:
+            self.copy(obj)
+
+    def copy(self, obj):
+        obj_fName = self.objToFileName(obj)
+        obj_fName = obj_fName.replace('.npy', '')
+        obj_dir = os.path.join(self.location, obj_fName)
+        if os.path.isdir(obj_dir):
+            search_str = os.path.join(obj_dir, 'v??')
+            ents = glob.glob(search_str)
+            highest_version = 0
+            for ent in ents:
+                version = int(ent[-2:])
+                if version > highest_version:
+                    highest_version = version
+            version_folder = 'v'+str(highest_version).zfill(2)
+        else:
+            version_folder = 'v00'
+        DB_dir = os.path.join(obj_dir, version_folder)
+        try:
+            shutil.copytree(obj_dir, DB_dir)
+        except FileNotFoundError as err:
+            self.logger.error(str(err))
+            self.logger.warning(f'SKIPPED: COPY {obj.caseDir} -> {self.location}')
+        # def get_version(ent):
+        #     return int(ent[-2:])
+        # ents.sort(key = get_version)
+        try:
+            copy_and_overwrite(obj.caseDir, DB_dir)
+        except FileNotFoundError as err:
+            self.logger.error(str(err))
+            self.logger.warning(f'SKIPPED: COPY {obj.caseDir} -> {self.location}')
 
     def stochasticSave(self, obj):
         pass

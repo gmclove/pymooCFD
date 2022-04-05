@@ -37,7 +37,7 @@ class OscillCylinder(YALES2Case):
     externalSolver = True
     onlyParallelizeSolve = True
     nProc = 10
-    procLim = 60
+    procLim = 20
     solverExecCmd = ['mpirun', '-n', str(nProc), '2D_cylinder']
 
     def __init__(self, caseDir, x, meshSF=1.0, **kwargs):

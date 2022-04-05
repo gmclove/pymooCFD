@@ -21,11 +21,13 @@ class MeshStudy: #(CFDCase):
                  size_factors = np.around(np.arange(0.5, 1.5, 0.1), decimals=2)
                  ):
         super().__init__()
+        self.folder = os.path.join(cfd_case.caseDir, 'meshStudy')
+        os.mkdir(self.folder)
+        # os.makedirs(self.folder,)
         self.logger = self.getLogger()
         self.base_case = cfd_case
         self.cases = None #[]
         self.size_factors = size_factors
-        self.folder = os.path.join(cfd_case.caseDir, 'meshStudy')
 
 
     def run(self):

@@ -32,7 +32,6 @@ n_offsprings = int(pop_size * (1 / 3))  # = num. of evaluations each generation
 ###################
 #    OPERATORS    #
 ###################
-
 sampling = MixedVariableSampling(BaseCase.varType, {
     "real": get_sampling("real_lhs"),  # "real_random"),
     "int": get_sampling("int_random")
