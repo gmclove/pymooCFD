@@ -7,7 +7,6 @@ import shutil
 from pymooCFD.util.sysTools import copy_and_overwrite
 
 
-
 class PyClassDB:
     def __init__(self, PyClass, location=None,
                  char_exceptions='._- ',
@@ -26,7 +25,7 @@ class PyClassDB:
     def objToFileName(self, obj):
         s = self._objToFileName(obj)  # get database specific file name
         fName = ''.join([c if (c.isalnum() or c in self.char_exceptions)
-                         else self.default_char for c in s])
+                        else self.default_char for c in s])
         if not fName.endswith('.npy'):
             fName = fName + '.npy'
         return fName
@@ -41,18 +40,6 @@ class PyClassDB:
             return True
 
     def load(self, obj):
-<<<<<<< HEAD
-        fPath = self.objToFilePath(obj)
-        loaded_obj = self.
-        if self.objToFileName(obj) == self.objToFileName(loaded_obj):
-            return loaded_obj
-        else:
-            self.logger.error(
-                'object -> file name != loaded object -> file name')
-
-    def loadIfExists(self, obj):
-=======
->>>>>>> 7a058ec8e7dd16c7fd5d938c3a253d46d2be27f8
         if self.exists(obj):
             fPath = self.objToFilePath(obj)
             loaded_obj = self.loadNumpyFile(fPath)
@@ -87,13 +74,6 @@ class PyClassDB:
         latest_file = files[0]
         return latest_file
 
-    def loadObj(self, fPath):
-        obj = np.load(fPath, allow_pickle=True).flatten()
-        latest_obj = files[0]
-        if isinstance(latest_obj, self.Class):
-            return latest_obj
-        else:
-
     @staticmethod
     def saveNumpyFile(path, data):
         if not path.endswith('.npy'):
@@ -108,17 +88,11 @@ class PyClassDB:
             os.remove(old_path)
         return path
 
-    @property
-    def dictionaries(self):
-
-        dicts = []
-        return dicts
-
     def _objToFileName(self, obj):
         fName = ''
         dictonary = obj.__dict__
         for i, (key, val) in enumerate(dictonary.items()):
-            if i != len(dictonary) - 1:
+            if i != len(dictonary)-1:
                 fName += key + '-' + str(val) + '_'
             else:
                 fName += key + '-' + str(val)
@@ -128,13 +102,14 @@ class PyClassDB:
 class CFDCaseDB(PyClassDB):
     def __init__(self, CFDCase, location, precision=30, collect_all_data=True):
         super().__init__(CFDCase, location)
+        self.collect_all_data = collect_all_data
         self.precision = precision
         cp_path = os.path.join(self.location, 'cfdCaseDB.npy')
         self.saveNumpyFile(cp_path, self)
 
     def save(self, obj):
         super().save(obj)
-        if type(obj) == self.PyClass and collect_all_data:
+        if type(obj) == self.PyClass and self.collect_all_data:
             self.copy(obj)
 
     def copy(self, obj):
