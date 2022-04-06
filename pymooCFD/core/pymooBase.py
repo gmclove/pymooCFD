@@ -1,3 +1,4 @@
+from pymoo.core.callback import Callback
 from pymoo.util.display import Display
 import numpy as np
 import os
@@ -20,7 +21,11 @@ n_offsprings = int(pop_size * (2 / 3))
 
 
 class CFDProblem_GA(Problem):
-    def __init__(self, BaseCase, *args, **kwargs):
+    def __init__(self, BaseCase,
+                 n_var, n_obj, n_const,
+                 var_labels=None,
+                 obj_labels=None,
+                 *args, **kwargs):
         super().__init__(n_var=BaseCase.n_var,
                          n_obj=BaseCase.n_obj,
                          n_constr=BaseCase.n_constr,
@@ -31,6 +36,19 @@ class CFDProblem_GA(Problem):
                          )
         self.BaseCase = BaseCase
         self.gen1Pop = None
+        self.BaseCase.validated = False
+
+        # Design and Objective Space Labels
+        if var_labels is None:
+            self.var_labels = [f'var{x_i}' for x_i in range(self.n_var)]
+        else:
+            self.var_lables = var_labels
+        if obj_labels is None:
+            self.obj_labels = [f'obj{x_i}' for x_i in range(self.n_obj)]
+        else:
+            self.obj_labels = obj_labels
+        if not len(self.xl) == len(self.xu) and len(self.xu) == len(self.var_labels) and len(self.var_labels) == self.n_var:
+            raise Exception("Design Space Definition Incorrect")
 
     def _evaluate(self, X, out, *args, **kwargs):
         runDir = kwargs.get('runDir')
@@ -56,6 +74,8 @@ class CFDProblem_GA(Problem):
 #################
 #    DISPLAY    #
 #################
+
+
 class MyDisplay(Display):
     def _do(self, problem, evaluator, algorithm):
         super()._do(problem, evaluator, algorithm)
@@ -66,12 +86,13 @@ class MyDisplay(Display):
                 f"best obj.{obj+1}", algorithm.pop.get('F')[:, obj].min())
         self.output.header()
 
+
 display = MyDisplay()
 
 ##################
 #    CALLBACK    #
 ##################
-from pymoo.core.callback import Callback
+
 
 class PymooCFDCallback(Callback):
     def __init__(self) -> None:
@@ -85,10 +106,11 @@ class PymooCFDCallback(Callback):
         # increment generation
         self.gen += 1
         self.data["best"].append(alg.pop.get("F").min())
-        ### For longer runs to save memory may want to use callback.data
-        ## instead of using algorithm.save_history=True which stores deep
-        ## copy of algorithm object every generation.
+        # For longer runs to save memory may want to use callback.data
+        # instead of using algorithm.save_history=True which stores deep
+        # copy of algorithm object every generation.
         ## Example: self.data['var'].append(alg.pop.get('X'))
+
 
 callback = PymooCFDCallback()
 
