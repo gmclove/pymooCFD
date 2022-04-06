@@ -2,45 +2,88 @@
 # @Date:   2021-12-10T11:22:40-05:00
 # @Last modified by:   glove
 # @Last modified time: 2021-12-14T15:45:19-05:00
-import numpy as np
-import copy
 
-if 'ferfere':
-    print('string true')
 
-class Test:
-    def __init__(self, a, b):
-        self.a = a
-        self.b = b
-        print(dir(self))
-        print(self.__class__)
-        print(str(self.__class__))
-        print(dir(self.__class__))
-        print(self.__class__.__name__)
-        # print(self.__name__)
+# Python3 code to demonstrate
+# Numeric Sort in Mixed Pair String List
+# using split() + sort() + key function
 
-obj = Test(1, 2)
+# helper function
+def helper_func(ele):
+		name, val = ele.split()
+		return int(val)
+
+# Initializing list
+test_list = ["v5", "v7", "v6", "v10"]
+
+# printing original list
+print("The original list is : " + str(test_list))
+
+# Numeric Sort in Mixed Pair String List
+# using split() + sort() + key function
+test_list.sort(key = helper_func, reverse = True)
+
+# printing result
+print ("The reverse sorted numerics are : " + str(test_list))
+
+
+# # Python3 code to demonstrate
+# # numeric string sorting
+# # using sorted() + key
+#
+# # initializing list
+# test_list = [ 'v4', 'v6', '7', '2', '1']
+#
+# # printing original list
+# print ("The original list is : " + str(test_list))
+#
+# # using sorted() + key
+# # numeric string sorting
+# res = sorted(test_list, key = int)
+#
+# # printing result
+# print ("The resultant sorted list : " + str(res))
+
+
+# import numpy as np
+# import copy
+#
+# if 'ferfere':
+#     print('string true')
+#
+# class Test:
+#     def __init__(self, a, b):
+#         self.a = a
+#         self.b = b
+#         print(dir(self))
+#         print(self.__class__)
+#         print(str(self.__class__))
+#         print(dir(self.__class__))
+#         print(self.__class__.__name__)
+#         # print(self.__name__)
+#
+# obj = Test(1, 2)
+# # print(obj)
+# # print(str(obj))
+# np.save('obj.npy', obj)
+# loadedObj, = np.load('obj.npy', allow_pickle=True).flatten()
+# copyObj = copy.copy(obj)
 # print(obj)
-# print(str(obj))
-np.save('obj.npy', obj)
-loadedObj, = np.load('obj.npy', allow_pickle=True).flatten()
-copyObj = copy.copy(obj)
-print(obj)
-print(loadedObj)
-print(copyObj)
-# obj = LoadedTest(1, 2)
-# print(obj.a, obj.b)
-
-# print(str(Test))
-# print(str(LoadedTest))
-
-if obj == loadedObj:
-    print('correct')
-if obj is loadedObj:
-    print('is')
-
-if obj == copyObj:
-    print('copy correct')
+# print(loadedObj)
+# print(copyObj)
+# # obj = LoadedTest(1, 2)
+# # print(obj.a, obj.b)
+#
+# # print(str(Test))
+# # print(str(LoadedTest))
+#
+# if obj == loadedObj:
+#     print('correct')
+# if obj is loadedObj:
+#     print('is')
+#
+# if obj == copyObj:
+#     print('copy correct')
 
 # if isinstance(obj, LoadedTest):
 #     print('loaded')
