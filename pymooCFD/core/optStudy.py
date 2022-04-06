@@ -8,6 +8,7 @@ import logging
 import os
 import numpy as np
 import shutil
+from scipy.stats import linregress
 # import subprocess
 # from threading import Thread
 # import multiprocessing as mp
@@ -185,24 +186,6 @@ class OptStudy:
         self.logger.info('STARTING: OPTIMIZATION ALGORITHM RUN')
         self.algorithm.save_history = True
         self.initAlg()
-        # if self.algorithm.problem is None or not restart:
-        # if self.algorithm.is_initialized:
-        #     self.loadCP()
-        #     self.logger.info(f'Loaded Checkpoint: {self.algorithm}')
-        #     self.logger.info(
-        #         f'Last checkpoint at generation {self.algorithm.callback.gen}')
-        #
-        # else:
-        #     self.newStudy()
-        # self.logger.info('STARTING NEW OPTIMIZATION STUDY')
-        # # archive/empty previous runs data directory
-        # emptyDir(self.optDatDir)
-        # self.algorithm.setup(self.problem,
-        #                      seed=self.algorithm.seed,
-        #                      verbose=self.algorithm.verbose,
-        #                      save_history=self.algorithm.save_history,
-        #                      return_least_infeasible=self.algorithm.return_least_infeasible
-        #                      )
         # restart client if being used
         # if self.client is not None:
         #     self.client.restart()
@@ -211,16 +194,6 @@ class OptStudy:
         ######    OPTIMIZATION    ######
         # until the algorithm has not terminated
         while self.algorithm.has_next():
-            # print('RESTART WHILE LOOP')
-            # print('n_gen:', self.algorithm.n_gen)
-            # print('history:', self.algorithm.history)
-            # print('alg. off.:', self.algorithm.off)
-            # print('opt:', self.algorithm.opt)
-            # if self.algorithm.pop is not None:
-            # print('BEFORE ASK:')
-            # print('gen', self.algorithm.callback.gen)
-            # print(self.algorithm.pop.get('F'))
-            # print('history[-1].off', self.algorithm.history[-1].off)
             # First generation
             # population is None so ask for new pop
             if self.algorithm.pop is None:
@@ -230,9 +203,7 @@ class OptStudy:
                 self.algorithm.off = evalPop
             # Previous generation complete
             # If current objective does not have None values then get new pop
-            # ie previous pop is complete
-            # evaluate new pop
-            # elif None not in self.algorithm.pop.get('F'):
+            # ie previous pop is complete evaluate new pop
             elif self.algorithm.off is None:
                 self.logger.info('\tSTART-UP: new generation')
                 evalPop = self.algorithm.ask()
@@ -242,15 +213,6 @@ class OptStudy:
             else:
                 self.logger.info('\tSTART-UP: mid-generation')
                 evalPop = self.algorithm.off
-                # self.algorithm.callback.gen -= 1
-            # print('AFTER ASK:')
-            # print('\talgorithm.n_gen:', self.algorithm.n_gen)
-            # print('\tcallbck.gen:', self.algorithm.callback.gen)
-            # print(self.algorithm.pop.get('F'))
-            # print('alg. off.:', self.algorithm.off)
-            # print('evalPop:', evalPop)
-            # print('opt:', self.algorithm.opt)
-            # input('any key to continue')
             # save checkpoint before evaluation
             self.saveCP()
             # evaluate the individuals using the algorithm's evaluator (necessary to count evaluations for termination)
@@ -632,7 +594,47 @@ class OptStudy:
         set_cv(pop)
         if gen == 1:
             self.gen1Pop = cases
+            self.plotGen1()
         return pop
+
+    def plotGen1(self):
+        ##### Variable vs. Objective Plots ######
+        # extract objectives and variables columns and plot them against each other
+        var_labels = self.BaseCase.var_labels
+        obj_labels = self.BaseCase.obj_labels
+        popX = self.algorithm.history[0].pop.get('X').astype(float)
+        popF = self.algorithm.history[0].pop.get('F').astype(float)
+        mapPaths = []
+        plots = []
+        for x_i, x in enumerate(popX.transpose()):
+            for f_i, f in enumerate(popF.transpose()):
+                plot = Scatter(title=f'{var_labels[x_i]} vs. {obj_labels[f_i]}',
+                               labels=[var_labels[x_i], obj_labels[f_i]],
+        #                        figsize=(10,8)
+        #                        legend = True,
+                              )
+                xf = np.column_stack((x,f))
+                plot.add(xf)
+                ### Polynomial best fit lines
+                plot.do()
+                plot.legend = True
+                c = ['r', 'g', 'm']
+                for d in range(1, 3+1):
+                    coefs = np.polyfit(x, f, d)
+                    y = np.polyval(coefs, x)
+                    xy = np.column_stack((x, y))
+                    xy = xy[xy[:, 0].argsort()]
+                    label = f'Order {d} Best Fit'
+                    plot.ax.plot(xy[:,0], xy[:,1], label=label, c=c[d-1])
+                plot.do()
+                var_str = var_labels[x_i].replace(" ", "_").replace("/", "|").replace('%', 'precentage').replace("\\", "|")
+                obj_str = obj_labels[f_i].replace(" ", "_").replace("/", "|").replace('%', 'precentage').replace("\\", "|")
+                fName = f'{var_str}-vs-{obj_str}.png'
+                path = os.path.join(self.mapDir, fName)
+                mapPaths.append(path)
+                plot.save(path, dpi=100)
+                plots.append(plot)
+        return plots
 
     # def runPop(self, cases):
     #     nTask = int(self.procLim/self.BaseCase.nProc)
