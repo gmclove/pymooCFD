@@ -53,6 +53,9 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     ####### Define Constraints #########
     n_constr = None
 
+    ###### For Database #########
+    validated = False
+
     ##### External Solver #######
     externalSolver = False
     onlyParallelizeSolve = False
@@ -78,8 +81,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                  **kwargs
                  ):
         super().__init__()
-        if not len(self.xl) == len(self.xu) and len(self.xu) == len(self.var_labels) and len(self.var_labels) == self.n_var:
-            raise Exception("Design Space Definition Incorrect")
+        # if not len(self.xl) == len(self.xu) and len(self.xu) == len(self.var_labels) and len(self.var_labels) == self.n_var:
+        #     raise Exception("Design Space Definition Incorrect")
         if not isinstance(self.baseCaseDir, str):
             raise TypeError(f'{self.baseCaseDir} - must be a string')
         # These attributes are not taken from checkpoint
