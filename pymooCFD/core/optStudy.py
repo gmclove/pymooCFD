@@ -217,17 +217,13 @@ class OptStudy:
             self.saveCP()
             # evaluate the individuals using the algorithm's evaluator (necessary to count evaluations for termination)
             # self.algorithm.evaluator.eval(self.problem, evalPop)
-
             evalPop = self.runGen(evalPop)
             # print('self.algorithm.callback.gen:', self.algorithm.callback.gen)
             # print('self.algorithm.n_gen:', self.algorithm.n_gen)
 
             # returned the evaluated individuals which have been evaluated or even modified
             self.algorithm.tell(infills=evalPop)
-            # print('AFTER TELL:')
-            # print('\tself.algorithm.callback.gen =',
-            #       self.algorithm.callback.gen)
-            # print('\tself.algorithm.n_gen =', self.algorithm.n_gen)
+
             # save top {n_opt} optimal evaluated cases in pf directory
             compGen = self.algorithm.callback.gen - 1
             for off_i, off in enumerate(self.algorithm.off):
@@ -244,23 +240,6 @@ class OptStudy:
                             self.logger.error(str(err))
                             self.logger.warning('SKIPPED: UPDATE PARETO FRONT')
             # do some more things, printing, logging, storing or even modifying the algorithm object
-            # self.logger.info(algorithm.n_gen, algorithm.evaluator.n_eval)
-            # self.logger.info('Parameters:')
-            # self.logger.info(algorithm.pop.get('X'))
-            # self.logger.info('Objectives:')
-            # self.logger.info(algorithm.pop.get('F'))
-            # algorithm.display.do(algorithm.problem,
-            #                      algorithm.evaluator,
-            #                      algorithm
-            #                      )
-            # checkpoint saved
-            # print('AFTER TELL:')
-            # print('n_gen:', self.algorithm.n_gen)
-            # print('gen', self.algorithm.callback.gen)
-            # print(self.algorithm.pop.get('F'))
-            # print('alg. off.:', self.algorithm.off)
-            # print('opt:', self.algorithm.opt)
-            # input('any key to continue')
             self.algorithm.off = None
             self.saveCP()
             if delPrevGen and not compGen == 1:
@@ -276,7 +255,7 @@ class OptStudy:
     def execGen1(self):
         self.algorithm.termination = termination_from_tuple(('n_gen', 1))
         # no checkpoint saved before evaluation
-        # therefore self.slgorithm not stuck with after gen.1 termination criteria
+        # therefore self.algorithm not stuck with after gen.1 termination criteria
         self.algorithm.next()
 
     def runGen1(self):
@@ -324,11 +303,9 @@ class OptStudy:
         # define formatter
         formatter = MultiLineFormatter(
             '%(asctime)s :: %(levelname)-8s :: %(name)s :: %(message)s')
-        # formatter = MultiLineFormatter(
         #     f'%(asctime)s :: %(levelname)-8s :: {self.optName} :: %(message)s')
-        # formatter = logging.Formatter(
         #     f'%(asctime)s.%(msecs)03d :: %(levelname)-8s :: {self.optName} :: %(message)s')
-        # ' %(name)s :: %(levelname)-8s :: %(message)s')
+        #     '%(name)s :: %(levelname)-8s :: %(message)s')
         fileHandler.setFormatter(formatter)
         streamHandler.setFormatter(formatter)
         logger.info('~' * 30)
@@ -346,29 +323,6 @@ class OptStudy:
     #######################
     #    CHECKPOINTING    #
     #######################
-    # def saveCP(self): np.save(self.CP_path, self)
-    # def loadCP(self):
-    #     cp, = np.load(self.CP_path, allow_pickle=True).flatten()
-    #     self.__dict__.update(cp.__dict__)
-    #     self.logger.info('LOADING CHECKPOINT')
-    #######################
-    #    CHECKPOINTING    #
-    #######################
-    # def saveCP(self):
-    #     np.save(self.CP_path + '.temp.npy', self)
-    #     if os.path.exists(self.CP_path + '.npy'):
-    #         os.rename(self.CP_path + '.npy', self.CP_path + '.old.npy')
-    #     os.rename(self.CP_path + '.temp.npy', self.CP_path + '.npy')
-    #     if os.path.exists(self.CP_path + '.old.npy'):
-    #         os.remove(self.CP_path + '.old.npy')
-    #
-    # def loadCP(self):
-    #     if os.path.exists(self.CP_path + '.old'):
-    #         os.rename(self.CP_path + '.old', self.CP_path + '.npy')
-    #     cp, = np.load(self.CP_path + '.npy', allow_pickle=True).flatten()
-    #     self.__dict__.update(cp.__dict__)
-    #     self.logger.info(f'\tCHECKPOINT LOADED - from {self.CP_path}.npy')
-
     def loadCP(self, hasTerminated=False):
         if os.path.exists(self.CP_path + '.old'):
             os.rename(self.CP_path + '.old', self.CP_path + '.npy')
@@ -387,30 +341,16 @@ class OptStudy:
             self.logger.debug('\tOPTIMIZATION ALGORITHM DICTONARY:')
             for key, val in cp.algorithm.__dict__.items():
                 self.logger.debug(f'\t\t{key}: {val}')
-        # # update paths and loggers for
-        # cp.CP_path = self.CP_path
-        # cp.optName = self.optName
-        # cp.optDatDir = self.optDatDir
-        # cp.logger = self.logger
-        # cp.logger = self.getLogger()
         #### TEMPORARY CODE ##########
         # TRANSITION BETWEEN CHECKPOINTS
 
         self.__dict__.update(cp.__dict__)
-        # self.logger.info(f'\tCHECKPOINT LOADED - from {self.CP_path}.npy')
         # only necessary if for the checkpoint the termination criterion has been met
         try:
             self.algorithm.has_terminated = hasTerminated
         except AttributeError as err:
             self.logger.error(err)
-        # alg = self.algorithm
-        # # Update any changes made to the algorithms between runs
-        # alg.termination = self.algorithm.termination
-        # alg.pop_size = self.algorithm.pop_size
-        # alg.n_offsprings = self.algorithm.n_offsprings
-        # alg.problem.xl = np.array(self.problem.xl)
-        # alg.problem.xu = np.array(self.problem.xu)
-        # self.algorithm = alg
+
 
     def saveCP(self):  # , alg=None):
         gen = self.algorithm.callback.gen
@@ -467,24 +407,6 @@ class OptStudy:
         # else:
         #     self.algorithm = alg
 
-        # genDir = f'gen{gen}'
-        # os.path.join(optDatDir, 'checkpoint')
-        # np.save(self.CP_path, alg)
-        # gen0 and every nCP generations save additional static checkpoint
-        # if gen % self.n_CP == 1:
-        #     np.save(os.path.join(self.optDatDir, f'checkpoint-gen{gen}'), self)
-        # save text file of variables and objectives as well
-        # this provides more options for post-processesing data
-        # genX = self.algorithm.pop.get('X')
-        # saveTxt(self.optDatDir, f'gen{gen}X.txt', genX)
-        # try:
-        #     genF = self.algorithm.pop.get('F')
-        #     saveTxt(self.optDatDir, f'gen{gen}F.txt', genF)
-        #     # path = os.path.join(self.optDatDir, f'gen{gen}F.txt')
-        #     # np.savetxt(path, genF)
-        # except TypeError:  # AttributeError
-        #     self.logger.info('\tmid-generation')
-
     def checkCPs(self):
         self.logger.info(f'CHECKPOINT CHECK - {self.CP_path}.npy')
         if os.path.exists(f'{self.CP_path}.npy'):
@@ -493,32 +415,6 @@ class OptStudy:
         else:
             self.logger.info(f'\t{self.CP_path} does not exist')
 
-    # def saveCP(self, alg=None):
-    #     # default use self.algorithm
-    #     if alg is None:
-    #         alg = self.algorithm
-    #     # if give alg assign it to self.algorithm
-    #     else:
-    #         self.algorithm = alg
-    #     gen = alg.callback.gen
-    #     self.logger.info(f'SAVING CHECKPOINT - GENERATION {gen}')
-    #     # genDir = f'gen{gen}'
-    #     # os.path.join(optDatDir, 'checkpoint')
-    #     np.save(self.CP_path, alg)
-    #     # gen0 and every nCP generations save additional static checkpoint
-    #     if gen % self.n_CP == 1:
-    #         np.save(os.path.join(self.optDatDir, f'checkpoint-gen{gen}'), alg)
-    #     # save text file of variables and objectives as well
-    #     # this provides more options for post-processesing data
-    #     genX = alg.pop.get('X')
-    #     path = os.path.join(self.optDatDir, f'gen{gen}X.txt')
-    #     np.savetxt(path, genX)
-    #     try:
-    #         genF = alg.pop.get('F')
-    #         path = os.path.join(self.optDatDir, f'gen{gen}F.txt')
-    #         np.savetxt(path, genF)
-    #     except TypeError:  # AttributeError
-    #         self.logger.info('\tmid-generation')
 
     ###################
     #    TEST CASE    #
@@ -530,11 +426,6 @@ class OptStudy:
         xu = self.problem.xu
         x_mid = [xl[x_i] + (xu[x_i] - xl[x_i]) / 2
                  for x_i in range(self.problem.n_var)]
-        # for x_i, type in enumerate(self.BaseCase.varType):
-        #     if type == 'int':
-        #         x_mid[x_i] = int(x_mid[x_i])
-        # x_mid = [int(x_mid[x_i]) for x_i, type in enumerate(self.BaseCase.varType)
-        #          if type == 'int']
         for x_i, varType in enumerate(self.BaseCase.varType):
             if varType.lower() == 'int':
                 x_mid[x_i] = int(x_mid[x_i])
@@ -594,10 +485,44 @@ class OptStudy:
         set_cv(pop)
         if gen == 1:
             self.gen1Pop = cases
-            self.plotGen1()
+            self.mapGen1()
+        self.plotGen()
         return pop
 
-    def plotGen1(self):
+    def plotGen(self, gen=None, max_leg_len=10):
+        if gen is None:
+            gen = self.algorithm.n_gen
+        pop = self.algorithm.history[gen-1].pop
+        if len(pop) <= max_leg_len:
+            leg = True
+        else:
+            leg = False
+        #### Parameter Space Plot ####
+        popX = pop.get('X')
+        var_plot = Scatter(title=f'Generation {gen} Design Space',
+                       legend=leg,
+                       labels=self.BaseCase.var_labels,
+        #                figsize=(10,8)
+                      )
+        for ind_i, ind in enumerate(popX):
+            var_plot.add(ind, label=f'IND {ind_i+1}')
+        # save parameter space plot
+        var_plot.save(os.path.join(self.plotDir, f'gen{gen}_obj_space.png'), dpi=100)
+
+        #### Objective Space Plot ####
+        popF = pop.get('F')
+        obj_plot = Scatter(title=f'Generation {gen} Objective Space',
+                       legend=leg,
+                       labels=self.BaseCase.obj_labels
+                      )
+        for ind_i, ind in enumerate(popF):
+            obj_plot.add(ind, label=f'IND {ind_i+1}')
+        # save parameter space plot
+        obj_plot.save(os.path.join(self.plotDir, f'gen{gen}_obj_space.png'), dpi=100)
+        self.logger.info(f'PLOTTED: Generation {gen} Design and Objective Spaces')
+        return var_plot, obj_plot
+
+    def mapGen1(self):
         ##### Variable vs. Objective Plots ######
         # extract objectives and variables columns and plot them against each other
         var_labels = self.BaseCase.var_labels
@@ -634,7 +559,7 @@ class OptStudy:
                 mapPaths.append(path)
                 plot.save(path, dpi=100)
                 plots.append(plot)
-        return plots
+        return plots, mapPaths
 
     # def runPop(self, cases):
     #     nTask = int(self.procLim/self.BaseCase.nProc)
@@ -659,7 +584,6 @@ class OptStudy:
     ########################
     #    BOUNDARY CASES    #
     ########################
-
     def getLimPerms(self):
         from itertools import product
         xl = self.problem.xl
@@ -737,36 +661,10 @@ class OptStudy:
                        legend=True, labels=self.BaseCase.obj_labels)
         F = np.array([case.f for case in self.bndCases])
         for obj in F:
-            # nComp = len(obj)
-            # label = '['
-            # for i in range(nComp):
-            #     if i != nComp-1:
-            #         label += '%.2g, '%obj[i]
-            #     else:
-            #         label += '%.2g'%obj[i]
-            # label += ']'
-            # plot.add(obj, label=label)
             plot.add(obj, label=self.getPointLabel(obj))
         path = os.path.join(self.runDir, 'boundary-cases',
                             'bndPts_plot-objSpace.png')
         plot.save(path, dpi=100)
-        # plot.show()
-        # if F.shape[1] == 2:
-        #     # self.logger.debug(f'Plotting:\n\t{str(F).replace('\n', '\n\t')}')
-        #     plt.scatter(F[:,0], F[:,1])
-        #     plt.suptitle('Boundary Points')
-        #     plt.title('Objective Space')
-        #     plt.xlabel(self.BaseCase.obj_labels[0])
-        #     plt.ylabel(self.BaseCase.obj_labels[1])
-        #     for pt in F:
-        #         label = f'[{pt[0]}, {pt[1]}]'
-        #         plt.annotate(label, pt, textcoords='offset points', xytext=(1,50), color='r')
-        #     # plt.show()
-        #     path = os.path.join(self.optDatDir, 'boundary-cases', 'bndPts_plot-objSpace.png')
-        #     plt.savefig(path)
-        #     plt.clf()
-        # else:
-        #     self.logger.info('Boundary points not plotted: F.shape[1] != 2')
 
     def plotBndPts(self):
         plot = Scatter(title='Design Space: Boundary Cases',
@@ -776,36 +674,10 @@ class OptStudy:
                        )
         bndPts = np.array([case.x for case in self.bndCases])
         for var in bndPts:
-            # nComp = len(var)
-            # label = '['
-            # for i in range(nComp):
-            #     if i != nComp-1:
-            #         label += '%.2g, '%var[i]
-            #     else:
-            #         label += '%.2g'%var[i]
-            # label += ']'
-            # plot.add(var, label=label)
             plot.add(var, label=self.getPointLabel(var))
         path = os.path.join(self.runDir, 'boundary-cases',
                             'bndPts_plot-varSpace.png')
         plot.save(path, dpi=100)
-        # bndPts = np.array(bndPts)
-        # if bndPts.shape[1] == 2:
-        #     plt.scatter(bndPts[:,0], bndPts[:,1])
-        #     plt.suptitle('Boundary Points')
-        #     plt.title('Design Space')
-        #     plt.xlabel(self.BaseCase.var_labels[0])
-        #     plt.ylabel(self.BaseCase.var_labels[1])
-        #     for pt in bndPts:
-        #         label = f'[{pt[0]}, {pt[1]}]'
-        #         plt.annotate(label, pt, textcoords='offset points', color='r')
-        #     print(bndPts)
-        #     plt.show()
-        #     path = os.path.join(self.optDatDir, 'boundary-cases', 'bndPts_plot-varSpace.png')
-        #     plt.savefig(path)
-        #     plt.clf()
-        # else:
-        #     self.logger.info('Boundary points not plotted: bndPts.shape[1] != 2')
 
     def genBndCases(self, n_pts=2, getDiags=False):
         self.logger.info('GENERATING BOUNDARY CASES')
@@ -845,121 +717,6 @@ class OptStudy:
         pts = np.array(pts)
         pts = np.unique(pts, axis=0)
         return pts
-
-    ###################################
-    #    EXTERNAL SOLVER EXECUTION    #
-    ###################################
-
-    # def slurmExec(self, cases, batchSize=None):
-    #     self.logger.info('EXECUTING BATCH OF SIMULATIONS')
-    #     self.logger.info('SLURM EXECUTION')
-    #     if batchSize is not None:
-    #         self.logger.info(f'\t### Sending sims in batches of {batchSize}')
-    #         cases_batches = [cases[i:i + batchSize]
-    #                             for i in range(0, len(cases), batchSize)]
-    #         for cases_batch in cases_batches:
-    #             self.logger.info(f'     SUB-BATCH: {cases_batch}')
-    #             self.slurmExec(cases_batch)
-    #         return
-    #     # Queue all the individuals in the generation using SLURM
-    #     batchIDs = []  # collect batch IDs
-    #     for case in cases:
-    #         out = subprocess.check_output(['sbatch', case.jobFile], cwd = case.caseDir)
-    #         # Extract number from following: 'Submitted batch job 1847433'
-    #         # self.logger.info(int(out[20:]))
-    #         batchIDs.append([int(out[20:]), case])
-    #     # batchIDs = np.array(batchIDs)
-    #     self.logger.info('     slurm job IDs:')
-    #     self.logger.info('\t\tJob ID')
-    #     self.logger.info('\t\t------')
-    #     for e in batchIDs: self.logger.info(f'\t\t{e[0]} | {e[1]}')
-    #     waiting = True
-    #     count = np.ones(len(batchIDs))
-    #     prev_count = np.ones(len(batchIDs)) #[0] #count
-    #     threads = []
-    #     flag = True # first time through while loop flag
-    #     while waiting:
-    #         time.sleep(10)
-    #         for bID_i, bID in enumerate(batchIDs):
-    #             # grep for batch ID of each individual
-    #             out = subprocess.check_output(f'squeue | grep --count {bID[0]} || :', shell=True)  # '|| :' ignores non-zero exit status error
-    #             count[bID_i] = int(out)
-    #             # if simulation is no longer in squeue
-    #             if count[bID_i] != prev_count[bID_i]:
-    #                 ### check if simulation failed
-    #                 complete = bID[1]._isExecDone()
-    #                 ## if failed launch slurmExec as subprocess
-    #                 if not complete:
-    #                     print(f'\n\tJob ID: {bID[0]} | {bID[1]} INCOMPLETE')
-    #                     t = Thread(target=self.slurmExec, args=([bID[1]],))
-    #                     t.start()
-    #                     threads.append(t)
-    #                 else:
-    #                     print(f'\n\tJobID:{bID[0]} | {bID[1]} COMPLETE', end='')
-    #         ### update number of jobs waiting display
-    #         if sum(count) != sum(prev_count) or flag:
-    #             print(f'\n\tSimulations still running or queued = {int(sum(count))}', end='')
-    #         else:
-    #             print(' . ', end='')
-    #         prev_count = count.copy()
-    #         flag = False
-    #         ### check if all batch jobs are done
-    #         if sum(count) == 0:
-    #             waiting = False
-    #             print('\n\tDONE WAITING')
-    #     ## wait for second run of failed cases to complete
-    #     for thread in threads:
-    #         thread.join()
-    #     print()
-    #     print('BATCH OF SLURM SIMULATIONS COMPLETE')
-    #
-    # def singleNodeExec(self, cases): #, procLim=procLim, nProc=nProc, solverFile=solverFile):
-    #     print('EXECUTING BATCH OF SIMULATIONS')
-    #     print('SINGLE NODE EXECUTION')
-    #     # All processors will be queued until all are used
-    #     n = 0
-    #     currentP = 0
-    #     procs = []
-    #     proc_labels = {}
-    #     n_sims = len(cases)
-    #
-    #     while n < n_sims:
-    #         case = cases[n]
-    #         caseDir = case.caseDir
-    #         nProc = case.nProc
-    #         if currentP + nProc <= self.procLim: # currentP != procLim:
-    #             print(f'\t## Sending {caseDir} to simulation...')
-    #             proc = subprocess.Popen(case.solverExecCmd, # '>', 'output.dat'],
-    #                                    cwd = caseDir, stdout=subprocess.DEVNULL) #stdout=out)
-    #             # Store the proc of the above process
-    #             procs.append(proc)
-    #             # store working directory of process
-    #             proc_labels[proc.pid] = case.caseDir
-    #             # counters
-    #             n += 1
-    #             currentP = currentP + nProc
-    #         # Then, wait until completion and fill processors again
-    #         else:
-    #             print('\tWAITING')
-    #             # wait for any processes to complete
-    #             waiting = True
-    #             while waiting:
-    #                 # check all processes for completion every _ seconds
-    #                 time.sleep(10)
-    #                 for proc in procs:
-    #                     if proc.poll() is not None:
-    #                         # remove completed job from procs list
-    #                         procs.remove(proc)
-    #                         # reduce currentP by nProc
-    #                         currentP -= nProc
-    #                         # stop waiting
-    #                         waiting = False
-    #                         print('\tCOMPLETED: ', proc_labels[proc.pid])
-    #     # Wait until all PID in the list has been completed
-    #     print('\tWAITING')
-    #     for proc in procs:
-    #         proc.wait()
-    #     print('BATCH OF SIMULATIONS COMPLETE')
 
     ########################
     #    HELPER METHODS    #
