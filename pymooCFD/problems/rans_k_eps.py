@@ -56,7 +56,7 @@ class RANS_k_eps(FluentCase):
              ]
 
     def _postProc(self):
-        residuals_dict = self.residuals_file_to_dict(self.datFile)
+        residuals_dict = self.residuals_file_to_dict(self.datPath)
         avgs = []
         for _, mat in residuals_dict.items():
             if len(mat) < 2000:
