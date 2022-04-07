@@ -216,8 +216,13 @@ class OptStudy:
             # save checkpoint before evaluation
             self.saveCP()
             # evaluate the individuals using the algorithm's evaluator (necessary to count evaluations for termination)
+            evalPop = self.algorithm.evaluator.eval(self.problem, evalPop,
+                                                runDir=self.runDir,
+                                                gen=self.algorithm.callback.gen
+                                                # alg=self.algorithm
+                                                )
             # self.algorithm.evaluator.eval(self.problem, evalPop)
-            evalPop = self.runGen(evalPop)
+            # evalPop = self.runGen(evalPop)
             # print('self.algorithm.callback.gen:', self.algorithm.callback.gen)
             # print('self.algorithm.n_gen:', self.algorithm.n_gen)
 
