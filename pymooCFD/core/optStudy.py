@@ -19,6 +19,7 @@ import copy
 from pymoo.visualization.scatter import Scatter
 from pymoo.core.problem import Problem
 from pymoo.core.evaluator import set_cv
+from pmyooCFD.core.pymooBase import CFDProblem_GA
 from pymooCFD.util.sysTools import emptyDir, copy_and_overwrite, saveTxt, yes_or_no
 from pymooCFD.util.loggingTools import MultiLineFormatter, DispNameFilter
 import pymooCFD.config as config
@@ -101,20 +102,10 @@ class OptStudy:
         #############################
         #    Required Attributes    #
         #############################
-        self.problem = problem
-        self.problem = Problem(n_var=BaseCase.n_var,
-                               n_obj=BaseCase.n_obj,
-                               n_constr=BaseCase.n_constr,
-                               xl=np.array(BaseCase.xl),
-                               xu=np.array(BaseCase.xu),
-                               # *args,
-                               # **kwargs
-                               )
+        self.problem = CFDProblem_GA(BaseCase)
         self.algorithm = algorithm  # algorithm.setup(problem)
-        # initialize baseCase
         self.BaseCase = BaseCase
-        # self.baseCaseDir = baseCaseDir
-        # self.genTestCase()
+
         #####################################
         #    Default/Optional Attributes    #
         #####################################
@@ -136,19 +127,7 @@ class OptStudy:
         # os.makedirs(self.pfDir, exist_ok=True)
         # number of optimal points along Pareto front to save
         self.n_opt = int(n_opt)
-        # Plots Directory
-        # self.plotDir = os.path.join(self.runDir, plotsDir)
-        # os.makedirs(self.plotDir, exist_ok=True)
-        # Mapping Objectives vs. Variables Directory
-        # self.mapDir = os.path.join(self.runDir, mapGen1Dir)
-        # os.makedirs(self.mapDir, exist_ok=True)
-        #### Mesh Sensitivity Studies ###
-        # self.studyDir = os.path.join(self.optDatDir, meshStudyDir)
-        # os.makedirs(self.studyDir, exist_ok=True)
-        # self.meshSFs = meshSFs  # mesh size factors
-        # self.procLim = procLim
-        ##### Processing #####
-        # self.client = client
+
         ###################################
         #    Attributes To Be Set Later   #
         ###################################
@@ -159,6 +138,12 @@ class OptStudy:
         self.testCase = None
         self.genTestCase()
         self.saveCP()
+
+    def newProb(self, BaseCase):
+        self.logger.info('INITIALIZING NEW OPTIMIZATION PROBLEM')
+        self.problem = CFDProblem_GA(BaseCase)
+        self.saveCP()
+        return self.problem
 
     def newAlg(self):
         self.logger.info('INITIALIZING NEW OPTIMIZATION AlGORITHM')
