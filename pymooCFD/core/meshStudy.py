@@ -28,6 +28,7 @@ class MeshStudy: #(CFDCase):
         self.base_case = cfd_case
         self.cases = None #[]
         self.size_factors = size_factors
+        self.logger.info('INITIALIZED: Mesh Study')
 
 
     def run(self):

@@ -22,6 +22,7 @@ n_offsprings = int(pop_size * (2 / 3))
 
 class CFDProblem_GA(Problem):
     def __init__(self, BaseCase,
+                 # xl, xu,
                  # n_var, n_obj, n_constr,
                  var_labels=None,
                  obj_labels=None,

@@ -45,15 +45,16 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     varType = None  # OPTIONS: 'int' or 'real'
     xl = None  # lower limits of parameters/variables
     xu = None  # upper limits of variables
-    # if not len(xl) == len(xu) and len(xu) == len(var_labels) and len(var_labels) == n_var:
-    #     raise ExceptionDesign Space Definition Incorrect")
+
     ####### Define Objective Space ########
     obj_labels = None
     n_obj = None
     ####### Define Constraints #########
     n_constr = None
 
-    ###### For Database #########
+    ######################
+    #    Datbase Info    #
+    ######################
     validated = False
 
     ##### External Solver #######
@@ -81,8 +82,6 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                  **kwargs
                  ):
         super().__init__()
-        # if not len(self.xl) == len(self.xu) and len(self.xu) == len(self.var_labels) and len(self.var_labels) == self.n_var:
-        #     raise Exception("Design Space Definition Incorrect")
         if not isinstance(self.baseCaseDir, str):
             raise TypeError(f'{self.baseCaseDir} - must be a string')
         # These attributes are not taken from checkpoint
@@ -141,6 +140,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         if meshStudy is None:
             self.meshStudy = MeshStudy(self)
 
+
         # Design and Objective Space Labels
         if self.var_labels is None:
             self.var_labels = [
@@ -165,23 +165,26 @@ class CFDCase:  # (PreProcCase, PostProcCase)
 
         self.solnTime = None
 
-        ######################
-        #    Datbase Init    #
-        ######################
-        self.infill_DB = False
+        #######################
+        #    Database Init    #
+        #######################
         if database_location is None:
             database_location = os.path.join('CFDCase-DB', self.__class__.__name__)
         self.database = CFDCaseDB(self.__class__, database_location, precision=database_precision)
+        #### Database Load ####
         db_load = self.database.load(self)
-        if db_load is not None and db_load.meshSF == self.meshSF:
+        if (db_load is not None and
+            db_load.meshSF == self.meshSF and
+            db_load.numElem == self.numElem and
+            db_load.x == self.x):
             self.f = db_load.f
-            if db_load.meshStudy is not None:
+            if (db_load.meshStudy is not None):
                 self.meshStudy = db_load.meshStudy
             self.logger.info(f'DATABASE LOAD: Objectives - {self.f}')
 
         #################
         #    WRAP UP    #
-        #################
+        #################self
         self.logger.info('CASE INTITIALIZED')
         self.logger.debug('INITIAL CASE DICTONARY')
         for key in self.__dict__:
@@ -352,7 +355,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             self.logger.error('INCOMPLETE: POST-PROCESS')
         else:
             self.logger.info('COMPLETE: POST-PROCESS')
-            if self.infill_DB:
+            if self.validated:
                 self.database.save(self)
                 self.logger.info(f'\tCase added to database - {self.database}')
         self.saveCP()

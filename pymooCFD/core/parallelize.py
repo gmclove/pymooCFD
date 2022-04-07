@@ -7,8 +7,10 @@ import logging
 
 
 class Parallelize:
-    def __init__(self, exec_funct, procLim, nProc, nTasks=None, externalSolver=False, solverCmd=None,
-                onlyParallelizeSolve=False):
+    def __init__(self, exec_funct, procLim, nProc,
+                 nTasks=None,
+                 externalSolver=False, solverCmd=None,
+                 onlyParallelizeSolve=False):
         self.logger = logging.getLogger()
         self.onlyParallelizeSolve = onlyParallelizeSolve
         self.externalSolver = externalSolver

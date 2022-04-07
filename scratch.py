@@ -9,22 +9,22 @@
 # using split() + sort() + key function
 
 # helper function
-def helper_func(ele):
-		name, val = ele.split()
-		return int(val)
-
-# Initializing list
-test_list = ["v5", "v7", "v6", "v10"]
-
-# printing original list
-print("The original list is : " + str(test_list))
-
-# Numeric Sort in Mixed Pair String List
-# using split() + sort() + key function
-test_list.sort(key = helper_func, reverse = True)
-
-# printing result
-print ("The reverse sorted numerics are : " + str(test_list))
+# def helper_func(ele):
+# 		name, val = ele.split()
+# 		return int(val)
+#
+# # Initializing list
+# test_list = ["v5", "v7", "v6", "v10"]
+#
+# # printing original list
+# print("The original list is : " + str(test_list))
+#
+# # Numeric Sort in Mixed Pair String List
+# # using split() + sort() + key function
+# test_list.sort(key = helper_func, reverse = True)
+#
+# # printing result
+# print ("The reverse sorted numerics are : " + str(test_list))
 
 
 # # Python3 code to demonstrate
@@ -51,17 +51,17 @@ print ("The reverse sorted numerics are : " + str(test_list))
 # if 'ferfere':
 #     print('string true')
 #
-# class Test:
-#     def __init__(self, a, b):
-#         self.a = a
-#         self.b = b
-#         print(dir(self))
-#         print(self.__class__)
-#         print(str(self.__class__))
-#         print(dir(self.__class__))
-#         print(self.__class__.__name__)
-#         # print(self.__name__)
-#
+class Test:
+    def __init__(self, a, b):
+        self.a = a
+        self.b = b
+        print(dir(self))
+        print(self.__class__)
+        print(str(self.__class__))
+        print(dir(self.__class__))
+        print(self.__class__.__name__)
+        # print(self.__name__)
+
 # obj = Test(1, 2)
 # # print(obj)
 # # print(str(obj))
