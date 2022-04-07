@@ -2,14 +2,15 @@ import numpy as np
 
 from pymooCFD.core.cfdCase import FluentCase
 
+
 class RANS_k_eps(FluentCase):
     baseCaseDir = 'base_cases/rans_k-eps_3D-room'
 
     n_var = 2
     var_labels = ['Turbulent Viscosity Constant', 'Number of Iterations']
-    var_type =  ['real', 'int']
-    xl =        [0.09*0.9, 4_000]
-    xu =        [0.09*1.1, 30_000]
+    var_type = ['real', 'int']
+    xl = [0.09 * 0.9, 4_000]
+    xu = [0.09 * 1.1, 30_000]
 
     obj_labels = ['Average of Residuals', 'Wall Time']
     n_obj = 2
@@ -26,7 +27,6 @@ class RANS_k_eps(FluentCase):
                          datFile='residuals.txt',
                          *args, **kwargs)
 
-
     def _preProc(self):
         self.inputLines = [
             '/file/read rans_k-eps.cas.h5',
@@ -37,12 +37,13 @@ class RANS_k_eps(FluentCase):
             f'/solve/iterate {self.x[1]}',
             f'/plot/residual-set/plot-to-file {self.datFile}',
             '/solver/iterate 1'
-            ]
+        ]
 
         ####### Slurm Job Lines #########
         self.jobLines = \
             ['#!/bin/bash',
-             "#SBATCH --partition=ib --constraint='ib&sandybridge'",
+             "#SBATCH --partition=ib",
+             "#SBATCCH --constraint='ib&sandybridge|haswell_1|haswell_2'",
              '#SBATCH --cpus-per-task=5',
              '#SBATCH --ntasks=10',
              '#SBATCH --time=00:30:00',
@@ -54,7 +55,6 @@ class RANS_k_eps(FluentCase):
              'time fluent 2ddp -g -pdefault -t$SLURM_NTASKS -slurm -i exec.jou > run.out'
              ]
 
-
     def _postProc(self):
         residuals_dict = self.extract_residuals(self.datFile)
         avgs = []
@@ -63,12 +63,10 @@ class RANS_k_eps(FluentCase):
                 self.logger.error('LESS THAN 2000 ITERATIONS PREFORMED')
                 return
             # mask = np.where(mat[:,0]>28000)
-            avgs.append(np.mean(mat[-2000:,1]))
+            avgs.append(np.mean(mat[-2000:, 1]))
         avg = np.mean(avgs)
         self.f = [avg, self.solnTime]
         return self.f
-
-
 
     @staticmethod
     def residuals_file_to_dict(f_path):
