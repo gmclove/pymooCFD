@@ -300,6 +300,7 @@ class GridInterp3D(GridInterp2D):
         print('          interpolation time: %d seconds' %(end - start))
         return grid
 
+    @staticmethod
     def getCGNSData(cgnsPath, datID): # datIDs):
         '''
         Overwite of GridInterp2D.getCGNSData()

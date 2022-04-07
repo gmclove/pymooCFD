@@ -90,8 +90,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                  # *args, **kwargs
                  ):
         super().__init__()
-        if not len(self.xl) == len(self.xu) and len(self.xu) == len(self.var_labels) and len(self.var_labels) == self.n_var:
-            raise Exception("Design Space Definition Incorrect")
+
         if not isinstance(self.baseCaseDir, str):
             raise TypeError(f'{self.baseCaseDir} - must be a string')
         # These attributes are not taken from checkpoint
@@ -147,28 +146,6 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         # self.datFile = kwargs.get('datFile')
         # self.meshFile = kwargs.get('meshFile')
 
-        # # if class level variable is None then assign instance attribute
-        # if self.datFile is None:
-        #     self.datFile = datFile
-        # if self.inputFile is None:
-        #     self.inputPath = None
-        # else:
-        #     self.inputPath = os.path.join(self.caseDir, self.inputFile)
-        #
-        # if self.datFile is None:
-        #     self.datPath = None
-        # else:
-        #     self.datPath = os.path.join(self.caseDir, self.datFile)
-        #
-        # if self.meshFile is None:
-        #     self.meshPath = None
-        # else:
-        #     self.meshPath = os.path.join(self.caseDir, self.meshFile)
-        #
-        # if self.jobFile is None:
-        #     self.jobPath = None
-        # else:
-        #     self.jobPath = os.path.join(self.caseDir, self.jobFile)
         ####################
         #    Attributes    #
         ####################
@@ -181,15 +158,15 @@ class CFDCase:  # (PreProcCase, PostProcCase)
 
         # Design and Objective Space Labels
         if self.var_labels is None:
-            self.var_labels = [
-                f'var{x_i}' for x_i in range(self.n_var)]
-        # else:
-        #     self.var_labels = var_labels
+            self.var_labels = [f'var{x_i}' for x_i in range(self.n_var)]
+        else:
+            self.var_labels = var_labels
         if self.obj_labels is None:
-            self.obj_labels = [
-                f'obj{x_i}' for x_i in range(self.n_obj)]
-        # else:
-        #     self.obj_labels = obj_labels
+            self.obj_labels = [f'obj{x_i}' for x_i in range(self.n_obj)]
+        else:
+            self.obj_labels = obj_labels
+        if not len(self.xl) == len(self.xu) and len(self.xu) == len(self.var_labels) and len(self.var_labels) == self.n_var:
+            raise Exception("Design Space Definition Incorrect")
         ###################################################
         #    Attributes To Be Set Later During Each Run   #
         ###################################################
