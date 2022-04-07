@@ -5,6 +5,7 @@
 # from pymooCFD.util.handleData import findKeywordLine
 from pymoo.visualization.scatter import Scatter
 import re
+from pymooCFD.core.meshStudy import MeshStudy
 from pymooCFD.util.loggingTools import MultiLineFormatter, DispNameFilter
 from pymooCFD.util.sysTools import saveTxt, yes_or_no
 import pymooCFD.config as config
@@ -77,8 +78,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #     pool = Pool(nTasks)
 
     def __init__(self, caseDir, x,
-                 meshSF=1,
-                 meshSFs=np.around(np.arange(0.5, 1.5, 0.1), decimals=2),
+                 meshStudy=None,
                  # externalSolver=False,
                  var_labels=None, obj_labels=None,
                  meshFile=None,  # meshLines = None,
@@ -87,19 +87,18 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                  datFile=None,
                  # restart=False,
                  # solverExecCmd=None,
-                 # *args, **kwargs
+                 # *args,
+                 **kwargs
                  ):
         super().__init__()
 
-        if not isinstance(self.baseCaseDir, str):
-            raise TypeError(f'{self.baseCaseDir} - must be a string')
+        if not isinstance(caseDir, str):
+            raise TypeError(f'case directory must be a string: {caseDir}')
         # These attributes are not taken from checkpoint
         self.caseDir = caseDir
         # self.cpPath = os.path.join(self.caseDir, 'case')
         # self.meshStudyDir = os.path.join(self.caseDir, 'meshStudy')
-        self.meshSF = meshSF
-        # Using kwargs
-        # self.meshSF = kwargs.get('meshSF', 1)
+        self.meshSF = kwargs.get('meshSF', 1)
 
         ###########################
         #    RESTART VARIABLES    #
@@ -108,7 +107,6 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         self.restart = False
         self.parallelizeInit(self.externalSolver)
         self.x = x
-        # self._x = x
 
         #########################
         #    CHECKPOINT INIT    #
@@ -149,8 +147,9 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         ####################
         #    Attributes    #
         ####################
-        self.x = np.array(x)
         # Default Attributes
+        if meshStudy is None:
+            self.meshStudy = MeshStudy(self)
         # os.makedirs(self.baseCaseDir, exist_ok=True)
         # Using kwargs (not an option with labels as class variables)
         # self.var_labels = kwargs.get('var_labels')
@@ -175,12 +174,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         # meshing attributes
         self.msCases = None
         self.numElem = None
-        # class properties
-        self._meshSF = None
-        self.meshSF = meshSF  # kwargs.get('meshSF', 1)
-        self._meshSFs = None
-        self.meshSFs = meshSFs
 
+        # case file lines
         self.inputLines = None
         self.jobLines = None
 
@@ -188,8 +183,8 @@ class CFDCase:  # (PreProcCase, PostProcCase)
 
         self.logger.info('CASE INTITIALIZED')
         self.logger.debug('INITIAL CASE DICTONARY')
-        for key in self.__dict__:
-            self.logger.debug(f'\t{key}: {self.__dict__[key]}')
+        for key, val in self.__dict__.items():
+            self.logger.debug(f'\t{key}: {val}')
         # self.genMesh()
         ### Save Checkpoint ###
         # _, tail = os.path.split(caseDir)
