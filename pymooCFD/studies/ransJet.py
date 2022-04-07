@@ -103,7 +103,7 @@ class RANSJet(FluentCase):
     ####### Define Design Space #########
     n_var = 2
     var_labels = ['Mouth Diameter [m]', 'Breath Velocity [m/s]']
-    varType = ["real", "real"]  # OPTIONS: 'int' or 'real'
+    var_type = ["real", "real"]  # OPTIONS: 'int' or 'real'
     xl = [0.005, 0.1]  # lower limits of parameters/variables
     xu = [0.04, 0.4]  # upper limits of variables
     if not len(xl) == len(xu) and len(xu) == len(var_labels) and len(var_labels) == n_var:

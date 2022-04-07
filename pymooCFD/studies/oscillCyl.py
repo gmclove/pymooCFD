@@ -20,7 +20,7 @@ class OscillCylinder(YALES2Case):
     ####### Define Design Space #########
     n_var = 2
     var_labels = ['Amplitude [1/s]', 'Frequency [1/s]']
-    varType = ["real", "real"]  # options: 'int' or 'real'
+    var_type = ["real", "real"]  # options: 'int' or 'real'
     xl = [0.1, 0.1]  # lower limits of parameters/variables
     xu = [3.0, 1]  # upper limits of variables
 

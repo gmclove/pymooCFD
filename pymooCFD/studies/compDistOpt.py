@@ -24,7 +24,7 @@ class FluentCompDistSLURM(CFDCase):
     n_var = 2
     # , 'Time Step']
     var_labels = ['Number of Tasks', 'Number of CPUs per Task']
-    varType = ['int', 'int']
+    var_type = ['int', 'int']
     xl = [1, 1]
     xu = [50, 50]
 

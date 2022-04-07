@@ -40,7 +40,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     ####### Define Design Space #########
     n_var = None
     var_labels = None
-    varType = None  # OPTIONS: 'int' or 'real'
+    var_type = None  # OPTIONS: 'int' or 'real'
     xl = None  # lower limits of parameters/variables
     xu = None  # upper limits of variables
     # if not len(xl) == len(xu) and len(xu) == len(var_labels) and len(var_labels) == n_var:
@@ -798,7 +798,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             'OVERRIDE _solve(self) method to execute internal python solver OR use CFDCase.externalSolver=True')
 
     def _execDone(self):
-        if self.f is not None and not np.isnan(np.sum(self.f)):
+        if (self.f is not None and np.isfinite(np.sum(self.f))):
             return True
 
     def _postProc(self):

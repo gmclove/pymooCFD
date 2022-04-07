@@ -30,7 +30,7 @@ class CompDistSLURM_YALES2(CompDistSLURM):
     n_var = 3
     var_labels = np.append(CompDistSLURM.var_labels,
                            'Number of Elements per Group')
-    varType = np.append(CompDistSLURM.varType, 'real')
+    var_type = np.append(CompDistSLURM.var_type, 'real')
     xl = np.append(CompDistSLURM.xl, 50)
     xu = np.append(CompDistSLURM.xu, 1000)
 
@@ -243,17 +243,17 @@ callback = MyCallback()
 #    OPERATORS    #
 ###################
 
-sampling = MixedVariableSampling(BaseCase.varType, {
+sampling = MixedVariableSampling(BaseCase.var_type, {
     "real": get_sampling("real_lhs"),  # "real_random"),
     "int": get_sampling("int_random")
 })
 
-crossover = MixedVariableCrossover(BaseCase.varType, {
+crossover = MixedVariableCrossover(BaseCase.var_type, {
     "real": get_crossover("real_sbx", prob=1.0, eta=3.0),
     "int": get_crossover("int_sbx", prob=1.0, eta=3.0)
 })
 
-mutation = MixedVariableMutation(BaseCase.varType, {
+mutation = MixedVariableMutation(BaseCase.var_type, {
     "real": get_mutation("real_pm", eta=3.0),
     "int": get_mutation("int_pm", eta=3.0)
 })

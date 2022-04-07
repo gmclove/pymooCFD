@@ -32,7 +32,7 @@ class CompDistSLURM(CFDCase):
     n_var = 2
     # , 'Time Step']
     var_labels = ['Number of Tasks', 'Number of CPUs per Task']
-    varType = ['int', 'int']
+    var_type = ['int', 'int']
     xl = [1, 1]
     xu = [10, 10]
 
@@ -209,17 +209,17 @@ callback = MyCallback()
 #    OPERATORS    #
 ###################
 
-sampling = MixedVariableSampling(BaseCase.varType, {
+sampling = MixedVariableSampling(BaseCase.var_type, {
     "real": get_sampling("real_lhs"),  # "real_random"),
     "int": get_sampling("int_random")
 })
 
-crossover = MixedVariableCrossover(BaseCase.varType, {
+crossover = MixedVariableCrossover(BaseCase.var_type, {
     "real": get_crossover("real_sbx", prob=1.0, eta=3.0),
     "int": get_crossover("int_sbx", prob=1.0, eta=3.0)
 })
 
-mutation = MixedVariableMutation(BaseCase.varType, {
+mutation = MixedVariableMutation(BaseCase.var_type, {
     "real": get_mutation("real_pm", eta=3.0),
     "int": get_mutation("int_pm", eta=3.0)
 })

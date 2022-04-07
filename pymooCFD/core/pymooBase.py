@@ -121,17 +121,17 @@ callback = PymooCFDCallback()
 # from pymoo.factory import get_sampling, get_crossover, get_mutation
 # from pymoo.operators.mixed_variable_operator import MixedVariableSampling, MixedVariableMutation, MixedVariableCrossover
 #
-# sampling = MixedVariableSampling(BaseCase.varType, {
+# sampling = MixedVariableSampling(BaseCase.var_type, {
 #     "real": get_sampling("real_lhs"),  # "real_random"),
 #     "int": get_sampling("int_random")
 # })
 #
-# crossover = MixedVariableCrossover(BaseCase.varType, {
+# crossover = MixedVariableCrossover(BaseCase.var_type, {
 #     "real": get_crossover("real_sbx", prob=1.0, eta=3.0),
 #     "int": get_crossover("int_sbx", prob=1.0, eta=3.0)
 # })
 #
-# mutation = MixedVariableMutation(BaseCase.varType, {
+# mutation = MixedVariableMutation(BaseCase.var_type, {
 #     "real": get_mutation("real_pm", eta=3.0),
 #     "int": get_mutation("int_pm", eta=3.0)
 # })

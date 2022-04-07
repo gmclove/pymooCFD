@@ -29,7 +29,7 @@ class OscillCylinder(OscCylX2):
     n_var = 3
     var_labels = np.append(OscCylX2.var_labels, 'Reynolds Number')
     # options: 'int' or 'real'
-    varType = np.append(OscCylX2.varType, 'int')
+    var_type = np.append(OscCylX2.var_type, 'int')
     # lower limits of parameters/variables
     xl = np.append(OscCylX2.xl, 1)
     xu = np.append(OscCylX2.xu, 5)  # upper limits of variables
@@ -221,20 +221,20 @@ callback = MyCallback()
 #    OPERATORS    #
 ###################
 
-print(BaseCase.varType)
+print(BaseCase.var_type)
 
 
-sampling = MixedVariableSampling(BaseCase.varType, {
+sampling = MixedVariableSampling(BaseCase.var_type, {
     "real": get_sampling("real_lhs"),  # "real_random"),
     "int": get_sampling("int_random")
 })
 
-crossover = MixedVariableCrossover(BaseCase.varType, {
+crossover = MixedVariableCrossover(BaseCase.var_type, {
     "real": get_crossover("real_sbx", prob=1.0, eta=3.0),
     "int": get_crossover("int_sbx", prob=1.0, eta=3.0)
 })
 
-mutation = MixedVariableMutation(BaseCase.varType, {
+mutation = MixedVariableMutation(BaseCase.var_type, {
     "real": get_mutation("real_pm", eta=3.0),
     "int": get_mutation("int_pm", eta=3.0)
 })

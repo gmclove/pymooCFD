@@ -416,8 +416,8 @@ class OptStudy:
         xu = self.problem.xu
         x_mid = [xl[x_i] + (xu[x_i] - xl[x_i]) / 2
                  for x_i in range(self.problem.n_var)]
-        for x_i, varType in enumerate(self.BaseCase.varType):
-            if varType.lower() == 'int':
+        for x_i, var_type in enumerate(self.BaseCase.var_type):
+            if var_type.lower() == 'int':
                 x_mid[x_i] = int(x_mid[x_i])
         testCaseDir = os.path.join(self.runDir, testCaseDir)
         self.testCase = self.BaseCase(testCaseDir, x_mid)  # , restart=True)

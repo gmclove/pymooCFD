@@ -11,28 +11,27 @@ from pymoo.factory import get_sampling, get_crossover, get_mutation
 from pymooCFD.core.optStudy import OptStudy
 from pymooCFD.core.pymooBase import callback, display,
 
-class OscillCylinderOpt(OptStudy):
+class RANSConstOpt(OptStudy):
     def __init__(self, algorithm, BaseCase,
-                 # *args, **kwargs
+                 *args, **kwargs
                  ):
         super().__init__(algorithm, BaseCase,
-                         # optName='OscCylX2',
-                         optName='oscCylX2-v2',
-                         runDir='run'
+                         # optName='',
+                         # runDir='run'
                          # n_opt = 20,
                          # baseCaseDir='base_cases/osc-cyl_base',
                          # optDatDir='cyl-opt_run',
-                         # *args, **kwargs
+                         *args, **kwargs
                          )
 
-MyOptStudy = OscillCylinderOpt
+MyOptStudy = RANSConstOpt
 
 #####################################
 #### Genetic Algorithm Criteria #####
 #####################################
-n_gen = 30
-pop_size = 50
-n_offsprings = int(pop_size * (1 / 3))  # = num. of evaluations each generation
+n_gen = 2
+pop_size = 3
+n_offsprings = int(pop_size * (1 / 2))  # = num. of evaluations each generation
 
 ###################
 #    OPERATORS    #
