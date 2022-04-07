@@ -5,7 +5,7 @@ from pymooCFD.core.cfdCase import FluentCase
 class RANS_k_eps(FluentCase):
     baseCaseDir = 'base_cases/rans_k-eps_3D-room'
 
-    n_var = 1
+    n_var = 2
     var_labels = ['Turbulent Viscosity Constant', 'Number of Iterations']
     var_type =  ['real', 'int']
     xl =        [0.09*0.9, 4_000]
@@ -17,7 +17,7 @@ class RANS_k_eps(FluentCase):
     n_constr = 0
 
     externalSolver = True
-    solverCmd = ['sbatch', '--wait', 'jobslurm.sh']
+    solverExecCmd = ['sbatch', '--wait', 'jobslurm.sh']
 
     def __init__(self, caseDir, x, *args, **kwargs):
         super().__init__(caseDir, x,

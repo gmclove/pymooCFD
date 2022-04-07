@@ -19,7 +19,7 @@ import copy
 from pymoo.visualization.scatter import Scatter
 from pymoo.core.problem import Problem
 from pymoo.core.evaluator import set_cv
-from pmyooCFD.core.pymooBase import CFDProblem_GA
+from pymooCFD.core.pymooBase import CFDProblem_GA
 from pymooCFD.util.sysTools import emptyDir, copy_and_overwrite, saveTxt, yes_or_no
 from pymooCFD.util.loggingTools import MultiLineFormatter, DispNameFilter
 import pymooCFD.config as config
