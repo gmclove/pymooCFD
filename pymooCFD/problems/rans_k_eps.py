@@ -10,7 +10,7 @@ class RANS_k_eps(FluentCase):
     var_labels = ['Turbulent Viscosity Constant', 'Number of Iterations']
     var_type = ['real', 'int']
     xl = [0.09 * 0.9, 4_000]
-    xu = [0.09 * 1.1, 30_000]
+    xu = [0.09 * 1.1, 10_000]
 
     obj_labels = ['Average of Residuals', 'Wall Time']
     n_obj = 2
@@ -44,8 +44,8 @@ class RANS_k_eps(FluentCase):
             ['#!/bin/bash',
              "#SBATCH --partition=ib",
              "#SBATCCH --constraint='ib&sandybridge|haswell_1|haswell_2'",
-             '#SBATCH --cpus-per-task=1',
-             '#SBATCH --ntasks=25',
+             '#SBATCH --cpus-per-task=2',
+             '#SBATCH --ntasks=10',
              '#SBATCH --time=00:30:00',
              '#SBATCH --mem-per-cpu=2G',
              '#SBATCH --job-name=rans_room',
