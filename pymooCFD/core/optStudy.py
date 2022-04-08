@@ -27,7 +27,8 @@ from pymoo.util.misc import termination_from_tuple
 
 
 class OptStudy(PicklePath):
-    def __init__(self, algorithm, BaseCase, runDir='run-defualt'
+    def __init__(self, algorithm, problem,
+                 runDir='run-defualt',
                  n_opt=20,
                  # restart=True,
                  # optDatDir='opt_run',
@@ -45,10 +46,10 @@ class OptStudy(PicklePath):
         #######################################
         #    ATTRIBUTES NEEDED FOR RESTART    #
         #######################################
-        self.logger = self.getLogger()
-        self.logger.info(f'OPTIMIZATION STUDY') #- {self.optName}')
-        self.CP_path = os.path.join(self.optDatDir, f'{self.optName}-CP')
-        self.logger.info(f'\tCheckpoint Path: {self.CP_path}')
+        # self.logger = self.getLogger()
+        self.logger.info(f'OPTIMIZATION STUDY- {self.runDir}')
+        # self.CP_path = os.path.join(self.optDatDir, f'{self.optName}-CP')
+        self.logger.info(f'\tCheckpoint Path: {self.cp_path}')
 
         # if not restart:
         # if os.path.exists(self.optDatDir):
@@ -97,9 +98,10 @@ class OptStudy(PicklePath):
         #############################
         #    Required Attributes    #
         #############################
-        self.problem = CFDProblem_GA(BaseCase)
+        self.problem = problem #CFDProblem_GA(BaseCase)
+        #assert algorithm is setup
         self.algorithm = algorithm  # algorithm.setup(problem)
-        self.BaseCase = BaseCase
+        # self.BaseCase = BaseCase
 
         #####################################
         #    Default/Optional Attributes    #
@@ -268,34 +270,34 @@ class OptStudy(PicklePath):
     #    LOGGER    #
     ################
 
-    def getLogger(self):
-        # create root logger
-        logger = logging.getLogger()
-        logger.setLevel(config.OPT_STUDY_LOGGER_LEVEL)
-        # define handlers
-        # if not logger.handlers:
-        # file handler
-        fileHandler = logging.FileHandler(f'{self.optName}.log')
-        logger.addHandler(fileHandler)
-        # stream handler
-        streamHandler = logging.StreamHandler()  # sys.stdout)
-        streamHandler.setLevel(logging.DEBUG)
-        if streamHandler not in logger.handlers:
-            logger.addHandler(streamHandler)
-        # define filter
-        # filt = DispNameFilter(self.optName)
-        # logger.addFilter(filt)
-        # define formatter
-        formatter = MultiLineFormatter(
-            '%(asctime)s :: %(levelname)-8s :: %(name)s :: %(message)s')
-        #     f'%(asctime)s :: %(levelname)-8s :: {self.optName} :: %(message)s')
-        #     f'%(asctime)s.%(msecs)03d :: %(levelname)-8s :: {self.optName} :: %(message)s')
-        #     '%(name)s :: %(levelname)-8s :: %(message)s')
-        fileHandler.setFormatter(formatter)
-        streamHandler.setFormatter(formatter)
-        logger.info('~' * 30)
-        logger.info('NEW RUN')
-        return logger
+    # def getLogger(self):
+    #     # create root logger
+    #     logger = logging.getLogger()
+    #     logger.setLevel(config.OPT_STUDY_LOGGER_LEVEL)
+    #     # define handlers
+    #     # if not logger.handlers:
+    #     # file handler
+    #     fileHandler = logging.FileHandler(f'{self.optName}.log')
+    #     logger.addHandler(fileHandler)
+    #     # stream handler
+    #     streamHandler = logging.StreamHandler()  # sys.stdout)
+    #     streamHandler.setLevel(logging.DEBUG)
+    #     if streamHandler not in logger.handlers:
+    #         logger.addHandler(streamHandler)
+    #     # define filter
+    #     # filt = DispNameFilter(self.optName)
+    #     # logger.addFilter(filt)
+    #     # define formatter
+    #     formatter = MultiLineFormatter(
+    #         '%(asctime)s :: %(levelname)-8s :: %(name)s :: %(message)s')
+    #     #     f'%(asctime)s :: %(levelname)-8s :: {self.optName} :: %(message)s')
+    #     #     f'%(asctime)s.%(msecs)03d :: %(levelname)-8s :: {self.optName} :: %(message)s')
+    #     #     '%(name)s :: %(levelname)-8s :: %(message)s')
+    #     fileHandler.setFormatter(formatter)
+    #     streamHandler.setFormatter(formatter)
+    #     logger.info('~' * 30)
+    #     logger.info('NEW RUN')
+    #     return logger
 
     ####################
     #    MESH STUDY    #
@@ -411,11 +413,11 @@ class OptStudy(PicklePath):
         xu = self.problem.xu
         x_mid = [xl[x_i] + (xu[x_i] - xl[x_i]) / 2
                  for x_i in range(self.problem.n_var)]
-        for x_i, var_type in enumerate(self.BaseCase.var_type):
+        for x_i, var_type in enumerate(self.problem.BaseCase.var_type):
             if var_type.lower() == 'int':
                 x_mid[x_i] = int(x_mid[x_i])
         testCaseDir = os.path.join(self.runDir, testCaseDir)
-        self.testCase = self.BaseCase(testCaseDir, x_mid)  # , restart=True)
+        self.testCase = self.problem.BaseCase(testCaseDir, x_mid)  # , restart=True)
 
     def runTestCase(self):
         self.logger.info('TEST CASE RUN . . .')
@@ -439,7 +441,7 @@ class OptStudy(PicklePath):
     #     # create sub-directories for each individual
     #     indDirs = [os.path.join(genDir, f'ind{i+1}') for i in range(len(X))]
     #     cases = self.genCases(indDirs, X)
-    #     self.BaseCase.parallelize(cases)
+    #     self.problem.BaseCase.parallelize(cases)
     #     # self.runPop(cases)
     #     for case in cases:
     #         print(case.caseDir, case.f, case.x)
@@ -459,7 +461,7 @@ class OptStudy(PicklePath):
         # create sub-directories for each individual
         indDirs = [os.path.join(genDir, f'ind{i+1}') for i in range(len(X))]
         cases = self.genCases(indDirs, X)
-        self.BaseCase.parallelize(cases)
+        self.problem.BaseCase.parallelize(cases)
         F = np.array([case.f for case in cases])
         G = np.array([case.g for case in cases])
         # objectives
@@ -486,7 +488,7 @@ class OptStudy(PicklePath):
         popX = pop.get('X')
         var_plot = Scatter(title=f'Generation {gen} Design Space',
                        legend=leg,
-                       labels=self.BaseCase.var_labels,
+                       labels=self.problem.BaseCase.var_labels,
         #                figsize=(10,8)
                       )
         for ind_i, ind in enumerate(popX):
@@ -498,7 +500,7 @@ class OptStudy(PicklePath):
         popF = pop.get('F')
         obj_plot = Scatter(title=f'Generation {gen} Objective Space',
                        legend=leg,
-                       labels=self.BaseCase.obj_labels
+                       labels=self.problem.BaseCase.obj_labels
                       )
         for ind_i, ind in enumerate(popF):
             obj_plot.add(ind, label=f'IND {ind_i+1}')
@@ -510,8 +512,8 @@ class OptStudy(PicklePath):
     def mapGen1(self):
         ##### Variable vs. Objective Plots ######
         # extract objectives and variables columns and plot them against each other
-        var_labels = self.BaseCase.var_labels
-        obj_labels = self.BaseCase.obj_labels
+        var_labels = self.problem.BaseCase.var_labels
+        obj_labels = self.problem.BaseCase.obj_labels
         popX = self.algorithm.history[0].pop.get('X').astype(float)
         popF = self.algorithm.history[0].pop.get('F').astype(float)
         mapPaths = []
@@ -547,7 +549,7 @@ class OptStudy(PicklePath):
         return plots, mapPaths
 
     # def runPop(self, cases):
-    #     nTask = int(self.procLim/self.BaseCase.nProc)
+    #     nTask = int(self.procLim/self.problem.BaseCase.nProc)
     #     pool = mp.Pool(nTask)
     #     for case in cases:
     #         pool.apply_async(case.run, ())
@@ -598,7 +600,7 @@ class OptStudy(PicklePath):
                         '[', '').replace(']', '').replace(' ', '_')
                 cornerCaseDir = os.path.join(
                     self.optDatDir, 'corner-cases', caseName)
-                cornerCase = self.BaseCase(cornerCaseDir, perm)
+                cornerCase = self.problem.BaseCase(cornerCaseDir, perm)
                 cornerCases.append(cornerCase)
         self.cornerCases = cornerCases
 
@@ -626,7 +628,7 @@ class OptStudy(PicklePath):
         else:
             self.logger.warning(
                 'SKIPPED: GENERATE CORNER CASES - call self.genCornerCases() directly to create new corner cases')
-        self.BaseCase.parallelize(self.cornerCases)
+        self.problem.BaseCase.parallelize(self.cornerCases)
 
     def runBndCases(self, n_pts=2, getDiags=False, doMeshStudy=False):
         if self.bndCases is None:
@@ -634,7 +636,7 @@ class OptStudy(PicklePath):
         else:
             self.logger.warning(
                 'SKIPPED: GENERATE BOUNDARY CASES - call self.genBndCases() directly to create new boundary cases')
-        self.BaseCase.parallelize(self.bndCases)
+        self.problem.BaseCase.parallelize(self.bndCases)
         self.saveCP()
         self.plotBndPtsObj()
         if doMeshStudy:
@@ -643,7 +645,7 @@ class OptStudy(PicklePath):
 
     def plotBndPtsObj(self):
         plot = Scatter(title='Objective Space: Boundary Cases',
-                       legend=True, labels=self.BaseCase.obj_labels)
+                       legend=True, labels=self.problem.BaseCase.obj_labels)
         F = np.array([case.f for case in self.bndCases])
         for obj in F:
             plot.add(obj, label=self.getPointLabel(obj))
@@ -654,7 +656,7 @@ class OptStudy(PicklePath):
     def plotBndPts(self):
         plot = Scatter(title='Design Space: Boundary Cases',
                        legend=True,
-                       labels=self.BaseCase.var_labels
+                       labels=self.problem.BaseCase.var_labels
                        # grid=True
                        )
         bndPts = np.array([case.x for case in self.bndCases])
@@ -718,11 +720,11 @@ class OptStudy(PicklePath):
 
     def genCases(self, paths, X):  # , baseCase=None):
         # if baseCase is None:
-        #     baseCase = self.BaseCase
+        #     baseCase = self.problem.BaseCase
         assert len(paths) == len(X), 'genCases(paths, X): len(paths) == len(X)'
         cases = []
         for x_i, x in enumerate(X):
-            case = self.BaseCase(paths[x_i], x)
+            case = self.problem.BaseCase(paths[x_i], x)
             cases.append(case)
         return cases
 
@@ -816,7 +818,7 @@ class OptStudy(PicklePath):
     # def gen1Pop(self, cases):
     #     if cases is not None:
     #         for case in cases:
-    #             if isinstance(case, self.BaseCase):
+    #             if isinstance(case, self.problem.BaseCase):
     #                 case.saveCP()
     #     # path = os.path.join(self.optDatDir, 'gen1Pop.npy')
     #     # np.save(path, cases, allow_pickle=True)
@@ -833,7 +835,7 @@ class OptStudy(PicklePath):
     # def cornerCases(self, cases):
     #     if cases is not None:
     #         for case in cases:
-    #             if isinstance(case, self.BaseCase):
+    #             if isinstance(case, self.problem.BaseCase):
     #                 case.saveCP()
     #     # path = os.path.join(self.optDatDir, 'cornerCases.npy')
     #     # np.save(path, cases, allow_pickle=True)
@@ -851,7 +853,7 @@ class OptStudy(PicklePath):
     # def bndCases(self, cases):
     #     if cases is not None:
     #         for case in cases:
-    #             if isinstance(case, self.BaseCase):
+    #             if isinstance(case, self.problem.BaseCase):
     #                 case.saveCP()
     #     # path = os.path.join(self.optDatDir, 'bndCases.npy')
     #     # np.save(path, cases, allow_pickle=True)
@@ -866,7 +868,7 @@ class OptStudy(PicklePath):
     #
     # @testCase.setter
     # def testCase(self, case):
-    #     if isinstance(case, self.BaseCase):
+    #     if isinstance(case, self.problem.BaseCase):
     #         case.saveCP()
     #     self._testCase = case
         # path = os.path.join(self.optDatDir, 'testCase.npy')

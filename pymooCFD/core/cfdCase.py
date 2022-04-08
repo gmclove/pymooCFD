@@ -78,6 +78,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #     pool = Pool(nTasks)
 
     def __init__(self, caseDir, x,
+                 validated=False,
                  meshStudy=None,
                  # externalSolver=False,
                  var_labels=None, obj_labels=None,
@@ -147,6 +148,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         ####################
         #    Attributes    #
         ####################
+        self.validated = validated
         # Default Attributes
         if meshStudy is None:
             self.meshStudy = MeshStudy(self)

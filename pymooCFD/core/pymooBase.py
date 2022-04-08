@@ -37,7 +37,7 @@ class CFDProblem_GA(Problem):
                          )
         self.BaseCase = BaseCase
         self.gen1Pop = None
-        self.BaseCase.validated = False
+        self.validated = False
 
         # Design and Objective Space Labels
         # if var_labels is None:
@@ -62,7 +62,7 @@ class CFDProblem_GA(Problem):
         assert len(indDirs) == len(X), 'len(paths) == len(X)'
         cases = []
         for x_i, x in enumerate(X):
-            case = self.BaseCase(indDirs[x_i], x)
+            case = self.BaseCase(indDirs[x_i], x, validated=self.validated)
             cases.append(case)
         self.BaseCase.parallelize(cases)
         F = np.array([case.f for case in cases])
@@ -160,7 +160,6 @@ callback = PymooCFDCallback()
 #    ALGORITHM    #
 ###################
 from pymoo.algorithms.moo.nsga2 import NSGA2
-from pymoo.factory import get_sampling, get_crossover, get_mutation
 ### initialize algorithm here
 ## will be overwritten in runOpt() if checkpoint already exists
 class MyNSGA2(NSGA2):
