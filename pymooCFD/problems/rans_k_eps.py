@@ -52,7 +52,7 @@ class RANS_k_eps(FluentCase):
              '#SBATCH --output=slurm.out',
              'module load ansys/fluent-21.2.0',
              'cd $SLURM_SUBMIT_DIR',
-             'time fluent 2ddp -g -pdefault -t$SLURM_NTASKS -slurm -i exec.jou > run.out'
+             'time fluent 3ddp -g -pdefault -t$SLURM_NTASKS -slurm -i exec.jou > run.out'
              ]
 
     def _postProc(self):
