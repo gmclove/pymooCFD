@@ -2,14 +2,15 @@
 from pymooCFD.studies.rans_const_opt import optStudy
 
 def main():
-    # optStudy.runTestCase()
-
+    optStudy.testCase.preProc()
+    optStudy.testCase.solve()
+    optStudy.testCase.postProc()
     # db = optStudy.problem.BaseCase.database
     # print(db.database)
     # print(db.database.location)
     # print(db.database.PyClass)
     # optStudy.testCase.externalSolver = True
-    optStudy.testCase.run()
+    # optStudy.testCase.run()
     # optStudy.testCase.validated = True
     # case = optStudy.testCase
     # case.f = None
