@@ -26,32 +26,27 @@ import pymooCFD.config as config
 from pymoo.util.misc import termination_from_tuple
 
 
-class OptStudy:
-    def __init__(self, algorithm, BaseCase,
+class OptStudy(PicklePath):
+    def __init__(self, algorithm, BaseCase, runDir='run-defualt'
+                 n_opt=20,
                  # restart=True,
                  # optDatDir='opt_run',
-                 optName=None,
-                 n_opt=20,  # n_CP=10,
+                 # optName=None,
+                  # n_CP=10,
                  # CP_fName='checkpoint',
                  # plotsDir='plots', archiveDir='archive', mapGen1Dir='mapGen1',
-                 runDir='run',
+                 # runDir='run',
                  # procLim=os.cpu_count(),
                  # var_labels=None, obj_labels=None,
                  # client=None,
                  # *args, **kwargs
                  ):
-        super().__init__()
+        super().__init__(path=runDir)
         #######################################
         #    ATTRIBUTES NEEDED FOR RESTART    #
         #######################################
-        if optName is None:
-            self.optName = self.__class__.__name__
-        else:
-            self.optName = optName
         self.logger = self.getLogger()
-        self.logger.info(f'OPTIMIZATION STUDY - {self.optName}')
-        self.optDatDir = 'optStudy-' + self.optName
-        self.logger.info(f'\tData Directory: {self.optDatDir}')
+        self.logger.info(f'OPTIMIZATION STUDY') #- {self.optName}')
         self.CP_path = os.path.join(self.optDatDir, f'{self.optName}-CP')
         self.logger.info(f'\tCheckpoint Path: {self.CP_path}')
 

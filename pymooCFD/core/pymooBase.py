@@ -159,10 +159,44 @@ callback = PymooCFDCallback()
 ###################
 #    ALGORITHM    #
 ###################
-# from pymoo.algorithms.moo.nsga2 import NSGA2
-# from pymoo.factory import get_sampling, get_crossover, get_mutation
-# ### initialize algorithm here
-# ## will be overwritten in runOpt() if checkpoint already exists
+from pymoo.algorithms.moo.nsga2 import NSGA2
+from pymoo.factory import get_sampling, get_crossover, get_mutation
+### initialize algorithm here
+## will be overwritten in runOpt() if checkpoint already exists
+class MyNSGA2(NSGA2):
+    def __init__(self, sampling, crossover, mutation,
+                 pop_size=5,
+                 n_offsprings=2,
+                 eliminate_duplicates=True,
+
+                 termination=get_termination("n_gen", 5),
+
+                 callback=callback,
+                 display=display,
+                 **kwargs
+                 ):
+        super().__init__(pop_size=pop_size,
+                         n_offsprings=n_offsprings,
+                         eliminate_duplicates=eliminate_duplicates,
+
+                         termination = termination,
+
+                         sampling = sampling,
+                         crossover = crossover,
+                         mutation = mutation,
+
+                         callback=callback,
+                         display=display,
+                         **kwargs
+                         )
+
+    def setup(self, problem, **kwargs):
+        super().setup(self, problem, **kwargs)
+        self.save_history = True
+        self.seed = 1
+        self.return_least_infeasible = True
+        self.verbose = True
+
 # algorithm = NSGA2(pop_size=pop_size,
 #                   n_offsprings=n_offsprings,
 #                   eliminate_duplicates=True,
