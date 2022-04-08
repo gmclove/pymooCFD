@@ -35,6 +35,7 @@ class RANS_k_eps(FluentCase):
             '/solve/initialize/compute-defaults/velocity-inlet inlet',
             '/solve/initialize/initialize-flow',
             f'/solve/iterate {int(self.x[1])}',
+            'n',
             f'/plot/residual-set/plot-to-file {self.datFile}',
             '/solver/iterate 1'
         ]
