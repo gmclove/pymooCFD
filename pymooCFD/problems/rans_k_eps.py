@@ -73,7 +73,7 @@ class RANS_k_eps(FluentCase):
              '#SBATCH --ntasks=10',
              '#SBATCH --time=00:30:00',
              '#SBATCH --mem-per-cpu=2G',
-             '#SBATCH --job-name=rans_room',
+             '#SBATCH --job-name=RANSroom',
              '#SBATCH --output=slurm.out',
              'module load ansys/fluent-21.2.0',
              'cd $SLURM_SUBMIT_DIR',
