@@ -19,6 +19,7 @@ class RANS_k_eps(FluentCase):
 
     externalSolver = True
     solverExecCmd = ['sbatch', '--wait', 'jobslurm.sh']
+    nTasks = 4
 
     def __init__(self, caseDir, x, *args, **kwargs):
         super().__init__(caseDir, x,
