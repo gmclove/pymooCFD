@@ -746,9 +746,12 @@ class OptStudy:
     @staticmethod
     def loadCase(case_path):
         caseCP = os.path.join(case_path, 'case.npy')
-        if os.path.exists(caseCP):
+        try:
             case, = np.load(caseCP, allow_pickle=True).flatten()
-        return case
+            return case
+        except FileNotFoundError as err:
+            print(err)
+
 
     @classmethod
     def loadCases(cls, directory):
@@ -762,7 +765,8 @@ class OptStudy:
         for ent in ents:
             case_path = os.path.join(directory, ent)
             if os.path.isdir(case_path):
-                case = cls.loadCase(case_path)
+                case_cp = os.path.join(case_path, 'case.npy')
+                case = cls.loadCase(case_cp)
                 cases.append(case)
         return cases
 
