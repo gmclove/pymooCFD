@@ -305,6 +305,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
         if self.f is None or np.isnan(np.sum(self.f)):
             self.preProc()
             self.solve()
+            self.postProc()
             if self._execDone():
                 self.logger.info('COMPLETE: SOLVE')
             else:
@@ -316,7 +317,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                 else:
                     self.logger.warning(
                         f'MAX NUMBER OF RE-RUNS ({max_reruns}) REACHED')
-            self.postProc()
+            # self.postProc()
         else:
             self.logger.warning(
                 'SKIPPED: RUN - self.run() called but case already complete')
