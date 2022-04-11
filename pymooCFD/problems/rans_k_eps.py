@@ -32,12 +32,32 @@ class RANS_k_eps(FluentCase):
             '/file/read rans_k-eps.cas.h5',
             '/define/models/viscous/ke-standard y',
             f'(rpsetvar\' kecmu {self.x[0]})',
+            ';save residuals',
             '/solve/initialize/compute-defaults/velocity-inlet inlet',
             '/solve/initialize/initialize-flow',
-            f'/solve/iterate {int(self.x[1])}',
-            'n',
-            f'/plot/residual-set/plot-to-file {self.datFile}',
-            '/solver/iterate 1'
+            '(let',
+            '((writefile (lambda (p)',
+            '(define np (length (residual-history "iteration")))',
+            '(let loop ((i 0))',
+            '(if (not (= i np))',
+            '(begin (define j (+ i 1))',
+            '(display (list-ref (residual-history "iteration") (- np j)) p) (display " " p)',
+            '(display (list-ref (residual-history "continuity") (- np j)) p) (display " " p)',
+            '(display (list-ref (residual-history "x-velocity") (- np j)) p) (display " " p)',
+            '(display (list-ref (residual-history "y-velocity") (- np j)) p) (display " " p)',
+            '(display (list-ref (residual-history "z-velocity") (- np j)) p) (display " " p)',
+            '(display (list-ref (residual-history "k") (- np j)) p) (display " " p)',
+            '(display (list-ref (residual-history "epsilon") (- np j)) p)',
+            '(newline p)',
+            '(loop (+ i 1))',
+            ')',
+            ')',
+            ')',
+            ') )',
+            '(output-port (open-output-file "residual_2000_e387_udf.dat")))',
+            '(writefile output-port)',
+            '(close-output-port output-port))',
+            '/exit y'
         ]
 
         ####### Slurm Job Lines #########
@@ -57,15 +77,15 @@ class RANS_k_eps(FluentCase):
              ]
 
     def _postProc(self):
-        residuals_dict = self.residuals_file_to_dict(self.datPath)
-        avgs = []
-        for _, mat in residuals_dict.items():
-            if len(mat) < 2000:
-                self.logger.error('LESS THAN 2000 ITERATIONS PREFORMED')
-                return
-            # mask = np.where(mat[:,0]>28000)
-            avgs.append(np.mean(mat[-2000:, 1]))
-        avg = np.mean(avgs)
+        # residuals_dict = self.residuals_file_to_dict(self.datPath)
+        dat = np.genfromtxt('residuals.dat')
+        if dat[-1, 0] < 2000:
+            self.logger.error('LESS THAN 2000 ITERATIONS PREFORMED')
+        # avgs = []
+        # for col in dat.T[1:]:
+        #     avgs.append(np.mean(col[-2000:]))
+        # avg = np.mean(avgs)
+        avg = np.mean(dat[:, 1:])
         self.f = [avg, self.solnTime]
         return self.f
 
