@@ -18,11 +18,11 @@ from pymooCFD.util.handleData import saveTxt
 
 class MeshStudy: #(CFDCase):
     def __init__(self, cfd_case,
-                 size_factors = np.around(np.arange(0.5, 1.5, 0.1), decimals=2)
+                 size_factors=np.around(np.arange(0.5, 1.5, 0.1), decimals=2)
                  ):
         super().__init__()
         self.folder = os.path.join(cfd_case.abs_path, 'meshStudy')
-        os.mkdir(self.folder)
+        os.makedirs(self.folder, exist_ok=True)
         # os.makedirs(self.folder,)
         self.logger = self.getLogger()
         self.base_case = cfd_case

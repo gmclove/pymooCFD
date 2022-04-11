@@ -4,56 +4,18 @@
 # @Last modified time: 2021-12-14T15:45:19-05:00
 
 class A:
+    a = 1
+
     def __init__(self):
-        pass
-        # print(self.__name__)
-
-class B(A):
-    def __init__(self):
-        print(self.__class__)
-        # print(super().__name__)
-A()
-B()
-
-print(__name__)
-
-
-path = 'A/B/C/D'
-import os
-split = os.path.split(path)
-join = '.'.join(split)
-print(split)
-print(join)
-print(os.path.normpath(path).split(os.path.sep))
-print('.'.join(os.path.normpath(path).split(os.path.sep)))
-# from pymoo.algorithms.base.genetic import GeneticAlgorithm
-# from pymoo.algorithms.moo.nsga2 import NSGA2
-# print(type(NSGA2))
-# print(type(GeneticAlgorithm))
-# print(NSGA2.__bases__)
-# for base in NSGA2.__bases__:
-#     print(base)
-#     print(base.__bases__)
-# print(GeneticAlgorithm)
-# print(isinstance(NSGA2, GeneticAlgorithm))
-# print(GeneticAlgorithm in NSGA2.__bases__)
-# # print(GeneticAlgorithm in [base for NSGA2.__bases__)
-#
-# print(NSGA2.mro())
-# print(GeneticAlgorithm in NSGA2.mro())
-
-
-# import os
-#
-# p1 = 'A/B/C'
-# p2 = os.path.join(p1, 'D')
-#
-# print(os.path.relpath(p2, start=p1))
-#
-# if p1 in p2:
-#     _, rel = p2.split(p1)
-#     print(rel)
-    # dif =
+        self.b = 2
+        # self.externalSolver =
+inst = A()
+Cls = A
+print(Cls.__dict__)
+print(inst.__dict__)
+print(inst.__class__.__dict__)
+inst.__class__.__dict__ = inst.__class__.__dict__
+print(inst.__class__.__dict__)
 
 
 # from pymoo.visualization.scatter import Scatter

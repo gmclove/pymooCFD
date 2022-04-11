@@ -9,14 +9,13 @@ from pymoo.operators.mixed_variable_operator import MixedVariableSampling, Mixed
 from pymoo.factory import get_sampling, get_crossover, get_mutation
 
 from pymooCFD.core.optStudy import OptStudy
-from pymooCFD.core.pymooBase import callback, display
-from pymooCFD.problems.rans_k_eps import BaseCase
+from pymooCFD.core.pymooBase import rans_k_eps import BaseCase
 
 class RANSConstOpt(OptStudy):
-    def __init__(self, algorithm, BaseCase,
+    def __init__(self, algorithm, problem,
                  *args, **kwargs
                  ):
-        super().__init__(algorithm, BaseCase,
+        super().__init__(algorithm, problem,
                          # optName='',
                          # runDir='run'
                          # n_opt = 20,

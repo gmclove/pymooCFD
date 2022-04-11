@@ -7,9 +7,8 @@ from pymooCFD.util.loggingTools import MultiLineFormatter, DispNameFilter
 import pymooCFD.config as config
 from pymooCFD.util.sysTools import yes_or_no
 
-
 class PicklePath:
-    def __init__(self, dir_path=None, sub_dirs=[]):
+    def __init__(self, dir_path=None, sub_dirs=[], log_level=logging.DEBUG):
         if dir_path is None:
             dir_path = self.__class__.__name__
         self.abs_path = os.path.abspath(dir_path)
@@ -20,7 +19,12 @@ class PicklePath:
         # self.cp_rel_path = os.path.relpath(self.cp_path)
         # self.par_path = os.path.join(self.abs_path, os.pardir)
         # self.log_path = os.path.join(self.par_path, self.data_folder+'.log')
-        self.init_logger()
+        self.log_level = log_level
+        self.logger = self.get_logger()
+        # INTRODUCTION MESSAGE
+        intro_str = 'INITIALIZING - Pickle Path'
+        self.logger.info('~' * len(intro_str))
+        self.logger.info(intro_str)
         #########################
         #    Checkpoint Load    #
         #########################
@@ -42,7 +46,7 @@ class PicklePath:
                 # self.logger.info('RE-INITIALIZING OPTIMIZATION ALGORITHM')
         else:
             os.makedirs(self.abs_path)
-            self.init_logger()
+            self.logger = self.get_logger()
             self.logger.info(
                 f'NEW - {self.rel_path} did not exist')
         for i, sub_dir in enumerate(sub_dirs):
@@ -51,40 +55,39 @@ class PicklePath:
         self.sub_dirs = sub_dirs
 
         os.makedirs(self.abs_path, exist_ok=True)
+
         # for path in sub_dirs:
         #     os.makedirs(path, exist_ok=True)
 
-    def init_logger(self):
-        # log_level = config.OPT_STUDY_LOGGER_LEVEL
+    def get_logger(self):
         name = '.'.join(os.path.normpath(self.rel_path).split(os.path.sep))
         logger = logging.getLogger(name)
-        logger.setLevel(config.OPT_STUDY_LOGGER_LEVEL)
-        # define handlers
-        # if not logger.handlers:
-        # file handler
-        fileHandler = logging.FileHandler(self.log_path)
-        logger.addHandler(fileHandler)
-        # stream handler
-        streamHandler = logging.StreamHandler()  # sys.stdout)
-        streamHandler.setLevel(config.OPT_STUDY_LOGGER_LEVEL)
-        if streamHandler not in logger.handlers:
-            logger.addHandler(streamHandler)
-        # define filter
-        # filt = DispNameFilter(self.optName)
-        # logger.addFilter(filt)
-        # define formatter
+        logger.propagate = False
+        logger.setLevel(self.log_level)
+        if logger.handlers:
+            logger.handlers.clear()
+
+        # FORMATTER
         formatter = MultiLineFormatter(
             '%(asctime)s :: %(levelname)-8s :: %(name)s :: %(message)s',
             "%m-%d %H:%M:%S")
-        #     f'%(asctime)s :: %(levelname)-8s :: {self.optName} :: %(message)s')
-        #     f'%(asctime)s.%(msecs)03d :: %(levelname)-8s :: {self.optName} :: %(message)s')
-        #     '%(name)s :: %(levelname)-8s :: %(message)s')
+
+        # FILE
+        fileHandler = logging.FileHandler(self.log_path)
+        logger.addHandler(fileHandler)
         fileHandler.setFormatter(formatter)
+
+        # FILTER
+        # filt = DispNameFilter(self.optName)
+        # logger.addFilter(filt)
+
+        # STREAM
+        streamHandler = logging.StreamHandler()  # sys.stdout)
+        logger.addHandler(streamHandler)
         streamHandler.setFormatter(formatter)
-        intro_str = 'INITIALIZED: logger'
-        logger.info('~' * len(intro_str))
-        logger.info(intro_str)
-        self.logger = logger
+
+        return logger
+
 
     def save_self(self):
         self.saveNumpyFile(self.cp_path, self)
@@ -106,6 +109,10 @@ class PicklePath:
             loaded_self = self.load_self()
         # UPDATE
         self.__dict__.update(loaded_self.__dict__)
+        # log
+        self.logger.debug('\tUPDATED DICTONARY')
+        for key, val in self.__dict__.items():
+            self.logger.debug(f'\t\t{key}: {val}')
 
     def check_saves(self, print_info=False):
         if print_info:

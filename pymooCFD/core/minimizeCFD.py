@@ -70,7 +70,9 @@ class MinimizeCFD(PicklePath):
             yes = yes_or_no(question)
             if yes:
                 os.rmdir(run_path)
-        self.opt_runs.append(OptStudy(alg, prob, run_path=run_path))
+        opt_run = OptStudy(alg, prob, run_path=run_path)
+        self.opt_runs.append(opt_run)
         self.save_self()
+        return opt_run
 
         # self.algorithm = CFDAlgorithm(sampling, crossover, mutation)

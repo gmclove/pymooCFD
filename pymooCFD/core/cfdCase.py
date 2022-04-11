@@ -400,7 +400,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         return os.path.join(self.abs_path, 'meshStudy')
 
     # @property
-    # def cpPath(self):
+    # def cp_path(self):
     #     return os.path.join(self.abs_path, 'case.npy')
 
     ### Job Lines ###
@@ -556,15 +556,15 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
     #######################
     #    CHECKPOINTING    #
     #######################
-    # def saveCP(self):
-    #     cpPath = self.cpPath.replace('.npy', '')
+    # def save_self(self):
+    #     cp_path = self.cp_path.replace('.npy', '')
     #     try:
-    #         np.save(cpPath + '.temp.npy', self)
-    #         if os.path.exists(cpPath + '.npy'):
-    #             os.rename(cpPath + '.npy', cpPath + '.old.npy')
-    #         os.rename(cpPath + '.temp.npy', cpPath + '.npy')
-    #         if os.path.exists(cpPath + '.old.npy'):
-    #             os.remove(cpPath + '.old.npy')
+    #         np.save(cp_path + '.temp.npy', self)
+    #         if os.path.exists(cp_path + '.npy'):
+    #             os.rename(cp_path + '.npy', cp_path + '.old.npy')
+    #         os.rename(cp_path + '.temp.npy', cp_path + '.npy')
+    #         if os.path.exists(cp_path + '.old.npy'):
+    #             os.remove(cp_path + '.old.npy')
     #     except FileNotFoundError as err:
     #         self.logger.error(str(err))
 
@@ -576,8 +576,8 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                 self.logger.warning(
                     'CASE DIRECTORY CHANGED BETWEEN CHECKPOINTS')
                 self.logger.debug(str(cp.rel_path) + ' -> ' + str(self.rel_path))
-            if cp.cpPath != self.cpPath:
-                self.logger.warning(f'{cp.cpPath} != {self.cpPath}')
+            if cp.cp_path != self.cp_path:
+                self.logger.warning(f'{cp.cp_path} != {self.cp_path}')
             if cp.meshSF != self.meshSF:
                 self.logger.warning(f'{cp.meshSF} != {self.meshSF}')
                 self.logger.warning(
@@ -589,7 +589,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                     'Mesh size factor changed, mesh generated, self.f and self.numElem set to None')
                 cp.f = None
             cp.abs_path = self.abs_path
-            # cp.cpPath = self.cpPath
+            # cp.cp_path = self.cp_path
             # cp.meshStudyDir = self.meshStudyDir
             # cp.meshSFs = self.meshSFs
             cp.base_case_path = self.base_case_path
@@ -744,7 +744,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
 
     # Calling destructor
     # def __del__(self):
-    #     # self.saveCP()
+    #     # self.save_self()
     #     # shutil.rmtree(caseDir)
     #     self.logger.info('EXITED')
     #     print('EXITED:', self.abs_path)
@@ -846,7 +846,7 @@ class YALES2Case(CFDCase):
     def solve(self):
         super().solve()
         self.wallTime = self.getWallTime()
-        self.saveCP()
+        self.save_self()
 
     def getWallTime(self):
         search_str = os.path.join(self.abs_path, 'solver01_rank*.log')
