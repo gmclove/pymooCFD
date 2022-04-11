@@ -82,7 +82,7 @@ class RANS_k_eps(FluentCase):
 
     def _postProc(self):
         # residuals_dict = self.residuals_file_to_dict(self.datPath)
-        dat = np.genfromtxt('residuals.dat')
+        dat = np.genfromtxt(self.datPath)
         if dat[-1, 0] < 2000:
             self.logger.error('LESS THAN 2000 ITERATIONS PREFORMED')
         # avgs = []
