@@ -72,7 +72,7 @@ class RANS_k_eps(FluentCase):
              "#SBATCCH --constraint='ib&sandybridge|haswell_1|haswell_2'",
              '#SBATCH --cpus-per-task=2',
              '#SBATCH --ntasks=10',
-             '#SBATCH --time=00:30:00',
+             '#SBATCH --time=10:00:00',
              '#SBATCH --mem-per-cpu=2G',
              '#SBATCH --job-name=RANSroom',
              '#SBATCH --output=slurm.out',
