@@ -12,6 +12,7 @@ from pymooCFD.core.optStudy import OptStudy
 from pymooCFD.core.pymooBase import callback, display
 from pymooCFD.problems.rans_k_eps import BaseCase
 
+
 class RANSConstOpt(OptStudy):
     def __init__(self, algorithm, BaseCase,
                  *args, **kwargs
@@ -25,13 +26,14 @@ class RANSConstOpt(OptStudy):
                          *args, **kwargs
                          )
 
+
 MyOptStudy = RANSConstOpt
 
 #####################################
 #### Genetic Algorithm Criteria #####
 #####################################
-n_gen = 2
-pop_size = 3
+n_gen = 100
+pop_size = 50
 n_offsprings = int(pop_size * (1 / 2))  # = num. of evaluations each generation
 
 ###################
