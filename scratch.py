@@ -3,6 +3,10 @@
 # @Last modified by:   glove
 # @Last modified time: 2021-12-14T15:45:19-05:00
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> devel
 class A:
     a = 1
 

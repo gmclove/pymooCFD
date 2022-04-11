@@ -311,6 +311,7 @@ class OptStudy(PicklePath):
     #######################
     #    CHECKPOINTING    #
     #######################
+<<<<<<< HEAD
     # def loadCP(self, hasTerminated=False):
     #     if os.path.exists(self.cp_path + '.old'):
     #         os.rename(self.cp_path + '.old', self.cp_path + '.npy')
@@ -338,6 +339,35 @@ class OptStudy(PicklePath):
     #         self.algorithm.has_terminated = hasTerminated
     #     except AttributeError as err:
     #         self.logger.error(err)
+=======
+    def loadCP(self, hasTerminated=False):
+        if os.path.exists(self.CP_path + '.old'):
+            os.rename(self.CP_path + '.old', self.CP_path + '.npy')
+        cp, = np.load(self.CP_path + '.npy', allow_pickle=True).flatten()
+
+        # logging
+        self.logger.info(f'\tCHECKPOINT LOADED: {self.CP_path}.npy')
+        self.logger.debug('\tRESTART DICTONARY')
+        for key in self.__dict__:
+            self.logger.debug(f'\t\t{key}: {self.__dict__[key]}')
+        self.logger.debug('\tCHECKPOINT DICTONARY')
+        for key in cp.__dict__:
+            self.logger.debug(f'\t\t{key}: {cp.__dict__[key]}')
+
+        if cp.algorithm is not None:
+            self.logger.debug('\tOPTIMIZATION ALGORITHM DICTONARY:')
+            for key, val in cp.algorithm.__dict__.items():
+                self.logger.debug(f'\t\t{key}: {val}')
+        #### TEMPORARY CODE ##########
+        # TRANSITION BETWEEN CHECKPOINTS
+        self.__dict__.update(cp.__dict__)
+        # only necessary if for the checkpoint the termination criterion has been met
+        try:
+            self.algorithm.has_terminated = hasTerminated
+        except AttributeError as err:
+            self.logger.error(err)
+
+>>>>>>> devel
 
     #
     # def save_self(self):  # , alg=None):
@@ -742,20 +772,29 @@ class OptStudy(PicklePath):
         return label
 
     @staticmethod
-    def loadCases(directory):
+    def loadCase(case_path):
+        caseCP = os.path.join(case_path, 'case.npy')
+        try:
+            case, = np.load(caseCP, allow_pickle=True).flatten()
+            return case
+        except FileNotFoundError as err:
+            print(err)
+
+
+    @classmethod
+    def loadCases(cls, directory):
         '''
         Parameter: directory - searches every directory in given directory for
                                 case.npy file and tries to load if it exists.
         '''
+
         cases = []
         ents = os.listdir(directory)
         for ent in ents:
-            ent_path = os.path.join(directory, ent)
-            if os.path.isdir(ent_path):
-                caseCP = os.path.join(ent_path, 'case.npy')
-                if os.path.exists(caseCP):
-                    case, = np.load(caseCP, allow_pickle=True).flatten()
-                    cases.append(case)
+            case_path = os.path.join(directory, ent)
+            if os.path.isdir(case_path):
+                case = cls.loadCase(case_path)
+                cases.append(case)
         return cases
 
     #####################
