@@ -765,8 +765,7 @@ class OptStudy:
         for ent in ents:
             case_path = os.path.join(directory, ent)
             if os.path.isdir(case_path):
-                case_cp = os.path.join(case_path, 'case.npy')
-                case = cls.loadCase(case_cp)
+                case = cls.loadCase(case_path)
                 cases.append(case)
         return cases
 
