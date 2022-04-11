@@ -334,7 +334,6 @@ class OptStudy:
         #### TEMPORARY CODE ##########
         # TRANSITION BETWEEN CHECKPOINTS
         self.__dict__.update(cp.__dict__)
-        self.__class__.__dict__.update(cp.__class__.__dict__)
         # only necessary if for the checkpoint the termination criterion has been met
         try:
             self.algorithm.has_terminated = hasTerminated
