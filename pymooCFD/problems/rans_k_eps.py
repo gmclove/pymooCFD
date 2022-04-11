@@ -9,8 +9,8 @@ class RANS_k_eps(FluentCase):
     n_var = 2
     var_labels = ['Turbulent Viscosity Constant', 'Number of Iterations']
     var_type = ['real', 'int']
-    xl = [0.09 * 0.8, 1] #4_000]
-    xu = [0.09 * 1.2, 100] #30_000]
+    xl = [0.09 * 0.8, 4_000]
+    xu = [0.09 * 1.2, 30_000]
 
     obj_labels = ['Average of Residuals', 'Wall Time']
     n_obj = 2
