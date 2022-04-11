@@ -744,20 +744,26 @@ class OptStudy:
         return label
 
     @staticmethod
-    def loadCases(directory):
+    def loadCase(case_path):
+        caseCP = os.path.join(case_path, 'case.npy')
+        if os.path.exists(caseCP):
+            case, = np.load(caseCP, allow_pickle=True).flatten()
+        return case
+
+    @classmethod
+    def loadCases(cls, directory):
         '''
         Parameter: directory - searches every directory in given directory for
                                 case.npy file and tries to load if it exists.
         '''
+
         cases = []
         ents = os.listdir(directory)
         for ent in ents:
-            ent_path = os.path.join(directory, ent)
-            if os.path.isdir(ent_path):
-                caseCP = os.path.join(ent_path, 'case.npy')
-                if os.path.exists(caseCP):
-                    case, = np.load(caseCP, allow_pickle=True).flatten()
-                    cases.append(case)
+            case_path = os.path.join(directory, ent)
+            if os.path.isdir(case_path):
+                case = cls.loadCase(case_path)
+                cases.append(case)
         return cases
 
     #####################
