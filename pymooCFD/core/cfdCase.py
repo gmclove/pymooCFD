@@ -624,6 +624,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
             cp.baseCaseDir = self.baseCaseDir
             # cp.logger = self.getLogger()
             self.__dict__.update(cp.__dict__)
+            self.__class__.__dict__.update(cp.__class__.__dict__)
             self.logger.info(f'CHECKPOINT LOADED - {self.cpPath}')
         else:
             self.logger.info(f'Given Parameters: {self._x}')

@@ -333,8 +333,8 @@ class OptStudy:
                 self.logger.debug(f'\t\t{key}: {val}')
         #### TEMPORARY CODE ##########
         # TRANSITION BETWEEN CHECKPOINTS
-
         self.__dict__.update(cp.__dict__)
+        self.__class__.__dict__.update(cp.__class__.__dict__)
         # only necessary if for the checkpoint the termination criterion has been met
         try:
             self.algorithm.has_terminated = hasTerminated
@@ -765,8 +765,7 @@ class OptStudy:
         for ent in ents:
             case_path = os.path.join(directory, ent)
             if os.path.isdir(case_path):
-                case_cp = os.path.join(case_path, 'case.npy')
-                case = cls.loadCase(case_cp)
+                case = cls.loadCase(case_path)
                 cases.append(case)
         return cases
 
