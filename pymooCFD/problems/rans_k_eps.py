@@ -32,6 +32,7 @@ class RANS_k_eps(FluentCase):
             '/file/read rans_k-eps.cas.h5',
             '/define/models/viscous/ke-standard y',
             f'(rpsetvar\' kecmu {self.x[0]})',
+            f'/solve/iterate {self.x[1]}',
             ';save residuals',
             '/solve/initialize/compute-defaults/velocity-inlet inlet',
             '/solve/initialize/initialize-flow',
