@@ -24,7 +24,7 @@ class RANS_k_eps(FluentCase):
         super().__init__(caseDir, x,
                          jobFile='jobslurm.sh',
                          inputFile='exec.jou',
-                         datFile='residuals.txt',
+                         datFile='residuals.dat',
                          *args, **kwargs)
 
     def _preProc(self):
@@ -58,7 +58,7 @@ class RANS_k_eps(FluentCase):
             ')',
             ')',
             ') )',
-            '(output-port (open-output-file "residual_2000_e387_udf.dat")))',
+            '(output-port (open-output-file "residuals.dat")))',
             '(writefile output-port)',
             '(close-output-port output-port))',
             '/exit y'
