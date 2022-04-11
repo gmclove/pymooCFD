@@ -4,7 +4,7 @@ from pymooCFD.core.cfdCase import FluentCase
 
 
 class RANS_k_eps(FluentCase):
-    baseCaseDir = 'base_cases/rans_k-eps_3D-room'
+    base_case_path = 'base_cases/rans_k-eps_3D-room'
 
     n_var = 2
     var_labels = ['Turbulent Viscosity Constant', 'Number of Iterations']

@@ -21,7 +21,7 @@ class MeshStudy: #(CFDCase):
                  size_factors = np.around(np.arange(0.5, 1.5, 0.1), decimals=2)
                  ):
         super().__init__()
-        self.folder = os.path.join(cfd_case.caseDir, 'meshStudy')
+        self.folder = os.path.join(cfd_case.abs_path, 'meshStudy')
         os.mkdir(self.folder)
         # os.makedirs(self.folder,)
         self.logger = self.getLogger()
@@ -107,8 +107,8 @@ class MeshStudy: #(CFDCase):
                 self.logger.info(
                     f'\t\t\t{msCase} already has number of elements: {msCase.numElem}')
             # sfToElem.append([msCase.meshSF, msCase.numElem])
-            saveTxt(msCase.caseDir, 'numElem.txt', [msCase.numElem])
-            study.append([msCase.caseDir, str(
+            saveTxt(msCase.abs_path, 'numElem.txt', [msCase.numElem])
+            study.append([msCase.abs_path, str(
                 msCase.numElem), str(msCase.meshSF)])
             # var.append(msCase.x)
         study = np.array(study)
@@ -135,7 +135,7 @@ class MeshStudy: #(CFDCase):
 
     def plot(self):
         self.logger.info('\tPLOTTING MESH STUDY')
-        _, tail = os.path.split(self.base_case.caseDir)
+        _, tail = os.path.split(self.base_case.abs_path)
         a_numElem = np.array([case.numElem for case in self.cases])
         a_sf = np.array([case.meshSF for case in self.cases])
         msObj = np.array([case.f for case in self.cases])
@@ -216,7 +216,7 @@ class MeshStudy: #(CFDCase):
         # Filters
         # Filters added to logger do not propogate up logger hierarchy
         # Filters added to handlers do propogate
-        # filt = DispNameFilter(self.caseDir)
+        # filt = DispNameFilter(self.abs_path)
         # logger.addFilter(filt)
         # File Handle
         logFile = os.path.join(self.folder, f'{tail}.log')

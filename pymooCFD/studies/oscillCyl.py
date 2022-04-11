@@ -16,7 +16,7 @@ from pymooCFD.core.cfdCase import YALES2Case  # CFDCase
 
 
 class OscillCylinder(YALES2Case):
-    baseCaseDir = 'base_cases/osc-cyl_base'
+    base_case_path = 'base_cases/osc-cyl_base'
     ####### Define Design Space #########
     n_var = 2
     var_labels = ['Amplitude [1/s]', 'Frequency [1/s]']
@@ -35,8 +35,8 @@ class OscillCylinder(YALES2Case):
     procLim = 60
     solverExecCmd = ['mpirun', '-n', str(nProc), '2D_cylinder']
 
-    def __init__(self, caseDir, x):
-        super().__init__(caseDir, x,
+    def __init__(self, case_path, x):
+        super().__init__(case_path, x,
                          meshFile='2D_cylinder.msh22',
                          datFile='ics_temporals.txt',
                          jobFile='jobslurm.sh',
@@ -50,7 +50,7 @@ class OscillCylinder(YALES2Case):
                          )
 
     def _execDone(self):
-        fPath = os.path.join(self.caseDir, 'solver01_rank00.log')
+        fPath = os.path.join(self.abs_path, 'solver01_rank00.log')
         if os.path.exists(fPath):
             with open(fPath, 'rb') as f:
                 print(f)
@@ -62,7 +62,7 @@ class OscillCylinder(YALES2Case):
                     f.seek(0)
                 last_line = f.readline().decode()
             return bool('in destroy_mpi' in last_line)
-        # dumpDir = os.path.join(self.caseDir, 'dump')
+        # dumpDir = os.path.join(self.abs_path, 'dump')
         # finalSolnPath = os.path.join(dumpDir, '2D_cyl.sol000400.xmf')
         # if os.path.isfile(finalSolnPath) and os.path.isfile(self.datPath):
         #     return True
@@ -373,7 +373,7 @@ class OscillCylinderOpt(OptStudy):
                  # *args, **kwargs
                  ):
         super().__init__(algorithm, problem, BaseCase,
-                         # baseCaseDir='base_cases/osc-cyl_base',
+                         # base_case_path='base_cases/osc-cyl_base',
                          # optDatDir='cyl-opt_run',
                          # *args, **kwargs
                          )

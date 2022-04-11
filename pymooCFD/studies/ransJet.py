@@ -23,7 +23,7 @@ from pymooCFD.util.gridInterp import GridInterp2D, GridInterp3D, radialAvg
 
 
 class RANSJet(FluentCase):
-    baseCaseDir = 'base_cases/rans_jet-base'
+    base_case_path = 'base_cases/rans_jet-base'
     ###################################################
     #      High Quality Simulation Interpolation      #
     ###################################################
@@ -125,8 +125,8 @@ class RANSJet(FluentCase):
     # solverExecCmd = ['C:\"Program Files"\"Ansys Inc"\v211\fluent\ntbin\win64\fluent.exe',
     # '2ddp', f'-t{nProc}', '-g', '-i', 'jet_rans-axi_sym.jou', '>', 'run.out']
 
-    def __init__(self, caseDir, x):
-        super().__init__(caseDir, x,
+    def __init__(self, case_path, x):
+        super().__init__(case_path, x,
                          meshSF=0.4,
                          meshSFs=np.append(
                              np.around(np.arange(0.3, 1.6, 0.1), decimals=2),
@@ -493,7 +493,7 @@ class RANSJet(FluentCase):
                    self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
         plt.colorbar()
         plt.title('RANS - Mass Fraction of Scalar')
-        path = os.path.join(self.caseDir, 'RANS-phi-grid.png')
+        path = os.path.join(self.abs_path, 'RANS-phi-grid.png')
         plt.savefig(path)
         plt.clf()
         # phi difference plot
@@ -502,7 +502,7 @@ class RANSJet(FluentCase):
                    self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
         plt.colorbar()
         plt.title('RANS DNS Difference - Mass Fraction of Scalar')
-        path = os.path.join(self.caseDir, 'diff-phi-grid.png')
+        path = os.path.join(self.abs_path, 'diff-phi-grid.png')
         plt.savefig(path)
         plt.clf()
         # uMag grid plot
@@ -510,7 +510,7 @@ class RANSJet(FluentCase):
                    self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
         plt.colorbar()
         plt.title('RANS - Velocity Magnitude')
-        path = os.path.join(self.caseDir, 'RANS-uMag-grid.png')
+        path = os.path.join(self.abs_path, 'RANS-uMag-grid.png')
         plt.savefig(path)
         plt.clf()
         # uMag difference plot
@@ -519,7 +519,7 @@ class RANSJet(FluentCase):
                    self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
         plt.colorbar()
         plt.title('RANS DNS Difference - Velocity Magnitude')
-        path = os.path.join(self.caseDir, 'diff-uMag-grid.png')
+        path = os.path.join(self.abs_path, 'diff-uMag-grid.png')
         plt.savefig(path)
         plt.clf()
 

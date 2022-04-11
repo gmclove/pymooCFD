@@ -22,7 +22,7 @@ from pymooCFD.core.optStudy import OptStudy
 
 
 class CompDistSLURM_YALES2(CompDistSLURM):
-    baseCaseDir = 'base_cases/osc-cyl_base'
+    base_case_path = 'base_cases/osc-cyl_base'
     inputFile = '2D_cylinder.in'
     jobFile = 'jobslurm.sh'
     datFile = 'FORCES_temporal.txt'
@@ -38,9 +38,9 @@ class CompDistSLURM_YALES2(CompDistSLURM):
     #
     # solveExternal = True
     # solverExecCmd = ['sbatch', '--wait', 'jobslurm.sh']
-    # def __init__(self, baseCaseDir, caseDir, x,
+    # def __init__(self, base_case_path, caseDir, x,
     #              *args, **kwargs):
-    #     super().__init__(baseCaseDir, caseDir, x,
+    #     super().__init__(base_case_path, caseDir, x,
     #                      *args, **kwargs)
 
     def _preProc(self):
@@ -152,7 +152,7 @@ class CompDistOpt(OptStudy):
         super().__init__(algorithm, BaseCase,
                          # optName='CompDistSOO-test',
                          n_opt=20,
-                         # baseCaseDir='base_cases/osc-cyl_base',
+                         # base_case_path='base_cases/osc-cyl_base',
                          # optDatDir='cyl-opt_run',
                          # *args, **kwargs
                          )

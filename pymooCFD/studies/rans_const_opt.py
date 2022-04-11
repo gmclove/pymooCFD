@@ -20,7 +20,7 @@ class RANSConstOpt(OptStudy):
                          # optName='',
                          # runDir='run'
                          # n_opt = 20,
-                         # baseCaseDir='base_cases/osc-cyl_base',
+                         # base_case_path='base_cases/osc-cyl_base',
                          # optDatDir='cyl-opt_run',
                          *args, **kwargs
                          )

@@ -10,7 +10,7 @@ from pymooCFD.core.cfdCase import YALES2Case
 
 
 class OscillCylinder(YALES2Case):
-    baseCaseDir = 'base_cases/osc-cyl_base'
+    base_case_path = 'base_cases/osc-cyl_base'
     ####### Define Design Space #########
     n_var = 2
     var_labels = ['Amplitude [radians/s]', 'Frequency [cycles/s]']

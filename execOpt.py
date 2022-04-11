@@ -45,7 +45,7 @@ def main():
     #                        np.arange(0.3, 1.6, 0.1), decimals=2)
     #optStudy.BaseCase = BaseCase
     # optStudy.saveCP()
-    #optStudy.testCase.caseDir = os.path.join(optStudy.runDir, 'test_case')
+    #optStudy.testCase.abs_path = os.path.join(optStudy.runDir, 'test_case')
     # optStudy.saveCP()
 
     # optStudy.testCase.meshStudy()

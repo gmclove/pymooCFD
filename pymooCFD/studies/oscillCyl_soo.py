@@ -75,7 +75,7 @@ class OscillCylinderOptSOO(OptStudy):
         super().__init__(algorithm, problem, BaseCase,
                          optName='SOO-test',
                          n_opt=20,
-                         # baseCaseDir='base_cases/osc-cyl_base',
+                         # base_case_path='base_cases/osc-cyl_base',
                          # optDatDir='cyl-opt_run',
                          *args, **kwargs)
 

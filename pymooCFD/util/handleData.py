@@ -108,7 +108,7 @@ def compressDir(dirToComp, archDir):
 #     for i, x in enumerate(X):
 #         preProc(indDirs[i], x)
 #     # for indDir in indDirs:
-#     #     copy_tree(baseCaseDir, indDir)
+#     #     copy_tree(base_case_path, indDir)
 #
 #     ###### RUN GENERATION ######
 #     # from pymooCFD.setupCFD import runGen

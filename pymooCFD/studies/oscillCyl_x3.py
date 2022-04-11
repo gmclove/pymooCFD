@@ -24,7 +24,7 @@ from pymooCFD.core.cfdCase import YALES2Case  # CFDCase
 
 
 class OscillCylinder(OscCylX2):
-    baseCaseDir = 'base_cases/osc-cyl_base'
+    base_case_path = 'base_cases/osc-cyl_base'
     ####### Define Design Space #########
     n_var = 3
     var_labels = np.append(OscCylX2.var_labels, 'Reynolds Number')
@@ -131,7 +131,7 @@ class OscillCylinderOpt(OptStudy):
         super().__init__(algorithm, BaseCase,
                          optName='OscCylX3',
                          # n_opt = 20,
-                         # baseCaseDir='base_cases/osc-cyl_base',
+                         # base_case_path='base_cases/osc-cyl_base',
                          # optDatDir='cyl-opt_run',
                          # *args, **kwargs
                          )

@@ -132,15 +132,15 @@ class CFDCaseDB(PyClassDB):
             shutil.copytree(obj_dir, DB_dir)
         except FileNotFoundError as err:
             self.logger.error(str(err))
-            self.logger.warning(f'SKIPPED: COPY {obj.caseDir} -> {self.location}')
+            self.logger.warning(f'SKIPPED: COPY {obj.abs_path} -> {self.location}')
         # def get_version(ent):
         #     return int(ent[-2:])
         # ents.sort(key = get_version)
         try:
-            copy_and_overwrite(obj.caseDir, DB_dir)
+            copy_and_overwrite(obj.abs_path, DB_dir)
         except FileNotFoundError as err:
             self.logger.error(str(err))
-            self.logger.warning(f'SKIPPED: COPY {obj.caseDir} -> {self.location}')
+            self.logger.warning(f'SKIPPED: COPY {obj.abs_path} -> {self.location}')
 
     def stochasticSave(self, obj):
         pass

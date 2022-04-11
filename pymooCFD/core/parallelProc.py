@@ -56,7 +56,7 @@
 #                             override solve() method with python CFD solver or \
 #                             add solverExecCmd to CFDCase object.')
 #         else:
-#             subprocess.run(case.solverExecCmd, cwd=case.caseDir,
+#             subprocess.run(case.solverExecCmd, cwd=case.abs_path,
 #                            stdout=subprocess.DEVNULL)
 #         # if case._execDone():
 #         #     case.logger.info('RUN COMPLETE')

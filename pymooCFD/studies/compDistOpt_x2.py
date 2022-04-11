@@ -24,7 +24,7 @@ from pymooCFD.core.optStudy import OptStudy
 
 
 class CompDistSLURM(CFDCase):
-    baseCaseDir = 'base_cases/rans-jet_base'
+    base_case_path = 'base_cases/rans-jet_base'
     inputFile = 'jet_rans-axi_sym.jou'
     jobFile = 'jobslurm.sh'
     datFile = 'jet_rans-axi_sym.cgns'
@@ -119,7 +119,7 @@ class CompDistOpt(OptStudy):
         super().__init__(algorithm, BaseCase,
                          # optName='CompDistSOO-test',
                          n_opt=20,
-                         # baseCaseDir='base_cases/osc-cyl_base',
+                         # base_case_path='base_cases/osc-cyl_base',
                          # optDatDir='cyl-opt_run',
                          # *args, **kwargs
                          )

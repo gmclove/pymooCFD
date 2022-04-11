@@ -1,65 +1,76 @@
-from pymooCFD.core.pymooBase import CFDProblem_GA, CFDAlgorithm
+from pymooCFD.core.pymooBase import CFDGeneticProblem, CFDGeneticAlgorithm
 from pymooCFD.core.optStudy import OptStudy
 from pymooCFD.core.picklePath import PicklePath
+from pymooCFD.util.sysTools import yes_or_no
+
+from pymoo.factory import get_sampling, get_crossover, get_mutation
+from pymoo.operators.mixed_variable_operator import MixedVariableSampling, MixedVariableMutation, MixedVariableCrossover
+
+import os
 
 
 class MinimizeCFD(PicklePath):
     def __init__(self, CFDCase,
-                 algorithm=CFDAlgorithm(), #Problem,
-                 dir_path=None):
+                 # xl, xu,
+                 CFDGeneticAlgorithm=CFDGeneticAlgorithm,
+                 # CFDGeneticProblem=CFDGeneticProblem,
+                 dir_path=None,
+                 **kwargs
+                 ):
         if dir_path is None:
-            dir_path = 'optStudy-'+self.__class__.__name__
+            dir_path = 'optStudy-'+CFDCase.__name__
         super().__init__(dir_path)
         self.CFDCase = CFDCase
         ###################
         #    OPERATORS    #
         ###################
-        from pymoo.factory import get_sampling, get_crossover, get_mutation
-        from pymoo.operators.mixed_variable_operator import MixedVariableSampling, MixedVariableMutation, MixedVariableCrossover
+        # self.init_algorithm
+        # self.problem = CFDGeneticProblem(CFDCase, **kwargs)
+        self.CFDGeneticAlgorithm = CFDGeneticAlgorithm
+        # self.CFDGeneticProblem = CFDGeneticProblem
 
-        sampling = MixedVariableSampling(CFDCase.var_type, {
+        self.opt_runs = [] #OptStudy(self.get_algorithm(), self.get_problem(), run_path='run00')]
+        # self.save_self()
+
+    def get_problem(self, xl, xu, **kwargs):
+        return CFDGeneticProblem(self.CFDCase, xl, xu, **kwargs)
+
+    # def get_algorithm(self, **kwargs):
+    #     alg = CFDGeneticAlgorithm(**kwargs)
+    #     return alg
+
+    def get_algorithm(self, **kwargs):
+        sampling = MixedVariableSampling(self.CFDCase.var_type, {
             "real": get_sampling("real_lhs"),  # "real_random"),
             "int": get_sampling("int_random")
         })
 
-        crossover = MixedVariableCrossover(CFDCase.var_type, {
+        crossover = MixedVariableCrossover(self.CFDCase.var_type, {
             "real": get_crossover("real_sbx", prob=1.0, eta=3.0),
             "int": get_crossover("int_sbx", prob=1.0, eta=3.0)
         })
 
-        mutation = MixedVariableMutation(CFDCase.var_type, {
+        mutation = MixedVariableMutation(self.CFDCase.var_type, {
             "real": get_mutation("real_pm", eta=3.0),
             "int": get_mutation("int_pm", eta=3.0)
         })
-        algorithm.sampling = sampling
-        algorithm.crossover = crossover
-        algorithm.mutation = mutation
-        self.algorithm = algorithm
+        return CFDGeneticAlgorithm(sampling, crossover, mutation)
 
-        self.problem = CFDProblem_GA(CFDCase)
 
-        self.runs = [OptStudy(algorithm, CFDCase, runDir='run00')]
-        # self.save_self()
-
-    def new_problem(self):
-        self.logger.info('INITIALIZING NEW OPTIMIZATION PROBLEM')
-        self.problem = CFDProblem_GA(CFDCase)
-        # self.save_self()
-        return self.problem
-
-    def new_run(self, algorithm=None, problem=None, run_dir=None):
-        if problem is None:
-            problem = self.problem
-        if algorithm is None:
-            algorithm = self.algorithm
+    def new_run(self, alg, prob, run_dir=None):  # algorithm=None, problem=None,
+        # if problem is None:
+        #     problem = self.CFDGeneticProblem(self.CFDCase, **kwargs)
+        # if algorithm is None:
+        #     algorithm = self.algorithm
         if run_dir is None:
-            run_dir = 'run'+str(len(self.runs)).zfill(2)
-        if run_dir in os.listdir(self.abs_path):
+            run_dir = 'run'+str(len(self.opt_runs)).zfill(2)
+        run_path = os.path.join(self.abs_path, run_dir)
+        if run_path in os.listdir(self.abs_path):
             question = 'Run directory already exists. Overwrite?'
             yes = yes_or_no(question)
             if yes:
-                os.rmdir(run_dir)
-        self.runs.append(OptStudy(algorithm, problem, runDir='run00'))
+                os.rmdir(run_path)
+        self.opt_runs.append(OptStudy(alg, prob, run_path=run_path))
         self.save_self()
 
         # self.algorithm = CFDAlgorithm(sampling, crossover, mutation)

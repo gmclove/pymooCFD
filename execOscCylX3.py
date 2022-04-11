@@ -88,11 +88,11 @@ def main():
     # for case in cases:
     # case.meshStudy()
     # case.meshFile = '2D_cylinder.msh22'
-    # case.meshPath = os.path.join(case.caseDir, case.meshFile)
+    # case.meshPath = os.path.join(case.abs_path, case.meshFile)
     # case.saveCP()
     # for msCase in case.msCases:
     #   print(msCase.f)
-    #  path = os.path.join(msCase.caseDir, 'obj.txt')
+    #  path = os.path.join(msCase.abs_path, 'obj.txt')
     # msCase.f = np.loadtxt(path)
     # case.genMeshStudy()
     # case.meshStudy()
@@ -117,7 +117,7 @@ def main():
     #                        np.arange(0.3, 1.6, 0.1), decimals=2)
     #optStudy.BaseCase = BaseCase
     # optStudy.saveCP()
-    #optStudy.testCase.caseDir = os.path.join(optStudy.runDir, 'test_case')
+    #optStudy.testCase.abs_path = os.path.join(optStudy.runDir, 'test_case')
     # optStudy.saveCP()
 
 #    optStudy.testCase.meshStudy()

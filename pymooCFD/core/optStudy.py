@@ -19,76 +19,76 @@ import copy
 from pymoo.visualization.scatter import Scatter
 from pymoo.core.problem import Problem
 from pymoo.core.evaluator import set_cv
-from pymooCFD.core.pymooBase import CFDProblem_GA
+from pymooCFD.core.pymooBase import CFDGeneticProblem
 from pymooCFD.util.sysTools import emptyDir, copy_and_overwrite, saveTxt, yes_or_no
 from pymooCFD.util.loggingTools import MultiLineFormatter, DispNameFilter
+from pymooCFD.core.picklePath import PicklePath
 import pymooCFD.config as config
 from pymoo.util.misc import termination_from_tuple
 
 
 class OptStudy(PicklePath):
     def __init__(self, algorithm, problem,
-                 runDir='run-defualt',
+                 run_path='run-defualt',
                  n_opt=20,
                  # restart=True,
                  # optDatDir='opt_run',
                  # optName=None,
-                  # n_CP=10,
+                 # n_CP=10,
                  # CP_fName='checkpoint',
                  # plotsDir='plots', archiveDir='archive', mapGen1Dir='mapGen1',
-                 # runDir='run',
                  # procLim=os.cpu_count(),
                  # var_labels=None, obj_labels=None,
                  # client=None,
                  # *args, **kwargs
                  ):
-        super().__init__(path=runDir)
+        super().__init__(dir_path=run_path)
         #######################################
         #    ATTRIBUTES NEEDED FOR RESTART    #
         #######################################
         # self.logger = self.getLogger()
-        self.logger.info(f'OPTIMIZATION STUDY- {self.runDir}')
-        # self.CP_path = os.path.join(self.optDatDir, f'{self.optName}-CP')
+        self.logger.info(f'OPTIMIZATION STUDY- {self.rel_path}')
+        # self.cp_path = os.path.join(self.optDatDir, f'{self.optName}-CP')
         self.logger.info(f'\tCheckpoint Path: {self.cp_path}')
 
         # if not restart:
         # if os.path.exists(self.optDatDir):
-        #     if os.path.exists(self.CP_path):
+        #     if os.path.exists(self.cp_path):
         #         self.loadCP()
-        #         self.logger.info('RESTARTED FROM', self.CP_path)
+        #         self.logger.info('RESTARTED FROM', self.cp_path)
         #         return
         #     else:
-        #         question = f'{self.CP_path} does not exist.\nOVERWRITE {self.optDatDir}?'
+        #         question = f'{self.cp_path} does not exist.\nOVERWRITE {self.optDatDir}?'
         #         overwrite = yes_or_no(question)
         #         if overwrite:
         #             os.removedirs(self.optDatDir)
         #             os.makedirs(optDatDir, exist_ok=True)
         #         else:
-        #             question = f'{self.CP_path} does not exist.\n?'
+        #             question = f'{self.cp_path} does not exist.\n?'
         #             overwrite = yes_or_no(question)
 
-        if os.path.isdir(self.optDatDir):
-            try:
-                self.loadCP()
-                self.logger.info('RESTARTED FROM CHECKPOINT')
-                return
-            except FileNotFoundError:
-                question = f'\n{self.CP_path} does not exist.\nEMPTY {self.optDatDir} DIRECTORY?'
-                overwrite = yes_or_no(question)
-                if overwrite:
-                    shutil.rmtree(self.optDatDir)
-                    os.mkdir(self.optDatDir)
-                    self.logger.info(f'EMPTIED - {self.optDatDir}')
-                else:
-                    self.logger.info(f'KEEPING FILES - {self.optDatDir}')
-                self.logger.info('RE-INITIALIZING OPTIMIZATION ALGORITHM')
-        else:
-            os.makedirs(self.optDatDir)
-            self.logger.info(
-                f'NEW OPTIMIZATION STUDY - {self.optDatDir} did not exist')
+        # if os.path.isdir(self.optDatDir):
+        #     try:
+        #         self.loadCP()
+        #         self.logger.info('RESTARTED FROM CHECKPOINT')
+        #         return
+        #     except FileNotFoundError:
+        #         question = f'\n{self.cp_path} does not exist.\nEMPTY {self.optDatDir} DIRECTORY?'
+        #         overwrite = yes_or_no(question)
+        #         if overwrite:
+        #             shutil.rmtree(self.optDatDir)
+        #             os.mkdir(self.optDatDir)
+        #             self.logger.info(f'EMPTIED - {self.optDatDir}')
+        #         else:
+        #             self.logger.info(f'KEEPING FILES - {self.optDatDir}')
+        #         self.logger.info('RE-INITIALIZING OPTIMIZATION ALGORITHM')
+        # else:
+        #     os.makedirs(self.optDatDir)
+        #     self.logger.info(
+        #         f'NEW OPTIMIZATION STUDY - {self.optDatDir} did not exist')
             # except FileNotFoundError:
             #     print('OVERRIDE OPTIMIZATION STUDY -')
-            #     print('\t{self.CP_path} already exists but {self.cpPath} does not')
+            #     print('\t{self.cp_path} already exists but {self.cpPath} does not')
             #     self.copy()
         # else:
         #     os.makedirs(caseDir, exist_ok=True)
@@ -106,9 +106,9 @@ class OptStudy(PicklePath):
         #####################################
         #    Default/Optional Attributes    #
         #####################################
-        self.runDir = runDir
-        # self.runDir = os.path.join(self.optDatDir, runDir)
-        # os.makedirs(self.runDir, exist_ok=True)
+        self.run_path = run_path
+        # self.run_path = os.path.join(self.optDatDir, run_path)
+        # os.makedirs(self.run_path, exist_ok=True)
 
         ### Data Handling ###
         # self.archiveDir = os.path.join(self.optDatDir, archiveDir)
@@ -120,7 +120,7 @@ class OptStudy(PicklePath):
         # os.makedirs(self.procOptDir, exist_ok=True)
         # Pareto Front Directory
         # directory to save optimal solutions (a.k.a. Pareto Front)
-        # self.pfDir = os.path.join(self.runDir, pfDir)
+        # self.pfDir = os.path.join(self.run_path, pfDir)
         # os.makedirs(self.pfDir, exist_ok=True)
         # number of optimal points along Pareto front to save
         self.n_opt = int(n_opt)
@@ -134,13 +134,14 @@ class OptStudy(PicklePath):
         ### Test Case ###
         self.testCase = None
         self.genTestCase()
-        self.saveCP()
+        self.save_self()
+        # self.save_self()
 
-    def newProb(self, BaseCase):
-        self.logger.info('INITIALIZING NEW OPTIMIZATION PROBLEM')
-        self.problem = CFDProblem_GA(BaseCase)
-        self.saveCP()
-        return self.problem
+    # def newProb(self, BaseCase):
+    #     self.logger.info('INITIALIZING NEW OPTIMIZATION PROBLEM')
+    #     self.problem = CFDProblem_GA(BaseCase)
+    #     self.save_self()
+    #     return self.problem
 
     def newAlg(self):
         self.logger.info('INITIALIZING NEW OPTIMIZATION AlGORITHM')
@@ -153,7 +154,7 @@ class OptStudy(PicklePath):
                              return_least_infeasible=self.algorithm.return_least_infeasible
                              )
         self.algorithm.callback.__init__()
-        self.saveCP()
+        self.save_self()
 
     def initAlg(self):
         if self.algorithm.is_initialized:
@@ -196,10 +197,10 @@ class OptStudy(PicklePath):
                 self.logger.info('\tSTART-UP: mid-generation')
                 evalPop = self.algorithm.off
             # save checkpoint before evaluation
-            self.saveCP()
+            self.save_self()
             # evaluate the individuals using the algorithm's evaluator (necessary to count evaluations for termination)
             evalPop = self.algorithm.evaluator.eval(self.problem, evalPop,
-                                                runDir=self.runDir,
+                                                run_path=self.run_path,
                                                 gen=self.algorithm.callback.gen
                                                 # alg=self.algorithm
                                                 )
@@ -218,7 +219,7 @@ class OptStudy(PicklePath):
                     if np.array_equal(off.X, opt.X):
                         optDir = os.path.join(self.pfDir, f'opt{opt_i+1}')
                         offDir = os.path.join(
-                            self.runDir, f'gen{compGen}', f'ind{off_i+1}')
+                            self.run_path, f'gen{compGen}', f'ind{off_i+1}')
                         self.logger.info(
                             f'\tUpdating Pareto front folder: {offDir} -> {optDir}')
                         try:
@@ -228,16 +229,16 @@ class OptStudy(PicklePath):
                             self.logger.warning('SKIPPED: UPDATE PARETO FRONT')
             # do some more things, printing, logging, storing or even modifying the algorithm object
             self.algorithm.off = None
-            self.saveCP()
+            self.save_self()
             if delPrevGen and not compGen == 1:
                 direct = os.path.join(
-                    self.runDir, f'gen{compGen}')
+                    self.run_path, f'gen{compGen}')
                 shutil.rmtree(direct)
         # obtain the result objective from the algorithm
         res = self.algorithm.result()
         # calculate a hash to show that all executions end with the same result
         self.logger.info(f'hash {res.F.sum()}')
-        # self.saveCP()
+        # self.save_self()
 
     def execGen1(self):
         self.algorithm.termination = termination_from_tuple(('n_gen', 1))
@@ -264,7 +265,7 @@ class OptStudy(PicklePath):
             # therefore self.slgorithm not stuck with after gen.1 termination criteria
             self.algorithm.next()
         self.logger.info('COMPLETE: RUN GENERATION 1')
-        self.saveCP()
+        self.save_self()
 
     ################
     #    LOGGER    #
@@ -302,89 +303,89 @@ class OptStudy(PicklePath):
     ####################
     #    MESH STUDY    #
     ####################
-    def meshStudy(self, cases):
-        for case in cases:
-            self.logger.info(f'MESH STUDY - {case}')
-            case.meshStudy()
+    # def meshStudy(self, cases):
+    #     for case in cases:
+    #         self.logger.info(f'MESH STUDY - {case}')
+    #         case.meshStudy()
 
     #######################
     #    CHECKPOINTING    #
     #######################
-    def loadCP(self, hasTerminated=False):
-        if os.path.exists(self.CP_path + '.old'):
-            os.rename(self.CP_path + '.old', self.CP_path + '.npy')
-        cp, = np.load(self.CP_path + '.npy', allow_pickle=True).flatten()
+    # def loadCP(self, hasTerminated=False):
+    #     if os.path.exists(self.cp_path + '.old'):
+    #         os.rename(self.cp_path + '.old', self.cp_path + '.npy')
+    #     cp, = np.load(self.cp_path + '.npy', allow_pickle=True).flatten()
+    #
+    #     # logging
+    #     self.logger.info(f'\tCHECKPOINT LOADED: {self.cp_path}.npy')
+    #     self.logger.debug('\tRESTART DICTONARY')
+    #     for key in self.__dict__:
+    #         self.logger.debug(f'\t\t{key}: {self.__dict__[key]}')
+    #     self.logger.debug('\tCHECKPOINT DICTONARY')
+    #     for key in cp.__dict__:
+    #         self.logger.debug(f'\t\t{key}: {cp.__dict__[key]}')
+    #
+    #     if cp.algorithm is not None:
+    #         self.logger.debug('\tOPTIMIZATION ALGORITHM DICTONARY:')
+    #         for key, val in cp.algorithm.__dict__.items():
+    #             self.logger.debug(f'\t\t{key}: {val}')
+    #     #### TEMPORARY CODE ##########
+    #     # TRANSITION BETWEEN CHECKPOINTS
+    #
+    #     self.__dict__.update(cp.__dict__)
+    #     # only necessary if for the checkpoint the termination criterion has been met
+    #     try:
+    #         self.algorithm.has_terminated = hasTerminated
+    #     except AttributeError as err:
+    #         self.logger.error(err)
 
-        # logging
-        self.logger.info(f'\tCHECKPOINT LOADED: {self.CP_path}.npy')
-        self.logger.debug('\tRESTART DICTONARY')
-        for key in self.__dict__:
-            self.logger.debug(f'\t\t{key}: {self.__dict__[key]}')
-        self.logger.debug('\tCHECKPOINT DICTONARY')
-        for key in cp.__dict__:
-            self.logger.debug(f'\t\t{key}: {cp.__dict__[key]}')
-
-        if cp.algorithm is not None:
-            self.logger.debug('\tOPTIMIZATION ALGORITHM DICTONARY:')
-            for key, val in cp.algorithm.__dict__.items():
-                self.logger.debug(f'\t\t{key}: {val}')
-        #### TEMPORARY CODE ##########
-        # TRANSITION BETWEEN CHECKPOINTS
-
-        self.__dict__.update(cp.__dict__)
-        # only necessary if for the checkpoint the termination criterion has been met
-        try:
-            self.algorithm.has_terminated = hasTerminated
-        except AttributeError as err:
-            self.logger.error(err)
-
-
-    def saveCP(self):  # , alg=None):
-        gen = self.algorithm.callback.gen
-        self.logger.info(f'SAVING CHECKPOINT - GENERATION {gen}')
-        if self.algorithm.pop is not None:
-            genX = self.algorithm.pop.get('X')
-            if None not in genX:
-                saveTxt(self.runDir, f'gen{gen}X.txt', genX)
-            genF = self.algorithm.pop.get('F')
-            if None not in genF:
-                saveTxt(self.runDir, f'gen{gen}F.txt', genF)
-            if self.algorithm.off is None:
-                self.logger.info(f'\tgeneration {gen-1} complete')
-
-        elif self.algorithm.off is not None:  # and self.algorithm.pop is not None
-            self.logger.info('\tmid-generation checkpoint')
-        # except TypeError:
-        #     self.logger.info('\tmid-generation')
-        # save checkpoint
-        np.save(self.CP_path + '.temp.npy', self)
-        if os.path.exists(self.CP_path + '.npy'):
-            os.rename(self.CP_path + '.npy', self.CP_path + '.old.npy')
-        os.rename(self.CP_path + '.temp.npy', self.CP_path + '.npy')
-        if os.path.exists(self.CP_path + '.old.npy'):
-            os.remove(self.CP_path + '.old.npy')
-        # Checkpoint each cfdCase object stored in optStudy
-        try:
-            self.testCase.saveCP()
-        except AttributeError:
-            self.logger.debug('No Test Case to Save Checkpoint for')
-        except FileNotFoundError:
-            self.logger.debug('No Test Case to Save Checkpoint for')
-        try:
-            for case in self.bndCases:
-                case.saveCP()
-        except TypeError:
-            self.logger.debug('No Boundary Cases to Save Checkpoints for')
-        except AttributeError:
-            self.logger.debug('No Boundary Cases to Save Checkpoints for')
-            # self.logger.error(e)
-        try:
-            for case in self.cornerCases:
-                case.saveCP()
-        except TypeError:
-            self.logger.debug('No Corner Cases to Save Checkpoints for')
-        except AttributeError:
-            self.logger.debug('No Corner Cases to Save Checkpoints for')
+    #
+    # def save_self(self):  # , alg=None):
+    #     gen = self.algorithm.callback.gen
+    #     self.logger.info(f'SAVING CHECKPOINT - GENERATION {gen}')
+    #     if self.algorithm.pop is not None:
+    #         genX = self.algorithm.pop.get('X')
+    #         if None not in genX:
+    #             saveTxt(self.run_path, f'gen{gen}X.txt', genX)
+    #         genF = self.algorithm.pop.get('F')
+    #         if None not in genF:
+    #             saveTxt(self.run_path, f'gen{gen}F.txt', genF)
+    #         if self.algorithm.off is None:
+    #             self.logger.info(f'\tgeneration {gen-1} complete')
+    #
+    #     elif self.algorithm.off is not None:  # and self.algorithm.pop is not None
+    #         self.logger.info('\tmid-generation checkpoint')
+    #     # except TypeError:
+    #     #     self.logger.info('\tmid-generation')
+    #     # save checkpoint
+    #     np.save(self.cp_path + '.temp.npy', self)
+    #     if os.path.exists(self.cp_path + '.npy'):
+    #         os.rename(self.cp_path + '.npy', self.cp_path + '.old.npy')
+    #     os.rename(self.cp_path + '.temp.npy', self.cp_path + '.npy')
+    #     if os.path.exists(self.cp_path + '.old.npy'):
+    #         os.remove(self.cp_path + '.old.npy')
+    #     # Checkpoint each cfdCase object stored in optStudy
+    #     try:
+    #         self.testCase.save_self()
+    #     except AttributeError:
+    #         self.logger.debug('No Test Case to Save Checkpoint for')
+    #     except FileNotFoundError:
+    #         self.logger.debug('No Test Case to Save Checkpoint for')
+    #     try:
+    #         for case in self.bndCases:
+    #             case.save_self()
+    #     except TypeError:
+    #         self.logger.debug('No Boundary Cases to Save Checkpoints for')
+    #     except AttributeError:
+    #         self.logger.debug('No Boundary Cases to Save Checkpoints for')
+    #         # self.logger.error(e)
+    #     try:
+    #         for case in self.cornerCases:
+    #             case.save_self()
+    #     except TypeError:
+    #         self.logger.debug('No Corner Cases to Save Checkpoints for')
+    #     except AttributeError:
+    #         self.logger.debug('No Corner Cases to Save Checkpoints for')
             # self.logger.error(e)
 
         # # default use self.algorithm
@@ -394,13 +395,13 @@ class OptStudy(PicklePath):
         # else:
         #     self.algorithm = alg
 
-    def checkCPs(self):
-        self.logger.info(f'CHECKPOINT CHECK - {self.CP_path}.npy')
-        if os.path.exists(f'{self.CP_path}.npy'):
-            for cp in np.load(self.CP_path):
-                self.logger.info(cp.__dict__)
-        else:
-            self.logger.info(f'\t{self.CP_path} does not exist')
+    # def checkCPs(self):
+    #     self.logger.info(f'CHECKPOINT CHECK - {self.cp_path}.npy')
+    #     if os.path.exists(f'{self.cp_path}.npy'):
+    #         for cp in np.load(self.cp_path):
+    #             self.logger.info(cp.__dict__)
+    #     else:
+    #         self.logger.info(f'\t{self.cp_path} does not exist')
 
 
     ###################
@@ -416,7 +417,7 @@ class OptStudy(PicklePath):
         for x_i, var_type in enumerate(self.problem.BaseCase.var_type):
             if var_type.lower() == 'int':
                 x_mid[x_i] = int(x_mid[x_i])
-        testCaseDir = os.path.join(self.runDir, testCaseDir)
+        testCaseDir = os.path.join(self.run_path, testCaseDir)
         self.testCase = self.problem.BaseCase(testCaseDir, x_mid)  # , restart=True)
 
     def runTestCase(self):
@@ -428,7 +429,7 @@ class OptStudy(PicklePath):
         self.logger.info(f'\tParameters: {self.testCase.x}')
         self.logger.info(f'\tObjectives: {self.testCase.f}')
         self.logger.info('TEST CASE COMPLETE ')
-        self.saveCP()
+        self.save_self()
         return self.testCase
 
     #################################
@@ -437,14 +438,14 @@ class OptStudy(PicklePath):
     # def runGen(self, X, out):
     #     gen = self.algorithm.callback.gen
     #     # create generation directory for storing data/executing simulations
-    #     genDir = os.path.join(self.runDir, f'gen{gen}')
+    #     genDir = os.path.join(self.run_path, f'gen{gen}')
     #     # create sub-directories for each individual
     #     indDirs = [os.path.join(genDir, f'ind{i+1}') for i in range(len(X))]
     #     cases = self.genCases(indDirs, X)
     #     self.problem.BaseCase.parallelize(cases)
     #     # self.runPop(cases)
     #     for case in cases:
-    #         print(case.caseDir, case.f, case.x)
+    #         print(case.abs_path, case.f, case.x)
     #     print(np.array([case.f for case in cases]))
     #     out['F'] = np.array([case.f for case in cases])
     #     if gen == 1:
@@ -457,7 +458,7 @@ class OptStudy(PicklePath):
         # implement your evluation
         gen = self.algorithm.callback.gen
         # create generation directory for storing data/executing simulations
-        genDir = os.path.join(self.runDir, f'gen{gen}')
+        genDir = os.path.join(self.run_path, f'gen{gen}')
         # create sub-directories for each individual
         indDirs = [os.path.join(genDir, f'ind{i+1}') for i in range(len(X))]
         cases = self.genCases(indDirs, X)
@@ -599,7 +600,7 @@ class OptStudy(PicklePath):
                     caseName = str(perm).replace(
                         '[', '').replace(']', '').replace(' ', '_')
                 cornerCaseDir = os.path.join(
-                    self.optDatDir, 'corner-cases', caseName)
+                    self.run_path, 'corner-cases', caseName)
                 cornerCase = self.problem.BaseCase(cornerCaseDir, perm)
                 cornerCases.append(cornerCase)
         self.cornerCases = cornerCases
@@ -637,11 +638,11 @@ class OptStudy(PicklePath):
             self.logger.warning(
                 'SKIPPED: GENERATE BOUNDARY CASES - call self.genBndCases() directly to create new boundary cases')
         self.problem.BaseCase.parallelize(self.bndCases)
-        self.saveCP()
+        self.save_self()
         self.plotBndPtsObj()
         if doMeshStudy:
             self.meshStudy(self.bndCases)
-            self.saveCP()
+            self.save_self()
 
     def plotBndPtsObj(self):
         plot = Scatter(title='Objective Space: Boundary Cases',
@@ -649,7 +650,7 @@ class OptStudy(PicklePath):
         F = np.array([case.f for case in self.bndCases])
         for obj in F:
             plot.add(obj, label=self.getPointLabel(obj))
-        path = os.path.join(self.runDir, 'boundary-cases',
+        path = os.path.join(self.run_path, 'boundary-cases',
                             'bndPts_plot-objSpace.png')
         plot.save(path, dpi=100)
 
@@ -662,7 +663,7 @@ class OptStudy(PicklePath):
         bndPts = np.array([case.x for case in self.bndCases])
         for var in bndPts:
             plot.add(var, label=self.getPointLabel(var))
-        path = os.path.join(self.runDir, 'boundary-cases',
+        path = os.path.join(self.run_path, 'boundary-cases',
                             'bndPts_plot-varSpace.png')
         plot.save(path, dpi=100)
 
@@ -674,12 +675,12 @@ class OptStudy(PicklePath):
             with np.printoptions(precision=3, suppress=True, formatter={'all': lambda x: '%.3g' % x}):
                 caseName = str(pt).replace(
                     '[', '').replace(']', '').replace(' ', '_')
-            dirs.append(os.path.join(self.runDir,
+            dirs.append(os.path.join(self.run_path,
                                      'boundary-cases', caseName))
         cases = self.genCases(dirs, bndPts)
         self.bndCases = cases
         self.plotBndPts()
-        self.saveCP()
+        self.save_self()
 
     def getBndPts(self, n_pts=2, getDiags=False):
         xl = self.problem.xl
@@ -714,7 +715,7 @@ class OptStudy(PicklePath):
             self.logger.info(f'\t   To Case - {case}')
             newMeshSFs = np.append(case.meshSFs, addedMeshSFs)
             case.meshSFs = newMeshSFs
-            case.saveCP()
+            case.save_self()
         except AttributeError as err:
             self.logger.error(str(err))
 
@@ -760,41 +761,41 @@ class OptStudy(PicklePath):
     #####################
     #     PROPERTIES    #
     #####################
-    @property
-    def runDir(self):
-        return self._runDir
-
-    @runDir.setter
-    def runDir(self, runDir):
-        head, tail = os.path.split(runDir)
-        if head == self.optDatDir:
-            self.logger.debug('runDir setter: head == self.optDatDir')
-            self._runDir = os.path.join(self.optDatDir, tail)
-        else:
-            self._runDir = os.path.join(self.optDatDir, runDir)
-        os.makedirs(self._runDir, exist_ok=True)
+    # @property
+    # def run_path(self):
+    #     return self._run_path
+    #
+    # @run_path.setter
+    # def run_path(self, run_path):
+    #     head, tail = os.path.split(run_path)
+    #     if head == self.optDatDir:
+    #         self.logger.debug('run_path setter: head == self.optDatDir')
+    #         self._run_path = os.path.join(self.optDatDir, tail)
+    #     else:
+    #         self._run_path = os.path.join(self.optDatDir, run_path)
+    #     os.makedirs(self._run_path, exist_ok=True)
 
     @property
     def plotDir(self):
-        plotDir = os.path.join(self.runDir, 'plots')
+        plotDir = os.path.join(self.run_path, 'plots')
         os.makedirs(plotDir, exist_ok=True)
         return plotDir
 
     @property
     def mapDir(self):
-        mapDir = os.path.join(self.runDir, 'mapGen1')
+        mapDir = os.path.join(self.run_path, 'mapGen1')
         os.makedirs(mapDir, exist_ok=True)
         return mapDir
 
     @property
     def archiveDir(self):
-        archiveDir = os.path.join(self.runDir, 'archive')
+        archiveDir = os.path.join(self.run_path, 'archive')
         os.makedirs(archiveDir, exist_ok=True)
         return archiveDir
 
     @property
     def pfDir(self):
-        pfDir = os.path.join(self.runDir, 'pareto_front')
+        pfDir = os.path.join(self.run_path, 'pareto_front')
         os.makedirs(pfDir, exist_ok=True)
         return pfDir
     # @property
@@ -819,7 +820,7 @@ class OptStudy(PicklePath):
     #     if cases is not None:
     #         for case in cases:
     #             if isinstance(case, self.problem.BaseCase):
-    #                 case.saveCP()
+    #                 case.save_self()
     #     # path = os.path.join(self.optDatDir, 'gen1Pop.npy')
     #     # np.save(path, cases, allow_pickle=True)
     #     self._gen1Pop = cases
@@ -836,7 +837,7 @@ class OptStudy(PicklePath):
     #     if cases is not None:
     #         for case in cases:
     #             if isinstance(case, self.problem.BaseCase):
-    #                 case.saveCP()
+    #                 case.save_self()
     #     # path = os.path.join(self.optDatDir, 'cornerCases.npy')
     #     # np.save(path, cases, allow_pickle=True)
     #     self._cornerCases = cases
@@ -854,7 +855,7 @@ class OptStudy(PicklePath):
     #     if cases is not None:
     #         for case in cases:
     #             if isinstance(case, self.problem.BaseCase):
-    #                 case.saveCP()
+    #                 case.save_self()
     #     # path = os.path.join(self.optDatDir, 'bndCases.npy')
     #     # np.save(path, cases, allow_pickle=True)
     #     self._bndCases = cases
@@ -869,7 +870,7 @@ class OptStudy(PicklePath):
     # @testCase.setter
     # def testCase(self, case):
     #     if isinstance(case, self.problem.BaseCase):
-    #         case.saveCP()
+    #         case.save_self()
     #     self._testCase = case
         # path = os.path.join(self.optDatDir, 'testCase.npy')
         # np.save(path, case, allow_pickle=True)
@@ -914,7 +915,7 @@ class OptStudy(PicklePath):
     #     # if meshSFs is None:
     #     #     meshSFs = self.meshSFs
     #     for case in cases:
-    #         _, tail = os.path.split(case.caseDir)
+    #         _, tail = os.path.split(case.abs_path)
     #         meshStudyDir = os.path.join(case.studyDir, tail)
     #         print(f'MESH STUDY - {meshStudyDir}')
     #         print(f'\t{case.meshSFs}')
@@ -927,13 +928,13 @@ class OptStudy(PicklePath):
     #             ### Deep copy case instance
     #             msCase = copy.deepcopy(case)
     #             msCases.append(msCase)
-    #             msCase.caseDir = os.path.join(meshStudyDir, f'meshSF-{sf}')
+    #             msCase.abs_path = os.path.join(meshStudyDir, f'meshSF-{sf}')
     #             msCase.meshSF = sf
     #             ### only pre-processing needed is generating mesh
     #             numElem = msCase.genMesh()
     #             a_numElem.append(numElem)
-    #             np.savetxt(os.path.join(msCase.caseDir, 'numElem.txt'), [numElem])
-    #             study.append([msCase.caseDir, str(numElem)])
+    #             np.savetxt(os.path.join(msCase.abs_path, 'numElem.txt'), [numElem])
+    #             study.append([msCase.abs_path, str(numElem)])
     #             var.append(msCase.x)
     #         print(f'\t{a_numElem}')
     #         # study = np.array(study)

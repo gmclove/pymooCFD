@@ -56,7 +56,7 @@ class Parallelize:
     # def solveExternal(self):
     #     self.logger.info('SOLVING AS SUBPROCESS...')
     #     self.logger.info(f'\tcommand: {self.solverCmd}')
-    #     subprocess.run(self.solverCmd, cwd=self.caseDir,
+    #     subprocess.run(self.solverCmd, cwd=self.abs_path,
     #                    stdout=subprocess.DEVNULL)
 
 

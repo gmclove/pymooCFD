@@ -18,7 +18,7 @@ from pymooCFD.core.cfdCase import CFDCase
 
 
 class FluentCompDistSLURM(CFDCase):
-    # baseCaseDir = 'base_cases/'
+    # base_case_path = 'base_cases/'
     # datFile = ''
 
     n_var = 2
@@ -36,10 +36,10 @@ class FluentCompDistSLURM(CFDCase):
     solveExternal = True
     solverExecCmd = ['sbatch', '--wait', 'jobslurm.sh']
 
-    def __init__(self, baseCaseDir, caseDir, x,
+    def __init__(self, case_path, x,
                  # *args, **kwargs
                  ):
-        super().__init__(baseCaseDir, caseDir, x,
+        super().__init__(case_path, x,
                          *args, **kwargs)
 
     def _preProc(self):
