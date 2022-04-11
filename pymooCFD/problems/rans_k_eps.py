@@ -30,12 +30,15 @@ class RANS_k_eps(FluentCase):
     def _preProc(self):
         self.inputLines = [
             '/file/read rans_k-eps.cas.h5',
+            ';DEFINE turbulence solver',
             '/define/models/viscous/ke-standard y',
             f'(rpsetvar\' kecmu {self.x[0]})',
-            f'/solve/iterate {int(self.x[1])}',
-            ';save residuals',
+            ';INITIALIZE'
             '/solve/initialize/compute-defaults/velocity-inlet inlet',
             '/solve/initialize/initialize-flow',
+            ';SOLVE',
+            f'/solve/iterate {int(self.x[1])} n y',
+            ';SAVE residuals',
             '(let',
             '((writefile (lambda (p)',
             '(define np (length (residual-history "iteration")))',
