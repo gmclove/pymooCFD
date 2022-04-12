@@ -145,9 +145,9 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
 
     ###  Parallel Processing  ###
     @classmethod
-    def parallelizeInit(cls, externalSolver):
-        # if externalSolver is None:
-        #     externalSolver = cls.externalSolver
+    def parallelizeInit(cls, externalSolver=None):
+        if externalSolver is None:
+            externalSolver = cls.externalSolver
         if cls.nTasks is None:
             if cls.nProc is not None and cls.nProc is not None:
                 cls.nTasks = int(cls.procLim / cls.nProc)

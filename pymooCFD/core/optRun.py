@@ -180,7 +180,7 @@ class OptRun(PicklePath):
             # save checkpoint before evaluation
             self.save_self()
             # evaluate the individuals using the algorithm's evaluator (necessary to count evaluations for termination)
-            print('GEN:', algorithm.callback.gen)
+            print('GEN:', self.algorithm.callback.gen)
             eval_pop = self.algorithm.evaluator.eval(self.problem, eval_pop,
                                                      run_path=self.abs_path,
                                                      gen=self.algorithm.callback.gen
@@ -463,6 +463,7 @@ class OptRun(PicklePath):
     #     self.problem.BaseCase.parallelize(self.cornerCases)
 
     def run_bnd_cases(self, n_pts=2, getDiags=False, do_mesh_study=False):
+        self.problem.BaseCase.parallelizeInit()
         self.problem.BaseCase.parallelize(self.bnd_cases)
         self.save_self()
         self.plotBndPtsObj()
