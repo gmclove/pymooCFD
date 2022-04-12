@@ -6,6 +6,7 @@ from pymooCFD.problems.rans_k_eps import RANS_k_eps
 from pymooCFD.core.minimizeCFD import MinimizeCFD
 from pymooCFD.core.pymooBase import CFDTestProblem
 
+
 def exec_test():
     study = MinimizeCFD(RANS_k_eps, CFDGeneticProblem=CFDTestProblem)
     # if study.opt_runs:
@@ -18,18 +19,19 @@ def exec_test():
                               n_offsprings=2)
 
     opt_run = study.new_run(alg, prob, run_dir='test-run')
-    print(alg)
-    print(opt_run.algorithm)
+    print('alg:', alg)
+    print('opt_run.algorithm:', opt_run.algorithm)
     print()
-    print(prob)
-    print(opt_run.algorithm.problem)
+    print('prob:', prob)
+    print('opt_run.algorithm.problem:', opt_run.algorithm.problem)
     print()
-    print(prob.n_var)
-    print(opt_run.algorithm.problem.n_var)
+    print('prob.n_var:', prob.n_var)
+    print('opt_run.algorithm.problem.n_var:', opt_run.algorithm.problem.n_var)
 
     # opt_run.test_case.run()
     # opt_run.run_bnd_cases()
     # opt_run.run()
+
 
 def exec():
     study = MinimizeCFD(RANS_k_eps)
