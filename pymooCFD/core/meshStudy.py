@@ -16,7 +16,7 @@ from pymooCFD.util.loggingTools import MultiLineFormatter
 from pymooCFD.util.handleData import saveTxt
 
 
-class MeshStudy: #(CFDCase):
+class MeshStudy:  # (CFDCase):
     def __init__(self, cfd_case,
                  size_factors=np.around(np.arange(0.5, 1.5, 0.1), decimals=2)
                  ):

@@ -118,7 +118,7 @@ class RANSJet(FluentCase):
     # procLim = 60
     nTasks = 4
 
-    def __init__(self, case_path, x):
+    def __init__(self, case_path, x, **kwargs):
         super().__init__(case_path, x,
                          meshSF=0.4,
                          meshSFs=np.append(
@@ -127,7 +127,8 @@ class RANSJet(FluentCase):
                          meshFile='jet_rans-axi_sym.unv',
                          datFile='jet_rans-axi_sym.cgns',
                          jobFile='jobslurm.sh',
-                         inputFile='jet_rans-axi_sym.jou'
+                         inputFile='jet_rans-axi_sym.jou',
+                         **kwargs
                          )
 
     def _execDone(self):
