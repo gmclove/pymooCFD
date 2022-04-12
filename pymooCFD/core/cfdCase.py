@@ -63,7 +63,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                  validated=False,
                  mesh_study=None,
                  # externalSolver=False,
-                 var_labels=None, obj_labels=None,
+                 # var_labels=None, obj_labels=None,
                  meshFile=None,  # meshLines = None,
                  jobFile=None,  # jobLines = None,
                  inputFile=None,  # inputLines = None,
@@ -113,11 +113,11 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         # self.var_labels = kwargs.get('var_labels')
         # self.obj_labels = kwargs.get('obj_labels')
         # Design and Objective Space Labels
-        if var_labels is None:
+        if self.var_labels is None:
             self.var_labels = [f'var{x_i}' for x_i in range(self.n_var)]
         else:
             self.var_labels = var_labels
-        if obj_labels is None:
+        if self.obj_labels is None:
             self.obj_labels = [f'obj{x_i}' for x_i in range(self.n_obj)]
         else:
             self.obj_labels = obj_labels
