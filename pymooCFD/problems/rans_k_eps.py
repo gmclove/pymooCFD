@@ -21,8 +21,9 @@ class RANS_k_eps(FluentCase):
     solverExecCmd = ['sbatch', '--wait', 'jobslurm.sh']
     nTasks = 4
 
-    def __init__(self, caseDir, x, *args, **kwargs):
+    def __init__(self, caseDir, x, meshSF=1.0, *args, **kwargs):
         super().__init__(caseDir, x,
+                         meshSF=meshSF,
                          jobFile='jobslurm.sh',
                          inputFile='exec.jou',
                          datFile='residuals.dat',
