@@ -1,7 +1,7 @@
 import numpy as np
 
 from pymooCFD.core.cfdCase import FluentCase
-
+from pymooCFD.util.handleData import saveTxt
 
 class RANS_k_eps(FluentCase):
     base_case_path = 'base_cases/rans_k-eps_3D-room'
@@ -86,34 +86,33 @@ class RANS_k_eps(FluentCase):
         dat = np.genfromtxt(self.datPath)
         if dat[-1, 0] < 2000:
             self.logger.error('LESS THAN 2000 ITERATIONS PREFORMED')
-        # avgs = []
-        # for col in dat.T[1:]:
-        #     avgs.append(np.mean(col[-2000:]))
-        # avg = np.mean(avgs)
-        avg = np.mean(dat[:, 1:])
+        rel_dat = dat[-2000:, 1:]
+        saveTxt(self.abs_path, 'residual_avgs.txt', np.mean(rel_dat, axis=0))
+
+        avg = np.mean(dat[-2000:, 1:])
         self.f = [avg, self.solnTime]
         return self.f
 
-    @staticmethod
-    def residuals_file_to_dict(f_path):
-        with open(f_path, 'r') as f:
-            dat_lines = f.readlines()
-            dat = {}
-            for line in dat_lines:
-                if line[:2] == '((':
-                    label = line.split('"')[1]
-                    dat[label] = []
-                try:
-                    int(line[0])
-                except ValueError:
-                    continue
-                split_line = line.split()
-                l = [int(split_line[0]), float(split_line[1])]
-                # l = np.array(l)
-                dat[label].append(l)
-        for key, val in dat.items():
-            dat[key] = np.array(val)
-        return dat
+    # @staticmethod
+    # def residuals_file_to_dict(f_path):
+    #     with open(f_path, 'r') as f:
+    #         dat_lines = f.readlines()
+    #         dat = {}
+    #         for line in dat_lines:
+    #             if line[:2] == '((':
+    #                 label = line.split('"')[1]
+    #                 dat[label] = []
+    #             try:
+    #                 int(line[0])
+    #             except ValueError:
+    #                 continue
+    #             split_line = line.split()
+    #             l = [int(split_line[0]), float(split_line[1])]
+    #             # l = np.array(l)
+    #             dat[label].append(l)
+    #     for key, val in dat.items():
+    #         dat[key] = np.array(val)
+    #     return dat
         # with open() as f:
         #
 
