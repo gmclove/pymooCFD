@@ -11,29 +11,17 @@ from pymoo.factory import get_termination
 from pymoo.core.problem import Problem
 # from pymoo.core.problem import ElementwiseProblem
 
-####################################
-#    Genetic Algorithm Criteria    #
-####################################
+#####################################
+#### Genetic Algorithm Criteria #####
+#####################################
 # n_gen = 2
 # pop_size = 2
 # # = number of evaluations each generation
 # n_offsprings = int(pop_size * (2 / 3))
 
-<<<<<<< HEAD
-=======
-#####################################
-#### Genetic Algorithm Criteria #####
-#####################################
-n_gen = 2
-pop_size = 2
-# = number of evaluations each generation
-n_offsprings = int(pop_size * (2 / 3))
-
 #################
 #    PROBLEM    #
 #################
-
-
 class CFDProblem_GA(Problem):
     def __init__(self, BaseCase,
                  # xl, xu,
@@ -83,7 +71,6 @@ class CFDProblem_GA(Problem):
         G = np.array([case.g for case in cases])
         out['F'] = F
         out['G'] = G
->>>>>>> devel
 
 #################
 #    DISPLAY    #

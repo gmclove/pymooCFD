@@ -103,8 +103,8 @@ class RANSJet(FluentCase):
     n_var = 2
     var_labels = ['Mouth Diameter [m]', 'Breath Velocity [m/s]']
     var_type = ["real", "real"]  # OPTIONS: 'int' or 'real'
-    xl = [0.005, 0.1]  # lower limits of parameters/variables
-    xu = [0.04, 0.4]  # upper limits of variables
+    # xl = [0.005, 0.1]  # lower limits of parameters/variables
+    # xu = [0.04, 0.4]  # upper limits of variables
 
     ####### Define Objective Space ########
     n_obj = 2

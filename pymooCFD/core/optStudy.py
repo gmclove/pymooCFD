@@ -106,7 +106,7 @@ class OptStudy(PicklePath):
         #####################################
         #    Default/Optional Attributes    #
         #####################################
-        self.run_path = run_path
+        self.run_path = self.abs_path
         # self.run_path = os.path.join(self.optDatDir, run_path)
         # os.makedirs(self.run_path, exist_ok=True)
 
@@ -199,23 +199,13 @@ class OptStudy(PicklePath):
             # save checkpoint before evaluation
             self.save_self()
             # evaluate the individuals using the algorithm's evaluator (necessary to count evaluations for termination)
-<<<<<<< HEAD
-            evalPop = self.algorithm.evaluator.eval(self.problem, evalPop,
-                                                run_path=self.run_path,
-                                                gen=self.algorithm.callback.gen
-                                                # alg=self.algorithm
-                                                )
-            # self.algorithm.evaluator.eval(self.problem, evalPop)
-            # evalPop = self.runGen(evalPop)
-=======
             eval_pop = self.algorithm.evaluator.eval(self.problem, eval_pop,
-                                                    runDir=self.runDir,
-                                                    gen=self.algorithm.callback.gen
-                                                    # alg=self.algorithm
-                                                    )
+                                                     run_path=self.run_path,
+                                                     gen=self.algorithm.callback.gen
+                                                     # alg=self.algorithm
+                                                     )
             # self.algorithm.evaluator.eval(self.problem, eval_pop)
             # eval_pop = self.runGen(eval_pop)
->>>>>>> devel
             # print('self.algorithm.callback.gen:', self.algorithm.callback.gen)
             # print('self.algorithm.n_gen:', self.algorithm.n_gen)
 
@@ -239,14 +229,10 @@ class OptStudy(PicklePath):
                             self.logger.warning('SKIPPED: UPDATE PARETO FRONT')
             # do some more things, printing, logging, storing or even modifying the algorithm object
             self.algorithm.off = None
-<<<<<<< HEAD
             self.save_self()
-=======
-            self.saveCP()
             self.plotGen()
             if self.algorithm.callback.gen == 1:
                 self.gen1_pop = eval_pop
->>>>>>> devel
             if delPrevGen and not compGen == 1:
                 direct = os.path.join(
                     self.run_path, f'gen{compGen}')
@@ -328,7 +314,6 @@ class OptStudy(PicklePath):
     #######################
     #    CHECKPOINTING    #
     #######################
-<<<<<<< HEAD
     # def loadCP(self, hasTerminated=False):
     #     if os.path.exists(self.cp_path + '.old'):
     #         os.rename(self.cp_path + '.old', self.cp_path + '.npy')
@@ -404,81 +389,6 @@ class OptStudy(PicklePath):
     #         self.logger.debug('No Corner Cases to Save Checkpoints for')
     #     except AttributeError:
     #         self.logger.debug('No Corner Cases to Save Checkpoints for')
-=======
-    def loadCP(self, hasTerminated=False):
-        if os.path.exists(self.CP_path + '.old'):
-            os.rename(self.CP_path + '.old', self.CP_path + '.npy')
-        cp, = np.load(self.CP_path + '.npy', allow_pickle=True).flatten()
-
-        # logging
-        self.logger.info(f'\tCHECKPOINT LOADED: {self.CP_path}.npy')
-        self.logger.debug('\tRESTART DICTONARY')
-        for key in self.__dict__:
-            self.logger.debug(f'\t\t{key}: {self.__dict__[key]}')
-        self.logger.debug('\tCHECKPOINT DICTONARY')
-        for key in cp.__dict__:
-            self.logger.debug(f'\t\t{key}: {cp.__dict__[key]}')
-
-        if cp.algorithm is not None:
-            self.logger.debug('\tOPTIMIZATION ALGORITHM DICTONARY:')
-            for key, val in cp.algorithm.__dict__.items():
-                self.logger.debug(f'\t\t{key}: {val}')
-        #### TEMPORARY CODE ##########
-        # TRANSITION BETWEEN CHECKPOINTS
-        self.__dict__.update(cp.__dict__)
-        # only necessary if for the checkpoint the termination criterion has been met
-        try:
-            self.algorithm.has_terminated = hasTerminated
-        except AttributeError as err:
-            self.logger.error(err)
-
-    def saveCP(self):  # , alg=None):
-        gen = self.algorithm.callback.gen
-        self.logger.info(f'SAVING CHECKPOINT - GENERATION {gen}')
-        if self.algorithm.pop is not None:
-            genX = self.algorithm.pop.get('X')
-            if None not in genX:
-                saveTxt(self.runDir, f'gen{gen}X.txt', genX)
-            genF = self.algorithm.pop.get('F')
-            if None not in genF:
-                saveTxt(self.runDir, f'gen{gen}F.txt', genF)
-            if self.algorithm.off is None:
-                self.logger.info(f'\tgeneration {gen-1} complete')
-
-        elif self.algorithm.off is not None:  # and self.algorithm.pop is not None
-            self.logger.info('\tmid-generation checkpoint')
-        # except TypeError:
-        #     self.logger.info('\tmid-generation')
-        # save checkpoint
-        np.save(self.CP_path + '.temp.npy', self)
-        if os.path.exists(self.CP_path + '.npy'):
-            os.rename(self.CP_path + '.npy', self.CP_path + '.old.npy')
-        os.rename(self.CP_path + '.temp.npy', self.CP_path + '.npy')
-        if os.path.exists(self.CP_path + '.old.npy'):
-            os.remove(self.CP_path + '.old.npy')
-        # Checkpoint each cfdCase object stored in optStudy
-        try:
-            self.testCase.saveCP()
-        except AttributeError:
-            self.logger.debug('No Test Case to Save Checkpoint for')
-        except FileNotFoundError:
-            self.logger.debug('No Test Case to Save Checkpoint for')
-        try:
-            for case in self.bndCases:
-                case.saveCP()
-        except TypeError:
-            self.logger.debug('No Boundary Cases to Save Checkpoints for')
-        except AttributeError:
-            self.logger.debug('No Boundary Cases to Save Checkpoints for')
-            # self.logger.error(e)
-        try:
-            for case in self.cornerCases:
-                case.saveCP()
-        except TypeError:
-            self.logger.debug('No Corner Cases to Save Checkpoints for')
-        except AttributeError:
-            self.logger.debug('No Corner Cases to Save Checkpoints for')
->>>>>>> devel
             # self.logger.error(e)
 
         # # default use self.algorithm
@@ -499,12 +409,7 @@ class OptStudy(PicklePath):
     ###################
     #    TEST CASE    #
     ###################
-<<<<<<< HEAD
     def gen_test_case(self, test_caseDir='test_case'):
-=======
-
-    def genTestCase(self, testCaseDir='test_case'):
->>>>>>> devel
         self.logger.info('\tGENERATING TEST CASE')
         # shutil.rmtree('test_case', ignore_errors=True)
         xl = self.problem.xl
@@ -549,39 +454,13 @@ class OptStudy(PicklePath):
     #         self.gen1_pop = cases
     #     return out
 
-<<<<<<< HEAD
-    def runGen(self, pop):
-        # get the design space values of the algorithm
-        X = pop.get("X")
-        # implement your evluation
-        gen = self.algorithm.callback.gen
-        # create generation directory for storing data/executing simulations
-        genDir = os.path.join(self.run_path, f'gen{gen}')
-        # create sub-directories for each individual
-        indDirs = [os.path.join(genDir, f'ind{i+1}') for i in range(len(X))]
-        cases = self.genCases(indDirs, X)
-        self.problem.BaseCase.parallelize(cases)
-        F = np.array([case.f for case in cases])
-        G = np.array([case.g for case in cases])
-        # objectives
-        pop.set("F", F)
-        # for constraints
-        pop.set("G", G)
-        # this line is necessary to set the CV and feasbility status - even for unconstrained
-        set_cv(pop)
-        if gen == 1:
-            self.gen1Pop = cases
-            self.mapGen1()
-        self.plotGen()
-        return pop
-=======
     # def runGen(self, pop):
     #     # get the design space values of the algorithm
     #     X = pop.get("X")
     #     # implement your evluation
     #     gen = self.algorithm.callback.gen
     #     # create generation directory for storing data/executing simulations
-    #     genDir = os.path.join(self.runDir, f'gen{gen}')
+    #     genDir = os.path.join(self.run_path, f'gen{gen}')
     #     # create sub-directories for each individual
     #     indDirs = [os.path.join(genDir, f'ind{i+1}') for i in range(len(X))]
     #     cases = self.genCases(indDirs, X)
@@ -599,7 +478,6 @@ class OptStudy(PicklePath):
     #         self.mapGen1()
     #     self.plotGen()
     #     return pop
->>>>>>> devel
 
     def plotGen(self, gen=None, max_leg_len=10):
         if gen is None:
@@ -612,17 +490,10 @@ class OptStudy(PicklePath):
         #### Parameter Space Plot ####
         popX = pop.get('X')
         var_plot = Scatter(title=f'Generation {gen} Design Space',
-<<<<<<< HEAD
                        legend=leg,
                        labels=self.problem.BaseCase.var_labels,
         #                figsize=(10,8)
                       )
-=======
-                           legend=leg,
-                           labels=self.BaseCase.var_labels,
-                           #                figsize=(10,8)
-                           )
->>>>>>> devel
         for ind_i, ind in enumerate(popX):
             var_plot.add(ind, label=f'IND {ind_i+1}')
         # save parameter space plot
@@ -632,15 +503,9 @@ class OptStudy(PicklePath):
         #### Objective Space Plot ####
         popF = pop.get('F')
         obj_plot = Scatter(title=f'Generation {gen} Objective Space',
-<<<<<<< HEAD
                        legend=leg,
                        labels=self.problem.BaseCase.obj_labels
                       )
-=======
-                           legend=leg,
-                           labels=self.BaseCase.obj_labels
-                           )
->>>>>>> devel
         for ind_i, ind in enumerate(popF):
             obj_plot.add(ind, label=f'IND {ind_i+1}')
         # save parameter space plot
