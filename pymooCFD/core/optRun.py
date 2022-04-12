@@ -40,13 +40,15 @@ class OptRun(PicklePath):
                  *args, **kwargs
                  ):
         super().__init__(dir_path=run_path)
+        self.run_path = self.abs_path
+        self.logger.info(f'OPTIMIZATION STUDY- {self.rel_path}')
+        self.logger.info(f'\tCheckpoint Path: {self.cp_path}')
+        if self.cp_restart:
+            return
         #######################################
         #    ATTRIBUTES NEEDED FOR RESTART    #
         #######################################
-        # self.logger = self.getLogger()
-        self.logger.info(f'OPTIMIZATION STUDY- {self.rel_path}')
-        # self.cp_path = os.path.join(self.optDatDir, f'{self.optName}-CP')
-        self.logger.info(f'\tCheckpoint Path: {self.cp_path}')
+
 
         # if not restart:
         # if os.path.exists(self.optDatDir):
@@ -95,7 +97,6 @@ class OptRun(PicklePath):
         #############################
         #    Required Attributes    #
         #############################
-        self.run_path = self.abs_path
         algorithm.setup(problem,
                         seed=algorithm.seed,
                         verbose=algorithm.verbose,
@@ -106,7 +107,8 @@ class OptRun(PicklePath):
         self.problem = problem
         self.gen_bnd_cases()
         self.gen_test_case()
-
+        print('!!!!!!!!!!!!!!!!!!!!!!!!')
+        print(self.algorithm, self.problem)
         #####################################
         #    Default/Optional Attributes    #
         #####################################
@@ -174,7 +176,7 @@ class OptRun(PicklePath):
             self.save_self()
             # evaluate the individuals using the algorithm's evaluator (necessary to count evaluations for termination)
             eval_pop = self.algorithm.evaluator.eval(self.problem, eval_pop,
-                                                     run_path=self.run_path,
+                                                     run_path=self.abs_path,
                                                      gen=self.algorithm.callback.gen
                                                      # alg=self.algorithm
                                                      )
@@ -189,7 +191,7 @@ class OptRun(PicklePath):
                     if np.array_equal(off.X, opt.X):
                         optDir = os.path.join(self.pfDir, f'opt{opt_i+1}')
                         offDir = os.path.join(
-                            self.run_path, f'gen{compGen}', f'ind{off_i+1}')
+                            self.abs_path, f'gen{compGen}', f'ind{off_i+1}')
                         self.logger.info(
                             f'\tUpdating Pareto front folder: {offDir} -> {optDir}')
                         try:
@@ -206,7 +208,7 @@ class OptRun(PicklePath):
                 self.map_gen1()
             if delPrevGen and not compGen == 1:
                 direct = os.path.join(
-                    self.run_path, f'gen{compGen}')
+                    self.abs_path, f'gen{compGen}')
                 shutil.rmtree(direct)
         # obtain the result objective from the algorithm
         # res = self.algorithm.result()
@@ -254,7 +256,7 @@ class OptRun(PicklePath):
         for x_i, var_type in enumerate(self.problem.BaseCase.var_type):
             if var_type.lower() == 'int':
                 x_mid[x_i] = int(x_mid[x_i])
-        test_caseDir = os.path.join(self.run_path, test_caseDir)
+        test_caseDir = os.path.join(self.abs_path, test_caseDir)
         self.test_case = self.problem.BaseCase(
             test_caseDir, x_mid)  # , restart=True)
 
@@ -276,7 +278,7 @@ class OptRun(PicklePath):
     # def runGen(self, X, out):
     #     gen = self.algorithm.callback.gen
     #     # create generation directory for storing data/executing simulations
-    #     genDir = os.path.join(self.run_path, f'gen{gen}')
+    #     genDir = os.path.join(self.abs_path, f'gen{gen}')
     #     # create sub-directories for each individual
     #     indDirs = [os.path.join(genDir, f'ind{i+1}') for i in range(len(X))]
     #     cases = self.genCases(indDirs, X)
@@ -296,7 +298,7 @@ class OptRun(PicklePath):
     #     # implement your evluation
     #     gen = self.algorithm.callback.gen
     #     # create generation directory for storing data/executing simulations
-    #     genDir = os.path.join(self.run_path, f'gen{gen}')
+    #     genDir = os.path.join(self.abs_path, f'gen{gen}')
     #     # create sub-directories for each individual
     #     indDirs = [os.path.join(genDir, f'ind{i+1}') for i in range(len(X))]
     #     cases = self.genCases(indDirs, X)
@@ -423,7 +425,7 @@ class OptRun(PicklePath):
     #                 caseName = str(perm).replace(
     #                     '[', '').replace(']', '').replace(' ', '_')
     #             cornerCaseDir = os.path.join(
-    #                 self.run_path, 'corner-cases', caseName)
+    #                 self.abs_path, 'corner-cases', caseName)
     #             cornerCase = self.problem.BaseCase(cornerCaseDir, perm)
     #             cornerCases.append(cornerCase)
     #     self.cornerCases = cornerCases
@@ -468,7 +470,7 @@ class OptRun(PicklePath):
         F = np.array([case.f for case in self.bnd_cases])
         for obj in F:
             plot.add(obj, label=self.getPointLabel(obj))
-        path = os.path.join(self.run_path, 'boundary-cases',
+        path = os.path.join(self.abs_path, 'boundary-cases',
                             'bndPts_plot-objSpace.png')
         plot.save(path, dpi=100)
 
@@ -481,7 +483,7 @@ class OptRun(PicklePath):
         bndPts = np.array([case.x for case in self.bnd_cases])
         for var in bndPts:
             plot.add(var, label=self.getPointLabel(var))
-        path = os.path.join(self.run_path, 'boundary-cases',
+        path = os.path.join(self.abs_path, 'boundary-cases',
                             'bndPts_plot-varSpace.png')
         plot.save(path, dpi=100)
 
@@ -493,7 +495,7 @@ class OptRun(PicklePath):
             with np.printoptions(precision=3, suppress=True, formatter={'all': lambda x: '%.3g' % x}):
                 caseName = str(pt).replace(
                     '[', '').replace(']', '').replace(' ', '_')
-            dirs.append(os.path.join(self.run_path,
+            dirs.append(os.path.join(self.abs_path,
                                      'boundary-cases', caseName))
         cases = self.genCases(dirs, bndPts)
         self.bnd_cases = cases
@@ -589,25 +591,25 @@ class OptRun(PicklePath):
     #####################
     @property
     def plotDir(self):
-        plotDir = os.path.join(self.run_path, 'plots')
+        plotDir = os.path.join(self.abs_path, 'plots')
         os.makedirs(plotDir, exist_ok=True)
         return plotDir
 
     @property
     def mapDir(self):
-        mapDir = os.path.join(self.run_path, 'map_gen1')
+        mapDir = os.path.join(self.abs_path, 'map_gen1')
         os.makedirs(mapDir, exist_ok=True)
         return mapDir
 
     @property
     def archiveDir(self):
-        archiveDir = os.path.join(self.run_path, 'archive')
+        archiveDir = os.path.join(self.abs_path, 'archive')
         os.makedirs(archiveDir, exist_ok=True)
         return archiveDir
 
     @property
     def pfDir(self):
-        pfDir = os.path.join(self.run_path, 'pareto_front')
+        pfDir = os.path.join(self.abs_path, 'pareto_front')
         os.makedirs(pfDir, exist_ok=True)
         return pfDir
     # @property

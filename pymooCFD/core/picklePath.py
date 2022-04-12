@@ -30,12 +30,12 @@ class PicklePath:
         #########################
         #    Checkpoint Load    #
         #########################
-        print(self.par_path)
-        print(self.abs_path)
+        self.cp_restart = False
         if os.path.isdir(self.abs_path):
             try:
                 self.update_self()
                 self.logger.info('RESTARTED FROM CHECKPOINT')
+                self.cp_restart = True
                 return
             except FileNotFoundError:
                 question = f'\n{self.rel_path} exists but {self.cp_rel_path} does not.\n\tEMPTY {self.rel_path} DIRECTORY?'
