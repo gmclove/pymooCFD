@@ -119,11 +119,6 @@ class OptRun(PicklePath):
         self.problem = problem
         self.gen_bnd_cases()
         self.gen_test_case()
-        print('!!!!!!!!!!!!!!!!!!!!!!!!')
-        print(self.algorithm, self.problem)
-        print(self.algorithm.problem)
-        print(self.algorithm.problem.n_var)
-
 
         ###################################
         #    Attributes To Be Set Later   #
@@ -185,6 +180,7 @@ class OptRun(PicklePath):
             # save checkpoint before evaluation
             self.save_self()
             # evaluate the individuals using the algorithm's evaluator (necessary to count evaluations for termination)
+            print('GEN:', algorithm.callback.gen)
             eval_pop = self.algorithm.evaluator.eval(self.problem, eval_pop,
                                                      run_path=self.abs_path,
                                                      gen=self.algorithm.callback.gen
