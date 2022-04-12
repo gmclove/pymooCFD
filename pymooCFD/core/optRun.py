@@ -217,7 +217,7 @@ class OptRun(PicklePath):
                     self.abs_path, f'gen{compGen}')
                 shutil.rmtree(direct)
         # obtain the result objective from the algorithm
-        # res = self.algorithm.result()
+        res = self.algorithm.result()
         # calculate a hash to show that all executions end with the same result
         self.logger.info(f'hash {res.F.sum()}')
         # self.save_self()
