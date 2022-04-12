@@ -31,7 +31,7 @@
 # #             pool.apply_async(worker, (case, ))
 # #         pool.close()
 # #         pool.join()
-# 
+#
 #         # if self.externalSolver:
 #         #     pool = mp.pool.ThreadPool(nTasks)
 #         #     for case in cases:
