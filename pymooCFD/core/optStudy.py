@@ -202,10 +202,10 @@ class OptStudy:
             self.saveCP()
             # evaluate the individuals using the algorithm's evaluator (necessary to count evaluations for termination)
             evalPop = self.algorithm.evaluator.eval(self.problem, evalPop,
-                                                runDir=self.runDir,
-                                                gen=self.algorithm.callback.gen
-                                                # alg=self.algorithm
-                                                )
+                                                    runDir=self.runDir,
+                                                    gen=self.algorithm.callback.gen
+                                                    # alg=self.algorithm
+                                                    )
             # self.algorithm.evaluator.eval(self.problem, evalPop)
             # evalPop = self.runGen(evalPop)
             # print('self.algorithm.callback.gen:', self.algorithm.callback.gen)
@@ -340,7 +340,6 @@ class OptStudy:
         except AttributeError as err:
             self.logger.error(err)
 
-
     def saveCP(self):  # , alg=None):
         gen = self.algorithm.callback.gen
         self.logger.info(f'SAVING CHECKPOINT - GENERATION {gen}')
@@ -404,10 +403,10 @@ class OptStudy:
         else:
             self.logger.info(f'\t{self.CP_path} does not exist')
 
-
     ###################
     #    TEST CASE    #
     ###################
+
     def genTestCase(self, testCaseDir='test_case'):
         self.logger.info('\tGENERATING TEST CASE')
         # shutil.rmtree('test_case', ignore_errors=True)
@@ -463,7 +462,7 @@ class OptStudy:
         # create sub-directories for each individual
         indDirs = [os.path.join(genDir, f'ind{i+1}') for i in range(len(X))]
         cases = self.genCases(indDirs, X)
-        self.BaseCase.parallelize(cases)
+        self.problem.BaseCase.parallelize(cases)
         F = np.array([case.f for case in cases])
         G = np.array([case.g for case in cases])
         # objectives
@@ -481,7 +480,7 @@ class OptStudy:
     def plotGen(self, gen=None, max_leg_len=10):
         if gen is None:
             gen = self.algorithm.n_gen
-        pop = self.algorithm.history[gen-1].pop
+        pop = self.algorithm.history[gen - 1].pop
         if len(pop) <= max_leg_len:
             leg = True
         else:
@@ -489,26 +488,29 @@ class OptStudy:
         #### Parameter Space Plot ####
         popX = pop.get('X')
         var_plot = Scatter(title=f'Generation {gen} Design Space',
-                       legend=leg,
-                       labels=self.BaseCase.var_labels,
-        #                figsize=(10,8)
-                      )
+                           legend=leg,
+                           labels=self.BaseCase.var_labels,
+                           #                figsize=(10,8)
+                           )
         for ind_i, ind in enumerate(popX):
             var_plot.add(ind, label=f'IND {ind_i+1}')
         # save parameter space plot
-        var_plot.save(os.path.join(self.plotDir, f'gen{gen}_obj_space.png'), dpi=100)
+        var_plot.save(os.path.join(
+            self.plotDir, f'gen{gen}_obj_space.png'), dpi=100)
 
         #### Objective Space Plot ####
         popF = pop.get('F')
         obj_plot = Scatter(title=f'Generation {gen} Objective Space',
-                       legend=leg,
-                       labels=self.BaseCase.obj_labels
-                      )
+                           legend=leg,
+                           labels=self.BaseCase.obj_labels
+                           )
         for ind_i, ind in enumerate(popF):
             obj_plot.add(ind, label=f'IND {ind_i+1}')
         # save parameter space plot
-        obj_plot.save(os.path.join(self.plotDir, f'gen{gen}_obj_space.png'), dpi=100)
-        self.logger.info(f'PLOTTED: Generation {gen} Design and Objective Spaces')
+        obj_plot.save(os.path.join(
+            self.plotDir, f'gen{gen}_obj_space.png'), dpi=100)
+        self.logger.info(
+            f'PLOTTED: Generation {gen} Design and Objective Spaces')
         return var_plot, obj_plot
 
     def mapGen1(self):
@@ -524,25 +526,27 @@ class OptStudy:
             for f_i, f in enumerate(popF.transpose()):
                 plot = Scatter(title=f'{var_labels[x_i]} vs. {obj_labels[f_i]}',
                                labels=[var_labels[x_i], obj_labels[f_i]],
-        #                        figsize=(10,8)
-        #                        legend = True,
-                              )
-                xf = np.column_stack((x,f))
+                               #                        figsize=(10,8)
+                               #                        legend = True,
+                               )
+                xf = np.column_stack((x, f))
                 plot.add(xf)
-                ### Polynomial best fit lines
+                # Polynomial best fit lines
                 plot.do()
                 plot.legend = True
                 c = ['r', 'g', 'm']
-                for d in range(1, 3+1):
+                for d in range(1, 3 + 1):
                     coefs = np.polyfit(x, f, d)
                     y = np.polyval(coefs, x)
                     xy = np.column_stack((x, y))
                     xy = xy[xy[:, 0].argsort()]
                     label = f'Order {d} Best Fit'
-                    plot.ax.plot(xy[:,0], xy[:,1], label=label, c=c[d-1])
+                    plot.ax.plot(xy[:, 0], xy[:, 1], label=label, c=c[d - 1])
                 plot.do()
-                var_str = var_labels[x_i].replace(" ", "_").replace("/", "|").replace('%', 'precentage').replace("\\", "|")
-                obj_str = obj_labels[f_i].replace(" ", "_").replace("/", "|").replace('%', 'precentage').replace("\\", "|")
+                var_str = var_labels[x_i].replace(" ", "_").replace(
+                    "/", "|").replace('%', 'precentage').replace("\\", "|")
+                obj_str = obj_labels[f_i].replace(" ", "_").replace(
+                    "/", "|").replace('%', 'precentage').replace("\\", "|")
                 fName = f'{var_str}-vs-{obj_str}.png'
                 path = os.path.join(self.mapDir, fName)
                 mapPaths.append(path)
@@ -750,7 +754,6 @@ class OptStudy:
             return case
         except FileNotFoundError as err:
             print(err)
-
 
     @classmethod
     def loadCases(cls, directory):
