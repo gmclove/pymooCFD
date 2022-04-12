@@ -30,6 +30,8 @@ class PicklePath:
         #########################
         #    Checkpoint Load    #
         #########################
+        print(self.par_path)
+        print(self.abs_path)
         if os.path.isdir(self.abs_path):
             try:
                 self.update_self()
@@ -194,7 +196,7 @@ class PicklePath:
 
     @property
     def par_path(self):
-        return os.path.join(self.abs_path, os.pardir)
+        return os.path.dirname(self.abs_path)
 
     @property
     def log_path(self):
