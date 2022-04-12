@@ -87,7 +87,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         #    CHECKPOINT/PICKLE PATH INIT    #
         #####################################
         super().__init__(dir_path=case_path)
-        if self.cp_loaded:
+        if self.cp_init:
             return
         self.copy_base_case()
         saveTxt(self.abs_path, 'var.txt', self.x)

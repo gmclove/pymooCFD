@@ -30,12 +30,12 @@ class PicklePath:
         #########################
         #    Checkpoint Load    #
         #########################
-        self.cp_restart = False
+        self.cp_init = False
         if os.path.isdir(self.abs_path):
             try:
                 self.update_self()
                 self.logger.info('RESTARTED FROM CHECKPOINT')
-                self.cp_restart = True
+                self.cp_init = True
                 return
             except FileNotFoundError:
                 question = f'\n{self.rel_path} exists but {self.cp_rel_path} does not.\n\tEMPTY {self.rel_path} DIRECTORY?'
@@ -52,10 +52,10 @@ class PicklePath:
             # self.logger = self.get_logger()
             self.logger.info(
                 f'NEW - {self.rel_path} did not exist')
-        for i, sub_dir in enumerate(sub_dirs):
-            sub_dirs[i] = os.path.join(self.abs_path, sub_dir)
-            # os.makedirs(sub_dirs[i]) #, exist_ok=True)
-        self.sub_dirs = sub_dirs
+        # for i, sub_dir in enumerate(sub_dirs):
+        #     sub_dirs[i] = os.path.join(self.abs_path, sub_dir)
+        #     # os.makedirs(sub_dirs[i]) #, exist_ok=True)
+        # self.sub_dirs = sub_dirs
 
         # os.makedirs(self.abs_path, exist_ok=True)
 

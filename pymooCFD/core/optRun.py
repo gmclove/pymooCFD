@@ -39,17 +39,23 @@ class OptRun(PicklePath):
                  # client=None,
                  *args, **kwargs
                  ):
+        #####################################
+        #    Default/Optional Attributes    #
+        #####################################
+        ### Optimization Pre/Post Processing ###
+        self.n_opt = int(n_opt)
+        ##########################
+        #    Pickle Path Init    #
+        ##########################
         super().__init__(dir_path=run_path)
         self.run_path = self.abs_path
         self.logger.info(f'OPTIMIZATION STUDY- {self.rel_path}')
         self.logger.info(f'\tCheckpoint Path: {self.cp_path}')
-        if self.cp_restart:
+        if self.cp_init:
             return
         #######################################
         #    ATTRIBUTES NEEDED FOR RESTART    #
         #######################################
-
-
         # if not restart:
         # if os.path.exists(self.optDatDir):
         #     if os.path.exists(self.cp_path):
@@ -117,11 +123,7 @@ class OptRun(PicklePath):
         print(self.algorithm, self.problem)
         print(self.algorithm.problem)
         print(self.algorithm.problem.n_var)
-        #####################################
-        #    Default/Optional Attributes    #
-        #####################################
-        ### Optimization Pre/Post Processing ###
-        self.n_opt = int(n_opt)
+
 
         ###################################
         #    Attributes To Be Set Later   #
