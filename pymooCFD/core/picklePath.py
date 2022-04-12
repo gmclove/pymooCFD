@@ -122,7 +122,7 @@ class PicklePath:
         for key, val in self.__dict__.items():
             if key in loaded_self.__dict__:
                 loaded_val = loaded_self.__dict__[key]
-                if not val == loaded_val:
+                if not all(val) == all(loaded_val):
                     self.logger.warning(f'UPDATED {key}: {val} -> {loaded_val}')
         # if self.abs_path != loaded_self.abs_path:
         #     self.logger.warning('PATH CHANGED BETWEEN CHECKPOINTS')
