@@ -2,7 +2,7 @@ import numpy as np
 import os
 
 from pymoo.algorithms.base.genetic import GeneticAlgorithm \
-                                        as PymooGeneticAlgorithm
+    as PymooGeneticAlgorithm
 from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.core.callback import Callback
 from pymoo.util.display import Display
@@ -22,6 +22,8 @@ from pymoo.core.problem import Problem
 #################
 #    PROBLEM    #
 #################
+
+
 class CFDProblem_GA(Problem):
     def __init__(self, BaseCase,
                  # xl, xu,
@@ -50,8 +52,10 @@ class CFDProblem_GA(Problem):
         #     self.obj_labels = [f'obj{x_i}' for x_i in range(self.n_obj)]
         # else:
         #     self.obj_labels = obj_labels
-        # if not len(self.xl) == len(self.xu) and len(self.xu) == len(self.var_labels) and len(self.var_labels) == self.n_var:
-        #     raise Exception("Design Space Definition Incorrect")
+        if not (len(self.xl) == len(self.xu) and
+                len(self.xu) == len(self.BaseCase.var_labels) and
+                len(self.BaseCase.var_labels) == self.n_var):
+            raise Exception("Design Space Definition Incorrect")
 
     def _evaluate(self, X, out, *args, **kwargs):
         runDir = kwargs.get('runDir')
@@ -75,6 +79,8 @@ class CFDProblem_GA(Problem):
 #################
 #    DISPLAY    #
 #################
+
+
 class MyDisplay(Display):
     def _do(self, problem, evaluator, algorithm):
         super()._do(problem, evaluator, algorithm)
@@ -177,30 +183,8 @@ class CFDGeneticProblem(Problem):
         out['F'] = F
         out['G'] = G
 
-class CFDTestProblem(Problem):
-    def __init__(self, BaseCase,
-                 xl, xu,
-                 # n_var, n_obj, n_constr,
-                 # var_labels=None,
-                 # obj_labels=None,
-                 *args, **kwargs):
-        super().__init__(n_var=BaseCase.n_var,
-                         n_obj=BaseCase.n_obj,
-                         n_constr=BaseCase.n_constr,
-                         xl=np.array(xl),
-                         xu=np.array(xu),
-                         *args,
-                         **kwargs
-                         )
-        self.BaseCase = BaseCase
-        self.gen1Pop = None
-        self.validated = False
-        if not (len(self.xl) == len(self.xu) and
-                len(self.xu) == len(self.BaseCase.var_labels) and
-                len(self.BaseCase.var_labels) == self.n_var
-                ):
-            raise Exception("Design Space Definition Incorrect")
 
+class CFDTestProblem(CFDGeneticProblem):
     def _evaluate(self, X, out, *args, **kwargs):
         runDir = kwargs.get('runDir')
         gen = kwargs.get('gen')
@@ -216,13 +200,15 @@ class CFDTestProblem(Problem):
             cases.append(case)
         # self.BaseCase.parallelize(cases)
         F = np.ones((len(X), self.n_obj))
-        G = np.zeros((len(X), self.n_obj))-1
+        G = np.zeros((len(X), self.n_obj)) - 1
         out['F'] = F
         out['G'] = G
 
 ###################
 #    ALGORITHM    #
 ###################
+
+
 def get_CFDGeneticAlgorithm(GeneticAlgorithm):
     assert PymooGeneticAlgorithm in GeneticAlgorithm.mro()
     global CFDGeneticAlgorithm
@@ -266,22 +252,3 @@ def get_CFDGeneticAlgorithm(GeneticAlgorithm):
 
 
 CFDGeneticAlgorithm = get_CFDGeneticAlgorithm(NSGA2)
-
-# algorithm = NSGA2(pop_size=pop_size,
-#                   n_offsprings=n_offsprings,
-#                   eliminate_duplicates=True,
-#
-#                   termination = termination,
-#
-#                   sampling = sampling,
-#                   crossover = crossover,
-#                   mutation = mutation,
-#
-#                   display = display,
-#                   callback = callback,
-#                   )
-# # setup run specific criteria
-# algorithm.save_history = True
-# algorithm.seed = 1
-# algorithm.return_least_infeasible = True
-# algorithm.verbose = True
