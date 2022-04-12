@@ -19,6 +19,71 @@ from pymoo.core.problem import Problem
 # # = number of evaluations each generation
 # n_offsprings = int(pop_size * (2 / 3))
 
+<<<<<<< HEAD
+=======
+#####################################
+#### Genetic Algorithm Criteria #####
+#####################################
+n_gen = 2
+pop_size = 2
+# = number of evaluations each generation
+n_offsprings = int(pop_size * (2 / 3))
+
+#################
+#    PROBLEM    #
+#################
+
+
+class CFDProblem_GA(Problem):
+    def __init__(self, BaseCase,
+                 # xl, xu,
+                 # n_var, n_obj, n_constr,
+                 # var_labels=None,
+                 # obj_labels=None,
+                 *args, **kwargs):
+        super().__init__(n_var=BaseCase.n_var,
+                         n_obj=BaseCase.n_obj,
+                         n_constr=BaseCase.n_constr,
+                         xl=np.array(BaseCase.xl),
+                         xu=np.array(BaseCase.xu),
+                         *args,
+                         **kwargs
+                         )
+        self.BaseCase = BaseCase
+        self.gen1Pop = None
+        self.BaseCase.validated = False
+
+        # Design and Objective Space Labels
+        # if var_labels is None:
+        #     self.var_labels = [f'var{x_i}' for x_i in range(self.n_var)]
+        # else:
+        #     self.var_lables = var_labels
+        # if obj_labels is None:
+        #     self.obj_labels = [f'obj{x_i}' for x_i in range(self.n_obj)]
+        # else:
+        #     self.obj_labels = obj_labels
+        # if not len(self.xl) == len(self.xu) and len(self.xu) == len(self.var_labels) and len(self.var_labels) == self.n_var:
+        #     raise Exception("Design Space Definition Incorrect")
+
+    def _evaluate(self, X, out, *args, **kwargs):
+        runDir = kwargs.get('runDir')
+        gen = kwargs.get('gen')
+        # create generation directory for storing data/executing simulations
+        genDir = os.path.join(runDir, f'gen{gen}')
+        # create sub-directories for each individual
+        indDirs = [os.path.join(genDir, f'ind{i+1}') for i in range(len(X))]
+        # cases = self.genCases(indDirs, X)
+        assert len(indDirs) == len(X), 'len(paths) == len(X)'
+        cases = []
+        for x_i, x in enumerate(X):
+            case = self.BaseCase(indDirs[x_i], x)
+            cases.append(case)
+        self.BaseCase.parallelize(cases)
+        F = np.array([case.f for case in cases])
+        G = np.array([case.g for case in cases])
+        out['F'] = F
+        out['G'] = G
+>>>>>>> devel
 
 #################
 #    DISPLAY    #

@@ -128,7 +128,7 @@ class OptStudy(PicklePath):
         ###################################
         #    Attributes To Be Set Later   #
         ###################################
-        self.gen1Pop = None
+        self.gen1_pop = None
         self.cornerCases = None
         self.bndCases = None
         ### Test Case ###
@@ -181,24 +181,25 @@ class OptStudy(PicklePath):
             # population is None so ask for new pop
             if self.algorithm.pop is None:
                 self.logger.info('\tSTART-UP: first generation')
-                evalPop = self.algorithm.ask()
-                self.algorithm.pop = evalPop
-                self.algorithm.off = evalPop
+                eval_pop = self.algorithm.ask()
+                self.algorithm.pop = eval_pop
+                self.algorithm.off = eval_pop
             # Previous generation complete
             # If current objective does not have None values then get new pop
             # ie previous pop is complete evaluate new pop
             elif self.algorithm.off is None:
                 self.logger.info('\tSTART-UP: new generation')
-                evalPop = self.algorithm.ask()
-                self.algorithm.off = evalPop
+                eval_pop = self.algorithm.ask()
+                self.algorithm.off = eval_pop
             # Mid-generation start-up
             # evaluate offspring population
             else:
                 self.logger.info('\tSTART-UP: mid-generation')
-                evalPop = self.algorithm.off
+                eval_pop = self.algorithm.off
             # save checkpoint before evaluation
             self.save_self()
             # evaluate the individuals using the algorithm's evaluator (necessary to count evaluations for termination)
+<<<<<<< HEAD
             evalPop = self.algorithm.evaluator.eval(self.problem, evalPop,
                                                 run_path=self.run_path,
                                                 gen=self.algorithm.callback.gen
@@ -206,11 +207,20 @@ class OptStudy(PicklePath):
                                                 )
             # self.algorithm.evaluator.eval(self.problem, evalPop)
             # evalPop = self.runGen(evalPop)
+=======
+            eval_pop = self.algorithm.evaluator.eval(self.problem, eval_pop,
+                                                    runDir=self.runDir,
+                                                    gen=self.algorithm.callback.gen
+                                                    # alg=self.algorithm
+                                                    )
+            # self.algorithm.evaluator.eval(self.problem, eval_pop)
+            # eval_pop = self.runGen(eval_pop)
+>>>>>>> devel
             # print('self.algorithm.callback.gen:', self.algorithm.callback.gen)
             # print('self.algorithm.n_gen:', self.algorithm.n_gen)
 
             # returned the evaluated individuals which have been evaluated or even modified
-            self.algorithm.tell(infills=evalPop)
+            self.algorithm.tell(infills=eval_pop)
 
             # save top {n_opt} optimal evaluated cases in pf directory
             compGen = self.algorithm.callback.gen - 1
@@ -229,7 +239,14 @@ class OptStudy(PicklePath):
                             self.logger.warning('SKIPPED: UPDATE PARETO FRONT')
             # do some more things, printing, logging, storing or even modifying the algorithm object
             self.algorithm.off = None
+<<<<<<< HEAD
             self.save_self()
+=======
+            self.saveCP()
+            self.plotGen()
+            if self.algorithm.callback.gen == 1:
+                self.gen1_pop = eval_pop
+>>>>>>> devel
             if delPrevGen and not compGen == 1:
                 direct = os.path.join(
                     self.run_path, f'gen{compGen}')
@@ -311,6 +328,7 @@ class OptStudy(PicklePath):
     #######################
     #    CHECKPOINTING    #
     #######################
+<<<<<<< HEAD
     # def loadCP(self, hasTerminated=False):
     #     if os.path.exists(self.cp_path + '.old'):
     #         os.rename(self.cp_path + '.old', self.cp_path + '.npy')
@@ -386,6 +404,81 @@ class OptStudy(PicklePath):
     #         self.logger.debug('No Corner Cases to Save Checkpoints for')
     #     except AttributeError:
     #         self.logger.debug('No Corner Cases to Save Checkpoints for')
+=======
+    def loadCP(self, hasTerminated=False):
+        if os.path.exists(self.CP_path + '.old'):
+            os.rename(self.CP_path + '.old', self.CP_path + '.npy')
+        cp, = np.load(self.CP_path + '.npy', allow_pickle=True).flatten()
+
+        # logging
+        self.logger.info(f'\tCHECKPOINT LOADED: {self.CP_path}.npy')
+        self.logger.debug('\tRESTART DICTONARY')
+        for key in self.__dict__:
+            self.logger.debug(f'\t\t{key}: {self.__dict__[key]}')
+        self.logger.debug('\tCHECKPOINT DICTONARY')
+        for key in cp.__dict__:
+            self.logger.debug(f'\t\t{key}: {cp.__dict__[key]}')
+
+        if cp.algorithm is not None:
+            self.logger.debug('\tOPTIMIZATION ALGORITHM DICTONARY:')
+            for key, val in cp.algorithm.__dict__.items():
+                self.logger.debug(f'\t\t{key}: {val}')
+        #### TEMPORARY CODE ##########
+        # TRANSITION BETWEEN CHECKPOINTS
+        self.__dict__.update(cp.__dict__)
+        # only necessary if for the checkpoint the termination criterion has been met
+        try:
+            self.algorithm.has_terminated = hasTerminated
+        except AttributeError as err:
+            self.logger.error(err)
+
+    def saveCP(self):  # , alg=None):
+        gen = self.algorithm.callback.gen
+        self.logger.info(f'SAVING CHECKPOINT - GENERATION {gen}')
+        if self.algorithm.pop is not None:
+            genX = self.algorithm.pop.get('X')
+            if None not in genX:
+                saveTxt(self.runDir, f'gen{gen}X.txt', genX)
+            genF = self.algorithm.pop.get('F')
+            if None not in genF:
+                saveTxt(self.runDir, f'gen{gen}F.txt', genF)
+            if self.algorithm.off is None:
+                self.logger.info(f'\tgeneration {gen-1} complete')
+
+        elif self.algorithm.off is not None:  # and self.algorithm.pop is not None
+            self.logger.info('\tmid-generation checkpoint')
+        # except TypeError:
+        #     self.logger.info('\tmid-generation')
+        # save checkpoint
+        np.save(self.CP_path + '.temp.npy', self)
+        if os.path.exists(self.CP_path + '.npy'):
+            os.rename(self.CP_path + '.npy', self.CP_path + '.old.npy')
+        os.rename(self.CP_path + '.temp.npy', self.CP_path + '.npy')
+        if os.path.exists(self.CP_path + '.old.npy'):
+            os.remove(self.CP_path + '.old.npy')
+        # Checkpoint each cfdCase object stored in optStudy
+        try:
+            self.testCase.saveCP()
+        except AttributeError:
+            self.logger.debug('No Test Case to Save Checkpoint for')
+        except FileNotFoundError:
+            self.logger.debug('No Test Case to Save Checkpoint for')
+        try:
+            for case in self.bndCases:
+                case.saveCP()
+        except TypeError:
+            self.logger.debug('No Boundary Cases to Save Checkpoints for')
+        except AttributeError:
+            self.logger.debug('No Boundary Cases to Save Checkpoints for')
+            # self.logger.error(e)
+        try:
+            for case in self.cornerCases:
+                case.saveCP()
+        except TypeError:
+            self.logger.debug('No Corner Cases to Save Checkpoints for')
+        except AttributeError:
+            self.logger.debug('No Corner Cases to Save Checkpoints for')
+>>>>>>> devel
             # self.logger.error(e)
 
         # # default use self.algorithm
@@ -403,11 +496,15 @@ class OptStudy(PicklePath):
     #     else:
     #         self.logger.info(f'\t{self.cp_path} does not exist')
 
-
     ###################
     #    TEST CASE    #
     ###################
+<<<<<<< HEAD
     def gen_test_case(self, test_caseDir='test_case'):
+=======
+
+    def genTestCase(self, testCaseDir='test_case'):
+>>>>>>> devel
         self.logger.info('\tGENERATING TEST CASE')
         # shutil.rmtree('test_case', ignore_errors=True)
         xl = self.problem.xl
@@ -449,9 +546,10 @@ class OptStudy(PicklePath):
     #     print(np.array([case.f for case in cases]))
     #     out['F'] = np.array([case.f for case in cases])
     #     if gen == 1:
-    #         self.gen1Pop = cases
+    #         self.gen1_pop = cases
     #     return out
 
+<<<<<<< HEAD
     def runGen(self, pop):
         # get the design space values of the algorithm
         X = pop.get("X")
@@ -476,11 +574,37 @@ class OptStudy(PicklePath):
             self.mapGen1()
         self.plotGen()
         return pop
+=======
+    # def runGen(self, pop):
+    #     # get the design space values of the algorithm
+    #     X = pop.get("X")
+    #     # implement your evluation
+    #     gen = self.algorithm.callback.gen
+    #     # create generation directory for storing data/executing simulations
+    #     genDir = os.path.join(self.runDir, f'gen{gen}')
+    #     # create sub-directories for each individual
+    #     indDirs = [os.path.join(genDir, f'ind{i+1}') for i in range(len(X))]
+    #     cases = self.genCases(indDirs, X)
+    #     self.problem.BaseCase.parallelize(cases)
+    #     F = np.array([case.f for case in cases])
+    #     G = np.array([case.g for case in cases])
+    #     # objectives
+    #     pop.set("F", F)
+    #     # for constraints
+    #     pop.set("G", G)
+    #     # this line is necessary to set the CV and feasbility status - even for unconstrained
+    #     set_cv(pop)
+    #     if gen == 1:
+    #         self.gen1_pop = cases
+    #         self.mapGen1()
+    #     self.plotGen()
+    #     return pop
+>>>>>>> devel
 
     def plotGen(self, gen=None, max_leg_len=10):
         if gen is None:
             gen = self.algorithm.n_gen
-        pop = self.algorithm.history[gen-1].pop
+        pop = self.algorithm.history[gen - 1].pop
         if len(pop) <= max_leg_len:
             leg = True
         else:
@@ -488,26 +612,42 @@ class OptStudy(PicklePath):
         #### Parameter Space Plot ####
         popX = pop.get('X')
         var_plot = Scatter(title=f'Generation {gen} Design Space',
+<<<<<<< HEAD
                        legend=leg,
                        labels=self.problem.BaseCase.var_labels,
         #                figsize=(10,8)
                       )
+=======
+                           legend=leg,
+                           labels=self.BaseCase.var_labels,
+                           #                figsize=(10,8)
+                           )
+>>>>>>> devel
         for ind_i, ind in enumerate(popX):
             var_plot.add(ind, label=f'IND {ind_i+1}')
         # save parameter space plot
-        var_plot.save(os.path.join(self.plotDir, f'gen{gen}_obj_space.png'), dpi=100)
+        var_plot.save(os.path.join(
+            self.plotDir, f'gen{gen}_obj_space.png'), dpi=100)
 
         #### Objective Space Plot ####
         popF = pop.get('F')
         obj_plot = Scatter(title=f'Generation {gen} Objective Space',
+<<<<<<< HEAD
                        legend=leg,
                        labels=self.problem.BaseCase.obj_labels
                       )
+=======
+                           legend=leg,
+                           labels=self.BaseCase.obj_labels
+                           )
+>>>>>>> devel
         for ind_i, ind in enumerate(popF):
             obj_plot.add(ind, label=f'IND {ind_i+1}')
         # save parameter space plot
-        obj_plot.save(os.path.join(self.plotDir, f'gen{gen}_obj_space.png'), dpi=100)
-        self.logger.info(f'PLOTTED: Generation {gen} Design and Objective Spaces')
+        obj_plot.save(os.path.join(
+            self.plotDir, f'gen{gen}_obj_space.png'), dpi=100)
+        self.logger.info(
+            f'PLOTTED: Generation {gen} Design and Objective Spaces')
         return var_plot, obj_plot
 
     def mapGen1(self):
@@ -523,25 +663,27 @@ class OptStudy(PicklePath):
             for f_i, f in enumerate(popF.transpose()):
                 plot = Scatter(title=f'{var_labels[x_i]} vs. {obj_labels[f_i]}',
                                labels=[var_labels[x_i], obj_labels[f_i]],
-        #                        figsize=(10,8)
-        #                        legend = True,
-                              )
-                xf = np.column_stack((x,f))
+                               #                        figsize=(10,8)
+                               #                        legend = True,
+                               )
+                xf = np.column_stack((x, f))
                 plot.add(xf)
-                ### Polynomial best fit lines
+                # Polynomial best fit lines
                 plot.do()
                 plot.legend = True
                 c = ['r', 'g', 'm']
-                for d in range(1, 3+1):
+                for d in range(1, 3 + 1):
                     coefs = np.polyfit(x, f, d)
                     y = np.polyval(coefs, x)
                     xy = np.column_stack((x, y))
                     xy = xy[xy[:, 0].argsort()]
                     label = f'Order {d} Best Fit'
-                    plot.ax.plot(xy[:,0], xy[:,1], label=label, c=c[d-1])
+                    plot.ax.plot(xy[:, 0], xy[:, 1], label=label, c=c[d - 1])
                 plot.do()
-                var_str = var_labels[x_i].replace(" ", "_").replace("/", "|").replace('%', 'precentage').replace("\\", "|")
-                obj_str = obj_labels[f_i].replace(" ", "_").replace("/", "|").replace('%', 'precentage').replace("\\", "|")
+                var_str = var_labels[x_i].replace(" ", "_").replace(
+                    "/", "|").replace('%', 'precentage').replace("\\", "|")
+                obj_str = obj_labels[f_i].replace(" ", "_").replace(
+                    "/", "|").replace('%', 'precentage').replace("\\", "|")
                 fName = f'{var_str}-vs-{obj_str}.png'
                 path = os.path.join(self.mapDir, fName)
                 mapPaths.append(path)
@@ -749,7 +891,6 @@ class OptStudy(PicklePath):
             return case
         except FileNotFoundError as err:
             print(err)
-
 
     @classmethod
     def loadCases(cls, directory):
