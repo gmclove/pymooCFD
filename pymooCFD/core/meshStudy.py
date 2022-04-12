@@ -122,7 +122,7 @@ class MeshStudy:  # (CFDCase):
                 '\tMesh Size Factor | Number of Elements\n\t\t' + str(dat).replace('\n', '\n\t\t'))
             saveTxt(self.folder, 'size_factors-vs-numElem.txt', dat)
 
-        self.base_case.saveCP()
+        self.base_case.save_self()
 
     def exec(self):
         self.logger.info('\tEXECUTING MESH STUDY')
@@ -131,7 +131,7 @@ class MeshStudy:  # (CFDCase):
         obj = np.array([case.f for case in self.cases])
         self.logger.info('\tObjectives:\n\t\t' +
                          str(obj).replace('\n', '\n\t\t'))
-        self.base_case.saveCP()
+        self.base_case.save_self()
 
     def plot(self):
         self.logger.info('\tPLOTTING MESH STUDY')
@@ -203,7 +203,7 @@ class MeshStudy:  # (CFDCase):
             fName = f'ms_plot-{tail}-numElem_v_obj{obj_i}_v_time.png'
             fPath = os.path.join(self.folder, fName)
             plot.save(fPath, dpi=100)
-        self.base_case.saveCP()
+        self.base_case.save_self()
 
     ################
     #    LOGGER    #
