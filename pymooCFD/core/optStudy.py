@@ -131,7 +131,7 @@ class OptStudy:
         ###################################
         #    Attributes To Be Set Later   #
         ###################################
-        self.gen1Pop = None
+        self.gen1_pop = None
         self.cornerCases = None
         self.bndCases = None
         ### Test Case ###
@@ -183,36 +183,36 @@ class OptStudy:
             # population is None so ask for new pop
             if self.algorithm.pop is None:
                 self.logger.info('\tSTART-UP: first generation')
-                evalPop = self.algorithm.ask()
-                self.algorithm.pop = evalPop
-                self.algorithm.off = evalPop
+                eval_pop = self.algorithm.ask()
+                self.algorithm.pop = eval_pop
+                self.algorithm.off = eval_pop
             # Previous generation complete
             # If current objective does not have None values then get new pop
             # ie previous pop is complete evaluate new pop
             elif self.algorithm.off is None:
                 self.logger.info('\tSTART-UP: new generation')
-                evalPop = self.algorithm.ask()
-                self.algorithm.off = evalPop
+                eval_pop = self.algorithm.ask()
+                self.algorithm.off = eval_pop
             # Mid-generation start-up
             # evaluate offspring population
             else:
                 self.logger.info('\tSTART-UP: mid-generation')
-                evalPop = self.algorithm.off
+                eval_pop = self.algorithm.off
             # save checkpoint before evaluation
             self.saveCP()
             # evaluate the individuals using the algorithm's evaluator (necessary to count evaluations for termination)
-            evalPop = self.algorithm.evaluator.eval(self.problem, evalPop,
+            eval_pop = self.algorithm.evaluator.eval(self.problem, eval_pop,
                                                     runDir=self.runDir,
                                                     gen=self.algorithm.callback.gen
                                                     # alg=self.algorithm
                                                     )
-            # self.algorithm.evaluator.eval(self.problem, evalPop)
-            # evalPop = self.runGen(evalPop)
+            # self.algorithm.evaluator.eval(self.problem, eval_pop)
+            # eval_pop = self.runGen(eval_pop)
             # print('self.algorithm.callback.gen:', self.algorithm.callback.gen)
             # print('self.algorithm.n_gen:', self.algorithm.n_gen)
 
             # returned the evaluated individuals which have been evaluated or even modified
-            self.algorithm.tell(infills=evalPop)
+            self.algorithm.tell(infills=eval_pop)
 
             # save top {n_opt} optimal evaluated cases in pf directory
             compGen = self.algorithm.callback.gen - 1
@@ -232,6 +232,9 @@ class OptStudy:
             # do some more things, printing, logging, storing or even modifying the algorithm object
             self.algorithm.off = None
             self.saveCP()
+            self.plotGen()
+            if self.algorithm.callback.gen == 1:
+                self.gen1_pop = eval_pop
             if delPrevGen and not compGen == 1:
                 direct = os.path.join(
                     self.runDir, f'gen{compGen}')
@@ -449,33 +452,33 @@ class OptStudy:
     #     print(np.array([case.f for case in cases]))
     #     out['F'] = np.array([case.f for case in cases])
     #     if gen == 1:
-    #         self.gen1Pop = cases
+    #         self.gen1_pop = cases
     #     return out
 
-    def runGen(self, pop):
-        # get the design space values of the algorithm
-        X = pop.get("X")
-        # implement your evluation
-        gen = self.algorithm.callback.gen
-        # create generation directory for storing data/executing simulations
-        genDir = os.path.join(self.runDir, f'gen{gen}')
-        # create sub-directories for each individual
-        indDirs = [os.path.join(genDir, f'ind{i+1}') for i in range(len(X))]
-        cases = self.genCases(indDirs, X)
-        self.problem.BaseCase.parallelize(cases)
-        F = np.array([case.f for case in cases])
-        G = np.array([case.g for case in cases])
-        # objectives
-        pop.set("F", F)
-        # for constraints
-        pop.set("G", G)
-        # this line is necessary to set the CV and feasbility status - even for unconstrained
-        set_cv(pop)
-        if gen == 1:
-            self.gen1Pop = cases
-            self.mapGen1()
-        self.plotGen()
-        return pop
+    # def runGen(self, pop):
+    #     # get the design space values of the algorithm
+    #     X = pop.get("X")
+    #     # implement your evluation
+    #     gen = self.algorithm.callback.gen
+    #     # create generation directory for storing data/executing simulations
+    #     genDir = os.path.join(self.runDir, f'gen{gen}')
+    #     # create sub-directories for each individual
+    #     indDirs = [os.path.join(genDir, f'ind{i+1}') for i in range(len(X))]
+    #     cases = self.genCases(indDirs, X)
+    #     self.problem.BaseCase.parallelize(cases)
+    #     F = np.array([case.f for case in cases])
+    #     G = np.array([case.g for case in cases])
+    #     # objectives
+    #     pop.set("F", F)
+    #     # for constraints
+    #     pop.set("G", G)
+    #     # this line is necessary to set the CV and feasbility status - even for unconstrained
+    #     set_cv(pop)
+    #     if gen == 1:
+    #         self.gen1_pop = cases
+    #         self.mapGen1()
+    #     self.plotGen()
+    #     return pop
 
     def plotGen(self, gen=None, max_leg_len=10):
         if gen is None:

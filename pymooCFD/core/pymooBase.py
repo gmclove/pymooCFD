@@ -69,8 +69,6 @@ class CFDProblem_GA(Problem):
         G = np.array([case.g for case in cases])
         out['F'] = F
         out['G'] = G
-        if gen == 1:
-            self.gen1Pop = cases
 
 #################
 #    DISPLAY    #
