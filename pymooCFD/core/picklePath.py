@@ -46,7 +46,7 @@ class PicklePath:
                 # self.logger.info('RE-INITIALIZING OPTIMIZATION ALGORITHM')
         else:
             os.makedirs(self.abs_path)
-            self.logger = self.get_logger()
+            # self.logger = self.get_logger()
             self.logger.info(
                 f'NEW - {self.rel_path} did not exist')
         for i, sub_dir in enumerate(sub_dirs):
@@ -54,7 +54,7 @@ class PicklePath:
             # os.makedirs(sub_dirs[i]) #, exist_ok=True)
         self.sub_dirs = sub_dirs
 
-        os.makedirs(self.abs_path, exist_ok=True)
+        # os.makedirs(self.abs_path, exist_ok=True)
 
         # for path in sub_dirs:
         #     os.makedirs(path, exist_ok=True)
