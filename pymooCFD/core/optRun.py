@@ -103,6 +103,12 @@ class OptRun(PicklePath):
                         save_history=algorithm.save_history,
                         return_least_infeasible=algorithm.return_least_infeasible,
                         **kwargs)
+        algorithm.callback.__init__()
+        algorithm.save_history = True
+        algorithm.seed = 1
+        algorithm.return_least_infeasible = True
+        algorithm.verbose = True
+
         self.algorithm = algorithm
         self.problem = problem
         self.gen_bnd_cases()

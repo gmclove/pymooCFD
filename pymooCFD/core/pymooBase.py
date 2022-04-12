@@ -240,13 +240,14 @@ def get_CFDGeneticAlgorithm(GeneticAlgorithm):
                              **kwargs
                              )
 
-        def setup(self, problem, **kwargs):
-            super().setup(self, problem, **kwargs)
-            self.callback.__init__()
-            self.save_history = True
-            self.seed = 1
-            self.return_least_infeasible = True
-            self.verbose = True
+        # def setup(self, problem, **kwargs):
+        #     super().setup(self, problem, **kwargs)
+            # self.callback.__init__()
+            # self.save_history = True
+            # self.seed = 1
+            # self.return_least_infeasible = True
+            # self.verbose = True
+
 
     return CFDGeneticAlgorithm
 
