@@ -88,8 +88,7 @@ class RANS_k_eps(FluentCase):
             self.logger.error('LESS THAN 2000 ITERATIONS PREFORMED')
         rel_dat = dat[-2000:, 1:]
         saveTxt(self.abs_path, 'residual_avgs.txt', np.mean(rel_dat, axis=0))
-
-        avg = np.mean(dat[-2000:, 1:])
+        avg = np.mean(rel_dat)
         self.f = [avg, self.solnTime]
         return self.f
 
