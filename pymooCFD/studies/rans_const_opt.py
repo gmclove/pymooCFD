@@ -21,7 +21,7 @@ def exec_test():
     opt_run = study.new_run(alg, prob, run_dir='test-run')
     print(opt_run.algorithm)
     print(opt_run.algorithm.problem)
-    print(opt_run_algorithm.problem.n_var)
+    print(opt_run.algorithm.problem.n_var)
 
     # opt_run.test_case.run()
     # opt_run.run_bnd_cases()
