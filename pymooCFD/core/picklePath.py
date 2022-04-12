@@ -2,6 +2,7 @@ import logging
 import os
 import numpy as np
 import shutil
+from deepdiff import DeepDiff
 
 from pymooCFD.util.loggingTools import MultiLineFormatter, DispNameFilter
 import pymooCFD.config as config
@@ -119,11 +120,13 @@ class PicklePath:
     def update_warnings(self, loaded_self=None):
         if loaded_self is None:
             loaded_self = self.load_self()
-        for key, val in self.__dict__.items():
-            if key in loaded_self.__dict__:
-                loaded_val = loaded_self.__dict__[key]
-                if not all(val) == all(loaded_val):
-                    self.logger.warning(f'UPDATED {key}: {val} -> {loaded_val}')
+        diff = DeepDiff(self, loaded_self)
+        self.logger.warning(str(diff))
+        # for key, val in self.__dict__.items():
+        #     if key in loaded_self.__dict__:
+        #         loaded_val = loaded_self.__dict__[key]
+        #         if not all(val) == all(loaded_val):
+        #             self.logger.warning(f'UPDATED {key}: {val} -> {loaded_val}')
         # if self.abs_path != loaded_self.abs_path:
         #     self.logger.warning('PATH CHANGED BETWEEN CHECKPOINTS')
         #     self.logger.debug(str(loaded_self.rel_path) + ' -> ' + str(self.rel_path))
