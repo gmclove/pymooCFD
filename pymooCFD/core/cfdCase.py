@@ -115,12 +115,8 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         # Design and Objective Space Labels
         if self.var_labels is None:
             self.var_labels = [f'var{x_i}' for x_i in range(self.n_var)]
-        else:
-            self.var_labels = var_labels
         if self.obj_labels is None:
             self.obj_labels = [f'obj{x_i}' for x_i in range(self.n_obj)]
-        else:
-            self.obj_labels = obj_labels
 
         ###################################################
         #    Attributes To Be Set Later During Each Run   #
