@@ -22,3 +22,7 @@ def main():
     opt_run.test_case.run()
     opt_run.run_bnd_cases()
     opt_run.run()
+
+
+if __name__ == '__main__':
+    main()
