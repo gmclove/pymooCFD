@@ -96,6 +96,7 @@ class OptRun(PicklePath):
         #    Required Attributes    #
         #############################
         self.run_path = self.abs_path
+        print(algorithm)
         self.algorithm = algorithm.setup(problem,
                                          seed=algorithm.seed,
                                          verbose=algorithm.verbose,
