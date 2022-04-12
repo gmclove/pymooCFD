@@ -17,8 +17,8 @@ def exec_test():
         alg = study.get_algorithm(n_gen=2, pop_size=3,
                                   n_offsprings=2)
         opt_run = study.new_run(alg, prob)
-    opt_run.test_case.run()
-    opt_run.run_bnd_cases()
+    # opt_run.test_case.run()
+    # opt_run.run_bnd_cases()
     opt_run.run()
 
 def exec():
