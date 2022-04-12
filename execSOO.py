@@ -3,12 +3,12 @@
 # @Last modified by:   glove
 # @Last modified time: 2021-12-16T09:37:30-05:00
 
-# from setupOpt import optStudy
+# from setupOpt import optRun
 import numpy as np
 #from pymooCFD.studies.oscillCyl import BaseCase
 #from pymoo.factory import get_termination
 import os
-from pymooCFD.studies.oscillCyl_soo import optStudy
+from pymooCFD.studies.oscillCyl_soo import optRun
 
 def main():
     '''
@@ -16,47 +16,47 @@ def main():
 
     import your optimization study object/instance from setupOpt.py and execute
     '''
-    #print(optStudy.algorithm.__dict__)
-    #print(optStudy.problem.__dict__)
-    #print(optStudy.BaseCase.__dict__)
-    #print(optStudy.__dict__)
-    #noOscCase = optStudy.BaseCase('no_osc_case', [0, 0])
+    #print(optRun.algorithm.__dict__)
+    #print(optRun.problem.__dict__)
+    #print(optRun.BaseCase.__dict__)
+    #print(optRun.__dict__)
+    #noOscCase = optRun.BaseCase('no_osc_case', [0, 0])
     #noOscCase.run()
 
-    #optStudy.runDir = os.path.join(optStudy.optDatDir, 'run')
-    #optStudy.saveCP()
-    #optStudy.test_case.loadCP()
-    #print(optStudy.test_case.__dict__)
-    #optStudy.algorithm.termination = get_termination("n_gen", 25)
-    #print(optStudy.algorithm.callback.gen)
+    #optRun.runDir = os.path.join(optRun.optDatDir, 'run')
+    #optRun.saveCP()
+    #optRun.test_case.loadCP()
+    #print(optRun.test_case.__dict__)
+    #optRun.algorithm.termination = get_termination("n_gen", 25)
+    #print(optRun.algorithm.callback.gen)
     ### Pre-Proccess ###
-    # optStudy.preProc()
-    # optStudy.runtest_case()
-    #optStudy.test_case.meshSFs = np.around(
+    # optRun.preProc()
+    # optRun.runtest_case()
+    #optRun.test_case.meshSFs = np.around(
     #                        np.arange(0.3, 1.6, 0.1), decimals=2)
-    #optStudy.BaseCase = BaseCase
-    #optStudy.saveCP()
-    #optStudy.test_case.abs_path = os.path.join(optStudy.runDir, 'test_case')
-    #optStudy.saveCP()
+    #optRun.BaseCase = BaseCase
+    #optRun.saveCP()
+    #optRun.test_case.abs_path = os.path.join(optRun.runDir, 'test_case')
+    #optRun.saveCP()
 
-    # optStudy.test_case.mesh_study()
-    #optStudy.genBndCases()
-    #for case in optStudy.bndCases:
+    # optRun.test_case.mesh_study()
+    #optRun.genBndCases()
+    #for case in optRun.bndCases:
      #   case.meshSFs = np.around(
     #                         np.arange(0.3, 1.6, 0.1), decimals=2)
-    #optStudy.saveCP()
-    #optStudy.run_bnd_cases(n_pts=3, getDiags=True, do_mesh_study=True)
-    # for case in optStudy.gen1Pop:
+    #optRun.saveCP()
+    #optRun.run_bnd_cases(n_pts=3, getDiags=True, do_mesh_study=True)
+    # for case in optRun.gen1Pop:
     #     case.logger = case.getLogger()
-    # optStudy.runGen1()
-    optStudy.run()
-    # optStudy.mesh_study(optStudy.gen1Pop)
+    # optRun.runGen1()
+    optRun.run()
+    # optRun.mesh_study(optRun.gen1Pop)
 
     ### Execute Study ###
-    # optStudy.run(restart = False)
+    # optRun.run(restart = False)
 
     ### Post-Process ###
-    # optStudy.archive()
+    # optRun.archive()
 
 
 if __name__ == '__main__':

@@ -17,7 +17,7 @@ from glob import glob
 # import scipy
 # from scipy.integrate import quad
 
-from pymooCFD.core.optStudy import OptStudy
+from pymooCFD.core.optRun import OptRun
 from pymooCFD.studies.oscillCyl_x2 import OscillCylinder as OscCylX2
 from pymooCFD.core.cfdCase import YALES2Case  # CFDCase
 # from pymooCFD.util.yales2Tools import getLatestXMF
@@ -124,7 +124,7 @@ class OscillCylinder(OscCylX2):
         return x
 
 
-class OscillCylinderOpt(OptStudy):
+class OscillCylinderOpt(OptRun):
     def __init__(self, algorithm, BaseCase,
                  # *args, **kwargs
                  ):
@@ -137,7 +137,7 @@ class OscillCylinderOpt(OptStudy):
                          )
 
 
-MyOptStudy = OscillCylinderOpt
+MyOptRun = OscillCylinderOpt
 BaseCase = OscillCylinder
 
 
@@ -167,7 +167,7 @@ class GA_CFD(Problem):
                          )
 
     def _evaluate(self, X, out, *args, **kwargs):
-        out = optStudy.runGen(X, out)
+        out = optRun.runGen(X, out)
 
 
 problem = GA_CFD()
@@ -205,7 +205,7 @@ class MyCallback(Callback):
 
     def notify(self, alg):
         # save checkpoint
-        optStudy.saveCP()
+        optRun.saveCP()
         # increment generation
         self.gen += 1
         self.data["best"].append(alg.pop.get("F").min())
@@ -284,4 +284,4 @@ algorithm.verbose = True
 
 ################################################################################
 ########  Optimization Study Object Initialization ##########
-optStudy = MyOptStudy(algorithm, BaseCase)
+optRun = MyOptRun(algorithm, BaseCase)

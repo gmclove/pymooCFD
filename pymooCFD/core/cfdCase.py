@@ -112,18 +112,16 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         # Using kwargs (not an option with labels as class variables)
         # self.var_labels = kwargs.get('var_labels')
         # self.obj_labels = kwargs.get('obj_labels')
-
         # Design and Objective Space Labels
-        if self.var_labels is None:
+        if var_labels is None:
             self.var_labels = [f'var{x_i}' for x_i in range(self.n_var)]
         else:
             self.var_labels = var_labels
-        if self.obj_labels is None:
+        if obj_labels is None:
             self.obj_labels = [f'obj{x_i}' for x_i in range(self.n_obj)]
         else:
             self.obj_labels = obj_labels
-        # if not len(self.xl) == len(self.xu) and len(self.xu) == len(self.var_labels) and len(self.var_labels) == self.n_var:
-        #     raise Exception("Design Space Definition Incorrect")
+
         ###################################################
         #    Attributes To Be Set Later During Each Run   #
         ###################################################
@@ -147,21 +145,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         ### Save Checkpoint ###
         self.save_self()
 
-    # def run(self):
-    #     self.preProc()
-    #     proc = self.solve()
-    #     proc.wait()
-    #     obj = self.postProc()
-    #     return obj
 
-    # def solve(self):
-    #     proc = self._solve()
-    #     return proc
-    # def slurmSolve(self):
-    #     cmd = ['sbatch', '--wait', self.jobFile]
-    #     proc = subprocess.Popen(cmd, cwd=self.case_path,
-    #                             stdout=subprocess.DEVNULL)
-    #     return proc
     ###  Parallel Processing  ###
     @classmethod
     def parallelizeInit(cls, externalSolver):
@@ -205,13 +189,6 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
             cls.pool.close()
             cls.pool.join()
 
-    # def parallelizeCleanUp(self):
-    #     self.pool.terminate()
-    # def solve(self):
-    #     # if not self.complete:
-    #     if self.f is None:
-    #         self._solve()
-
     def solve(self):
         if self.f is None or not np.isfinite(np.sum(self.f)):
             # try to prevent re-run if execution done
@@ -247,14 +224,11 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
             self.logger.warning('SKIPPED: SOLVE')
 
     def solveExternal(self):
-        #self.restart = True
-        #start = time.time()
         self.logger.info('SOLVING AS SUBPROCESS...')
         self.logger.info(f'\tcommand: {self.solverExecCmd}')
         subprocess.run(self.solverExecCmd, cwd=self.abs_path,
                        stdout=subprocess.DEVNULL)
-        #end = time.time()
-        #self.logger.info(f'Solve Time: {start-end}')
+
 
     def run(self, max_reruns=3, n_reruns=0):
         # print('RUNNING')
@@ -273,44 +247,22 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                 else:
                     self.logger.warning(
                         f'MAX NUMBER OF RE-RUNS ({max_reruns}) REACHED')
-            # self.postProc()
         else:
             self.logger.warning(
                 'SKIPPED: RUN - self.run() called but case already complete')
 
-    # def execDone(self):
-    #     pass
-
     def preProc(self):
         if self.f is None or not np.isfinite(np.sum(self.f)):
             if self.restart:
-                # self.cp_rel_path = os.path.join
                 self.logger.info(
                     'PRE-PROCESS RESTART - Using self._preProc_restart()')
                 self._preProc_restart()
             else:
                 self._preProc()
-            # save variables in case directory as text file after completing pre-processing
-            # saveTxt(self.abs_path, 'var.txt', self.x)
             self.logger.info('COMPLETE: PRE-PROCESS')
-            # self.restart = True  # ??????????????????
             self.save_self()
         else:
             self.logger.warning('SKIPPED: PRE-PROCESS')
-    # def pySolve(self):
-    #     self.logger.info('SOLVING . . . ')
-    #     self._pySolve()
-    #     self.logger.info('SOLVED')
-    # if self.solverExecCmd is None:
-    #     self.logger.error('No external solver execution command give. \
-    #                        Please override solve() method with python CFD \
-    #                        solver or add solverExecCmd to CFDCase object.')
-    #     raise Exception('No external solver execution command give. Please \
-    #                     override solve() method with python CFD solver or \
-    #                     add solverExecCmd to CFDCase object.')
-    # else:
-    #     subprocess.run(self.solverExecCmd, cwd=self.abs_path,
-    #                    stdout=subprocess.DEVNULL)
 
     def postProc(self):
         if self.f is None or not np.isfinite(np.sum(self.f)):
@@ -374,10 +326,6 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
     @property
     def mesh_studyDir(self):
         return os.path.join(self.abs_path, 'mesh_study')
-
-    # @property
-    # def cp_path(self):
-    #     return os.path.join(self.abs_path, 'case.npy')
 
     ### Job Lines ###
     @property
@@ -452,8 +400,6 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         self._x = x
         if os.path.exists(self.abs_path):
             saveTxt(self.abs_path, 'var.txt', x)
-            # path = os.path.join(self.abs_path, 'var.txt')
-            # np.savetxt(path, x)
 
     @property
     def g(self): return self._g
@@ -466,8 +412,6 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
             g = np.array(g)
             if not g.shape:  # for single objective studies
                 g = np.array([g])
-            # path = os.path.join(self.abs_path, 'const.txt')
-            # np.savetxt(path, g)
             saveTxt(self.abs_path, 'const.txt', g)
             if np.isnan(np.sum(g)):
                 self.logger.warning(f'CONSTRAINT(S) CONTAINS NaN VALUE - {g}')
@@ -500,128 +444,72 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                             f'\t Objective {obj_i}: {obj} -> {np.inf}')
                         self._f = f
 
-    ################
-    #    LOGGER    #
-    ################
-    # def getLogger(self):
-    #     _, tail = os.path.split(self.abs_path)
-    #     # Get Child Logger using hierarchical "dot" convention
-    #     logger = logging.getLogger(__name__ + '.' + self.abs_path)
-    #     logger.setLevel(config.CFD_CASE_LOGGER_LEVEL)
-    #     # Filters
-    #     # Filters added to logger do not propogate up logger hierarchy
-    #     # Filters added to handlers do propogate
-    #     # filt = DispNameFilter(self.abs_path)
-    #     # logger.addFilter(filt)
-    #     # File Handle
-    #     logFile = os.path.join(self.abs_path, f'{tail}.log')
-    #     fileHandler = logging.FileHandler(logFile)
-    #     logger.addHandler(fileHandler)
-    #     # Stream Handler
-    #     # parent root logger takes care of stream display
-    #     # Formatter
-    #     formatter = MultiLineFormatter(
-    #         '%(asctime)s :: %(levelname)-8s :: %(name)s :: %(message)s')
-    #     fileHandler.setFormatter(formatter)
-    #     # Initial Message
-    #     logger.info('-' * 30)
-    #     logger.info('LOGGER INITIALIZED')
-    #     # Plot logger
-    #     plot_logger = logging.getLogger(Scatter.__name__)
-    #     plot_logger.setLevel(config.PLOT_LOGGER_LEVEL)
-    #     return logger
-
-    #######################
-    #    CHECKPOINTING    #
-    #######################
-    # def save_self(self):
-    #     cp_path = self.cp_path.replace('.npy', '')
-    #     try:
-    #         np.save(cp_path + '.temp.npy', self)
-    #         if os.path.exists(cp_path + '.npy'):
-    #             os.rename(cp_path + '.npy', cp_path + '.old.npy')
-    #         os.rename(cp_path + '.temp.npy', cp_path + '.npy')
-    #         if os.path.exists(cp_path + '.old.npy'):
-    #             os.remove(cp_path + '.old.npy')
-    #     except FileNotFoundError as err:
-    #         self.logger.error(str(err))
     def _update_filter(self, loaded_self):
-        cp = self.load_self()
-        # print(cp._x)
-        if np.array_equal(self._x, cp._x):
-            if self.abs_path != cp.abs_path:
-                self.logger.warning(
-                    'CASE DIRECTORY CHANGED BETWEEN CHECKPOINTS')
-                self.logger.debug(str(cp.rel_path) + ' -> ' + str(self.rel_path))
-            if cp.cp_path != self.cp_path:
-                self.logger.warning(f'{cp.cp_path} != {self.cp_path}')
-            if cp.meshSF != self.meshSF:
-                self.logger.warning(f'{cp.meshSF} != {self.meshSF}')
+        if np.array_equal(self._x, loaded_self._x):
+            if loaded_self.meshSF != self.meshSF:
+                self.logger.warning(f'{loaded_self.meshSF} != {self.meshSF}')
                 self.logger.warning(
                     'Running genMesh() to reflect change in mesh size factor')
                 self.numElem = None
                 self.genMesh()
-                # cp.meshSF = self.meshSF
+                # loaded_self.meshSF = self.meshSF
                 self.logger.info(
                     'Mesh size factor changed, mesh generated, self.f and self.numElem set to None')
-                cp.f = None
-            cp.abs_path = self.abs_path
-            # cp.cp_path = self.cp_path
-            # cp.mesh_studyDir = self.mesh_studyDir
-            # cp.meshSFs = self.meshSFs
-            cp.base_case_path = self.base_case_path
-            return cp
+                loaded_self.f = None
+            loaded_self.base_case_path = self.base_case_path
+            return loaded_self
         else:
             self.logger.info(f'Given Parameters: {self._x}')
-            self.logger.info(f'Checkpoint Parameters: {cp._x}')
+            self.logger.info(f'Checkpoint Parameters: {loaded_self._x}')
             question = f'\nCASE PARAMETERS DO NOT MATCH.\nOVERWRITE {self.rel_path}?'
             overwrite = yes_or_no(question)
             if overwrite:
                 shutil.rmtree(self.abs_path)
                 self.__init__(self.abs_path, self.x)
+                return self
             else:
                 self.logger.exception(
                     'GIVEN PARAMETERS DO NOT MATCH CHECKPOINT PARAMETERS.')
 
-    def update_self(self):
-        cp = self.load_self()
-        # print(cp._x)
-        if np.array_equal(self._x, cp._x):
-            if self.abs_path != cp.abs_path:
-                self.logger.warning(
-                    'CASE DIRECTORY CHANGED BETWEEN CHECKPOINTS')
-                self.logger.debug(str(cp.rel_path) + ' -> ' + str(self.rel_path))
-            if cp.cp_path != self.cp_path:
-                self.logger.warning(f'{cp.cp_path} != {self.cp_path}')
-            if cp.meshSF != self.meshSF:
-                self.logger.warning(f'{cp.meshSF} != {self.meshSF}')
-                self.logger.warning(
-                    'Running genMesh() to reflect change in mesh size factor')
-                self.numElem = None
-                self.genMesh()
-                # cp.meshSF = self.meshSF
-                self.logger.info(
-                    'Mesh size factor changed, mesh generated, self.f and self.numElem set to None')
-                cp.f = None
-            cp.abs_path = self.abs_path
-            # cp.cp_path = self.cp_path
-            # cp.mesh_studyDir = self.mesh_studyDir
-            # cp.meshSFs = self.meshSFs
-            cp.base_case_path = self.base_case_path
-            # cp.logger = self.getLogger()
-            self.update_self(loaded_self=cp)
-            self.logger.info(f'CHECKPOINT LOADED - {self.cp_rel_path}')
-        else:
-            self.logger.info(f'Given Parameters: {self._x}')
-            self.logger.info(f'Checkpoint Parameters: {cp._x}')
-            question = f'\nCASE PARAMETERS DO NOT MATCH.\nOVERWRITE {self.rel_path}?'
-            overwrite = yes_or_no(question)
-            if overwrite:
-                shutil.rmtree(self.abs_path)
-                self.__init__(self.abs_path, self.x)
-            else:
-                self.logger.exception(
-                    'GIVEN PARAMETERS DO NOT MATCH CHECKPOINT PARAMETERS.')
+    # def update_self(self):
+    #     cp = self.load_self()
+    #     # print(cp._x)
+    #     if np.array_equal(self._x, cp._x):
+    #         if self.abs_path != cp.abs_path:
+    #             self.logger.warning(
+    #                 'CASE DIRECTORY CHANGED BETWEEN CHECKPOINTS')
+    #             self.logger.debug(str(cp.rel_path) + ' -> ' + str(self.rel_path))
+    #         if cp.cp_path != self.cp_path:
+    #             self.logger.warning(f'{cp.cp_path} != {self.cp_path}')
+    #         if cp.meshSF != self.meshSF:
+    #             self.logger.warning(f'{cp.meshSF} != {self.meshSF}')
+    #             self.logger.warning(
+    #                 'Running genMesh() to reflect change in mesh size factor')
+    #             self.numElem = None
+    #             self.genMesh()
+    #             # cp.meshSF = self.meshSF
+    #             self.logger.info(
+    #                 'Mesh size factor changed, mesh generated, self.f and self.numElem set to None')
+    #             cp.f = None
+    #         cp.abs_path = self.abs_path
+    #         # cp.cp_path = self.cp_path
+    #         # cp.mesh_studyDir = self.mesh_studyDir
+    #         # cp.meshSFs = self.meshSFs
+    #         cp.base_case_path = self.base_case_path
+    #         # cp.logger = self.getLogger()
+    #         self.update_self(loaded_self=cp)
+    #         self.logger.info(f'CHECKPOINT LOADED - {self.cp_rel_path}')
+    #     else:
+    #         self.logger.info(f'Given Parameters: {self._x}')
+    #         self.logger.info(f'Checkpoint Parameters: {cp._x}')
+    #         question = f'\nCASE PARAMETERS DO NOT MATCH.\nOVERWRITE {self.rel_path}?'
+    #         overwrite = yes_or_no(question)
+    #         if overwrite:
+    #             shutil.rmtree(self.abs_path)
+    #             self.__init__(self.abs_path, self.x)
+    #         else:
+    #             self.logger.exception(
+    #                 'GIVEN PARAMETERS DO NOT MATCH CHECKPOINT PARAMETERS.')
         # del_keys = []
         # for cp_key in cp.__dict__:
         #     if cp_key in self.__dict__:

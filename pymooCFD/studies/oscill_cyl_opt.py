@@ -1,9 +1,9 @@
 from pymooCFD.core.minimizeCFD import MinimizeCFD
 from pymooCFD.problems.oscill_cyl_x2 import OscillCylinder
-
+from pymooCFD.core.pymooBase import CFDTestProblem
 
 def exec_test():
-    study = MinimizeCFD(OscillCylinder)
+    study = MinimizeCFD(OscillCylinder, CFDGeneticProblem=CFDTestProblem)
 
     xl = [0.1, 0.1]  # lower limits of parameters/variables
     xu = [6, 1]  # upper limits of variables

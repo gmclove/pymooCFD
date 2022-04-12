@@ -1,5 +1,5 @@
 from pymooCFD.core.pymooBase import CFDGeneticProblem, CFDGeneticAlgorithm
-from pymooCFD.core.optStudy import OptStudy
+from pymooCFD.core.optRun import OptRun
 from pymooCFD.core.picklePath import PicklePath
 from pymooCFD.util.sysTools import yes_or_no
 
@@ -13,29 +13,26 @@ class MinimizeCFD(PicklePath):
     def __init__(self, CFDCase,
                  # xl, xu,
                  CFDGeneticAlgorithm=CFDGeneticAlgorithm,
-                 # CFDGeneticProblem=CFDGeneticProblem,
+                 CFDGeneticProblem=CFDGeneticProblem,
                  dir_path=None,
                  **kwargs
                  ):
         if dir_path is None:
-            dir_path = 'optStudy-'+CFDCase.__name__
+            dir_path = 'optRun-'+CFDCase.__name__
         ##########################
         #    RESET ATTRIBUTES    #
         ##########################
-        self.opt_runs = [] #OptStudy(self.get_algorithm(), self.get_problem(), run_path='run00')]
+        self.opt_runs = [] #OptRun(self.get_algorithm(), self.get_problem(), run_path='run00')]
         self.CFDCase = CFDCase
         self.CFDGeneticAlgorithm = CFDGeneticAlgorithm
+        self.CFDGeneticProblem = CFDGeneticProblem
         #####################
         #    PICKLE PATH    #
         #####################
         super().__init__(dir_path)
 
     def get_problem(self, xl, xu, **kwargs):
-        return CFDGeneticProblem(self.CFDCase, xl, xu, **kwargs)
-
-    # def get_algorithm(self, **kwargs):
-    #     alg = CFDGeneticAlgorithm(**kwargs)
-    #     return alg
+        return self.CFDGeneticProblem(self.CFDCase, xl, xu, **kwargs)
 
     def get_algorithm(self, **kwargs):
         sampling = MixedVariableSampling(self.CFDCase.var_type, {
@@ -52,8 +49,7 @@ class MinimizeCFD(PicklePath):
             "real": get_mutation("real_pm", eta=3.0),
             "int": get_mutation("int_pm", eta=3.0)
         })
-        return CFDGeneticAlgorithm(sampling, crossover, mutation)
-
+        return self.CFDGeneticAlgorithm(sampling, crossover, mutation, **kwargs)
 
     def new_run(self, alg, prob, run_dir=None):  # algorithm=None, problem=None,
         # if problem is None:
@@ -68,7 +64,7 @@ class MinimizeCFD(PicklePath):
             yes = yes_or_no(question)
             if yes:
                 os.rmdir(run_path)
-        opt_run = OptStudy(alg, prob, run_path=run_path)
+        opt_run = OptRun(alg, prob, run_path=run_path)
         self.opt_runs.append(opt_run)
         self.save_self()
         return opt_run

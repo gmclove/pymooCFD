@@ -2,7 +2,7 @@
 # @Date:   2021-12-10T10:32:00-05:00
 # @Last modified by:   glove
 # @Last modified time: 2021-12-16T10:15:25-05:00
-from myStudy import BaseCase, MyOptStudy
+from myStudy import BaseCase, MyOptRun
 #####################################
 #### Genetic Algorithm Criteria #####
 #####################################
@@ -29,7 +29,7 @@ class GA_CFD(Problem):
                          **kwargs
                          )
     def _evaluate(self, X, out, *args, **kwargs):
-        out = optStudy.runGen(X, out)
+        out = optRun.runGen(X, out)
 
 problem = GA_CFD()
 
@@ -63,7 +63,7 @@ class MyCallback(Callback):
 
     def notify(self, alg):
         # save checkpoint
-        optStudy.saveCP()
+        optRun.saveCP()
         # increment generation
         self.gen += 1
         self.data["best"].append(alg.pop.get("F").min())
@@ -143,5 +143,5 @@ algorithm.verbose = True
 
 ################################################################################
 ########  Optimization Study Object Initialization ##########
-optStudy = MyOptStudy(algorithm, problem, BaseCase,
+optRun = MyOptRun(algorithm, problem, BaseCase,
                     procLim = 64)

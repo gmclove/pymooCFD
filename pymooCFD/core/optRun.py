@@ -27,20 +27,17 @@ import pymooCFD.config as config
 from pymoo.util.misc import termination_from_tuple
 
 
-class OptStudy(PicklePath):
+class OptRun(PicklePath):
     def __init__(self, algorithm, problem,
                  run_path='run-defualt',
                  n_opt=20,
                  # restart=True,
                  # optDatDir='opt_run',
                  # optName=None,
-                 # n_CP=10,
-                 # CP_fName='checkpoint',
-                 # plotsDir='plots', archiveDir='archive', mapGen1Dir='mapGen1',
                  # procLim=os.cpu_count(),
                  # var_labels=None, obj_labels=None,
                  # client=None,
-                 # *args, **kwargs
+                 *args, **kwargs
                  ):
         super().__init__(dir_path=run_path)
         #######################################
@@ -98,81 +95,57 @@ class OptStudy(PicklePath):
         #############################
         #    Required Attributes    #
         #############################
-        self.problem = problem #CFDProblem_GA(BaseCase)
-        #assert algorithm is setup
-        self.algorithm = algorithm  # algorithm.setup(problem)
-        # self.BaseCase = BaseCase
+        self.run_path = self.abs_path
+        self.algorithm = algorithm.setup(problem,
+                                         seed=algorithm.seed,
+                                         verbose=algorithm.verbose,
+                                         save_history=algorithm.save_history,
+                                         return_least_infeasible=algorithm.return_least_infeasible,
+                                         **kwargs)
+        self.problem = problem
+        self.gen_bnd_cases()
+        self.gen_test_case()
 
         #####################################
         #    Default/Optional Attributes    #
         #####################################
-        self.run_path = self.abs_path
-        # self.run_path = os.path.join(self.optDatDir, run_path)
-        # os.makedirs(self.run_path, exist_ok=True)
-
-        ### Data Handling ###
-        # self.archiveDir = os.path.join(self.optDatDir, archiveDir)
-        # os.makedirs(self.archiveDir, exist_ok=True)
-        # self.n_CP = n_CP  # number of generations between extra checkpoints
-
         ### Optimization Pre/Post Processing ###
-        # self.procOptDir = os.path.join(self.optDatDir, procOptDir)
-        # os.makedirs(self.procOptDir, exist_ok=True)
-        # Pareto Front Directory
-        # directory to save optimal solutions (a.k.a. Pareto Front)
-        # self.pfDir = os.path.join(self.run_path, pfDir)
-        # os.makedirs(self.pfDir, exist_ok=True)
-        # number of optimal points along Pareto front to save
         self.n_opt = int(n_opt)
 
         ###################################
         #    Attributes To Be Set Later   #
         ###################################
         self.gen1_pop = None
-        self.cornerCases = None
-        self.bndCases = None
-        ### Test Case ###
-        self.test_case = None
-        self.gen_test_case()
+
         self.save_self()
         # self.save_self()
 
-    # def newProb(self, BaseCase):
-    #     self.logger.info('INITIALIZING NEW OPTIMIZATION PROBLEM')
-    #     self.problem = CFDProblem_GA(BaseCase)
+    # def newAlg(self):
+    #     self.logger.info('INITIALIZING NEW OPTIMIZATION AlGORITHM')
+    #     # archive/empty previous runs data directory
+    #     # emptyDir(self.optDatDir)
+    #     self.algorithm.setup(self.problem,
+    #                          seed=self.algorithm.seed,
+    #                          verbose=self.algorithm.verbose,
+    #                          save_history=self.algorithm.save_history,
+    #                          return_least_infeasible=self.algorithm.return_least_infeasible
+    #                          )
+    #     self.algorithm.callback.__init__()
     #     self.save_self()
-    #     return self.problem
-
-    def newAlg(self):
-        self.logger.info('INITIALIZING NEW OPTIMIZATION AlGORITHM')
-        # archive/empty previous runs data directory
-        # emptyDir(self.optDatDir)
-        self.algorithm.setup(self.problem,
-                             seed=self.algorithm.seed,
-                             verbose=self.algorithm.verbose,
-                             save_history=self.algorithm.save_history,
-                             return_least_infeasible=self.algorithm.return_least_infeasible
-                             )
-        self.algorithm.callback.__init__()
-        self.save_self()
-
-    def initAlg(self):
-        if self.algorithm.is_initialized:
-            self.loadCP()
-            self.logger.info(f'Loaded Algorithm Checkpoint: {self.algorithm}')
-            self.logger.info(
-                f'\tLast checkpoint at generation {self.algorithm.callback.gen}')
-        else:
-            self.newAlg()
+    #
+    # def initAlg(self):
+    #     if self.algorithm.is_initialized:
+    #         self.loadCP()
+    #         self.logger.info(f'Loaded Algorithm Checkpoint: {self.algorithm}')
+    #         self.logger.info(
+    #             f'\tLast checkpoint at generation {self.algorithm.callback.gen}')
+    #     else:
+    #         self.newAlg()
 
     def run(self, delPrevGen=True):
         self.logger.info('STARTING: OPTIMIZATION ALGORITHM RUN')
         self.algorithm.save_history = True
-        self.initAlg()
-        # restart client if being used
-        # if self.client is not None:
-        #     self.client.restart()
-        #     self.logger.info("CLIENT RESTARTED")
+        # self.initAlg()
 
         ######    OPTIMIZATION    ######
         # until the algorithm has not terminated
@@ -204,10 +177,6 @@ class OptStudy(PicklePath):
                                                      gen=self.algorithm.callback.gen
                                                      # alg=self.algorithm
                                                      )
-            # self.algorithm.evaluator.eval(self.problem, eval_pop)
-            # eval_pop = self.runGen(eval_pop)
-            # print('self.algorithm.callback.gen:', self.algorithm.callback.gen)
-            # print('self.algorithm.n_gen:', self.algorithm.n_gen)
 
             # returned the evaluated individuals which have been evaluated or even modified
             self.algorithm.tell(infills=eval_pop)
@@ -233,178 +202,43 @@ class OptStudy(PicklePath):
             self.plotGen()
             if self.algorithm.callback.gen == 1:
                 self.gen1_pop = eval_pop
+                self.map_gen1()
             if delPrevGen and not compGen == 1:
                 direct = os.path.join(
                     self.run_path, f'gen{compGen}')
                 shutil.rmtree(direct)
         # obtain the result objective from the algorithm
-        res = self.algorithm.result()
+        # res = self.algorithm.result()
         # calculate a hash to show that all executions end with the same result
         self.logger.info(f'hash {res.F.sum()}')
         # self.save_self()
 
-    def execGen1(self):
-        self.algorithm.termination = termination_from_tuple(('n_gen', 1))
-        # no checkpoint saved before evaluation
-        # therefore self.algorithm not stuck with after gen.1 termination criteria
-        self.algorithm.next()
-
-    def runGen1(self):
-        self.logger.info('RUNNING GENERATION 1')
-        self.initAlg()
-        try:
-            gen1Alg = self.algorithm.history[0]
-            popX = gen1Alg.pop.get('X')
-            popF = gen1Alg.pop.get('F')
-            self.logger.info('\tCurrent Generation 1:')
-            for i in len(popX):
-                self.logger.info(
-                    f'\t\tParameters-{popX[i]} | Objectives- {popF[i]}')
-        except TypeError:
-            self.logger.info('\tNo Generation 1 Population Found')
-            self.logger.info(f'\tAlgorithm History: {self.algorithm.history}')
-            self.algorithm.termination = termination_from_tuple(('n_gen', 1))
-            # no checkpoint saved before evaluation
-            # therefore self.slgorithm not stuck with after gen.1 termination criteria
-            self.algorithm.next()
-        self.logger.info('COMPLETE: RUN GENERATION 1')
-        self.save_self()
-
-    ################
-    #    LOGGER    #
-    ################
-
-    # def getLogger(self):
-    #     # create root logger
-    #     logger = logging.getLogger()
-    #     logger.setLevel(config.OPT_STUDY_LOGGER_LEVEL)
-    #     # define handlers
-    #     # if not logger.handlers:
-    #     # file handler
-    #     fileHandler = logging.FileHandler(f'{self.optName}.log')
-    #     logger.addHandler(fileHandler)
-    #     # stream handler
-    #     streamHandler = logging.StreamHandler()  # sys.stdout)
-    #     streamHandler.setLevel(logging.DEBUG)
-    #     if streamHandler not in logger.handlers:
-    #         logger.addHandler(streamHandler)
-    #     # define filter
-    #     # filt = DispNameFilter(self.optName)
-    #     # logger.addFilter(filt)
-    #     # define formatter
-    #     formatter = MultiLineFormatter(
-    #         '%(asctime)s :: %(levelname)-8s :: %(name)s :: %(message)s')
-    #     #     f'%(asctime)s :: %(levelname)-8s :: {self.optName} :: %(message)s')
-    #     #     f'%(asctime)s.%(msecs)03d :: %(levelname)-8s :: {self.optName} :: %(message)s')
-    #     #     '%(name)s :: %(levelname)-8s :: %(message)s')
-    #     fileHandler.setFormatter(formatter)
-    #     streamHandler.setFormatter(formatter)
-    #     logger.info('~' * 30)
-    #     logger.info('NEW RUN')
-    #     return logger
-
-    ####################
-    #    MESH STUDY    #
-    ####################
-    # def mesh_study(self, cases):
-    #     for case in cases:
-    #         self.logger.info(f'MESH STUDY - {case}')
-    #         case.mesh_study()
-
-    #######################
-    #    CHECKPOINTING    #
-    #######################
-    # def loadCP(self, hasTerminated=False):
-    #     if os.path.exists(self.cp_path + '.old'):
-    #         os.rename(self.cp_path + '.old', self.cp_path + '.npy')
-    #     cp, = np.load(self.cp_path + '.npy', allow_pickle=True).flatten()
+    # def execGen1(self):
+    #     self.algorithm.termination = termination_from_tuple(('n_gen', 1))
+    #     # no checkpoint saved before evaluation
+    #     # therefore self.algorithm not stuck with after gen.1 termination criteria
+    #     self.algorithm.next()
     #
-    #     # logging
-    #     self.logger.info(f'\tCHECKPOINT LOADED: {self.cp_path}.npy')
-    #     self.logger.debug('\tRESTART DICTONARY')
-    #     for key in self.__dict__:
-    #         self.logger.debug(f'\t\t{key}: {self.__dict__[key]}')
-    #     self.logger.debug('\tCHECKPOINT DICTONARY')
-    #     for key in cp.__dict__:
-    #         self.logger.debug(f'\t\t{key}: {cp.__dict__[key]}')
-    #
-    #     if cp.algorithm is not None:
-    #         self.logger.debug('\tOPTIMIZATION ALGORITHM DICTONARY:')
-    #         for key, val in cp.algorithm.__dict__.items():
-    #             self.logger.debug(f'\t\t{key}: {val}')
-    #     #### TEMPORARY CODE ##########
-    #     # TRANSITION BETWEEN CHECKPOINTS
-    #
-    #     self.__dict__.update(cp.__dict__)
-    #     # only necessary if for the checkpoint the termination criterion has been met
+    # def runGen1(self):
+    #     self.logger.info('RUNNING GENERATION 1')
+    #     # self.initAlg()
     #     try:
-    #         self.algorithm.has_terminated = hasTerminated
-    #     except AttributeError as err:
-    #         self.logger.error(err)
-
-    #
-    # def save_self(self):  # , alg=None):
-    #     gen = self.algorithm.callback.gen
-    #     self.logger.info(f'SAVING CHECKPOINT - GENERATION {gen}')
-    #     if self.algorithm.pop is not None:
-    #         genX = self.algorithm.pop.get('X')
-    #         if None not in genX:
-    #             saveTxt(self.run_path, f'gen{gen}X.txt', genX)
-    #         genF = self.algorithm.pop.get('F')
-    #         if None not in genF:
-    #             saveTxt(self.run_path, f'gen{gen}F.txt', genF)
-    #         if self.algorithm.off is None:
-    #             self.logger.info(f'\tgeneration {gen-1} complete')
-    #
-    #     elif self.algorithm.off is not None:  # and self.algorithm.pop is not None
-    #         self.logger.info('\tmid-generation checkpoint')
-    #     # except TypeError:
-    #     #     self.logger.info('\tmid-generation')
-    #     # save checkpoint
-    #     np.save(self.cp_path + '.temp.npy', self)
-    #     if os.path.exists(self.cp_path + '.npy'):
-    #         os.rename(self.cp_path + '.npy', self.cp_path + '.old.npy')
-    #     os.rename(self.cp_path + '.temp.npy', self.cp_path + '.npy')
-    #     if os.path.exists(self.cp_path + '.old.npy'):
-    #         os.remove(self.cp_path + '.old.npy')
-    #     # Checkpoint each cfdCase object stored in optStudy
-    #     try:
-    #         self.test_case.save_self()
-    #     except AttributeError:
-    #         self.logger.debug('No Test Case to Save Checkpoint for')
-    #     except FileNotFoundError:
-    #         self.logger.debug('No Test Case to Save Checkpoint for')
-    #     try:
-    #         for case in self.bndCases:
-    #             case.save_self()
+    #         gen1Alg = self.algorithm.history[0]
+    #         popX = gen1Alg.pop.get('X')
+    #         popF = gen1Alg.pop.get('F')
+    #         self.logger.info('\tCurrent Generation 1:')
+    #         for i in len(popX):
+    #             self.logger.info(
+    #                 f'\t\tParameters-{popX[i]} | Objectives- {popF[i]}')
     #     except TypeError:
-    #         self.logger.debug('No Boundary Cases to Save Checkpoints for')
-    #     except AttributeError:
-    #         self.logger.debug('No Boundary Cases to Save Checkpoints for')
-    #         # self.logger.error(e)
-    #     try:
-    #         for case in self.cornerCases:
-    #             case.save_self()
-    #     except TypeError:
-    #         self.logger.debug('No Corner Cases to Save Checkpoints for')
-    #     except AttributeError:
-    #         self.logger.debug('No Corner Cases to Save Checkpoints for')
-            # self.logger.error(e)
-
-        # # default use self.algorithm
-        # if alg is None:
-        #     alg = self.algorithm
-        # # if give alg assign it to self.algorithm
-        # else:
-        #     self.algorithm = alg
-
-    # def checkCPs(self):
-    #     self.logger.info(f'CHECKPOINT CHECK - {self.cp_path}.npy')
-    #     if os.path.exists(f'{self.cp_path}.npy'):
-    #         for cp in np.load(self.cp_path):
-    #             self.logger.info(cp.__dict__)
-    #     else:
-    #         self.logger.info(f'\t{self.cp_path} does not exist')
+    #         self.logger.info('\tNo Generation 1 Population Found')
+    #         self.logger.info(f'\tAlgorithm History: {self.algorithm.history}')
+    #         self.algorithm.termination = termination_from_tuple(('n_gen', 1))
+    #         # no checkpoint saved before evaluation
+    #         # therefore self.slgorithm not stuck with after gen.1 termination criteria
+    #         self.algorithm.next()
+    #     self.logger.info('COMPLETE: RUN GENERATION 1')
+    #     self.save_self()
 
     ###################
     #    TEST CASE    #
@@ -422,7 +256,7 @@ class OptStudy(PicklePath):
         test_caseDir = os.path.join(self.run_path, test_caseDir)
         self.test_case = self.problem.BaseCase(test_caseDir, x_mid)  # , restart=True)
 
-    def runtest_case(self):
+    def run_test_case(self):
         self.logger.info('TEST CASE RUN . . .')
         # if self.test_case is None:
         self.gen_test_case()
@@ -515,7 +349,7 @@ class OptStudy(PicklePath):
             f'PLOTTED: Generation {gen} Design and Objective Spaces')
         return var_plot, obj_plot
 
-    def mapGen1(self):
+    def map_gen1(self):
         ##### Variable vs. Objective Plots ######
         # extract objectives and variables columns and plot them against each other
         var_labels = self.problem.BaseCase.var_labels
@@ -556,26 +390,6 @@ class OptStudy(PicklePath):
                 plots.append(plot)
         return plots, mapPaths
 
-    # def runPop(self, cases):
-    #     nTask = int(self.procLim/self.problem.BaseCase.nProc)
-    #     pool = mp.Pool(nTask)
-    #     for case in cases:
-    #         pool.apply_async(case.run, ())
-    #     pool.close()
-    #     pool.join()
-    # def runPop(self, cases):
-    #     self.preProcPop(cases)
-    #     self.execPop(cases)
-    #     self.postProcPop(cases)
-    # def preProcPop(self, cases):
-    #     for case in cases:
-    #         case.preProc()
-    # def execPop(self, cases):
-    #     self._execPop(cases)
-    # def postProcPop(self, cases):
-    #     for case in cases:
-    #         case.postProc()
-
     ########################
     #    BOUNDARY CASES    #
     ########################
@@ -598,63 +412,58 @@ class OptStudy(PicklePath):
         self.logger.info(lim_perms)
         return lim_perms
 
-    def genCornerCases(self):
-        lim_perms = self.getLimPerms()
-        with np.printoptions(precision=3, suppress=True):
-            cornerCases = []
-            for perm in lim_perms:
-                with np.printoptions(precision=3, suppress=True, formatter={'all': lambda x: '%.3g' % x}):
-                    caseName = str(perm).replace(
-                        '[', '').replace(']', '').replace(' ', '_')
-                cornerCaseDir = os.path.join(
-                    self.run_path, 'corner-cases', caseName)
-                cornerCase = self.problem.BaseCase(cornerCaseDir, perm)
-                cornerCases.append(cornerCase)
-        self.cornerCases = cornerCases
-
-    def runCornerCases(self):
-        '''
-        Finds binary permutations of limits and runs these cases.
-
-        runCornerCases(alg)
-        -------------------
-        Running these simulations during the optimization studies pre-processing
-        provides insight into what is happening at the most extreme limits of the
-        parameter space.
-
-        These simulations may provide insight into whether the user should expand
-        or restrict the parameter space. They may reveal that the model becomes
-        non-physical in these extreme cases.
-
-        Exploring the entire parameter space becomes important expecially in
-        optimization studies with geometric parameters. This is due to the
-        automated meshing introducting more variablility into the CFD case
-        workflow.
-        '''
-        if self.cornerCases is None:
-            self.genCornerCases()
-        else:
-            self.logger.warning(
-                'SKIPPED: GENERATE CORNER CASES - call self.genCornerCases() directly to create new corner cases')
-        self.problem.BaseCase.parallelize(self.cornerCases)
+    # def genCornerCases(self):
+    #     lim_perms = self.getLimPerms()
+    #     with np.printoptions(precision=3, suppress=True):
+    #         cornerCases = []
+    #         for perm in lim_perms:
+    #             with np.printoptions(precision=3, suppress=True, formatter={'all': lambda x: '%.3g' % x}):
+    #                 caseName = str(perm).replace(
+    #                     '[', '').replace(']', '').replace(' ', '_')
+    #             cornerCaseDir = os.path.join(
+    #                 self.run_path, 'corner-cases', caseName)
+    #             cornerCase = self.problem.BaseCase(cornerCaseDir, perm)
+    #             cornerCases.append(cornerCase)
+    #     self.cornerCases = cornerCases
+    #
+    # def runCornerCases(self):
+    #     '''
+    #     Finds binary permutations of limits and runs these cases.
+    #
+    #     runCornerCases(alg)
+    #     -------------------
+    #     Running these simulations during the optimization studies pre-processing
+    #     provides insight into what is happening at the most extreme limits of the
+    #     parameter space.
+    #
+    #     These simulations may provide insight into whether the user should expand
+    #     or restrict the parameter space. They may reveal that the model becomes
+    #     non-physical in these extreme cases.
+    #
+    #     Exploring the entire parameter space becomes important expecially in
+    #     optimization studies with geometric parameters. This is due to the
+    #     automated meshing introducting more variablility into the CFD case
+    #     workflow.
+    #     '''
+    #     if self.cornerCases is None:
+    #         self.genCornerCases()
+    #     else:
+    #         self.logger.warning(
+    #             'SKIPPED: GENERATE CORNER CASES - call self.genCornerCases() directly to create new corner cases')
+    #     self.problem.BaseCase.parallelize(self.cornerCases)
 
     def run_bnd_cases(self, n_pts=2, getDiags=False, do_mesh_study=False):
-        if self.bndCases is None:
-            self.genBndCases(n_pts=n_pts, getDiags=getDiags)
-        else:
-            self.logger.warning(
-                'SKIPPED: GENERATE BOUNDARY CASES - call self.genBndCases() directly to create new boundary cases')
-        self.problem.BaseCase.parallelize(self.bndCases)
+        self.problem.BaseCase.parallelize(self.bnd_cases)
         self.save_self()
         self.plotBndPtsObj()
         if do_mesh_study:
-            self.mesh_study(self.bndCases)
+            self.mesh_study(self.bnd_cases)
             self.save_self()
 
     def plotBndPtsObj(self):
         plot = Scatter(title='Objective Space: Boundary Cases',
                        legend=True, labels=self.problem.BaseCase.obj_labels)
-        F = np.array([case.f for case in self.bndCases])
+        F = np.array([case.f for case in self.bnd_cases])
         for obj in F:
             plot.add(obj, label=self.getPointLabel(obj))
         path = os.path.join(self.run_path, 'boundary-cases',
@@ -667,14 +476,14 @@ class OptStudy(PicklePath):
                        labels=self.problem.BaseCase.var_labels
                        # grid=True
                        )
-        bndPts = np.array([case.x for case in self.bndCases])
+        bndPts = np.array([case.x for case in self.bnd_cases])
         for var in bndPts:
             plot.add(var, label=self.getPointLabel(var))
         path = os.path.join(self.run_path, 'boundary-cases',
                             'bndPts_plot-varSpace.png')
         plot.save(path, dpi=100)
 
-    def genBndCases(self, n_pts=2, getDiags=False):
+    def gen_bnd_cases(self, n_pts=2, getDiags=False):
         self.logger.info('GENERATING BOUNDARY CASES')
         bndPts = self.getBndPts(n_pts=n_pts, getDiags=getDiags)
         dirs = []
@@ -685,7 +494,7 @@ class OptStudy(PicklePath):
             dirs.append(os.path.join(self.run_path,
                                      'boundary-cases', caseName))
         cases = self.genCases(dirs, bndPts)
-        self.bndCases = cases
+        self.bnd_cases = cases
         self.plotBndPts()
         self.save_self()
 
@@ -776,20 +585,6 @@ class OptStudy(PicklePath):
     #####################
     #     PROPERTIES    #
     #####################
-    # @property
-    # def run_path(self):
-    #     return self._run_path
-    #
-    # @run_path.setter
-    # def run_path(self, run_path):
-    #     head, tail = os.path.split(run_path)
-    #     if head == self.optDatDir:
-    #         self.logger.debug('run_path setter: head == self.optDatDir')
-    #         self._run_path = os.path.join(self.optDatDir, tail)
-    #     else:
-    #         self._run_path = os.path.join(self.optDatDir, run_path)
-    #     os.makedirs(self._run_path, exist_ok=True)
-
     @property
     def plotDir(self):
         plotDir = os.path.join(self.run_path, 'plots')
@@ -798,7 +593,7 @@ class OptStudy(PicklePath):
 
     @property
     def mapDir(self):
-        mapDir = os.path.join(self.run_path, 'mapGen1')
+        mapDir = os.path.join(self.run_path, 'map_gen1')
         os.makedirs(mapDir, exist_ok=True)
         return mapDir
 
@@ -859,21 +654,21 @@ class OptStudy(PicklePath):
     #
     #
     # @property
-    # def bndCases(self):
-    #     return self._bndCases
-    #     # path = os.path.join(self.optDatDir, 'bndCases.npy')
-    #     # bndCases = np.load(path, allow_pickle=True).flatten()
-    #     # return bndCases
+    # def bnd_cases(self):
+    #     return self._bnd_cases
+    #     # path = os.path.join(self.optDatDir, 'bnd_cases.npy')
+    #     # bnd_cases = np.load(path, allow_pickle=True).flatten()
+    #     # return bnd_cases
     #
-    # @bndCases.setter
-    # def bndCases(self, cases):
+    # @bnd_cases.setter
+    # def bnd_cases(self, cases):
     #     if cases is not None:
     #         for case in cases:
     #             if isinstance(case, self.problem.BaseCase):
     #                 case.save_self()
-    #     # path = os.path.join(self.optDatDir, 'bndCases.npy')
+    #     # path = os.path.join(self.optDatDir, 'bnd_cases.npy')
     #     # np.save(path, cases, allow_pickle=True)
-    #     self._bndCases = cases
+    #     self._bnd_cases = cases
     #
     # @property
     # def test_case(self):
@@ -893,11 +688,11 @@ class OptStudy(PicklePath):
     # ==========================================================================
     # TO BE OVERWRITTEN
     # ==========================================================================
-    def _execPop(self, cases):
-        pass
-
-    def _mesh_study(self):
-        pass
+    # def _execPop(self, cases):
+    #     pass
+    #
+    # def _mesh_study(self):
+    #     pass
 
     def _preProc(self):
         pass

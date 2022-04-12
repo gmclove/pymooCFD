@@ -35,8 +35,7 @@ class PicklePath:
                 self.logger.info('RESTARTED FROM CHECKPOINT')
                 return
             except FileNotFoundError:
-                question = f'\n{self.cp_rel_path} does not exist.\n\
-                                EMPTY {self.rel_path} DIRECTORY?'
+                question = f'\n{self.rel_path} exists but {self.cp_rel_path} does not.\n\tEMPTY {self.rel_path} DIRECTORY?'
                 overwrite = yes_or_no(question)
                 if overwrite:
                     shutil.rmtree(self.abs_path)
@@ -196,4 +195,5 @@ class PicklePath:
 
     @property
     def log_path(self):
+        os.makedirs(self.par_path, exist_ok=True)
         return os.path.join(self.par_path, self.data_folder+'.log')

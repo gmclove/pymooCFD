@@ -3,7 +3,7 @@
 # @Last modified by:   glove
 # @Last modified time: 2021-12-16T09:37:30-05:00
 
-from pymooCFD.studies.rans_ import optStudy
+from pymooCFD.studies.oscill_cyl_x2 import exec_test
 
 def main():
     '''
@@ -11,7 +11,7 @@ def main():
 
     import your optimization study object/instance from setupOpt.py and execute
     '''
-
+    exec_test()
 
 
 

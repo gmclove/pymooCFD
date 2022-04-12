@@ -3,9 +3,9 @@
 # @Last modified by:   glove
 # @Last modified time: 2021-12-15T17:20:34-05:00
 
-from pymooCFD.core.optStudy import OptStudy
+from pymooCFD.core.optRun import OptRun
 
-# class LocalCompDistOpt(OptStudy):
+# class LocalCompDistOpt(OptRun):
 #
 #     def __init__(self):
 #         super().__init__()

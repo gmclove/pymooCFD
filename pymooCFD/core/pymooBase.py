@@ -100,7 +100,7 @@ class PymooCFDCallback(Callback):
 
     def notify(self, alg):
         # save checkpoint
-        # optStudy.saveCP(alg=alg)
+        # optRun.saveCP(alg=alg)
         # increment generation
         self.gen += 1
         self.data["best"].append(alg.pop.get("F").min())
@@ -144,8 +144,8 @@ class CFDGeneticProblem(Problem):
         super().__init__(n_var=BaseCase.n_var,
                          n_obj=BaseCase.n_obj,
                          n_constr=BaseCase.n_constr,
-                         xl=np.array(xl), #np.array(BaseCase.xl),
-                         xu=np.array(xu), #np.array(BaseCase.xu),
+                         xl=np.array(xl),
+                         xu=np.array(xu),
                          *args,
                          **kwargs
                          )
@@ -176,8 +176,49 @@ class CFDGeneticProblem(Problem):
         G = np.array([case.g for case in cases])
         out['F'] = F
         out['G'] = G
-        if gen == 1:
-            self.gen1Pop = cases
+
+class CFDTestProblem(Problem):
+    def __init__(self, BaseCase,
+                 xl, xu,
+                 # n_var, n_obj, n_constr,
+                 # var_labels=None,
+                 # obj_labels=None,
+                 *args, **kwargs):
+        super().__init__(n_var=BaseCase.n_var,
+                         n_obj=BaseCase.n_obj,
+                         n_constr=BaseCase.n_constr,
+                         xl=np.array(xl),
+                         xu=np.array(xu),
+                         *args,
+                         **kwargs
+                         )
+        self.BaseCase = BaseCase
+        self.gen1Pop = None
+        self.validated = False
+        if not (len(self.xl) == len(self.xu) and
+                len(self.xu) == len(self.BaseCase.var_labels) and
+                len(self.BaseCase.var_labels) == self.n_var
+                ):
+            raise Exception("Design Space Definition Incorrect")
+
+    def _evaluate(self, X, out, *args, **kwargs):
+        runDir = kwargs.get('runDir')
+        gen = kwargs.get('gen')
+        # create generation directory for storing data/executing simulations
+        genDir = os.path.join(runDir, f'gen{gen}')
+        # create sub-directories for each individual
+        indDirs = [os.path.join(genDir, f'ind{i+1}') for i in range(len(X))]
+        # cases = self.genCases(indDirs, X)
+        assert len(indDirs) == len(X), 'len(paths) != len(X)'
+        cases = []
+        for x_i, x in enumerate(X):
+            case = self.BaseCase(indDirs[x_i], x, validated=self.validated)
+            cases.append(case)
+        # self.BaseCase.parallelize(cases)
+        F = np.ones((len(X), self.n_obj))
+        G = np.zeros((len(X), self.n_obj))-1
+        out['F'] = F
+        out['G'] = G
 
 ###################
 #    ALGORITHM    #
@@ -215,6 +256,7 @@ def get_CFDGeneticAlgorithm(GeneticAlgorithm):
 
         def setup(self, problem, **kwargs):
             super().setup(self, problem, **kwargs)
+            self.callback.__init__()
             self.save_history = True
             self.seed = 1
             self.return_least_infeasible = True

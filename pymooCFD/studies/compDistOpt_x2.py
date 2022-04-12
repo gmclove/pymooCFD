@@ -14,10 +14,10 @@ import numpy as np
 import os
 # from pymooCFD.core.cfdCase import CFDCase
 from pymooCFD.core.cfdCase import CFDCase
-from pymooCFD.core.optStudy import OptStudy
+from pymooCFD.core.optRun import OptRun
 
 
-# class LocalCompDistOpt(OptStudy):
+# class LocalCompDistOpt(OptRun):
 #     pass
 # def __init__(self):
 #     super().__init__()
@@ -112,7 +112,7 @@ class CompDistSLURM(CFDCase):
             return True
 
 
-class CompDistOpt(OptStudy):
+class CompDistOpt(OptRun):
     def __init__(self, algorithm, BaseCase,
                  # *args, **kwargs
                  ):
@@ -125,7 +125,7 @@ class CompDistOpt(OptStudy):
                          )
 
 
-MyOptStudy = CompDistOpt
+MyOptRun = CompDistOpt
 BaseCase = CompDistSLURM
 
 ####################################
@@ -155,7 +155,7 @@ class GA_CFD(Problem):
                          )
 
     def _evaluate(self, X, out, *args, **kwargs):
-        out = optStudy.runGen(X, out)
+        out = optRun.runGen(X, out)
         # out['F'] = np.zeros((BaseCase.n_obj, pop_size))
 
 
@@ -193,7 +193,7 @@ class MyCallback(Callback):
 
     def notify(self, alg):
         # save checkpoint
-        optStudy.saveCP()
+        optRun.saveCP()
         # increment generation
         self.gen += 1
         self.data["best"].append(alg.pop.get("F").min())
@@ -265,4 +265,4 @@ algorithm.verbose = True
 
 ################################################################################
 ########  Optimization Study Object Initialization ##########
-optStudy = MyOptStudy(algorithm, BaseCase)
+optRun = MyOptRun(algorithm, BaseCase)

@@ -3,12 +3,12 @@
 # @Last modified by:   glove
 # @Last modified time: 2021-12-16T09:37:30-05:00
 
-from pymooCFD.studies.oscillCyl_x2 import optStudy, algorithm, problem, BaseCase
+from pymooCFD.studies.oscillCyl_x2 import optRun, algorithm, problem, BaseCase
 import numpy as np
 # from pymooCFD.studies.oscillCyl import BaseCase
 # from pymoo.factory import get_termination
 import os
-# from pymooCFD.studies.oscillCyl_soo import optStudy
+# from pymooCFD.studies.oscillCyl_soo import optRun
 import types
 
 
@@ -18,16 +18,16 @@ def main():
 
     import your optimization study object/instance from setupOpt.py and execute
     '''
-    # print(optStudy.algorithm.__dict__)
-    # print(optStudy.problem.__dict__)
-    # print(optStudy.BaseCase.__dict__)
-    # print(optStudy.__dict__)
+    # print(optRun.algorithm.__dict__)
+    # print(optRun.problem.__dict__)
+    # print(optRun.BaseCase.__dict__)
+    # print(optRun.__dict__)
 
-    # optStudy.BaseCase = BaseCase
-    # optStudy.algorithm = algorithm
-    # optStudy.problem = problem
-    # optStudy.newAlg()
-    # noOscCase = optStudy.BaseCase('no_osc_case', [0, 0])
+    # optRun.BaseCase = BaseCase
+    # optRun.algorithm = algorithm
+    # optRun.problem = problem
+    # optRun.newAlg()
+    # noOscCase = optRun.BaseCase('no_osc_case', [0, 0])
     # noOscCase.genMesh()
     # noOscCase.f = None
     # noOscCase.postProc()
@@ -35,30 +35,30 @@ def main():
     # noOscCase.msCases = None
     # noOscCase.mesh_study()
 
-    # optStudy.runDir = os.path.join(optStudy.optDatDir, 'run')
-    # optStudy.saveCP()
-    # optStudy.test_case.loadCP()
-    # print(optStudy.test_case.__dict__)
-    # optStudy.algorithm.termination = get_termination("n_gen", 25)
-    # print(optStudy.algorithm.callback.gen)
+    # optRun.runDir = os.path.join(optRun.optDatDir, 'run')
+    # optRun.saveCP()
+    # optRun.test_case.loadCP()
+    # print(optRun.test_case.__dict__)
+    # optRun.algorithm.termination = get_termination("n_gen", 25)
+    # print(optRun.algorithm.callback.gen)
     ### Pre-Proccess ###
-    # optStudy.preProc()
-    # optStudy.runtest_case()
+    # optRun.preProc()
+    # optRun.runtest_case()
 
     # meshSFs = [0.6, 0.7, 0.9, 1.0, 1.3, 1.5, 2, 3, 4, 5]
     # meshSFs = [1.0, 1.3, 1.5, 2, 3, 4, 5]
-    # noOscCase = optStudy.BaseCase('no_osc_case', [0, 0])
+    # noOscCase = optRun.BaseCase('no_osc_case', [0, 0])
     # # noOscCase.nProc = 30
     # # noOscCase.run()
     # # noOscCase.nProc = 10
     # noOscCase.meshSFs = meshSFs
     # noOscCase.mesh_study()
     #
-    # optStudy.test_case.meshSFs = meshSFs
-    # optStudy.test_case.mesh_study()
-    # optStudy.run_bnd_cases(n_pts=3, getDiags=True, do_mesh_study=True)
+    # optRun.test_case.meshSFs = meshSFs
+    # optRun.test_case.mesh_study()
+    # optRun.run_bnd_cases(n_pts=3, getDiags=True, do_mesh_study=True)
     #
-    # optStudy.genBndCases()
+    # optRun.genBndCases()
     #
     # def _postProc(self):
     #     ####### EXTRACT VAR ########
@@ -89,16 +89,16 @@ def main():
     #     F_res = abs_mean_res_torque * D / 2
     #     self.f = [C_drag, F_res]
     #
-    # optStudy.test_case.obj_labels = [
+    # optRun.test_case.obj_labels = [
     #     'Coefficient of Drag', 'Resistive Torque [N m]']
-    # optStudy.test_case._postProc = types.MethodType(
-    #     _postProc, optStudy.test_case)
-    # for case in optStudy.test_case.msCases:
+    # optRun.test_case._postProc = types.MethodType(
+    #     _postProc, optRun.test_case)
+    # for case in optRun.test_case.msCases:
     #     # print(case)
     #     # print(case.msCases)
     #     # case.meshSFs = meshSFs
     #     # case.mesh_study()
-    #     # optStudy.saveCP()
+    #     # optRun.saveCP()
     #     # print(case.msCases)
     #     # for msCase in case.msCases:
     #     case._postProc = types.MethodType(_postProc, case)
@@ -107,25 +107,25 @@ def main():
     #     case.f = None
     #     case.postProc()
     #     case.obj_labels = ['Coefficient of Drag', 'Resistive Torque [N m]']
-    #optStudy.test_case.plotmesh_study()
-    #optStudy.plotBndPts()
-    #optStudy.plotBndPtsObj()    
+    #optRun.test_case.plotmesh_study()
+    #optRun.plotBndPts()
+    #optRun.plotBndPtsObj()    
 #
-    # for case in optStudy.bndCases:
+    # for case in optRun.bndCases:
     #     case.f = None
-    # optStudy.BaseCase.parallelize(optStudy.bndCases)
-    # optStudy.run_bnd_cases(n_pts=3, getDiags=True, do_mesh_study=True)
- #   for case in optStudy.loadCases(os.path.join(optStudy.runDir, 'gen21')):
+    # optRun.BaseCase.parallelize(optRun.bndCases)
+    # optRun.run_bnd_cases(n_pts=3, getDiags=True, do_mesh_study=True)
+ #   for case in optRun.loadCases(os.path.join(optRun.runDir, 'gen21')):
 #         case.postProc()
-    # optStudy.runGen1()
-    optStudy.run()
-    # optStudy.mesh_study(optStudy.gen1Pop)
+    # optRun.runGen1()
+    optRun.run()
+    # optRun.mesh_study(optRun.gen1Pop)
 
     ### Execute Study ###
-    # optStudy.run(restart = False)
+    # optRun.run(restart = False)
 
     ### Post-Process ###
-    # optStudy.archive()
+    # optRun.archive()
 
 
 if __name__ == '__main__':

@@ -1,8 +1,8 @@
-from pymooCFD.studies.compDistOpt_x2 import optStudy
+from pymooCFD.studies.compDistOpt_x2 import optRun
 
 
 def main():
-    optStudy.runtest_case()
+    optRun.runtest_case()
 
 
 if __name__ == '__main__':

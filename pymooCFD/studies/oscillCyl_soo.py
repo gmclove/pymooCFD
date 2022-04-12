@@ -3,7 +3,7 @@
 # @Last modified by:   glove
 # @Last modified time: 2021-12-15T16:36:54-05:00
 
-from pymooCFD.core.optStudy import OptStudy
+from pymooCFD.core.optRun import OptRun
 from pymoo.algorithms.soo.nonconvex.ga import GA
 from pymoo.factory import get_termination
 from pymoo.operators.mixed_variable_operator import MixedVariableSampling, MixedVariableMutation, MixedVariableCrossover
@@ -69,7 +69,7 @@ class OscillCylinderSOO(OscillCylinder):
         # print(self.f)
 
 
-class OscillCylinderOptSOO(OptStudy):
+class OscillCylinderOptSOO(OptRun):
     def __init__(self, algorithm, problem, BaseCase,
                  *args, **kwargs):
         super().__init__(algorithm, problem, BaseCase,
@@ -80,7 +80,7 @@ class OscillCylinderOptSOO(OptStudy):
                          *args, **kwargs)
 
 
-MyOptStudy = OscillCylinderOptSOO
+MyOptRun = OscillCylinderOptSOO
 BaseCase = OscillCylinderSOO
 
 ####################################
@@ -116,7 +116,7 @@ class GA_CFD(Problem):
                          )
 
     def _evaluate(self, X, out, *args, **kwargs):
-        out = optStudy.runGen(X, out)
+        out = optRun.runGen(X, out)
 
 
 problem = GA_CFD()
@@ -153,7 +153,7 @@ class MyCallback(Callback):
 
     def notify(self, alg):
         # save checkpoint
-        optStudy.saveCP()
+        optRun.saveCP()
         # increment generation
         self.gen += 1
         self.data["best"].append(alg.pop.get("F").min())
@@ -218,4 +218,4 @@ algorithm.verbose = True
 
 ################################################################################
 ########  Optimization Study Object Initialization ##########
-optStudy = MyOptStudy(algorithm, problem, BaseCase)
+optRun = MyOptRun(algorithm, problem, BaseCase)
