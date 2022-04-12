@@ -83,10 +83,10 @@ class OptRun(PicklePath):
         #     os.makedirs(self.optDatDir)
         #     self.logger.info(
         #         f'NEW OPTIMIZATION STUDY - {self.optDatDir} did not exist')
-            # except FileNotFoundError:
-            #     print('OVERRIDE OPTIMIZATION STUDY -')
-            #     print('\t{self.cp_path} already exists but {self.cpPath} does not')
-            #     self.copy()
+        # except FileNotFoundError:
+        #     print('OVERRIDE OPTIMIZATION STUDY -')
+        #     print('\t{self.cp_path} already exists but {self.cpPath} does not')
+        #     self.copy()
         # else:
         #     os.makedirs(caseDir, exist_ok=True)
         #     self.logger = self.getLogger()
@@ -96,14 +96,13 @@ class OptRun(PicklePath):
         #    Required Attributes    #
         #############################
         self.run_path = self.abs_path
-        self.algorithm = algorithm.setup(problem,
-                                         seed=algorithm.seed,
-                                         verbose=algorithm.verbose,
-                                         save_history=algorithm.save_history,
-                                         return_least_infeasible=algorithm.return_least_infeasible,
-                                         **kwargs)
-        print('!!!!!!!!!!!!!!!!!!!')
-        print(self.algorithm)
+        algorithm.setup(problem,
+                        seed=algorithm.seed,
+                        verbose=algorithm.verbose,
+                        save_history=algorithm.save_history,
+                        return_least_infeasible=algorithm.return_least_infeasible,
+                        **kwargs)
+        self.algorithm = algorithm
         self.problem = problem
         self.gen_bnd_cases()
         self.gen_test_case()
@@ -256,7 +255,8 @@ class OptRun(PicklePath):
             if var_type.lower() == 'int':
                 x_mid[x_i] = int(x_mid[x_i])
         test_caseDir = os.path.join(self.run_path, test_caseDir)
-        self.test_case = self.problem.BaseCase(test_caseDir, x_mid)  # , restart=True)
+        self.test_case = self.problem.BaseCase(
+            test_caseDir, x_mid)  # , restart=True)
 
     def run_test_case(self):
         self.logger.info('TEST CASE RUN . . .')
@@ -326,10 +326,10 @@ class OptRun(PicklePath):
         #### Parameter Space Plot ####
         popX = pop.get('X')
         var_plot = Scatter(title=f'Generation {gen} Design Space',
-                       legend=leg,
-                       labels=self.problem.BaseCase.var_labels,
-        #                figsize=(10,8)
-                      )
+                           legend=leg,
+                           labels=self.problem.BaseCase.var_labels,
+                           #                figsize=(10,8)
+                           )
         for ind_i, ind in enumerate(popX):
             var_plot.add(ind, label=f'IND {ind_i+1}')
         # save parameter space plot
@@ -339,9 +339,9 @@ class OptRun(PicklePath):
         #### Objective Space Plot ####
         popF = pop.get('F')
         obj_plot = Scatter(title=f'Generation {gen} Objective Space',
-                       legend=leg,
-                       labels=self.problem.BaseCase.obj_labels
-                      )
+                           legend=leg,
+                           labels=self.problem.BaseCase.obj_labels
+                           )
         for ind_i, ind in enumerate(popF):
             obj_plot.add(ind, label=f'IND {ind_i+1}')
         # save parameter space plot
