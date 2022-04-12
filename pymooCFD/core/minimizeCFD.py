@@ -18,7 +18,7 @@ class MinimizeCFD(PicklePath):
                  **kwargs
                  ):
         if dir_path is None:
-            dir_path = 'optRun-'+CFDCase.__name__
+            dir_path = 'optStudy-'+CFDCase.__name__
         ##########################
         #    RESET ATTRIBUTES    #
         ##########################

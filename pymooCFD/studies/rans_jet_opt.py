@@ -2,6 +2,7 @@ from pymooCFD.problems.rans_jet import RANSJet
 from pymooCFD.core.minimizeCFD import MinimizeCFD
 
 def exec():
+    RANSJet('optStudy-RANSJet/RANS_equiv_BCs', [0.02, 0.2]).run()
     study = MinimizeCFD(RANSJet)
     xl = [0.005, 0.1]  # lower limits of parameters/variables
     xu = [0.04, 0.4]  # upper limits of variables
