@@ -109,6 +109,8 @@ class OptRun(PicklePath):
         self.gen_test_case()
         print('!!!!!!!!!!!!!!!!!!!!!!!!')
         print(self.algorithm, self.problem)
+        print(self.algorithm.problem)
+        print(self.algorithm.problem.n_var)
         #####################################
         #    Default/Optional Attributes    #
         #####################################

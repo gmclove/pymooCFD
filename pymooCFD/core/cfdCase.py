@@ -87,6 +87,8 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         #    CHECKPOINT/PICKLE PATH INIT    #
         #####################################
         super().__init__(dir_path=case_path)
+        if self.cp_loaded:
+            return
         self.copy_base_case()
         saveTxt(self.abs_path, 'var.txt', self.x)
         #############################
@@ -117,7 +119,6 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
             self.var_labels = [f'var{x_i}' for x_i in range(self.n_var)]
         if self.obj_labels is None:
             self.obj_labels = [f'obj{x_i}' for x_i in range(self.n_obj)]
-
         ###################################################
         #    Attributes To Be Set Later During Each Run   #
         ###################################################
