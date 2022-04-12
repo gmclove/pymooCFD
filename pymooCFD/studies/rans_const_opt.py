@@ -8,15 +8,15 @@ from pymooCFD.core.pymooBase import CFDTestProblem
 
 def exec_test():
     study = MinimizeCFD(RANS_k_eps, CFDGeneticProblem=CFDTestProblem)
-    if study.opt_runs:
-        opt_run = study.opt_runs[0]
-    else:
-        xl = [0.09 * 0.8, 5]
-        xu = [0.09 * 1.2, 10]
-        prob = study.get_problem(xl, xu)
-        alg = study.get_algorithm(n_gen=2, pop_size=3,
-                                  n_offsprings=2)
-        opt_run = study.new_run(alg, prob)
+    # if study.opt_runs:
+    #     opt_run = study.opt_runs[0]
+    # else:
+    xl = [0.09 * 0.8, 5]
+    xu = [0.09 * 1.2, 10]
+    prob = study.get_problem(xl, xu)
+    alg = study.get_algorithm(n_gen=2, pop_size=3,
+                              n_offsprings=2)
+    opt_run = study.new_run(alg, prob, run_dir='test-run')
     # opt_run.test_case.run()
     # opt_run.run_bnd_cases()
     opt_run.run()
