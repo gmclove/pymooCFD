@@ -16,12 +16,12 @@ from pymooCFD.util.loggingTools import MultiLineFormatter
 from pymooCFD.util.handleData import saveTxt
 
 
-class MeshStudy: #(CFDCase):
+class mesh_study: #(CFDCase):
     def __init__(self, cfd_case,
                  size_factors=np.around(np.arange(0.5, 1.5, 0.1), decimals=2)
                  ):
         super().__init__()
-        self.folder = os.path.join(cfd_case.abs_path, 'meshStudy')
+        self.folder = os.path.join(cfd_case.abs_path, 'mesh_study')
         os.makedirs(self.folder, exist_ok=True)
         # os.makedirs(self.folder,)
         self.logger = self.getLogger()
@@ -39,7 +39,7 @@ class MeshStudy: #(CFDCase):
         # if size_factors is None:
         #     size_factors = self.size_factors
         # if self.msCases is None:
-        #     self.genMeshStudy()
+        #     self.genmesh_study()
         self.logger.info(f'MESH STUDY')
         if self.cases is None:
             self.logger.info('\tNo Mesh Cases Found: self.cases is None')
@@ -98,7 +98,7 @@ class MeshStudy: #(CFDCase):
             path = os.path.join(self.folder, fName)
             self.logger.info(f'\t\tInitializing {path} . . .')
             msCase.__init__(path, self.base_case.x, meshSF=sf)
-            msCase.meshStudy = None
+            msCase.mesh_study = None
             if msCase.meshSF != sf or msCase.numElem is None:
                 # only pre-processing needed is generating mesh
                 msCase.meshSF = sf

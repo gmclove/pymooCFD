@@ -19,18 +19,16 @@ class MinimizeCFD(PicklePath):
                  ):
         if dir_path is None:
             dir_path = 'optStudy-'+CFDCase.__name__
-        super().__init__(dir_path)
-        self.CFDCase = CFDCase
-        ###################
-        #    OPERATORS    #
-        ###################
-        # self.init_algorithm
-        # self.problem = CFDGeneticProblem(CFDCase, **kwargs)
-        self.CFDGeneticAlgorithm = CFDGeneticAlgorithm
-        # self.CFDGeneticProblem = CFDGeneticProblem
-
+        ##########################
+        #    RESET ATTRIBUTES    #
+        ##########################
         self.opt_runs = [] #OptStudy(self.get_algorithm(), self.get_problem(), run_path='run00')]
-        # self.save_self()
+        self.CFDCase = CFDCase
+        self.CFDGeneticAlgorithm = CFDGeneticAlgorithm
+        #####################
+        #    PICKLE PATH    #
+        #####################
+        super().__init__(dir_path)
 
     def get_problem(self, xl, xu, **kwargs):
         return CFDGeneticProblem(self.CFDCase, xl, xu, **kwargs)

@@ -7,6 +7,7 @@ from pymooCFD.util.loggingTools import MultiLineFormatter, DispNameFilter
 import pymooCFD.config as config
 from pymooCFD.util.sysTools import yes_or_no
 
+
 class PicklePath:
     def __init__(self, dir_path=None, sub_dirs=[], log_level=logging.DEBUG):
         if dir_path is None:
@@ -107,12 +108,30 @@ class PicklePath:
     def update_self(self, loaded_self=None):
         if loaded_self is None:
             loaded_self = self.load_self()
+        self.update_warnings(loaded_self)
+        loaded_self = self._update_filter(loaded_self)
         # UPDATE
         self.__dict__.update(loaded_self.__dict__)
         # log
         self.logger.debug('\tUPDATED DICTONARY')
         for key, val in self.__dict__.items():
             self.logger.debug(f'\t\t{key}: {val}')
+
+    def update_warnings(self, loaded_self=None):
+        if loaded_self is None:
+            loaded_self = self.load_self()
+        for key, val in self.__dict__.items():
+            if key in loaded_self.__dict__:
+                loaded_val = loaded_self.__dict__[key]
+                if not val == loaded_val:
+                    self.logger.warning(f'UPDATED {key}: {val} -> {loaded_val}')
+        # if self.abs_path != loaded_self.abs_path:
+        #     self.logger.warning('PATH CHANGED BETWEEN CHECKPOINTS')
+        #     self.logger.debug(str(loaded_self.rel_path) + ' -> ' + str(self.rel_path))
+        # if loaded_self.cp_path != self.cp_path:
+        #     self.logger.warning('CHECKPOINT PATH CHANGED BETWEEN CHECKPOINTS')
+        #     self.logger.warning(f'{loaded_self.cp_path} != {self.cp_path}')
+
 
     def check_saves(self, print_info=False):
         if print_info:
@@ -125,6 +144,9 @@ class PicklePath:
                 disp(cp.__dict__)
         else:
             disp(f'\t{self.cp_path} does not exist')
+
+    def _update_filter(self, loaded_self):
+        return loaded_self
 
     @staticmethod
     def loadNumpyFile(path):

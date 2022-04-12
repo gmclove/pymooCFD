@@ -132,8 +132,8 @@ class OptStudy(PicklePath):
         self.cornerCases = None
         self.bndCases = None
         ### Test Case ###
-        self.testCase = None
-        self.genTestCase()
+        self.test_case = None
+        self.gen_test_case()
         self.save_self()
         # self.save_self()
 
@@ -303,15 +303,14 @@ class OptStudy(PicklePath):
     ####################
     #    MESH STUDY    #
     ####################
-    # def meshStudy(self, cases):
+    # def mesh_study(self, cases):
     #     for case in cases:
     #         self.logger.info(f'MESH STUDY - {case}')
-    #         case.meshStudy()
+    #         case.mesh_study()
 
     #######################
     #    CHECKPOINTING    #
     #######################
-<<<<<<< HEAD
     # def loadCP(self, hasTerminated=False):
     #     if os.path.exists(self.cp_path + '.old'):
     #         os.rename(self.cp_path + '.old', self.cp_path + '.npy')
@@ -339,35 +338,6 @@ class OptStudy(PicklePath):
     #         self.algorithm.has_terminated = hasTerminated
     #     except AttributeError as err:
     #         self.logger.error(err)
-=======
-    def loadCP(self, hasTerminated=False):
-        if os.path.exists(self.CP_path + '.old'):
-            os.rename(self.CP_path + '.old', self.CP_path + '.npy')
-        cp, = np.load(self.CP_path + '.npy', allow_pickle=True).flatten()
-
-        # logging
-        self.logger.info(f'\tCHECKPOINT LOADED: {self.CP_path}.npy')
-        self.logger.debug('\tRESTART DICTONARY')
-        for key in self.__dict__:
-            self.logger.debug(f'\t\t{key}: {self.__dict__[key]}')
-        self.logger.debug('\tCHECKPOINT DICTONARY')
-        for key in cp.__dict__:
-            self.logger.debug(f'\t\t{key}: {cp.__dict__[key]}')
-
-        if cp.algorithm is not None:
-            self.logger.debug('\tOPTIMIZATION ALGORITHM DICTONARY:')
-            for key, val in cp.algorithm.__dict__.items():
-                self.logger.debug(f'\t\t{key}: {val}')
-        #### TEMPORARY CODE ##########
-        # TRANSITION BETWEEN CHECKPOINTS
-        self.__dict__.update(cp.__dict__)
-        # only necessary if for the checkpoint the termination criterion has been met
-        try:
-            self.algorithm.has_terminated = hasTerminated
-        except AttributeError as err:
-            self.logger.error(err)
-
->>>>>>> devel
 
     #
     # def save_self(self):  # , alg=None):
@@ -396,7 +366,7 @@ class OptStudy(PicklePath):
     #         os.remove(self.cp_path + '.old.npy')
     #     # Checkpoint each cfdCase object stored in optStudy
     #     try:
-    #         self.testCase.save_self()
+    #         self.test_case.save_self()
     #     except AttributeError:
     #         self.logger.debug('No Test Case to Save Checkpoint for')
     #     except FileNotFoundError:
@@ -437,7 +407,7 @@ class OptStudy(PicklePath):
     ###################
     #    TEST CASE    #
     ###################
-    def genTestCase(self, testCaseDir='test_case'):
+    def gen_test_case(self, test_caseDir='test_case'):
         self.logger.info('\tGENERATING TEST CASE')
         # shutil.rmtree('test_case', ignore_errors=True)
         xl = self.problem.xl
@@ -447,20 +417,20 @@ class OptStudy(PicklePath):
         for x_i, var_type in enumerate(self.problem.BaseCase.var_type):
             if var_type.lower() == 'int':
                 x_mid[x_i] = int(x_mid[x_i])
-        testCaseDir = os.path.join(self.run_path, testCaseDir)
-        self.testCase = self.problem.BaseCase(testCaseDir, x_mid)  # , restart=True)
+        test_caseDir = os.path.join(self.run_path, test_caseDir)
+        self.test_case = self.problem.BaseCase(test_caseDir, x_mid)  # , restart=True)
 
-    def runTestCase(self):
+    def runtest_case(self):
         self.logger.info('TEST CASE RUN . . .')
-        # if self.testCase is None:
-        self.genTestCase()
+        # if self.test_case is None:
+        self.gen_test_case()
         self.logger.info('\tRUNNING TEST CASE')
-        self.testCase.run()
-        self.logger.info(f'\tParameters: {self.testCase.x}')
-        self.logger.info(f'\tObjectives: {self.testCase.f}')
+        self.test_case.run()
+        self.logger.info(f'\tParameters: {self.test_case.x}')
+        self.logger.info(f'\tObjectives: {self.test_case.f}')
         self.logger.info('TEST CASE COMPLETE ')
         self.save_self()
-        return self.testCase
+        return self.test_case
 
     #################################
     #    RUN POPULATION OF CASES    #
@@ -661,7 +631,7 @@ class OptStudy(PicklePath):
                 'SKIPPED: GENERATE CORNER CASES - call self.genCornerCases() directly to create new corner cases')
         self.problem.BaseCase.parallelize(self.cornerCases)
 
-    def runBndCases(self, n_pts=2, getDiags=False, doMeshStudy=False):
+    def run_bnd_cases(self, n_pts=2, getDiags=False, do_mesh_study=False):
         if self.bndCases is None:
             self.genBndCases(n_pts=n_pts, getDiags=getDiags)
         else:
@@ -670,8 +640,8 @@ class OptStudy(PicklePath):
         self.problem.BaseCase.parallelize(self.bndCases)
         self.save_self()
         self.plotBndPtsObj()
-        if doMeshStudy:
-            self.meshStudy(self.bndCases)
+        if do_mesh_study:
+            self.mesh_study(self.bndCases)
             self.save_self()
 
     def plotBndPtsObj(self):
@@ -900,18 +870,18 @@ class OptStudy(PicklePath):
     #     self._bndCases = cases
     #
     # @property
-    # def testCase(self):
-    #     return self._testCase
-    #     # path = os.path.join(self.optDatDir, 'testCase.npy')
-    #     # testCase = np.load(path, allow_pickle=True).flatten()
-    #     # return testCase
+    # def test_case(self):
+    #     return self._test_case
+    #     # path = os.path.join(self.optDatDir, 'test_case.npy')
+    #     # test_case = np.load(path, allow_pickle=True).flatten()
+    #     # return test_case
     #
-    # @testCase.setter
-    # def testCase(self, case):
+    # @test_case.setter
+    # def test_case(self, case):
     #     if isinstance(case, self.problem.BaseCase):
     #         case.save_self()
-    #     self._testCase = case
-        # path = os.path.join(self.optDatDir, 'testCase.npy')
+    #     self._test_case = case
+        # path = os.path.join(self.optDatDir, 'test_case.npy')
         # np.save(path, case, allow_pickle=True)
 
     # ==========================================================================
@@ -920,7 +890,7 @@ class OptStudy(PicklePath):
     def _execPop(self, cases):
         pass
 
-    def _meshStudy(self):
+    def _mesh_study(self):
         pass
 
     def _preProc(self):
@@ -950,13 +920,13 @@ class OptStudy(PicklePath):
     #         # obj = np.row_stack([job.result() for job in jobs])
     #
 
-    # def meshStudy(self, cases): #, meshSFs=None):
+    # def mesh_study(self, cases): #, meshSFs=None):
     #     # if meshSFs is None:
     #     #     meshSFs = self.meshSFs
     #     for case in cases:
     #         _, tail = os.path.split(case.abs_path)
-    #         meshStudyDir = os.path.join(case.studyDir, tail)
-    #         print(f'MESH STUDY - {meshStudyDir}')
+    #         mesh_studyDir = os.path.join(case.studyDir, tail)
+    #         print(f'MESH STUDY - {mesh_studyDir}')
     #         print(f'\t{case.meshSFs}')
     #         ### Pre-Process
     #         study = []
@@ -967,7 +937,7 @@ class OptStudy(PicklePath):
     #             ### Deep copy case instance
     #             msCase = copy.deepcopy(case)
     #             msCases.append(msCase)
-    #             msCase.abs_path = os.path.join(meshStudyDir, f'meshSF-{sf}')
+    #             msCase.abs_path = os.path.join(mesh_studyDir, f'meshSF-{sf}')
     #             msCase.meshSF = sf
     #             ### only pre-processing needed is generating mesh
     #             numElem = msCase.genMesh()
@@ -978,9 +948,9 @@ class OptStudy(PicklePath):
     #         print(f'\t{a_numElem}')
     #         # study = np.array(study)
     #         print(study)
-    #         path = os.path.join(meshStudyDir, 'study.txt')
+    #         path = os.path.join(mesh_studyDir, 'study.txt')
     #         np.savetxt(path, study, fmt="%s")
-    #         path = os.path.join(meshStudyDir, 'studyX.txt')
+    #         path = os.path.join(mesh_studyDir, 'studyX.txt')
     #         np.savetxt(path, var)
     #         ### Execute
     #         self.execute(msCases)
@@ -991,10 +961,10 @@ class OptStudy(PicklePath):
     #             obj.append(f)
     #             study[msCase_i].extend(f)
     #         obj = np.array(obj)
-    #         path = os.path.join(meshStudyDir, 'studyF.txt')
+    #         path = os.path.join(mesh_studyDir, 'studyF.txt')
     #         np.savetxt(path, obj)
     #         print('\t' + str(study).replace('\n', '\n\t'))
-    #         #path = os.path.join(meshStudyDir, 'study.txt')
+    #         #path = os.path.join(mesh_studyDir, 'study.txt')
     #         #np.savetxt(path, study)
     #
     #         ##### PLOT #####
@@ -1005,7 +975,7 @@ class OptStudy(PicklePath):
     #              plt.title(tail)
     #              plt.xlabel('Number of Elements')
     #              plt.ylabel(obj_label)
-    #              plt.savefig(os.path.join(studyDir, f'meshStudy_plot-{tail}-{obj_label}.png'))
+    #              plt.savefig(os.path.join(studyDir, f'mesh_study_plot-{tail}-{obj_label}.png'))
     #              plt.clf()
     #
     #     return study

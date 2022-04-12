@@ -12,12 +12,12 @@ from pymooCFD.util.gridInterp import GridInterp2D, GridInterp3D, radialAvg
 
 
 def main():
-    # hqInterp('hq_sim/PulsedJetIrregular/meshStudy/meshSF-0.7')
-    # hqInterp('hq_sim/PulsedJetIrregular/meshStudy/meshSF-0.8')
+    # hqInterp('hq_sim/PulsedJetIrregular/mesh_study/meshSF-0.7')
+    # hqInterp('hq_sim/PulsedJetIrregular/mesh_study/meshSF-0.8')
     hqInterp(
-        'git_ignore_folder/rans_jet_opt/hq_sim/PulsedJetIrregular/meshStudy/meshSF-0.9')
-    # hqInterp('hq_sim/PulsedJetIrregular/meshStudy/meshSF-1.1')
-    # hqInterp('hq_sim/PulsedJetIrregular/meshStudy/meshSF-1.2')
+        'git_ignore_folder/rans_jet_opt/hq_sim/PulsedJetIrregular/mesh_study/meshSF-0.9')
+    # hqInterp('hq_sim/PulsedJetIrregular/mesh_study/meshSF-1.1')
+    # hqInterp('hq_sim/PulsedJetIrregular/mesh_study/meshSF-1.2')
 
 
 def hqInterp(caseDir):

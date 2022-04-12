@@ -10,7 +10,6 @@
 #         super().__init__(externalSolver)
 
 
-from pymooCFD.core.optStudy import OptStudy
 import gmsh
 import math
 from pymooCFD.core.cfdCase import FluentCase
@@ -106,8 +105,7 @@ class RANSJet(FluentCase):
     var_type = ["real", "real"]  # OPTIONS: 'int' or 'real'
     xl = [0.005, 0.1]  # lower limits of parameters/variables
     xu = [0.04, 0.4]  # upper limits of variables
-    if not len(xl) == len(xu) and len(xu) == len(var_labels) and len(var_labels) == n_var:
-        raise Exception("Design Space Definition Incorrect")
+
     ####### Define Objective Space ########
     n_obj = 2
     obj_labels = ['Velocity Field Error [m/s]', 'Scalar Concentration Error']
@@ -116,14 +114,9 @@ class RANSJet(FluentCase):
     externalSolver = True
     onlyParallelizeSolve = True
     solverExecCmd = ['sbatch', '--wait', 'jobslurm.sh']
-    nProc = 10
-    procLim = 60
+    # nProc = 10
+    # procLim = 60
     nTasks = 4
-
-    ##### Local Execution Command #####
-    # nProc = 8
-    # solverExecCmd = ['C:\"Program Files"\"Ansys Inc"\v211\fluent\ntbin\win64\fluent.exe',
-    # '2ddp', f'-t{nProc}', '-g', '-i', 'jet_rans-axi_sym.jou', '>', 'run.out']
 
     def __init__(self, case_path, x):
         super().__init__(case_path, x,
@@ -523,22 +516,4 @@ class RANSJet(FluentCase):
         plt.savefig(path)
         plt.clf()
 
-
-class RANSJetOpt(OptStudy):
-    def __init__(self, algorithm, problem, BaseCase,
-                 # *args, **kwargs
-                 ):
-        super().__init__(algorithm, problem, BaseCase,
-                         # optDatDir='jet-opt_run',
-                         # *args, **kwarg
-                         )
-
-    # def execute(self, cases):
-    #     self.slurmExec(cases)
-
-    def preProc(self):
-        pass
-
-
-MyOptStudy = RANSJetOpt
 BaseCase = RANSJet

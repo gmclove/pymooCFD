@@ -33,17 +33,17 @@ def main():
     # noOscCase.postProc()
     # noOscCase.run()
     # noOscCase.msCases = None
-    # noOscCase.meshStudy()
+    # noOscCase.mesh_study()
 
     # optStudy.runDir = os.path.join(optStudy.optDatDir, 'run')
     # optStudy.saveCP()
-    # optStudy.testCase.loadCP()
-    # print(optStudy.testCase.__dict__)
+    # optStudy.test_case.loadCP()
+    # print(optStudy.test_case.__dict__)
     # optStudy.algorithm.termination = get_termination("n_gen", 25)
     # print(optStudy.algorithm.callback.gen)
     ### Pre-Proccess ###
     # optStudy.preProc()
-    # optStudy.runTestCase()
+    # optStudy.runtest_case()
 
     # meshSFs = [0.6, 0.7, 0.9, 1.0, 1.3, 1.5, 2, 3, 4, 5]
     # meshSFs = [1.0, 1.3, 1.5, 2, 3, 4, 5]
@@ -52,11 +52,11 @@ def main():
     # # noOscCase.run()
     # # noOscCase.nProc = 10
     # noOscCase.meshSFs = meshSFs
-    # noOscCase.meshStudy()
+    # noOscCase.mesh_study()
     #
-    # optStudy.testCase.meshSFs = meshSFs
-    # optStudy.testCase.meshStudy()
-    # optStudy.runBndCases(n_pts=3, getDiags=True, doMeshStudy=True)
+    # optStudy.test_case.meshSFs = meshSFs
+    # optStudy.test_case.mesh_study()
+    # optStudy.run_bnd_cases(n_pts=3, getDiags=True, do_mesh_study=True)
     #
     # optStudy.genBndCases()
     #
@@ -89,15 +89,15 @@ def main():
     #     F_res = abs_mean_res_torque * D / 2
     #     self.f = [C_drag, F_res]
     #
-    # optStudy.testCase.obj_labels = [
+    # optStudy.test_case.obj_labels = [
     #     'Coefficient of Drag', 'Resistive Torque [N m]']
-    # optStudy.testCase._postProc = types.MethodType(
-    #     _postProc, optStudy.testCase)
-    # for case in optStudy.testCase.msCases:
+    # optStudy.test_case._postProc = types.MethodType(
+    #     _postProc, optStudy.test_case)
+    # for case in optStudy.test_case.msCases:
     #     # print(case)
     #     # print(case.msCases)
     #     # case.meshSFs = meshSFs
-    #     # case.meshStudy()
+    #     # case.mesh_study()
     #     # optStudy.saveCP()
     #     # print(case.msCases)
     #     # for msCase in case.msCases:
@@ -107,19 +107,19 @@ def main():
     #     case.f = None
     #     case.postProc()
     #     case.obj_labels = ['Coefficient of Drag', 'Resistive Torque [N m]']
-    #optStudy.testCase.plotMeshStudy()
+    #optStudy.test_case.plotmesh_study()
     #optStudy.plotBndPts()
     #optStudy.plotBndPtsObj()    
 #
     # for case in optStudy.bndCases:
     #     case.f = None
     # optStudy.BaseCase.parallelize(optStudy.bndCases)
-    # optStudy.runBndCases(n_pts=3, getDiags=True, doMeshStudy=True)
+    # optStudy.run_bnd_cases(n_pts=3, getDiags=True, do_mesh_study=True)
  #   for case in optStudy.loadCases(os.path.join(optStudy.runDir, 'gen21')):
 #         case.postProc()
     # optStudy.runGen1()
     optStudy.run()
-    # optStudy.meshStudy(optStudy.gen1Pop)
+    # optStudy.mesh_study(optStudy.gen1Pop)
 
     ### Execute Study ###
     # optStudy.run(restart = False)

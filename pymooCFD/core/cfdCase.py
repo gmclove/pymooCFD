@@ -5,9 +5,8 @@
 # from pymooCFD.util.handleData import findKeywordLine
 from pymoo.visualization.scatter import Scatter
 import re
-from pymooCFD.core.meshStudy import MeshStudy
+from pymooCFD.core.mesh_study import mesh_study
 from pymooCFD.core.picklePath import PicklePath
-from pymooCFD.util.loggingTools import MultiLineFormatter, DispNameFilter
 from pymooCFD.util.sysTools import saveTxt, yes_or_no
 import pymooCFD.config as config
 import multiprocessing.pool
@@ -17,10 +16,9 @@ from glob import glob
 import os
 import subprocess
 import time
-import sys
 import shutil
-import logging
-import copy
+import matplotlib.pyplot as plt
+plt.set_loglevel('info')
 # import matplotlib.pyplot as plt
 # plt.set_loglevel("info")
 
@@ -63,7 +61,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
 
     def __init__(self, case_path, x,
                  validated=False,
-                 meshStudy=None,
+                 mesh_study=None,
                  # externalSolver=False,
                  var_labels=None, obj_labels=None,
                  meshFile=None,  # meshLines = None,
@@ -75,7 +73,6 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                  # *args,
                  **kwargs
                  ):
-
         self.meshSF = kwargs.get('meshSF', 1)
 
         ###########################
@@ -86,29 +83,9 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         self.parallelizeInit(self.externalSolver)
         self._x = x
 
-        # #########################
-        # #    CHECKPOINT INIT    #
-        # #########################
-        # if os.path.exists(self.abs_path):
-        #     self.logger = self.getLogger()
-        #     try:
-        #         self.loadCP()
-        #         self.logger.info('RESTART CASE')
-        #         return
-        #     except FileNotFoundError as err:
-        #         self.logger.error(err)
-        #         self.logger.info(
-        #             f'OVERRIDE CASE - case directory already exists but {self.cp_rel_path} does not exist')
-        #         self.copy_base_case()
-        #         saveTxt(self.abs_path, 'var.txt', self.x)
-        #     # except ModuleNotFoundError as err:
-        #     #     print(self.cp_rel_path + '.npy')
-        #     #     raise err
-        # else:
-        #     os.makedirs(self.abs_path, exist_ok=True)
-        #     self.logger = self.getLogger()
-        #     self.logger.info('NEW CASE - directory did not exist')
-        #     self.copy_base_case()
+        #####################################
+        #    CHECKPOINT/PICKLE PATH INIT    #
+        #####################################
         super().__init__(dir_path=case_path)
         self.copy_base_case()
         saveTxt(self.abs_path, 'var.txt', self.x)
@@ -129,8 +106,8 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         ####################
         self.validated = validated
         # Default Attributes
-        if meshStudy is None:
-            self.meshStudy = MeshStudy(self)
+        if mesh_study is None:
+            self.mesh_study = mesh_study(self)
         # os.makedirs(self.basecase_path, exist_ok=True)
         # Using kwargs (not an option with labels as class variables)
         # self.var_labels = kwargs.get('var_labels')
@@ -168,8 +145,6 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
             self.logger.debug(f'\t{key}: {val}')
         # self.genMesh()
         ### Save Checkpoint ###
-        # _, tail = os.path.split(case_path)
-        # self.cp_rel_path = os.path.join(case_path, tail+'.npy')
         self.save_self()
 
     # def run(self):
@@ -397,8 +372,8 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
             return os.path.join(self.abs_path, self.jobFile)
 
     @property
-    def meshStudyDir(self):
-        return os.path.join(self.abs_path, 'meshStudy')
+    def mesh_studyDir(self):
+        return os.path.join(self.abs_path, 'mesh_study')
 
     # @property
     # def cp_path(self):
@@ -528,33 +503,33 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
     ################
     #    LOGGER    #
     ################
-    def getLogger(self):
-        _, tail = os.path.split(self.abs_path)
-        # Get Child Logger using hierarchical "dot" convention
-        logger = logging.getLogger(__name__ + '.' + self.abs_path)
-        logger.setLevel(config.CFD_CASE_LOGGER_LEVEL)
-        # Filters
-        # Filters added to logger do not propogate up logger hierarchy
-        # Filters added to handlers do propogate
-        # filt = DispNameFilter(self.abs_path)
-        # logger.addFilter(filt)
-        # File Handle
-        logFile = os.path.join(self.abs_path, f'{tail}.log')
-        fileHandler = logging.FileHandler(logFile)
-        logger.addHandler(fileHandler)
-        # Stream Handler
-        # parent root logger takes care of stream display
-        # Formatter
-        formatter = MultiLineFormatter(
-            '%(asctime)s :: %(levelname)-8s :: %(name)s :: %(message)s')
-        fileHandler.setFormatter(formatter)
-        # Initial Message
-        logger.info('-' * 30)
-        logger.info('LOGGER INITIALIZED')
-        # Plot logger
-        plot_logger = logging.getLogger(Scatter.__name__)
-        plot_logger.setLevel(config.PLOT_LOGGER_LEVEL)
-        return logger
+    # def getLogger(self):
+    #     _, tail = os.path.split(self.abs_path)
+    #     # Get Child Logger using hierarchical "dot" convention
+    #     logger = logging.getLogger(__name__ + '.' + self.abs_path)
+    #     logger.setLevel(config.CFD_CASE_LOGGER_LEVEL)
+    #     # Filters
+    #     # Filters added to logger do not propogate up logger hierarchy
+    #     # Filters added to handlers do propogate
+    #     # filt = DispNameFilter(self.abs_path)
+    #     # logger.addFilter(filt)
+    #     # File Handle
+    #     logFile = os.path.join(self.abs_path, f'{tail}.log')
+    #     fileHandler = logging.FileHandler(logFile)
+    #     logger.addHandler(fileHandler)
+    #     # Stream Handler
+    #     # parent root logger takes care of stream display
+    #     # Formatter
+    #     formatter = MultiLineFormatter(
+    #         '%(asctime)s :: %(levelname)-8s :: %(name)s :: %(message)s')
+    #     fileHandler.setFormatter(formatter)
+    #     # Initial Message
+    #     logger.info('-' * 30)
+    #     logger.info('LOGGER INITIALIZED')
+    #     # Plot logger
+    #     plot_logger = logging.getLogger(Scatter.__name__)
+    #     plot_logger.setLevel(config.PLOT_LOGGER_LEVEL)
+    #     return logger
 
     #######################
     #    CHECKPOINTING    #
@@ -570,6 +545,43 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
     #             os.remove(cp_path + '.old.npy')
     #     except FileNotFoundError as err:
     #         self.logger.error(str(err))
+    def _update_filter(self, loaded_self):
+        cp = self.load_self()
+        # print(cp._x)
+        if np.array_equal(self._x, cp._x):
+            if self.abs_path != cp.abs_path:
+                self.logger.warning(
+                    'CASE DIRECTORY CHANGED BETWEEN CHECKPOINTS')
+                self.logger.debug(str(cp.rel_path) + ' -> ' + str(self.rel_path))
+            if cp.cp_path != self.cp_path:
+                self.logger.warning(f'{cp.cp_path} != {self.cp_path}')
+            if cp.meshSF != self.meshSF:
+                self.logger.warning(f'{cp.meshSF} != {self.meshSF}')
+                self.logger.warning(
+                    'Running genMesh() to reflect change in mesh size factor')
+                self.numElem = None
+                self.genMesh()
+                # cp.meshSF = self.meshSF
+                self.logger.info(
+                    'Mesh size factor changed, mesh generated, self.f and self.numElem set to None')
+                cp.f = None
+            cp.abs_path = self.abs_path
+            # cp.cp_path = self.cp_path
+            # cp.mesh_studyDir = self.mesh_studyDir
+            # cp.meshSFs = self.meshSFs
+            cp.base_case_path = self.base_case_path
+            return cp
+        else:
+            self.logger.info(f'Given Parameters: {self._x}')
+            self.logger.info(f'Checkpoint Parameters: {cp._x}')
+            question = f'\nCASE PARAMETERS DO NOT MATCH.\nOVERWRITE {self.rel_path}?'
+            overwrite = yes_or_no(question)
+            if overwrite:
+                shutil.rmtree(self.abs_path)
+                self.__init__(self.abs_path, self.x)
+            else:
+                self.logger.exception(
+                    'GIVEN PARAMETERS DO NOT MATCH CHECKPOINT PARAMETERS.')
 
     def update_self(self):
         cp = self.load_self()
@@ -593,11 +605,11 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                 cp.f = None
             cp.abs_path = self.abs_path
             # cp.cp_path = self.cp_path
-            # cp.meshStudyDir = self.meshStudyDir
+            # cp.mesh_studyDir = self.mesh_studyDir
             # cp.meshSFs = self.meshSFs
             cp.base_case_path = self.base_case_path
             # cp.logger = self.getLogger()
-            super().update_self(loaded_self=cp)
+            self.update_self(loaded_self=cp)
             self.logger.info(f'CHECKPOINT LOADED - {self.cp_rel_path}')
         else:
             self.logger.info(f'Given Parameters: {self._x}')
