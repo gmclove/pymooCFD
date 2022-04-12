@@ -2,6 +2,7 @@
 # @Date:   2021-12-10T11:22:40-05:00
 # @Last modified by:   glove
 # @Last modified time: 2021-12-14T15:45:19-05:00
+<<<<<<< HEAD
 # from pymoo.visualization.scatter import Scatter
 import numpy as np
 # import os
@@ -18,6 +19,28 @@ for col in dat.T[1:]:
 print(np.mean(avgs))
 print(np.mean(dat[:, 1:]))
 
+=======
+
+
+class A:
+    a = 1
+
+    def __init__(self):
+        self.b = 2
+        # self.externalSolver =
+inst = A()
+Cls = A
+print(Cls.__dict__)
+print(inst.__dict__)
+print(inst.__class__.__dict__)
+inst.__class__.__dict__ = inst.__class__.__dict__
+print(inst.__class__.__dict__)
+
+
+# from pymoo.visualization.scatter import Scatter
+# import numpy as np
+# import os
+>>>>>>> e5cab1f77b4578ddaad5cfcd097b366e5f34fd9c
 #
 # import gmsh
 #

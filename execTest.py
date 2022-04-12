@@ -2,6 +2,8 @@
 from pymooCFD.studies.rans_const_opt import optStudy
 
 def main():
+    case = optStudy.loadCases.loadCase('/users/g/l/glove1/gitrepo/pymooCFD/optStudy-RANSConstOpt/run/gen1/ind3')
+    case.postProc()
     optStudy.testCase.preProc()
     optStudy.testCase.solve()
     optStudy.testCase.postProc()

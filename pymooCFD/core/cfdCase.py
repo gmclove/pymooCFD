@@ -257,7 +257,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #         self._solve()
 
     def solve(self):
-        if self.f is None or np.isnan(np.sum(self.f)):
+        if self.f is None or np.isfinite(np.sum(self.f)):
             # try to prevent re-run if execution done
             if self._execDone() and self.restart:
                 self.logger.debug(
@@ -267,7 +267,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                     self.postProc()
                 except FileNotFoundError as err:
                     self.logger.error(err)
-        if self.f is None or np.isnan(np.sum(self.f)):
+        if self.f is None or np.isfinite(np.sum(self.f)):
             self.restart = True
             start = time.time()
             self._solve()
@@ -302,9 +302,10 @@ class CFDCase:  # (PreProcCase, PostProcCase)
 
     def run(self, max_reruns=3, n_reruns=0):
         # print('RUNNING')
-        if self.f is None or np.isnan(np.sum(self.f)):
+        if self.f is None or np.isfinite(np.sum(self.f)):
             self.preProc()
             self.solve()
+            self.postProc()
             if self._execDone():
                 self.logger.info('COMPLETE: SOLVE')
             else:
@@ -316,7 +317,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                 else:
                     self.logger.warning(
                         f'MAX NUMBER OF RE-RUNS ({max_reruns}) REACHED')
-            self.postProc()
+            # self.postProc()
         else:
             self.logger.warning(
                 'SKIPPED: RUN - self.run() called but case already complete')
@@ -325,7 +326,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #     pass
 
     def preProc(self):
-        if self.f is None or np.isnan(np.sum(self.f)):
+        if self.f is None or np.isfinite(np.sum(self.f)):
             if self.restart:
                 # self.cpPath = os.path.join
                 self.logger.info(
@@ -356,14 +357,14 @@ class CFDCase:  # (PreProcCase, PostProcCase)
     #                    stdout=subprocess.DEVNULL)
 
     def postProc(self):
-        if self.f is None or np.isnan(np.sum(self.f)):
+        if self.f is None or np.isfinite(np.sum(self.f)):
             self._postProc()
         else:
             self.logger.warning('SKIPPED: POST-PROCESSING')
             self.logger.debug(
                 'self.postProc() called but self.f is not None or NaN so no action was taken')
         # Check Completion
-        if self.f is None or np.isnan(np.sum(self.f)):
+        if self.f is None or np.isfinite(np.sum(self.f)):
             self.logger.error('INCOMPLETE: POST-PROCESS')
         else:
             self.logger.info('COMPLETE: POST-PROCESS')
@@ -519,6 +520,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                         g[const_i] = np.inf
                         self.logger.warning(
                             f'\t Constraint {const_i}: {const} -> {np.inf}')
+                        self._g = g
     ### Objectives ###
     @property
     def f(self): return self._f
@@ -540,6 +542,7 @@ class CFDCase:  # (PreProcCase, PostProcCase)
                         f[obj_i] = np.inf
                         self.logger.warning(
                             f'\t Objective {obj_i}: {obj} -> {np.inf}')
+                        self._f = f
 
     ################
     #    LOGGER    #
