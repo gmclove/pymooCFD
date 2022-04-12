@@ -1,8 +1,14 @@
 from pymooCFD.problems.rans_jet import RANSJet
 from pymooCFD.core.minimizeCFD import MinimizeCFD
+import os
+
+def exec_test():
+    study = MinimizeCFD(RANSJet)
+    path = os.path.join(study.abs_path, 'RANS_equiv_BCs')
+    RANSJet(path, [0.02, 0.2]).run()
+
 
 def exec():
-    RANSJet('optStudy-RANSJet/RANS_equiv_BCs', [0.02, 0.2]).run()
     study = MinimizeCFD(RANSJet)
     xl = [0.005, 0.1]  # lower limits of parameters/variables
     xu = [0.04, 0.4]  # upper limits of variables
