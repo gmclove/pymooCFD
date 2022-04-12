@@ -74,7 +74,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                  **kwargs
                  ):
         self.meshSF = kwargs.get('meshSF', 1)
-
+        self.validated = validated
         ###########################
         #    RESTART VARIABLES    #
         ###########################
