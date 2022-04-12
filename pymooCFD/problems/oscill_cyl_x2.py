@@ -1,8 +1,3 @@
-# @Author: glove
-# @Date:   2021-12-14T16:02:45-05:00
-# @Last modified by:   glove
-# @Last modified time: 2021-12-15T16:36:54-05:00
-
 import gmsh
 import numpy as np
 
@@ -15,8 +10,8 @@ class OscillCylinder(YALES2Case):
     n_var = 2
     var_labels = ['Amplitude [radians/s]', 'Frequency [cycles/s]']
     var_type = ["real", "real"]  # options: 'int' or 'real'
-    xl = [0.1, 0.1]  # lower limits of parameters/variables
-    xu = [6, 1]  # upper limits of variables
+    # xl = [0.1, 0.1]  # lower limits of parameters/variables
+    # xu = [6, 1]  # upper limits of variables
 
     ####### Define Objective Space ########
     obj_labels = ['Change in Coefficient of Drag [%]',

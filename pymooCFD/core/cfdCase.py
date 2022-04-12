@@ -5,7 +5,7 @@
 # from pymooCFD.util.handleData import findKeywordLine
 from pymoo.visualization.scatter import Scatter
 import re
-from pymooCFD.core.mesh_study import mesh_study
+from pymooCFD.core.meshStudy import MeshStudy
 from pymooCFD.core.picklePath import PicklePath
 from pymooCFD.util.sysTools import saveTxt, yes_or_no
 import pymooCFD.config as config
@@ -107,7 +107,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         self.validated = validated
         # Default Attributes
         if mesh_study is None:
-            self.mesh_study = mesh_study(self)
+            self.mesh_study = MeshStudy(self)
         # os.makedirs(self.basecase_path, exist_ok=True)
         # Using kwargs (not an option with labels as class variables)
         # self.var_labels = kwargs.get('var_labels')
