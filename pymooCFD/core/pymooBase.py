@@ -186,11 +186,11 @@ class CFDGeneticProblem(Problem):
 
 class CFDTestProblem(CFDGeneticProblem):
     def _evaluate(self, X, out, *args, **kwargs):
-        runDir = kwargs.get('runDir')
+        run_path = kwargs.get('run_path')
         gen = kwargs.get('gen')
         print('GEN:', gen)
         # create generation directory for storing data/executing simulations
-        genDir = os.path.join(runDir, f'gen{gen}')
+        genDir = os.path.join(run_path, f'gen{gen}')
         # create sub-directories for each individual
         indDirs = [os.path.join(genDir, f'ind{i+1}') for i in range(len(X))]
         # cases = self.genCases(indDirs, X)
