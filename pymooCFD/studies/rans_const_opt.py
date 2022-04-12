@@ -19,18 +19,9 @@ def exec_test():
                               n_offsprings=2)
 
     opt_run = study.new_run(alg, prob, run_dir='test-run')
-    print('alg:', alg)
-    print('opt_run.algorithm:', opt_run.algorithm)
-    print()
-    print('prob:', prob)
-    print('opt_run.algorithm.problem:', opt_run.algorithm.problem)
-    print()
-    print('prob.n_var:', prob.n_var)
-    print('opt_run.algorithm.problem.n_var:', opt_run.algorithm.problem.n_var)
-
-    # opt_run.test_case.run()
-    # opt_run.run_bnd_cases()
-    # opt_run.run()
+    opt_run.test_case.run()
+    opt_run.run_bnd_cases()
+    opt_run.run()
 
 
 def exec():
