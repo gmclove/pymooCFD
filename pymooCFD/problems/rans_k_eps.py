@@ -35,7 +35,9 @@ class RANS_k_eps(FluentCase):
             ';DEFINE turbulence solver',
             '/define/models/viscous/ke-standard y',
             f'(rpsetvar\' kecmu {self.x[0]})',
-            ';INITIALIZE'
+            # CHANGE CONVERGENCE CRITERIA
+            '/solve/monitors/residual check-convergence n n n n n n',
+            ';INITIALIZE',
             '/solve/initialize/compute-defaults/velocity-inlet inlet',
             '/solve/initialize/initialize-flow',
             ';SOLVE',

@@ -274,6 +274,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         else:
             self.logger.info('COMPLETE: POST-PROCESS')
         self.save_self()
+        self.logger.info(f'\tParameters: {self.x}')
         self.logger.info(f'\tObjectives: {self.f}')
         return self.f
 
