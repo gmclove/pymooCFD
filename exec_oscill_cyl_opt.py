@@ -1,4 +1,4 @@
-from pymooCFD.problems.oscillCyl import OscillCylinder_SLURM as BaseCase
+from pymooCFD.problems.oscill_cyl import OscillCylinder_SLURM as BaseCase
 from pymooCFD.core.minimizeCFD import MinimizeCFD
 import os
 

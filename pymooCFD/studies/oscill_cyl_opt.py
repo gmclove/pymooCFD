@@ -1,5 +1,5 @@
 from pymooCFD.core.minimizeCFD import MinimizeCFD
-from pymooCFD.problems.oscill_cyl_x2 import OscillCylinder
+from pymooCFD.problems.oscill_cyl import OscillCylinder
 from pymooCFD.core.pymooBase import CFDTestProblem
 
 def exec_test():
