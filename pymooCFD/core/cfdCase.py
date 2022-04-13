@@ -119,6 +119,8 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
             self.var_labels = [f'var{x_i}' for x_i in range(self.n_var)]
         if self.obj_labels is None:
             self.obj_labels = [f'obj{x_i}' for x_i in range(self.n_obj)]
+        self.var_labels = list(self.var_labels)
+        self.obj_labels = list(self.obj_labels)
         ###################################################
         #    Attributes To Be Set Later During Each Run   #
         ###################################################

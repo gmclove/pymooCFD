@@ -4,8 +4,8 @@ import os
 
 def main():
     study = MinimizeCFD(RANS_k_eps)
-    path = os.path.join(study.abs_path, 'best_k-e_standard')
-    RANS_k_eps(path, [0.09, 30_000]).run()
+    # path = os.path.join(study.abs_path, 'best_k-e_standard')
+    # RANS_k_eps(path, [0.09, 30_000]).run()
     # xl = [0.09*0.8, 4_000]
     # xu = [0.09*1.2, 30_000]
     # prob = study.get_problem(xl, xu)
