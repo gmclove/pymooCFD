@@ -158,6 +158,9 @@ class CompDistSLURM_YALES2(CompDistSLURM):
             print(line_i)
             print(self.x[2])
             in_lines[line_i] = f'NELEMENTPERGROUP = {self.x[2]}'
+
+        print(in_lines[29])
+        print(self.inputLines[29])
         # self.jobLines = [
         #     '#!/bin/bash',
         #     "#SBATCH --partition=ib --constraint='ib&haswell_1'",
