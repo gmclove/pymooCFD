@@ -23,6 +23,7 @@ class MinimizeCFD(PicklePath):
         #    RESET ATTRIBUTES    #
         ##########################
         self.opt_runs = []  # OptRun(self.get_algorithm(), self.get_problem(), run_path='run00')]
+        self.case_runs = []
         self.CFDCase = CFDCase
         self.CFDGeneticAlgorithm = CFDGeneticAlgorithm
         self.CFDGeneticProblem = CFDGeneticProblem
@@ -72,4 +73,7 @@ class MinimizeCFD(PicklePath):
         # self.algorithm = CFDAlgorithm(sampling, crossover, mutation)
     def run_case(self, case_dir, x, **kwargs):
         path = os.path.join(self.abs_path, case_dir)
-        self.CFDCase(path, x, **kwargs).run()
+        case = self.CFDCase(path, x, **kwargs)
+        case.run()
+        self.case_runs.append(case)
+        return case
