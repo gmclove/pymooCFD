@@ -223,14 +223,15 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                 t_str = '%i mins | %i secs' % (mins, secs)
             else:
                 t_str = '%i secs' % dt
-            self.logger.info(f'Solve Time: {t_str}')
-            if int(dt) < 1:
-                self.logger.warning('Solve completed in less than 1 second')
+
             if self._solveDone():
                 self.logger.info('COMPLETE: SOLVE')
                 self.solnTime = dt
             else:
                 self.logger.info('FAILED: SOLVE')
+            self.logger.info(f'\tSolve Time: {t_str}')
+            if int(dt) < 1:
+                self.logger.warning('Solve executed in less than 1 second')
         else:
             self.logger.warning('SKIPPED: SOLVE')
         self.save_self()
