@@ -60,7 +60,7 @@ class CompDistSLURM(CFDCase):
         ntasks = self.x[0]
         c = self.x[1]
         # read job lines
-        job_lines = self.jobLines
+        job_lines = self.job_lines_rw
         if len(job_lines) > 0:
             newLine = f'#SBATCH --cpus-per-task={c}'
             kws = ['#SBATCH --cpus-per-task', '#SBATCH -c']
@@ -92,7 +92,7 @@ class CompDistSLURM(CFDCase):
             # else:
             #     job_lines.insert(0, newLine)
             # write job lines
-            self.jobLines = job_lines
+            self.job_lines_rw = job_lines
         elif self.jobFile in self.solverExecCmd:
             self.solverExecCmd.insert(
                 1, '-c').insert(2, str(c)).insert(3, '-n').insert(4, str(ntasks))

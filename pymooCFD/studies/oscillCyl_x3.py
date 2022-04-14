@@ -46,7 +46,7 @@ class OscillCylinder(OscCylX2):
         kin_visc = U * D / Re
         ### SIMULATION INPUT PARAMETERS ###
         # open and read YALES2 input file to array of strings for each line
-        in_lines = self.inputLines
+        in_lines = self.input_lines_rw
         # find line that must change using a keyword
         keyword = 'CYL_ROTATION_PROP'
         kw_lines = self.findKeywordLines(keyword, in_lines)
@@ -62,7 +62,7 @@ class OscillCylinder(OscCylX2):
             newLine = f'{kw_line[:kw_line.index("=")]}= {kin_visc}'
             in_lines[kw_line_i] = newLine
         # REPEAT FOR EACH LINE THAT MUST BE CHANGED
-        self.inputLines = in_lines
+        self.input_lines_rw = in_lines
 
     def _postProc(self):
         ####### EXTRACT VAR ########

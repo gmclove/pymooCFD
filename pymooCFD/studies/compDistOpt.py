@@ -45,7 +45,7 @@ class FluentCompDistSLURM(CFDCase):
     def _preProc(self):
         ntasks = self.x[0]
         c = self.x[1]
-        self.jobLines = [
+        self.job_lines_rw = [
             '#!/bin/bash',
             "#SBATCH --partition=ib --constraint='ib&haswell_1'",
             f'#SBATCH --cpus-per-task={c}',
@@ -63,7 +63,7 @@ class FluentCompDistSLURM(CFDCase):
         x_mid = [1.55, 0.55]
         outVel = x_mid[1]
         coflowVel = 0.005  # outVel*(2/100)
-        self.inputLines = [
+        self.input_lines_rw = [
             # IMPORT
             f'/file/import ideas-universal {self.meshFile}',
             # AUTO-SAVE

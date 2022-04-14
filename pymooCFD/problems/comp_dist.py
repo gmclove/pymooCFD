@@ -43,7 +43,7 @@ def get_CompDistSLURM(BaseCase):
             ntasks = self.x[0]
             c = self.x[1]
             # read job lines
-            job_lines = self.jobLines
+            job_lines = self.job_lines_rw
             if job_lines:
                 newLine = f'#SBATCH --cpus-per-task={c}'
                 kws = ['#SBATCH --cpus-per-task', '#SBATCH -c']
@@ -75,7 +75,7 @@ def get_CompDistSLURM(BaseCase):
                 # else:
                 #     job_lines.insert(0, newLine)
                 # write job lines
-                self.jobLines = job_lines
+                self.job_lines_rw = job_lines
             elif self.jobFile in self.solverExecCmd:
                 self.solverExecCmd.insert(
                     1, '-c').insert(2, str(c)).insert(3, '-n').insert(4, str(ntasks))
@@ -127,7 +127,7 @@ class CompDistSLURM_YALES2(CompDistSLURM):
         # ntasks = self.x[0]
         # c = self.x[1]
         # # read job lines
-        # job_lines = self.jobLines
+        # job_lines = self.job_lines_rw
         # if job_lines:
         #     kw_lines = self.findKeywordLines(
         #         '#SBATCH --cpus-per-task', job_lines)
@@ -143,14 +143,14 @@ class CompDistSLURM_YALES2(CompDistSLURM):
         #     for line_i, line in kw_lines:
         #         job_lines[line_i] = f'#SBATCH --ntasks={ntasks}'
         #     # write job lines
-        #     self.jobLines = job_lines
+        #     self.job_lines_rw = job_lines
         # else:
         #     self.solverExecCmd.insert(
         #         '-c', 1).insert(str(c), 2).insert('-n', 3).insert(str(ntasks), 4)
         print("BEFORE:   super()._preProc()")
         super()._preProc()
         print("AFTER:   super()._preProc()")
-        in_lines = self.inputLines
+        in_lines = self.input_lines_rw
         # print(in_lines)
         kw_lines = self.findKeywordLines('NELEMENTPERGROUP', in_lines)
         print(kw_lines)
@@ -159,10 +159,10 @@ class CompDistSLURM_YALES2(CompDistSLURM):
             print(self.x[2])
             in_lines[line_i] = f'NELEMENTPERGROUP = {self.x[2]}'
 
-        self.inputLines = in_lines
+        self.input_lines_rw = in_lines
         # print(in_lines[29])
-        print(self.inputLines[29])
-        # self.jobLines = [
+        print(self.input_lines_rw[29])
+        # self.job_lines_rw = [
         #     '#!/bin/bash',
         #     "#SBATCH --partition=ib --constraint='ib&haswell_1'",
         #     f'#SBATCH --cpus-per-task={c}',
@@ -180,7 +180,7 @@ class CompDistSLURM_YALES2(CompDistSLURM):
         # x_mid = [1.55, 0.55]
         # outVel = x_mid[1]
         # coflowVel = 0.005  # outVel*(2/100)
-        # self.inputLines = [
+        # self.input_lines_rw = [
         #     # IMPORT
         #     f'/file/import ideas-universal {self.meshFile}',
         #     # AUTO-SAVE

@@ -64,8 +64,8 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                  # externalSolver=False,
                  # var_labels=None, obj_labels=None,
                  meshFile=None,  # meshLines = None,
-                 jobFile=None,  # jobLines = None,
-                 inputFile=None,  # inputLines = None,
+                 jobFile=None,  # job_lines_rw = None,
+                 inputFile=None,  # input_lines_rw = None,
                  datFile=None,
                  # restart=False,
                  # solverExecCmd=None,
@@ -137,8 +137,8 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         self.numElem = None
 
         # case file lines
-        self.inputLines = None
-        self.jobLines = None
+        self.input_lines_rw = None
+        self.job_lines_rw = None
 
         self.solnTime = None
 
@@ -339,20 +339,20 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
 
     ### Job Lines ###
     @property
-    def jobLines(self):
+    def job_lines_rw(self):
         if self.jobPath is None:
             self.logger.warning(
-                'self.jobPath is None: self.jobLines is empty list')
+                'self.jobPath is None: self.job_lines_rw is empty list')
             return []
         with open(self.jobPath, 'r') as f:
-            jobLines = f.readlines()
-        return jobLines
+            job_lines_rw = f.readlines()
+        return job_lines_rw
 
-    @jobLines.setter
-    def jobLines(self, lines):
+    @job_lines_rw.setter
+    def job_lines_rw(self, lines):
         if self.jobPath is None:
             self.logger.warning(
-                'self.jobPath is None: self.jobLines not written')
+                'self.jobPath is None: self.job_lines_rw not written')
         elif lines is None:
             pass
         else:
@@ -364,20 +364,20 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
 
     ### Input Lines ###
     @property
-    def inputLines(self):
+    def input_lines_rw(self):
         if self.inputPath is None:
             self.logger.warning(
-                'self.inputPath is None: self.inputLines is empty list')
+                'self.inputPath is None: self.input_lines_rw is empty list')
             return []
         with open(self.inputPath, 'r') as f:
-            inputLines = f.readlines()
-        return inputLines
+            input_lines_rw = f.readlines()
+        return input_lines_rw
 
-    @inputLines.setter
-    def inputLines(self, lines):
+    @input_lines_rw.setter
+    def input_lines_rw(self, lines):
         if self.inputPath is None:
             self.logger.info(
-                'self.inputPath is None: self.inputLines not written')
+                'self.inputPath is None: self.input_lines_rw not written')
         elif lines is None:
             pass
         else:
@@ -386,13 +386,13 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                     lines[i] += '\n'
             with open(self.inputPath, 'w+') as f:
                 f.writelines(lines)
-    # @jobLines.deleter
-    # def jobLines(self):
-    #     self.jobLines = None
+    # @job_lines_rw.deleter
+    # def job_lines_rw(self):
+    #     self.job_lines_rw = None
 
     ### Data File Lines ###
     @property
-    def datLines(self):
+    def dat_lines_r(self):
         with open(self.datPath, 'r') as f:
             lines = f.readlines()
         return lines
@@ -701,7 +701,7 @@ class YALES2Case(CFDCase):
     # add random line to get to git push
     # def preProc(self):
     #     # ensure dump is in directory called 'dump'
-    #     in_lines = self.inputLines
+    #     in_lines = self.input_lines_rw
     #     if in_lines:
     #         kw_lines = self.findKeywordLines('DUMP_PREFIX', in_lines)
     #         for kw_line_i, kw_line in kw_lines:
@@ -712,7 +712,7 @@ class YALES2Case(CFDCase):
     #                 _, tail = os.path.split(mid)
     #                 path = os.path.join('dump', tail)
     #                 in_lines[kw_line_i] = 'DUMP_PREFIX = ' + path
-    #         self.inputLines = in_lines
+    #         self.input_lines_rw = in_lines
     #     else:
     #         self.logger.error('YALES2 input file (.in) can not be read')
     #     super().preProc()
@@ -737,10 +737,10 @@ class YALES2Case(CFDCase):
         # self._preProc()
         # XMF RESTARTS DO NOT WORK
         # read input lines
-        # in_lines = self.inputLines
+        # in_lines = self.input_lines_rw
         # in_lines = self.commentKeywordLines('RESTART', in_lines)
         # # re-read lines
-        # in_lines = self.inputLines
+        # in_lines = self.input_lines_rw
         # # delete all 'XMF' and "RESTART" lines
         # kw_lines = self.findKeywordLines('XMF', in_lines)
         # del_markers = [line_i for line_i, line in kw_lines
@@ -753,7 +753,7 @@ class YALES2Case(CFDCase):
         # path = os.path.join('dump', latestXMF)
         # in_lines.append('RESTART_XMF_SOLUTION = ' + path)
         # # write input lines
-        # self.inputLines = in_lines
+        # self.input_lines_rw = in_lines
 
     def solve(self):
         super().solve()
@@ -811,7 +811,7 @@ class YALES2Case(CFDCase):
     #     latestSoln = self.getLatestSoln()
     #     # with open(self.inputPath, 'r') as f:
     #     #     in_lines = f.readlines()
-    #     in_lines = self.inputLines
+    #     in_lines = self.input_lines_rw
     #     kw = 'RESTART_TYPE = GMSH'
     #     kw_line, kw_line_i = findKeywordLine(kw, in_lines)
     #     in_lines[kw_line_i] = '#' + kw
@@ -825,7 +825,7 @@ class YALES2Case(CFDCase):
     #     in_lines.append('RESTART_XMF_SOLUTION = dump/' + latestXMF)
     #     # with open(self.inputPath, 'w') as f:
     #     #     f.writelines(in_lines)
-    #     self.inputLines = in_lines
+    #     self.input_lines_rw = in_lines
 
     @property
     def dumpDir(self):
@@ -897,7 +897,7 @@ class FluentCase(CFDCase):
     #     latestSoln = self.getLatestSoln()
     #     # with open(self.inputPath, 'r') as f:
     #     #     in_lines = f.readlines()
-    #     in_lines = self.inputLines
+    #     in_lines = self.input_lines_rw
     #     kw = 'RESTART_TYPE = GMSH'
     #     kw_line, kw_line_i = findKeywordLine(kw, in_lines)
     #     in_lines[kw_line_i] = '#' + kw
@@ -911,7 +911,7 @@ class FluentCase(CFDCase):
     #     in_lines.append('RESTART_XMF_SOLUTION = dump/' + latestXMF)
     #     # with open(self.inputPath, 'w') as f:
     #     #     f.writelines(in_lines)
-    #     self.inputLines = in_lines
+    #     self.input_lines_rw = in_lines
 #
 #     @property
 #     def dumpDir(self):

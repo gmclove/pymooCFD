@@ -338,7 +338,7 @@ class RANSJet(FluentCase):
             '/exit',
             'OK'
         ]
-        self.inputLines = lines
+        self.input_lines_rw = lines
         ####### Slurm Job Lines #########
         lines = ['#!/bin/bash',
                  "#SBATCH --partition=ib --constraint='ib&haswell_1'",
@@ -352,7 +352,7 @@ class RANSJet(FluentCase):
                  'cd $SLURM_SUBMIT_DIR',
                  'time fluent 2ddp -g -pdefault -t$SLURM_NTASKS -slurm -i jet_rans-axi_sym.jou > run.out'
                  ]
-        self.jobLines = lines
+        self.job_lines_rw = lines
 
     # def _preProc_restart(self):
         # # get latest autosave and load this into fluent
@@ -456,7 +456,7 @@ class RANSJet(FluentCase):
         #     '/exit',
         #     'OK'
         #     ]
-        # self.inputLines=lines
+        # self.input_lines_rw=lines
 
     def _postProc(self):
         ####### EXTRACT VAR ########

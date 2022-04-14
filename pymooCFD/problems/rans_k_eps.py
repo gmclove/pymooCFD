@@ -34,7 +34,7 @@ class RANS_k_eps(FluentCase):
                          *args, **kwargs)
 
     def _preProc(self):
-        self.inputLines = [
+        self.input_lines_rw = [
             '/file/read rans_k-eps.cas.h5',
             ';DEFINE turbulence solver',
             '/define/models/viscous/ke-standard y',
@@ -73,7 +73,7 @@ class RANS_k_eps(FluentCase):
         ]
 
         ####### Slurm Job Lines #########
-        self.jobLines = \
+        self.job_lines_rw = \
             ['#!/bin/bash',
              "#SBATCH --partition=ib",
              "#SBATCCH --constraint='ib&sandybridge|haswell_1|haswell_2'",
