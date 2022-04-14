@@ -101,6 +101,7 @@ def get_CompDistSLURM(BaseCase):
 
 CompDistSLURM = get_CompDistSLURM(OscillCylinder)
 
+
 class CompDistSLURM_YALES2(CompDistSLURM):
     # base_case_path = 'base_cases/osc-cyl_base'
     # inputFile = '2D_cylinder.in'

@@ -72,6 +72,8 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                  # *args,
                  **kwargs
                  ):
+        if len(x) != self.n_var:
+            raise Exception(f'input x must be of length {self.n_var}')
         self.meshSF = kwargs.get('meshSF', 1)
         self.validated = validated
         ###########################
