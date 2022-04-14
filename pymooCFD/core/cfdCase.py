@@ -203,6 +203,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                     self.postProc()
                 except Exception as err:  # FileNotFoundError, TypeError
                     self.logger.error(err)
+                    self.f = None
         if self.f is None or not np.isfinite(np.sum(self.f)):
             self.restart = True
             start = time.time()
