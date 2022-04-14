@@ -463,7 +463,6 @@ class OptRun(PicklePath):
     #     self.problem.BaseCase.parallelize(self.cornerCases)
 
     def run_bnd_cases(self, n_pts=2, getDiags=False, do_mesh_study=False):
-        self.problem.BaseCase.parallelizeInit()
         self.problem.BaseCase.parallelize(self.bnd_cases)
         self.save_self()
         self.plotBndPtsObj()
