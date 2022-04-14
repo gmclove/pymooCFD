@@ -1,6 +1,5 @@
 from pymooCFD.core.cfdCase import CFDCase
 from pymooCFD.problems.oscill_cyl import OscillCylinder
-import os
 import numpy as np
 
 def get_CompDistSLURM(BaseCase):
