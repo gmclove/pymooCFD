@@ -131,7 +131,7 @@ class RANSJet(FluentCase):
                          **kwargs
                          )
 
-    def _execDone(self):
+    def _solveDone(self):
         if os.path.exists(self.datPath):
             return True
 

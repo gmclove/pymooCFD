@@ -141,9 +141,6 @@ class CompDistSLURM_YALES2(CompDistSLURM):
     def _postProc(self):
         self.f = self.solnTime
 
-    def _execDone(self):
-        return True
-
 
 class CompDistOpt(OptRun):
     def __init__(self, algorithm, BaseCase,

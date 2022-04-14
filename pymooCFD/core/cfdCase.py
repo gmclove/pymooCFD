@@ -195,9 +195,9 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
     def solve(self):
         if self.f is None or not np.isfinite(np.sum(self.f)):
             # try to prevent re-run if execution done
-            if self._execDone() or self.restart:
+            if self._solveDone() and self.restart:
                 self.logger.debug(
-                    'self.solve() called but self._execDone() or self.restart is True')
+                    'self.solve() called but self._solveDone() or self.restart is True')
                 self.logger.warning('TRYING: POST-PROCESS BEFORE SOLVE')
                 try:
                     self.postProc()
@@ -222,8 +222,10 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
             else:
                 t_str = '%i secs' % dt
             self.logger.info(f'Solve Time: {t_str}')
-            self.solnTime = dt
-            self.save_self()
+            if self._solveDone():
+                self.solnTime = dt
+            else:
+                self.logger.info('FAILED: SOLVE')
         else:
             self.logger.warning('SKIPPED: SOLVE')
         self.save_self()
@@ -240,7 +242,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
             self.preProc()
             self.solve()
             self.postProc()
-            if self._execDone():
+            if self._solveDone():
                 self.logger.info('COMPLETE: SOLVE')
             else:
                 if n_reruns < max_reruns:
@@ -674,9 +676,8 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         self.logger.error(
             'OVERRIDE _solve(self) method to execute internal python solver OR use CFDCase.externalSolver=True')
 
-    def _execDone(self):
-        if (self.f is not None and np.isfinite(np.sum(self.f))):
-            return True
+    def _solveDone(self):
+        return True
 
     def _postProc(self):
         pass
@@ -712,7 +713,7 @@ class YALES2Case(CFDCase):
     #     else:
     #         self.logger.error('YALES2 input file (.in) can not be read')
     #     super().preProc()
-    def _execDone(self):
+    def _solveDone(self):
         # print('EXECUTION DONE?')
         searchPath = os.path.join(self.abs_path, 'solver01_rank*.log')
         resPaths = glob(searchPath)

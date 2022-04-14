@@ -104,12 +104,12 @@ class CompDistSLURM(CFDCase):
         self.f = [self.solnTime, nCPUs]
         self.g = self.solnTime - 500
 
-    def _execDone(self):
-        if self.datPath is not None:
-            if os.path.exists(self.datPath):
-                return True
-        else:
-            return True
+    # def _solveDone(self):
+    #     if self.datPath is not None:
+    #         if os.path.exists(self.datPath):
+    #             return True
+    #     else:
+    #         return True
 
 
 class CompDistOpt(OptRun):

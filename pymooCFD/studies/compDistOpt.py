@@ -112,7 +112,3 @@ class FluentCompDistSLURM(CFDCase):
 
     def _postProc(self):
         pass
-
-    def _execDone(self):
-
-        return True

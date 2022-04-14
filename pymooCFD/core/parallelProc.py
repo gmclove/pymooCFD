@@ -58,7 +58,7 @@
 #         else:
 #             subprocess.run(case.solverExecCmd, cwd=case.abs_path,
 #                            stdout=subprocess.DEVNULL)
-#         # if case._execDone():
+#         # if case._solveDone():
 #         #     case.logger.info('RUN COMPLETE')
 #         # else:
 #         #     case.logger.warning('RUN FAILED TO EXECUTE')

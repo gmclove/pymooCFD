@@ -1,6 +1,7 @@
 from pymooCFD.core.cfdCase import CFDCase
 from pymooCFD.problems.oscill_cyl import OscillCylinder
 import os
+import numpy as np
 
 def get_CompDistSLURM(BaseCase):
     global CompDistSLURM
@@ -87,12 +88,12 @@ def get_CompDistSLURM(BaseCase):
             self.f = [self.solnTime, nCPUs]
             self.g = 500 - self.solnTime
 
-        def _execDone(self):
-            if self.datPath is not None:
-                if os.path.exists(self.datPath):
-                    return True
-            else:
-                return True
+        # def _solveDone(self):
+        #     if self.datPath is not None:
+        #         if os.path.exists(self.datPath):
+        #             return True
+        #     else:
+        #         return True
 
 CompDistSLURM = get_CompDistSLURM(OscillCylinder)
 
@@ -215,6 +216,3 @@ class CompDistSLURM_YALES2(CompDistSLURM):
 
     def _postProc(self):
         self.f = self.solnTime
-
-    def _execDone(self):
-        return True
