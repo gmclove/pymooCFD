@@ -96,15 +96,16 @@ def get_CompDistSLURM(BaseCase):
         #             return True
         #     else:
         #         return True
+    return CompDistSLURM
 
 
 CompDistSLURM = get_CompDistSLURM(OscillCylinder)
 
 class CompDistSLURM_YALES2(CompDistSLURM):
-    base_case_path = 'base_cases/osc-cyl_base'
-    inputFile = '2D_cylinder.in'
-    jobFile = 'jobslurm.sh'
-    datFile = 'FORCES_temporal.txt'
+    # base_case_path = 'base_cases/osc-cyl_base'
+    # inputFile = '2D_cylinder.in'
+    # jobFile = 'jobslurm.sh'
+    # datFile = 'FORCES_temporal.txt'
 
     n_var = 3
     var_labels = np.append(CompDistSLURM.var_labels,
