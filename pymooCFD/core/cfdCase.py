@@ -155,7 +155,8 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                 cls.nTasks = int(cls.procLim / cls.nProc)
             else:
                 cls.nTasks = config.MP_POOL_NTASKS_MAX
-
+        print(externalSolver)
+        print(cls.externalSolver)
         if externalSolver:
             assert cls.solverExecCmd is not None
             assert cls.nTasks is not None
