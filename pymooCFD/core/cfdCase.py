@@ -224,6 +224,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                 t_str = '%i secs' % dt
             self.logger.info(f'Solve Time: {t_str}')
             if self._solveDone():
+                self.logger.info('COMPLETE: SOLVE')
                 self.solnTime = dt
             else:
                 self.logger.info('FAILED: SOLVE')
@@ -242,12 +243,9 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         if self.f is None or not np.isfinite(np.sum(self.f)):
             self.preProc()
             self.solve()
-            self.postProc()
-            if self._solveDone():
-                self.logger.info('COMPLETE: SOLVE')
-            else:
+            if not self._solveDone():
                 if n_reruns < max_reruns:
-                    self.logger.warning('RUN FAILED TO EXECUTE')
+                    self.logger.warning('FAILED: SOLVE')
                     self.logger.info('RE-RUNNING')
                     n_reruns += 1
                     self.run(max_reruns=max_reruns, n_reruns=n_reruns)
