@@ -85,6 +85,8 @@ def get_CompDistSLURM(BaseCase):
 
         def _postProc(self):
             nCPUs = self.x[0] * self.x[1]
+            if self.solnTime < 100:
+                self.logger.exception(f'{self.solnTime} - too small')
             self.f = [self.solnTime, nCPUs]
             self.g = 500 - self.solnTime
 
