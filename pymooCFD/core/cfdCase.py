@@ -163,11 +163,11 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
             assert cls.nTasks is not None
             cls._solve = cls.solveExternal
             cls.Pool = mp.pool.ThreadPool
-            print('Initialized thread pool: ', end='')
+            print('Setup thread pool: ', end='')
         else:
             cls._solve = cls._solve
             cls.Pool = mp.Pool
-            print('Initialized multiprocessing pool: ', end='')
+            print('Setup multiprocessing pool: ', end='')
         print('number of tasks =', cls.nTasks)
 
     @classmethod
@@ -255,6 +255,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                 else:
                     self.logger.warning(
                         f'MAX NUMBER OF RE-RUNS ({max_reruns}) REACHED')
+            self.postProc()
         else:
             self.logger.warning(
                 'SKIPPED: RUN - self.run() called but case already complete')
