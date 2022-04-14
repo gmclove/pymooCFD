@@ -58,7 +58,6 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
     nTasks = None
     solverExecCmd = None
 
-
     def __init__(self, case_path, x,
                  validated=False,
                  mesh_study=None,
@@ -80,7 +79,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         ###########################
         # self.complete = False
         self.restart = False
-        self.parallelizeInit(self.externalSolver)
+        # self.parallelizeInit(self.externalSolver)
         self._x = x
 
         #####################################
@@ -89,7 +88,11 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         super().__init__(dir_path=case_path)
         if self.cp_init:
             return
-        self.copy_base_case()
+        if self.base_case_path is None:
+            self.logger.debug(
+                'SKIPPED: cls.base_case_path is None - base case not copied')
+        else:
+            self.copy_base_case()
         saveTxt(self.abs_path, 'var.txt', self.x)
         #############################
         #    Optional Attributes    #
@@ -144,31 +147,32 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         ### Save Checkpoint ###
         self.save_self()
 
-
     ###  Parallel Processing  ###
     @classmethod
-    def parallelizeInit(cls, externalSolver=None):
-        if externalSolver is None:
-            externalSolver = cls.externalSolver
+    def parallelizeInit(cls, externalSolver):
         if cls.nTasks is None:
             if cls.nProc is not None and cls.nProc is not None:
                 cls.nTasks = int(cls.procLim / cls.nProc)
             else:
                 cls.nTasks = config.MP_POOL_NTASKS_MAX
-        else:
-            nTasks = cls.nTasks
+
         if externalSolver:
             assert cls.solverExecCmd is not None
             assert cls.nTasks is not None
             cls._solve = cls.solveExternal
             cls.pool = mp.pool.ThreadPool(cls.nTasks)
+            print('Initialized thread pool:', end='')
         else:
             cls._solve = cls._solve
             cls.pool = mp.Pool(cls.nTasks)
+            print('Initialized multiprocessing pool:', end='')
+        print('number of tasks =', cls.nTasks)
 
     @classmethod
-    def parallelize(cls, cases):
-        # cls.parallelizeInit()
+    def parallelize(cls, cases, externalSolver=None):
+        if externalSolver is None:
+            externalSolver = cls.externalSolver
+        cls.parallelizeInit(externalSolver)
         #cls.logger.info('PARALLELIZING . . .')
         if cls.onlyParallelizeSolve:
             # print('\tParallelizing Only Solve')
@@ -227,7 +231,6 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         self.logger.info(f'\tcommand: {self.solverExecCmd}')
         subprocess.run(self.solverExecCmd, cwd=self.abs_path,
                        stdout=subprocess.DEVNULL)
-
 
     def run(self, max_reruns=3, n_reruns=0):
         # print('RUNNING')

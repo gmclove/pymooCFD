@@ -1,10 +1,13 @@
 import numpy as np
+import os
 
 from pymooCFD.core.cfdCase import FluentCase
 from pymooCFD.util.handleData import saveTxt
 
+
 class RANS_k_eps(FluentCase):
-    base_case_path = 'base_cases/rans_k-eps_3D-room'
+    base_case_path = os.path.join(os.path.dirname(__file__), 'base_cases',
+                                  'rans_k-eps_3D-room')
 
     n_var = 2
     var_labels = ['Turbulent Viscosity Constant', 'Number of Iterations']
