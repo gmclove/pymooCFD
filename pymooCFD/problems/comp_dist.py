@@ -1,5 +1,5 @@
 from pymooCFD.core.cfdCase import CFDCase
-from pymooCFD.problems.oscill_cyl import OscillCylinder
+from pymooCFD.problems.oscill_cyl import OscillCylinder_SLURM
 import numpy as np
 
 def get_CompDistSLURM(BaseCase):
@@ -98,7 +98,7 @@ def get_CompDistSLURM(BaseCase):
     return CompDistSLURM
 
 
-CompDistSLURM = get_CompDistSLURM(OscillCylinder)
+CompDistSLURM = get_CompDistSLURM(OscillCylinder_SLURM)
 
 
 class CompDistSLURM_YALES2(CompDistSLURM):
