@@ -201,7 +201,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                 self.logger.warning('TRYING: POST-PROCESS BEFORE SOLVE')
                 try:
                     self.postProc()
-                except FileNotFoundError as err:
+                except Exception as err:  # FileNotFoundError, TypeError
                     self.logger.error(err)
         if self.f is None or not np.isfinite(np.sum(self.f)):
             self.restart = True
