@@ -17,8 +17,8 @@ def get_CompDistSLURM(BaseCase):
         # , 'Time Step']
         var_labels = ['Number of Tasks', 'Number of CPUs per Task']
         var_type = ['int', 'int']
-        xl = [1, 1]
-        xu = [10, 10]
+        # xl = [1, 1]
+        # xu = [10, 10]
 
         n_obj = 2
         obj_labels = ['Solve Time', 'Total Number of CPUs']  # , 'Fidelity']
@@ -111,8 +111,8 @@ class CompDistSLURM_YALES2(CompDistSLURM):
     var_labels = np.append(CompDistSLURM.var_labels,
                            'Number of Elements per Group')
     var_type = np.append(CompDistSLURM.var_type, 'real')
-    xl = np.append(CompDistSLURM.xl, 50)
-    xu = np.append(CompDistSLURM.xu, 1000)
+    # xl = np.append(CompDistSLURM.xl, 50)
+    # xu = np.append(CompDistSLURM.xu, 1000)
 
     # n_constr = 0
     #
