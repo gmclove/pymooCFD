@@ -195,9 +195,9 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
     def solve(self):
         if self.f is None or not np.isfinite(np.sum(self.f)):
             # try to prevent re-run if execution done
-            if self._execDone() and self.restart:
+            if self._execDone() or self.restart:
                 self.logger.debug(
-                    'self.solve() called but self._execDone() and self.restart are both True')
+                    'self.solve() called but self._execDone() or self.restart is True')
                 self.logger.warning('TRYING: POST-PROCESS BEFORE SOLVE')
                 try:
                     self.postProc()
