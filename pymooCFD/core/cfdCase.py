@@ -225,6 +225,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
             self.save_self()
         else:
             self.logger.warning('SKIPPED: SOLVE')
+        self.save_self()
 
     def solveExternal(self):
         self.logger.info('SOLVING AS SUBPROCESS...')
@@ -262,9 +263,9 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
             else:
                 self._preProc()
             self.logger.info('COMPLETE: PRE-PROCESS')
-            self.save_self()
         else:
             self.logger.warning('SKIPPED: PRE-PROCESS')
+        self.save_self()
 
     def postProc(self):
         if self.f is None or not np.isfinite(np.sum(self.f)):
