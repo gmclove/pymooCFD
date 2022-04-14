@@ -158,11 +158,14 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         print(externalSolver)
         print(cls.externalSolver)
         if externalSolver:
+            print(externalSolver)
+            print(cls.externalSolver)
+            print(cls.solveExternal)
             assert cls.solverExecCmd is not None
             assert cls.nTasks is not None
             cls._solve = cls.solveExternal
             cls.pool = mp.pool.ThreadPool(cls.nTasks)
-            print('Initialized thread pool:', end='')
+            print('Initialized thread pool: ', end='')
         else:
             cls._solve = cls._solve
             cls.pool = mp.Pool(cls.nTasks)
