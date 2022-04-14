@@ -96,6 +96,8 @@ class RANS_k_eps(FluentCase):
         rel_dat = dat[-2000:, 1:]
         saveTxt(self.abs_path, 'residual_avgs.txt', np.mean(rel_dat, axis=0))
         avg = np.mean(rel_dat)
+        if int(self.solnTime) < 100:
+            self.logger.exception(f'{self.solnTime} is too small')
         self.f = [avg, self.solnTime]
         return self.f
 
