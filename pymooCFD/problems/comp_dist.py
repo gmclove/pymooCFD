@@ -147,11 +147,16 @@ class CompDistSLURM_YALES2(CompDistSLURM):
         # else:
         #     self.solverExecCmd.insert(
         #         '-c', 1).insert(str(c), 2).insert('-n', 3).insert(str(ntasks), 4)
-
+        print("BEFORE:   super()._preProc()")
         super()._preProc()
+        print("AFTER:   super()._preProc()")
         in_lines = self.inputLines
+        print(in_lines)
         kw_lines = self.findKeywordLines('NELEMENTPERGROUP', in_lines)
+        print(kw_lines)
         for line_i, _ in kw_lines:
+            print(line_i)
+            print(self.x[2])
             in_lines[line_i] = f'NELEMENTPERGROUP = {self.x[2]}'
         # self.jobLines = [
         #     '#!/bin/bash',
