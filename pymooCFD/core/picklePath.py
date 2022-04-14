@@ -94,6 +94,7 @@ class PicklePath:
 
     def save_self(self):
         self.saveNumpyFile(self.cp_path, self)
+        self.logger.info('CHECKPOINT SAVED')
 
     def load_self(self):
         loaded_self = self.loadNumpyFile(self.cp_path)

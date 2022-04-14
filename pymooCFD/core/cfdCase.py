@@ -165,7 +165,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         else:
             cls._solve = cls._solve
             cls.pool = mp.Pool(cls.nTasks)
-            print('Initialized multiprocessing pool:', end='')
+            print('Initialized multiprocessing pool: ', end='')
         print('number of tasks =', cls.nTasks)
 
     @classmethod
