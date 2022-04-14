@@ -70,3 +70,6 @@ class MinimizeCFD(PicklePath):
         return opt_run
 
         # self.algorithm = CFDAlgorithm(sampling, crossover, mutation)
+    def run_case(self, case_dir, x, **kwargs):
+        path = os.path.join(self.abs_path, case_dir)
+        self.CFDCase(path, x, **kwargs).run()

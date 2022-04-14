@@ -8,10 +8,10 @@ def get_CompDistSLURM(BaseCase):
     assert CFDCase in BaseCase.mro()
 
     class CompDistSLURM(BaseCase):
-        base_case_path = os.path.join(os.path.dirname(__file__), 'base_cases', 'osc-cyl_base')
-        inputFile = 'jet_rans-axi_sym.jou'
-        jobFile = 'jobslurm.sh'
-        datFile = 'jet_rans-axi_sym.cgns'
+        # base_case_path = os.path.join(os.path.dirname(__file__), 'base_cases', 'osc-cyl_base')
+        # inputFile = 'jet_rans-axi_sym.jou'
+        # jobFile = 'jobslurm.sh'
+        # datFile = 'jet_rans-axi_sym.cgns'
 
         n_var = 2
         # , 'Time Step']
@@ -34,9 +34,9 @@ def get_CompDistSLURM(BaseCase):
                      ):
             super().__init__(caseDir, x,
                              meshSF=meshSF,
-                             jobFile='jobslurm.sh',
-                             meshFile='2D_cylinder.msh22',
-                             inputFile='2D_cylinder.in'
+                             # jobFile='jobslurm.sh',
+                             # meshFile='2D_cylinder.msh22',
+                             # inputFile='2D_cylinder.in'
                              # *args, **kwargs
                              )
 
@@ -45,7 +45,7 @@ def get_CompDistSLURM(BaseCase):
             c = self.x[1]
             # read job lines
             job_lines = self.jobLines
-            if len(job_lines) > 0:
+            if job_lines:
                 newLine = f'#SBATCH --cpus-per-task={c}'
                 kws = ['#SBATCH --cpus-per-task', '#SBATCH -c']
                 job_lines = self.findAndReplaceKeywordLines(
@@ -81,12 +81,12 @@ def get_CompDistSLURM(BaseCase):
                 self.solverExecCmd.insert(
                     1, '-c').insert(2, str(c)).insert(3, '-n').insert(4, str(ntasks))
             else:
-                self.logger.warning('INCOMPLETE: PRE-PROCESSING')
+                self.logger.exception('INCOMPLETE: PRE-PROCESSING')
 
         def _postProc(self):
             nCPUs = self.x[0] * self.x[1]
-            if self.solnTime < 100:
-                self.logger.exception(f'{self.solnTime} - too small')
+            # if self.solnTime < 100:
+            #     self.logger.exception(f'{self.solnTime} - too small')
             self.f = [self.solnTime, nCPUs]
             self.g = 500 - self.solnTime
 
@@ -96,6 +96,7 @@ def get_CompDistSLURM(BaseCase):
         #             return True
         #     else:
         #         return True
+
 
 CompDistSLURM = get_CompDistSLURM(OscillCylinder)
 
@@ -216,5 +217,5 @@ class CompDistSLURM_YALES2(CompDistSLURM):
         #     'OK'
         # ]
 
-    def _postProc(self):
-        self.f = self.solnTime
+    # def _postProc(self):
+    #     self.f = self.solnTime
