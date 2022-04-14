@@ -90,6 +90,11 @@ class CFDGeneticProblem(Problem):
                  # var_labels=None,
                  # obj_labels=None,
                  *args, **kwargs):
+        if not (len(xl) == len(xu) and
+                len(xu) == len(BaseCase.var_labels) and
+                len(BaseCase.var_labels) == BaseCase.n_var
+                ):
+            raise Exception("Design Space Definition Incorrect")
         super().__init__(n_var=BaseCase.n_var,
                          n_obj=BaseCase.n_obj,
                          n_constr=BaseCase.n_constr,
@@ -101,11 +106,7 @@ class CFDGeneticProblem(Problem):
         self.BaseCase = BaseCase
         self.gen1Pop = None
         self.validated = False
-        if not (len(self.xl) == len(self.xu) and
-                len(self.xu) == len(self.BaseCase.var_labels) and
-                len(self.BaseCase.var_labels) == self.n_var
-                ):
-            raise Exception("Design Space Definition Incorrect")
+
 
     def _evaluate(self, X, out, *args, **kwargs):
         runDir = kwargs.get('runDir')
