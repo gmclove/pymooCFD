@@ -109,6 +109,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         ####################
         #    Attributes    #
         ####################
+        self.setup_parallelize()
         self.validated = validated
         # Default Attributes
         if mesh_study is None:
@@ -149,26 +150,21 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
 
     ###  Parallel Processing  ###
     @classmethod
-    def parallelizeInit(cls, externalSolver):
+    def setup_parallelize(cls, externalSolver):
         if cls.nTasks is None:
             if cls.nProc is not None and cls.nProc is not None:
                 cls.nTasks = int(cls.procLim / cls.nProc)
             else:
                 cls.nTasks = config.MP_POOL_NTASKS_MAX
-        print(externalSolver)
-        print(cls.externalSolver)
         if externalSolver:
-            print(externalSolver)
-            print(cls.externalSolver)
-            print(cls.solveExternal)
             assert cls.solverExecCmd is not None
             assert cls.nTasks is not None
             cls._solve = cls.solveExternal
-            cls.pool = mp.pool.ThreadPool(cls.nTasks)
+            cls.Pool = mp.pool.ThreadPool
             print('Initialized thread pool: ', end='')
         else:
             cls._solve = cls._solve
-            cls.pool = mp.Pool(cls.nTasks)
+            cls.Pool = mp.Pool
             print('Initialized multiprocessing pool: ', end='')
         print('number of tasks =', cls.nTasks)
 
@@ -176,25 +172,25 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
     def parallelize(cls, cases, externalSolver=None):
         if externalSolver is None:
             externalSolver = cls.externalSolver
-        cls.parallelizeInit(externalSolver)
+        cls.setup_parallelize(externalSolver)
         #cls.logger.info('PARALLELIZING . . .')
-        if cls.onlyParallelizeSolve:
-            # print('\tParallelizing Only Solve')
-            for case in cases:
-                case.preProc()
-            print('PARALLELIZING . . .')
-            for case in cases:
-                cls.pool.apply_async(case.solve, ())
-            cls.pool.close()
-            cls.pool.join()
-            for case in cases:
-                case.postProc()
-        else:
-            print('PARALLELIZING . . .')
-            for case in cases:
-                cls.pool.apply_async(case.run, ())
-            cls.pool.close()
-            cls.pool.join()
+        with cls.Pool(cls.nTasks) as pool:
+            if cls.onlyParallelizeSolve:
+                for case in cases:
+                    case.preProc()
+                print('PARALLELIZING . . .')
+                for case in cases:
+                    pool.apply_async(case.solve, ())
+                pool.close()
+                pool.join()
+                for case in cases:
+                    case.postProc()
+            else:
+                print('PARALLELIZING . . .')
+                for case in cases:
+                    pool.apply_async(case.run, ())
+                pool.close()
+                pool.join()
 
     def solve(self):
         if self.f is None or not np.isfinite(np.sum(self.f)):
