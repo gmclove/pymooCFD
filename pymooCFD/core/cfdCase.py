@@ -109,7 +109,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         ####################
         #    Attributes    #
         ####################
-        self.setup_parallelize()
+        self.setup_parallelize(self.externalSolver)
         self.validated = validated
         # Default Attributes
         if mesh_study is None:
