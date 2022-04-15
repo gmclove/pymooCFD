@@ -697,26 +697,6 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
 
 
 class YALES2Case(CFDCase):
-    # def __init__(self, caseDir, x, *args, **kwargs):
-    #     super().__init__(caseDir, x, *args, **kwargs)
-    # add random line to get to git push
-    # def preProc(self):
-    #     # ensure dump is in directory called 'dump'
-    #     in_lines = self.input_lines_rw
-    #     if in_lines:
-    #         kw_lines = self.findKeywordLines('DUMP_PREFIX', in_lines)
-    #         for kw_line_i, kw_line in kw_lines:
-    #             if kw_line[-1] != '#':
-    #                 print(kw_line)
-    #                 print(kw_line.split("'", 2))
-    #                 start, mid, end = kw_line.split("'", 2)
-    #                 _, tail = os.path.split(mid)
-    #                 path = os.path.join('dump', tail)
-    #                 in_lines[kw_line_i] = 'DUMP_PREFIX = ' + path
-    #         self.input_lines_rw = in_lines
-    #     else:
-    #         self.logger.error('YALES2 input file (.in) can not be read')
-    #     super().preProc()
     def _solveDone(self):
         # print('EXECUTION DONE?')
         searchPath = os.path.join(self.abs_path, 'solver01_rank*.log')
@@ -732,29 +712,6 @@ class YALES2Case(CFDCase):
                 last_line = f.readline().decode()
             if 'in destroy_mpi' in last_line:
                 return True
-
-    def _preProc_restart(self):
-        pass
-        # self._preProc()
-        # XMF RESTARTS DO NOT WORK
-        # read input lines
-        # in_lines = self.input_lines_rw
-        # in_lines = self.commentKeywordLines('RESTART', in_lines)
-        # # re-read lines
-        # in_lines = self.input_lines_rw
-        # # delete all 'XMF' and "RESTART" lines
-        # kw_lines = self.findKeywordLines('XMF', in_lines)
-        # del_markers = [line_i for line_i, line in kw_lines
-        #                if 'RESTART' in line]
-        # in_lines = [line for line_i, line in enumerate(in_lines)
-        #             if line_i in del_markers]
-        # # append restart lines with lastest xmf file from dump directory
-        # latestXMF = self.getLatestXMF()
-        # in_lines.append('RESTART_TYPE = XMF')
-        # path = os.path.join('dump', latestXMF)
-        # in_lines.append('RESTART_XMF_SOLUTION = ' + path)
-        # # write input lines
-        # self.input_lines_rw = in_lines
 
     def solve(self):
         super().solve()
@@ -837,114 +794,5 @@ class FluentCase(CFDCase):
     pass
 
 
-# class YALES2Case(CFDCase):
-#     # def __init__(self, caseDir, x, *args, **kwargs):
-#     #     super().__init__(caseDir, x, *args, **kwargs)
-#
-#     def solve(self):
-#         super().solve()
-#         self.wallTime = self.getWallTime()
-#
-#     def getWallTime(self):
-#         search_str = os.path.join(self.abs_path, 'solver01_rank*.log')
-#         fPaths = glob(search_str)
-#         for fPath in fPaths:
-#             with open(fPath, 'rb') as f:
-#                 try:  # catch OSError in case of a one line file
-#                     f.seek(-1020, os.SEEK_END)
-#                 except OSError:
-#                     f.seek(0)
-#                 clock_line = f.readline().decode()
-#             if 'WALL CLOCK TIME' in clock_line:
-#                 wall_time = int(float(clock_line[-13:]))
-#                 self.logger.info(f'YALES2 Wall Clock Time: {wall_time} seconds')
-#             else:
-#                 self.logger.warning('no wall clock time found')
-#                 wall_time = None
-#             return wall_time
-#
-#     def getLatestXMF(self):
-#         ents = os.listdir(self.dumpDir)
-#         ents.sort()
-#         for ent in ents:
-#             if ent.endswith('.xmf') and not re.search('.sol.+_.+\\.xmf', ent):
-#                 latestXMF = ent
-#         return latestXMF
-#
-#     def getLatestMesh(self):
-#         ents = os.listdir(self.dumpDir)
-#         ents.sort()
-#         for ent in ents:
-#             if ent.endswith('.mesh.h5'):
-#                 latestMesh = ent
-#         return latestMesh
-#
-#     def getLatestSoln(self):
-#         ents = os.listdir(self.dumpDir)
-#         ents.sort()
-#         for ent in ents:
-#             if ent.endswith('.sol.h5'):
-#                 latestSoln = ent
-#         return latestSoln
-#
-#     def getLatestDataFiles(self):
-#         latestMesh = self.getLatestMesh()
-#         latestSoln = self.getLatestSoln()
-#         return latestMesh, latestSoln
-
-    # def setRestart(self):
-    #     # latestMesh, latestSoln = self.getLatestDataFiles()
-    #     latestMesh = self.getLatestMesh()
-    #     latestSoln = self.getLatestSoln()
-    #     # with open(self.inputPath, 'r') as f:
-    #     #     in_lines = f.readlines()
-    #     in_lines = self.input_lines_rw
-    #     kw = 'RESTART_TYPE = GMSH'
-    #     kw_line, kw_line_i = findKeywordLine(kw, in_lines)
-    #     in_lines[kw_line_i] = '#' + kw
-    #     kw = "RESTART_GMSH_FILE = '2D_cylinder.msh22'"
-    #     kw_line, kw_line_i = findKeywordLine(kw, in_lines)
-    #     in_lines[kw_line_i] = '#' + kw
-    #     kw = "RESTART_GMSH_NODE_SWAPPING = TRUE"
-    #     kw_line, kw_line_i = findKeywordLine(kw, in_lines)
-    #     in_lines[kw_line_i] = '#' + kw
-    #     in_lines.append('RESTART_TYPE = XMF')
-    #     in_lines.append('RESTART_XMF_SOLUTION = dump/' + latestXMF)
-    #     # with open(self.inputPath, 'w') as f:
-    #     #     f.writelines(in_lines)
-    #     self.input_lines_rw = in_lines
-#
-#     @property
-#     def dumpDir(self):
-#         return os.path.join(self.abs_path, 'dump')
-# ###################
-#    FUNCTIONS    #
-###################
-# def saveTxt(path, fname, data):
-#     datFile = os.path.join(path, fname)
-#     # save data as text file in directory
-#     np.savetxt(datFile, data)
-
-# from http://stackoverflow.com/questions/4103773/efficient-way-of-having-a-function-only-execute-once-in-a-loop
-# import functools
-# def run_once(f):
-#     """Runs a function (successfully) only once.
-#     The running can be reset by setting the `has_run` attribute to False
-#     """
-#     @functools.wraps(f)
-#     def wrapper(*args, **kwargs):
-#         if not wrapper.complete:
-#             result = f(*args, **kwargs)
-#             wrapper.complete = True
-#             return result
-#     wrapper.complete = False
-#     return wrapper
-#
-# def calltracker(func):
-#     @functools.wraps(func)
-#     def wrapper(*args, **kwargs):
-#         result = func(*args, **kwargs)
-#         wrapper.complete = True
-#         return result
-#     wrapper.complete = False
-#     return wrapper
+class OpenFOAMCase(CFDCase):
+    pass
