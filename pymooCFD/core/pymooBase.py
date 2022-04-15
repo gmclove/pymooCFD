@@ -133,7 +133,7 @@ class CFDTestProblem(CFDGeneticProblem):
         run_path = kwargs.get('run_path')
         gen = kwargs.get('gen')
         print('GEN:', gen)
-        print(run_path)
+        print('\tPATH:', run_path)
         # create generation directory for storing data/executing simulations
         genDir = os.path.join(run_path, f'gen{gen}')
         # create sub-directories for each individual
