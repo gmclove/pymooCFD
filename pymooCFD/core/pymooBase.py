@@ -109,7 +109,7 @@ class CFDGeneticProblem(Problem):
 
 
     def _evaluate(self, X, out, *args, **kwargs):
-        run_path = kwargs.get('pun_path')
+        run_path = kwargs.get('run_path')
         gen = kwargs.get('gen')
         # create generation directory for storing data/executing simulations
         gen_path = os.path.join(run_path, f'gen{gen}')
