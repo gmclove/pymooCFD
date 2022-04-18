@@ -390,12 +390,14 @@ class OptRun(PicklePath):
                 plot.legend = True
                 c = ['r', 'g', 'm']
                 for d in range(1, 3 + 1):
-                    coefs, residuals, = np.polyfit(x, f, d, full=True)
-                    print(coefs, residuals)
+                    fit_res = np.polyfit(x, f, d, full=True)
+                    print(fit_res)
+                    coefs = fit_res[0]
+                    rss = sum(fit_res[1])
                     y = np.polyval(coefs, x)
                     xy = np.column_stack((x, y))
                     xy = xy[xy[:, 0].argsort()]
-                    label = f'Order {d} Best Fit'
+                    label = f'Order {d} Best Fit, rss={rss}'
                     plot.ax.plot(xy[:, 0], xy[:, 1], label=label, c=c[d - 1])
                 plot.do()
                 var_str = var_labels[x_i].replace(" ", "_").replace(
