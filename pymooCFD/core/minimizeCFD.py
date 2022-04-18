@@ -31,6 +31,9 @@ class MinimizeCFD(PicklePath):
         #    PICKLE PATH    #
         #####################
         super().__init__(dir_path)
+        for run in self.opt_runs:
+            print(run.__dict__)
+            print(run.algorithm.__dict__)
 
     def get_problem(self, xl, xu, **kwargs):
         return self.CFDGeneticProblem(self.CFDCase, xl, xu, **kwargs)
