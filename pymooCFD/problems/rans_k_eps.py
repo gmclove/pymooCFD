@@ -182,7 +182,7 @@ class RANS_k_eps_x4(RANS_k_eps):
             '(writefile output-port)',
             '(close-output-port output-port))',
             '/exit y'
-        ]
+            ]
 
         ####### Slurm Job Lines #########
         self.job_lines_rw = \

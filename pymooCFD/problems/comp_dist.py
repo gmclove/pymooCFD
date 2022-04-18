@@ -13,7 +13,8 @@ def get_CompDistYALES2_SLURM(BaseCase):
         # datFile = 'jet_rans-axi_sym.cgns'
 
         n_var = 3
-        var_labels = ['Number of Tasks', 'Number of CPUs per Task', 'Number of Elements per Group']
+        var_labels = ['Number of Tasks', 'Number of CPUs per Task',
+                      'Number of Elements per Group']
         var_type = ['int', 'int', 'int']
 
         n_obj = 2
