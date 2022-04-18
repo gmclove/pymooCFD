@@ -124,6 +124,10 @@ class CFDGeneticProblem(Problem):
         self.BaseCase.parallelize(cases)
         F = np.array([case.f for case in cases])
         G = np.array([case.g for case in cases])
+        print('Objectives:')
+        print(F)
+        print('Constraints:')
+        print(G)
         out['F'] = F
         out['G'] = G
 
