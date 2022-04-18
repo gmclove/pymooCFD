@@ -52,6 +52,14 @@ class PicklePath:
             # self.logger = self.get_logger()
             self.logger.info(
                 f'NEW - {self.rel_path} did not exist')
+
+        for attr in self.__dict__:
+            try:
+                if self.__class__ in attr.__class__.mro():
+                    attr.update_self()
+            except AttributeError as err:
+                self.logger.error(err)
+
         # for i, sub_dir in enumerate(sub_dirs):
         #     sub_dirs[i] = os.path.join(self.abs_path, sub_dir)
         #     # os.makedirs(sub_dirs[i]) #, exist_ok=True)
@@ -61,6 +69,7 @@ class PicklePath:
 
         # for path in sub_dirs:
         #     os.makedirs(path, exist_ok=True)
+
 
     def get_logger(self):
         name = '.'.join(os.path.normpath(self.rel_path).split(os.path.sep))
