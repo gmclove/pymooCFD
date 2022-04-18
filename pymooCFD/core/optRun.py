@@ -196,13 +196,13 @@ class OptRun(PicklePath):
             self.algorithm.tell(infills=eval_pop)
 
             # save top {n_opt} optimal evaluated cases in pf directory
-            compGen = self.algorithm.callback.gen - 1
+            # compGen = gen
             for off_i, off in enumerate(self.algorithm.off):
                 for opt_i, opt in enumerate(self.algorithm.opt[:self.n_opt]):
                     if np.array_equal(off.X, opt.X):
                         optDir = os.path.join(self.pfDir, f'opt{opt_i+1}')
                         offDir = os.path.join(
-                            self.abs_path, f'gen{compGen}', f'ind{off_i+1}')
+                            self.abs_path, f'gen{gen}', f'ind{off_i+1}')
                         self.logger.info(
                             f'\tUpdating Pareto front folder: {offDir} -> {optDir}')
                         try:
@@ -214,12 +214,12 @@ class OptRun(PicklePath):
             self.algorithm.off = None
             self.save_self()
             self.plotGen()
-            if self.algorithm.callback.gen == 1:
+            if gen == 1:
                 self.gen1_pop = eval_pop
                 self.map_gen1()
-            if delPrevGen and not compGen == 1:
+            if delPrevGen and not gen == 1:
                 direct = os.path.join(
-                    self.abs_path, f'gen{compGen}')
+                    self.abs_path, f'gen{gen}')
                 shutil.rmtree(direct)
         # obtain the result objective from the algorithm
         res = self.algorithm.result()
