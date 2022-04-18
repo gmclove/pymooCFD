@@ -8,6 +8,7 @@ import logging
 import os
 import numpy as np
 import shutil
+import warnings
 from scipy.stats import linregress
 # import subprocess
 # from threading import Thread
@@ -387,15 +388,17 @@ class OptRun(PicklePath):
                 plot.legend = True
                 c = ['r', 'g', 'm']
                 for d in range(1, 3 + 1):
-                    try:
-                        coefs = np.polyfit(x, f, d)
-                        y = np.polyval(coefs, x)
-                        xy = np.column_stack((x, y))
-                        xy = xy[xy[:, 0].argsort()]
-                        label = f'Order {d} Best Fit'
-                        plot.ax.plot(xy[:, 0], xy[:, 1], label=label, c=c[d - 1])
-                    except np.RankWarning as warn:
-                        self.logger.warning(warn)
+                    with warnings.catch_warnings():
+                        try:
+                            coefs = np.polyfit(x, f, d)
+                            y = np.polyval(coefs, x)
+                            xy = np.column_stack((x, y))
+                            xy = xy[xy[:, 0].argsort()]
+                            label = f'Order {d} Best Fit'
+                            plot.ax.plot(xy[:, 0], xy[:, 1], label=label, c=c[d - 1])
+                        except np.RankWarning as warn:
+                            self.logger.warning(warn)
+                            self.logger.warning(f'Order: {d}')
                 plot.do()
                 var_str = var_labels[x_i].replace(" ", "_").replace(
                     "/", "|").replace('%', 'precentage').replace("\\", "|")
