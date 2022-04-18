@@ -128,9 +128,9 @@ class CFDGeneticProblem(Problem):
         F = np.array([case.f for case in cases])
         G = np.array([case.g for case in cases])
         print('Objectives:')
-        print(str(F).replace('\n', '\n\t'))
+        print('\t' + str(F).replace('\n', '\n\t'))
         print('Constraints:')
-        print(str(G).replace('\n', '\n\t'))
+        print('\t' + str(G).replace('\n', '\n\t'))
         out['F'] = F
         out['G'] = G
 

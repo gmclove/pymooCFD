@@ -3,29 +3,18 @@
 # @Last modified by:   glove
 # @Last modified time: 2021-12-16T09:28:45-05:00
 # import time
-import sys
-import logging
 import os
 import numpy as np
 import shutil
-import warnings
-from scipy.stats import linregress
 # import subprocess
 # from threading import Thread
 # import multiprocessing as mp
-import copy
 # import shutil
 # import h5py
 # import matplotlib.pyplot as plt
 from pymoo.visualization.scatter import Scatter
-from pymoo.core.problem import Problem
-from pymoo.core.evaluator import set_cv
-from pymooCFD.core.pymooBase import CFDGeneticProblem
-from pymooCFD.util.sysTools import emptyDir, copy_and_overwrite, saveTxt, yes_or_no
-from pymooCFD.util.loggingTools import MultiLineFormatter, DispNameFilter
+from pymooCFD.util.sysTools import copy_and_overwrite, saveTxt
 from pymooCFD.core.picklePath import PicklePath
-import pymooCFD.config as config
-from pymoo.util.misc import termination_from_tuple
 
 
 class OptRun(PicklePath):
