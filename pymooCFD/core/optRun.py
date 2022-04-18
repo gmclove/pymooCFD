@@ -153,11 +153,15 @@ class OptRun(PicklePath):
     def run(self, delPrevGen=True):
         self.logger.info('STARTING: OPTIMIZATION ALGORITHM RUN')
         self.algorithm.save_history = True
+        gen = self.algorithm.callback.gen
+        gen_path = os.path.join(self.abs_path, f'gen{gen}')
+
         # self.initAlg()
 
         ######    OPTIMIZATION    ######
         # until the algorithm has not terminated
         while self.algorithm.has_next():
+            print('\tGEN:', gen)
             # First generation
             # population is None so ask for new pop
             if self.algorithm.pop is None:
@@ -177,13 +181,15 @@ class OptRun(PicklePath):
             else:
                 self.logger.info('\tSTART-UP: mid-generation')
                 eval_pop = self.algorithm.off
+            X = eval_pop.get('X')
+            ind_paths = [os.path.join(gen_path, f'ind{i+1}') for i in range(len(X))]
             # save checkpoint before evaluation
+            saveTxt(gen_path, f'gen{gen}X.txt', X)
             self.save_self()
             # evaluate the individuals using the algorithm's evaluator (necessary to count evaluations for termination)
-            print('GEN:', self.algorithm.callback.gen)
             eval_pop = self.algorithm.evaluator.eval(self.problem, eval_pop,
-                                                     run_path=self.abs_path,
-                                                     gen=self.algorithm.callback.gen
+                                                     eval_paths=ind_paths,
+                                                     # gen=self.algorithm.callback.gen
                                                      # alg=self.algorithm
                                                      )
 

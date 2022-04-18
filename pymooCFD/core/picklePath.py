@@ -53,6 +53,7 @@ class PicklePath:
             self.logger.info(
                 f'NEW - {self.rel_path} did not exist')
 
+        # Check for other PicklePath child class and load if found
         for attr in self.__dict__:
             try:
                 if self.__class__ in attr.__class__.mro():

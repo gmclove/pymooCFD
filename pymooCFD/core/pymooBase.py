@@ -109,44 +109,48 @@ class CFDGeneticProblem(Problem):
 
 
     def _evaluate(self, X, out, *args, **kwargs):
-        run_path = kwargs.get('run_path')
-        gen = kwargs.get('gen')
+        # run_path = kwargs.get('run_path')
+        # gen = kwargs.get('gen')
+        eval_paths = kwargs.get('eval_paths')
+        # print('GEN:', gen)
+        # print('\tPATH:', eval_path)
         # create generation directory for storing data/executing simulations
-        gen_path = os.path.join(run_path, f'gen{gen}')
+        # genDir = os.path.join(run_path, f'gen{gen}')
         # create sub-directories for each individual
-        ind_paths = [os.path.join(gen_path, f'ind{i+1}') for i in range(len(X))]
+        # indDirs = [os.path.join(genDir, f'ind{i+1}') for i in range(len(X))]
         # cases = self.genCases(indDirs, X)
-        assert len(ind_paths) == len(X), 'len(paths) == len(X)'
+        assert len(eval_paths) == len(X), 'len(eval_paths) != len(X)'
         cases = []
         for x_i, x in enumerate(X):
-            case = self.BaseCase(ind_paths[x_i], x, validated=self.validated)
+            case = self.BaseCase(eval_paths[x_i], x, validated=self.validated)
             cases.append(case)
         self.BaseCase.parallelize(cases)
         F = np.array([case.f for case in cases])
         G = np.array([case.g for case in cases])
         print('Objectives:')
-        print(F)
+        print(str(F).replace('\n', '\n\t'))
         print('Constraints:')
-        print(G)
+        print(str(G).replace('\n', '\n\t'))
         out['F'] = F
         out['G'] = G
 
 
 class CFDTestProblem(CFDGeneticProblem):
     def _evaluate(self, X, out, *args, **kwargs):
-        run_path = kwargs.get('run_path')
-        gen = kwargs.get('gen')
-        print('GEN:', gen)
-        print('\tPATH:', run_path)
+        # run_path = kwargs.get('run_path')
+        # gen = kwargs.get('gen')
+        eval_paths = kwargs.get('eval_paths')
+        # print('GEN:', gen)
+        # print('\tPATH:', eval_path)
         # create generation directory for storing data/executing simulations
-        genDir = os.path.join(run_path, f'gen{gen}')
+        # genDir = os.path.join(run_path, f'gen{gen}')
         # create sub-directories for each individual
-        indDirs = [os.path.join(genDir, f'ind{i+1}') for i in range(len(X))]
+        # indDirs = [os.path.join(genDir, f'ind{i+1}') for i in range(len(X))]
         # cases = self.genCases(indDirs, X)
-        assert len(indDirs) == len(X), 'len(paths) != len(X)'
+        assert len(eval_paths) == len(X), 'len(eval_paths) != len(X)'
         cases = []
         for x_i, x in enumerate(X):
-            case = self.BaseCase(indDirs[x_i], x, validated=self.validated)
+            case = self.BaseCase(eval_paths[x_i], x, validated=self.validated)
             cases.append(case)
         # self.BaseCase.parallelize(cases)
         F = np.ones((len(X), self.n_obj))
