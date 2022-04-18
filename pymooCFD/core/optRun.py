@@ -184,6 +184,7 @@ class OptRun(PicklePath):
             X = eval_pop.get('X')
             ind_paths = [os.path.join(gen_path, f'ind{i+1}') for i in range(len(X))]
             # save checkpoint before evaluation
+            os.mkdir(gen_path)
             saveTxt(gen_path, f'gen{gen}X.txt', X)
             self.save_self()
             # evaluate the individuals using the algorithm's evaluator (necessary to count evaluations for termination)
