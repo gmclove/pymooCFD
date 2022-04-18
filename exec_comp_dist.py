@@ -1,8 +1,8 @@
 from pymooCFD.core.minimizeCFD import MinimizeCFD
-from pymooCFD.problems.comp_dist import CompDistSLURM_YALES2
+from pymooCFD.problems.comp_dist import CompDistYALES2_SLURM
 
 def main():
-    study = MinimizeCFD(CompDistSLURM_YALES2)
+    study = MinimizeCFD(CompDistYALES2_SLURM)
     study.run_case('short-test', [1, 20, 100])
     xl = [1, 1, 50]  # lower limits of parameters/variables
     xu = [10, 10, 1_000]  # upper limits of variables
