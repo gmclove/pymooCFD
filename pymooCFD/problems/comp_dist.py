@@ -99,7 +99,7 @@ def get_CompDistYALES2_SLURM(BaseCase):
         #             return True
         #     else:
         #         return True
-    return CompDistSLURM
+    return CompDistYALES2_SLURM
 
 
 CompDistSLURM = get_CompDistYALES2_SLURM(OscillCylinder_SLURM)
