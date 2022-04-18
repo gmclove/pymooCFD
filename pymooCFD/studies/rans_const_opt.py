@@ -19,8 +19,8 @@ def exec_test():
                               n_offsprings=2)
 
     opt_run = study.new_run(alg, prob, run_dir='test-run')
-    opt_run.test_case.run()
-    opt_run.run_bnd_cases()
+    # opt_run.test_case.run()
+    # opt_run.run_bnd_cases()
     opt_run.run()
 
 
