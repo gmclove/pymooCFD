@@ -347,7 +347,7 @@ class OptRun(PicklePath):
             var_plot.add(ind, label=f'IND {ind_i+1}')
         # save parameter space plot
         var_plot.save(os.path.join(
-            self.plotDir, f'gen{gen}_obj_space.png'), dpi=100)
+            self.plotDir, f'gen{gen}_var_space.png'), dpi=100)
 
         #### Objective Space Plot ####
         popF = pop.get('F')

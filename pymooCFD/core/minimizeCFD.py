@@ -31,7 +31,9 @@ class MinimizeCFD(PicklePath):
         #    PICKLE PATH    #
         #####################
         super().__init__(dir_path)
-        # for run in self.opt_runs:
+        # for pp_child in self.opt_runs:
+        #     if PicklePath in pp_child.__class__.mro():
+        #         pp_child.__init__(pp_child.algorithm, pp_child.problem)
         #     print(run.__dict__)
         #     print(run.algorithm.__dict__)
         #     run.__init__(CFDCase)
