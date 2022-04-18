@@ -95,9 +95,19 @@ class RANS_k_eps(FluentCase):
         rel_dat = dat[-2000:, 1:]
         saveTxt(self.abs_path, 'residual_avgs.txt', np.mean(rel_dat, axis=0))
         avg = np.mean(rel_dat)
-        if int(self.solnTime) < 100:
-            self.logger.exception(f'{self.solnTime} is too small')
-        self.f = [avg, self.solnTime]
+        path = os.path.join(self.abs_path, 'run.out')
+        with open(path) as f:
+            lines = f.readlines()
+        real_t = lines[1]
+        _, t_str = real_t.split()
+        l_t_min = t_str.split('m')
+        t_min = int(l_t_min[0])
+        l_t_sec = l_t_min[-1].split('s')
+        t_sec = float(l_t_sec[0])
+        t_tot = t_min*60 + t_sec
+        if t_tot < 100:
+            self.logger.exception(f'{t_tot} is too small')
+        self.f = [avg, t_tot]
         return self.f
 
     # @staticmethod
@@ -129,7 +139,8 @@ BaseCase = RANS_k_eps
 
 class RANS_k_eps_x4(RANS_k_eps):
     n_var = 4
-    var_labels = ['Turbulent Viscosity Constant', 'C1 Epsilon', 'C2 Epsilon', 'Number of Iterations']
+    var_labels = ['Turbulent Viscosity Constant', 'C1 Epsilon', 'C2 Epsilon',
+                  'Number of Iterations']
     var_type = ['real', 'real', 'real', 'int']    # 0.09, 1.44, 1.92
 
     def _preProc(self):
