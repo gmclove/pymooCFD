@@ -201,11 +201,13 @@ class OptRun(PicklePath):
             for off_i, off in enumerate(self.algorithm.off):
                 for opt_i, opt in enumerate(self.algorithm.opt[:self.n_opt]):
                     if np.array_equal(off.X, opt.X):
-                        optDir = os.path.join(self.pfDir, f'opt{opt_i+1}')
+                        opt_folder = f'opt{opt_i+1}'
+                        optDir = os.path.join(self.pfDir, opt_folder)
+                        ind_folder = f'ind{off_i+1}'
                         offDir = os.path.join(
-                            self.abs_path, f'gen{gen}', f'ind{off_i+1}')
+                            self.abs_path, f'gen{gen}', ind_folder)
                         self.logger.info(
-                            f'\tUpdating Pareto front folder: {offDir} -> {optDir}')
+                            f'\tUpdating Pareto front folder: {ind_folder} -> {opt_folder}')
                         try:
                             copy_and_overwrite(offDir, optDir)
                         except FileNotFoundError as err:
@@ -388,17 +390,13 @@ class OptRun(PicklePath):
                 plot.legend = True
                 c = ['r', 'g', 'm']
                 for d in range(1, 3 + 1):
-                    with warnings.catch_warnings():
-                        try:
-                            coefs = np.polyfit(x, f, d)
-                            y = np.polyval(coefs, x)
-                            xy = np.column_stack((x, y))
-                            xy = xy[xy[:, 0].argsort()]
-                            label = f'Order {d} Best Fit'
-                            plot.ax.plot(xy[:, 0], xy[:, 1], label=label, c=c[d - 1])
-                        except np.RankWarning as warn:
-                            self.logger.warning(warn)
-                            self.logger.warning(f'Order: {d}')
+                    coefs, residuals, = np.polyfit(x, f, d, full=True)
+                    print(coefs, residuals)
+                    y = np.polyval(coefs, x)
+                    xy = np.column_stack((x, y))
+                    xy = xy[xy[:, 0].argsort()]
+                    label = f'Order {d} Best Fit'
+                    plot.ax.plot(xy[:, 0], xy[:, 1], label=label, c=c[d - 1])
                 plot.do()
                 var_str = var_labels[x_i].replace(" ", "_").replace(
                     "/", "|").replace('%', 'precentage').replace("\\", "|")
