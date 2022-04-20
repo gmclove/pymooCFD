@@ -1,3 +1,4 @@
+import pprint
 import logging
 import os
 import numpy as np
@@ -71,7 +72,6 @@ class PicklePath:
         # for path in sub_dirs:
         #     os.makedirs(path, exist_ok=True)
 
-
     def get_logger(self):
         name = '.'.join(os.path.normpath(self.rel_path).split(os.path.sep))
         logger = logging.getLogger(name)
@@ -100,7 +100,6 @@ class PicklePath:
         streamHandler.setFormatter(formatter)
 
         return logger
-
 
     def save_self(self):
         self.saveNumpyFile(self.cp_path, self)
@@ -134,7 +133,8 @@ class PicklePath:
         if loaded_self is None:
             loaded_self = self.load_self()
         diff = DeepDiff(self, loaded_self)
-        self.logger.warning(str(diff))
+        pp = pprint.PrettyPrinter(width=41, indent=4)  # ,compact=True)
+        self.logger.warning(pp.pformat(diff))
         # for key, val in self.__dict__.items():
         #     if key in loaded_self.__dict__:
         #         loaded_val = loaded_self.__dict__[key]
@@ -146,7 +146,6 @@ class PicklePath:
         # if loaded_self.cp_path != self.cp_path:
         #     self.logger.warning('CHECKPOINT PATH CHANGED BETWEEN CHECKPOINTS')
         #     self.logger.warning(f'{loaded_self.cp_path} != {self.cp_path}')
-
 
     def check_saves(self, print_info=False):
         if print_info:
@@ -212,4 +211,4 @@ class PicklePath:
     @property
     def log_path(self):
         os.makedirs(self.par_path, exist_ok=True)
-        return os.path.join(self.par_path, self.data_folder+'.log')
+        return os.path.join(self.par_path, self.data_folder + '.log')
