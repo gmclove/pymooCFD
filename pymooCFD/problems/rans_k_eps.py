@@ -69,6 +69,7 @@ class RANS_k_eps(FluentCase):
             '(output-port (open-output-file "residuals.dat")))',
             '(writefile output-port)',
             '(close-output-port output-port))',
+            '/file write-case-data fluent-data.cas.h5',
             '/exit y'
         ]
 
@@ -159,6 +160,9 @@ class RANS_k_eps_x4(RANS_k_eps):
     def _preProc(self):
         self.input_lines_rw = [
             '/file/read rans_k-eps.cas.h5',
+            # AUTO-SAVE
+            '/file/auto-save case-frequency if-case-is-modified',
+            '/file/auto-save data-frequency 1000',
             ';DEFINE turbulence solver',
             '/define/models/viscous/ke-standard y',
             f'(rpsetvar\' kecmu {self.x[0]})',
@@ -194,6 +198,8 @@ class RANS_k_eps_x4(RANS_k_eps):
             '(output-port (open-output-file "residuals.dat")))',
             '(writefile output-port)',
             '(close-output-port output-port))',
+            '/file write-case-data fluent-data.cas.h5',
+            'OK',
             '/exit y'
         ]
 

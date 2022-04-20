@@ -458,7 +458,7 @@ class RANSJet(FluentCase):
         coor, dat = self.gridInterp2D.getCGNSData(
             self.datPath, 'Axial_Velocity')
         ransGrid_u_x = self.gridInterp2D.getInterpGrid(coor, dat)
-        ransGrid_flux = ransGrid_phi*ransGrid_u_x
+        ransGrid_flux = ransGrid_phi * ransGrid_u_x
         lesGrid_flux = lesGrid_phi * lesGrid_u_x
         # average x-planes
         dx = 0.005
@@ -523,15 +523,15 @@ class RANSJet(FluentCase):
         plt.savefig(path)
         plt.clf()
 
-BaseCase = RANSJet
 
+BaseCase = RANSJet
 
 
 class RANSJet_x3(RANSJet):
     ####### Define Design Space #########
     n_var = 3
     var_labels = ['Mouth Diameter [m]', 'Breath Velocity [m/s]',
-                    'Mass Fraction Scalar at Inlet']
+                  'Mass Fraction Scalar at Inlet']
     var_type = ["real", "real", 'real']  # OPTIONS: 'int' or 'real'
     # xl = [0.005, 0.1]  # lower limits of parameters/variables
     # xu = [0.04, 0.4]  # upper limits of variables
