@@ -115,10 +115,12 @@ class RANS_k_eps(FluentCase):
         return self.f
 
     def _solveDone(self):
-        t_tot = self.f[2]
-        if t_tot < 100:
-            self.logger.error(f'{t_tot} is too small')
-            return False
+        print('solve done check')
+        if self.f is not None:
+            t_tot = self.f[2]
+            if t_tot < 100:
+                self.logger.error(f'{t_tot} is too small')
+                return False
         else:
             return super()._solveDone()
 
