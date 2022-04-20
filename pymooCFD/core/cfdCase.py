@@ -81,6 +81,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         ###########################
         # self.complete = False
         # self.parallelizeInit(self.externalSolver)
+        self.setup_parallelize(self.externalSolver)
         self._x = x
 
         #####################################
@@ -199,7 +200,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
             # try to prevent re-run if execution done
             if self._solveDone() and self.restart:
                 self.logger.debug(
-                    'self.solve() called but self._solveDone() or self.restart is True')
+                    'self.solve() called but self._solveDone() and self.restart is True')
                 self.logger.warning('TRYING: POST-PROCESS BEFORE SOLVE')
                 try:
                     self.postProc()
