@@ -170,7 +170,8 @@ class OptRun(PicklePath):
             self.logger.info(f'\tGEN: {gen}')
             gen_path = os.path.join(self.abs_path, f'gen{gen}')
             X = eval_pop.get('X')
-            ind_paths = [os.path.join(gen_path, f'ind{i+1}') for i in range(len(X))]
+            ind_paths = [os.path.join(
+                gen_path, f'ind{i+1}') for i in range(len(X))]
             # save checkpoint before evaluation
             os.makedirs(gen_path, exist_ok=True)
             saveTxt(gen_path, f'gen{gen}X.txt', X)
@@ -386,7 +387,7 @@ class OptRun(PicklePath):
                     y = np.polyval(coefs, x)
                     xy = np.column_stack((x, y))
                     xy = xy[xy[:, 0].argsort()]
-                    label = f'Order {d} Best Fit' #, rss={rss}'
+                    label = f'Order {d} Best Fit'  # , rss={rss}'
                     plot.ax.plot(xy[:, 0], xy[:, 1], label=label, c=c[d - 1])
                 plot.do()
                 var_str = var_labels[x_i].replace(" ", "_").replace(
@@ -567,17 +568,18 @@ class OptRun(PicklePath):
         label += ']'
         return label
 
-    @staticmethod
-    def loadCase(case_path):
-        caseCP = os.path.join(case_path, 'case.npy')
+    def loadCase(self, case_path):
+        # caseCP = os.path.join(case_path, self.problem.BaseCase.__name__ +
+        #                       '.checkpoint.npy')
+        _, tail = os.path.split(case_path)
+        caseCP = os.path.join(case_path, tail+'.checkpoint.npy')
         try:
             case, = np.load(caseCP, allow_pickle=True).flatten()
             return case
         except FileNotFoundError as err:
             print(err)
 
-    @classmethod
-    def loadCases(cls, directory):
+    def loadCases(self, directory):
         '''
         Parameter: directory - searches every directory in given directory for
                                 case.npy file and tries to load if it exists.
@@ -588,7 +590,7 @@ class OptRun(PicklePath):
         for ent in ents:
             case_path = os.path.join(directory, ent)
             if os.path.isdir(case_path):
-                case = cls.loadCase(case_path)
+                case = self.loadCase(case_path)
                 cases.append(case)
         return cases
 
