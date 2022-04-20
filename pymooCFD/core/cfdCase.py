@@ -447,6 +447,14 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                 f = np.array([f])
             path = os.path.join(self.abs_path, 'obj.txt')
             np.savetxt(path, f)
+            if None in f:
+                self.logger.warning(f'OBJECTIVE CONTAINS None VALUE - {f}')
+                for obj_i, obj in enumerate(f):
+                    if obj is None:
+                        f[obj_i] = np.inf
+                        self.logger.warning(
+                            f'\t Objective {obj_i}: {obj} -> {np.inf}')
+                        self._f = f
             if np.isnan(np.sum(f)):
                 self.logger.warning(f'OBJECTIVE CONTAINS NaN VALUE - {f}')
                 for obj_i, obj in enumerate(f):
