@@ -253,6 +253,7 @@ class GridInterp2D:
 
     def plot2DGrid(self, grid, title):
         plt.imshow(grid.T, extent=(self.xmin, self.xmax, self.ymin, self.ymax), origin='lower')
+        # plt.title(title)
         plt.colorbar()
         plt.savefig(f'interp_grid-{title.replace(" ", "_")}.png')
         plt.clf()

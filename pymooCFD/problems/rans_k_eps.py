@@ -1,3 +1,4 @@
+import fnmatch
 import numpy as np
 import os
 
@@ -98,15 +99,20 @@ class RANS_k_eps(FluentCase):
         path = os.path.join(self.abs_path, 'run.out')
         with open(path) as f:
             lines = f.readlines()
-        real_t = lines[1]
-        _, t_str = real_t.split()
-        l_t_min = t_str.split('m')
-        t_min = int(l_t_min[0])
-        l_t_sec = l_t_min[-1].split('s')
-        t_sec = float(l_t_sec[0])
-        t_tot = t_min*60 + t_sec
+        matches = fnmatch.filter(lines, 'real *m*s')
+        t_tot = None
+        for match in matches:
+            try:
+                _, t_str = match.split()
+                l_t_min = t_str.split('m')
+                t_min = int(l_t_min[0])
+                l_t_sec = l_t_min[-1].split('s')
+                t_sec = float(l_t_sec[0])
+                t_tot = t_min * 60 + t_sec
+            except AttributeError as err:
+                self.logger.error(err)
         if t_tot < 100:
-            self.logger.exception(f'{t_tot} is too small')
+            self.logger.error(f'{t_tot} is too small')
         self.f = [avg, t_tot]
         return self.f
 
@@ -130,8 +136,8 @@ class RANS_k_eps(FluentCase):
     #     for key, val in dat.items():
     #         dat[key] = np.array(val)
     #     return dat
-        # with open() as f:
-        #
+    # with open() as f:
+    #
 
 
 BaseCase = RANS_k_eps
@@ -182,7 +188,7 @@ class RANS_k_eps_x4(RANS_k_eps):
             '(writefile output-port)',
             '(close-output-port output-port))',
             '/exit y'
-            ]
+        ]
 
         ####### Slurm Job Lines #########
         self.job_lines_rw = \
