@@ -66,7 +66,7 @@ class MinimizeCFD(PicklePath):
         if run_dir is None:
             run_dir = 'run'+str(len(self.opt_runs)).zfill(2)
         run_path = os.path.join(self.abs_path, run_dir)
-        if run_path in os.listdir(self.abs_path):
+        if run_dir in os.listdir(self.abs_path):
             question = 'Run directory already exists. Overwrite?'
             yes = yes_or_no(question)
             if yes:
