@@ -177,8 +177,12 @@ def get_CFDGeneticAlgorithm(GeneticAlgorithm):
 
                      callback=callback,
                      display=display,
+
+                     n_gen=None,
                      **kwargs
                      ):
+            if n_gen is not None:
+                termination = get_termination("n_gen", n_gen)
             super().__init__(pop_size=pop_size,
                              n_offsprings=n_offsprings,
                              eliminate_duplicates=eliminate_duplicates,
