@@ -76,6 +76,31 @@ class RANSJet(FluentCase):
     else:
         hqGrid_uMag = np.load(hqGrid_uMag_path)
 
+    # x-component of velocity
+    hqGrid_u_x_path_3D = os.path.join(hqSim_dir, 'hqGrid_u_x-3D.npy')
+    if not os.path.exists(hqGrid_u_x_path_3D):
+        with h5py.File(os.path.join(hqSim_dir, 'merged-mesh.h5')) as h5f:
+            coor = h5f['XYZ'][:]
+        with h5py.File(os.path.join(hqSim_dir, 'merged-u_mean.h5')) as h5f:
+            dset1 = list(h5f.keys())[0]
+            uMean = h5f[dset1][:]
+        x_uMean = uMean[:, 0]
+        hqGrid_u_x_3D = gridInterp3D.getInterpGrid(coor, x_uMean)
+        np.save(hqGrid_u_x_path_3D, hqGrid_u_x_3D)
+        gridInterp3D.plot3DGrid(hqGrid_u_x_3D, 'hqGrid_u_x-3D')
+    else:
+        hqGrid_u_x_3D = np.load(hqGrid_u_x_path_3D)
+
+    hqGrid_u_x_path = os.path.join(hqSim_dir, 'hqGrid_u_x.npy')
+    if not os.path.exists(hqGrid_u_x_path):
+        # radial average
+        hqGrid_u_x = radialAvg(hqGrid_u_x_3D, gridInterp3D, gridInterp2D)
+        gridInterp2D.plot2DGrid(hqGrid_u_x, 'hqGrid_u_x_radAvg')
+        # save binary
+        np.save(hqGrid_u_x_path, hqGrid_u_x)
+    else:
+        hqGrid_u_x = np.load(hqGrid_u_x_path)
+
     hqGrid_phi_path_3D = os.path.join(hqSim_dir, 'hqGrid_phi-3D.npy')
     if not os.path.exists(hqGrid_phi_path_3D):
         with h5py.File(os.path.join(hqSim_dir, 'merged-mesh.h5')) as h5f:
@@ -331,7 +356,7 @@ class RANSJet(FluentCase):
             f'/define/boundary-conditions velocity-inlet coflow y y n {coflowVel} n 0 n 1 n 0 n 300 n n y 5 10 n n 0',
             '/solve/iterate 4000',
             # EXPORT
-            f'/file/export cgns {self.datFile} n y velocity-mag scalar q',
+            f'/file/export cgns {self.datFile} n y velocity-mag scalar axial-velocity radial-velocity turb-kinetic-energy q',
             'OK',
             f'/file write-case-data {self.datFile}',
             'OK',
@@ -468,18 +493,51 @@ class RANSJet(FluentCase):
         coor, dat = self.gridInterp2D.getCGNSData(
             self.datPath, 'Mass_fraction_of_scalar')
         ransGrid_phi = self.gridInterp2D.getInterpGrid(coor, dat)
-        dnsGrid_phi = self.hqGrid_phi
-        phi_meanDiff = np.mean(abs(ransGrid_phi - dnsGrid_phi))
+        lesGrid_phi = self.hqGrid_phi
+        phi_meanDiff = np.mean(abs(ransGrid_phi - lesGrid_phi))
 
         ######## Objective 2: Mean Difference in Velocity Magnitude #########
         coor, dat = self.gridInterp2D.getCGNSData(
             self.datPath, 'VelocityMagnitude')
         ransGrid_uMag = self.gridInterp2D.getInterpGrid(coor, dat)
-        dnsGrid_uMag = self.hqGrid_uMag
-        uMag_meanDiff = np.mean(abs(ransGrid_uMag - dnsGrid_uMag))
+        lesGrid_uMag = self.hqGrid_uMag
+        uMag_meanDiff = np.mean(abs(ransGrid_uMag - lesGrid_uMag))
 
         obj = [phi_meanDiff, uMag_meanDiff]
         self.f = obj
+
+        ##### Flux ###########
+        coor, dat = self.gridInterp2D.getCGNSData(
+            self.datPath, 'Axial_Velocity')
+        ransGrid_u_x = self.gridInterp2D.getInterpGrid(coor, dat)
+        ransGrid_flux = ransGrid_phi*ransGrid_u_x
+        lesGrid_flux = lesGrid_phi * lesGrid_u_x
+        # average x-planes
+        dx = 0.005
+        x0 = 1
+        rans_fluxes = np.zeros((ransGrid_flux.shape[0], 2))
+        for i, col in enumerate(ransGrid_flux):
+            x = i * dx + x0
+            avg = np.mean(col)
+            rans_fluxes[i] = [x, avg]
+        les_fluxes = np.zeros((lesGrid_flux.shape[0], 2))
+        for i, col in enumerate(lesGrid_flux):
+            x = i * dx + x0
+            avg = np.mean(col)
+            les_fluxes[i] = [x, avg]
+        plt.plot(les_fluxes[:, 0], les_fluxes[:, 1], label='les')
+        plt.plot(rans_fluxes[:, 0], rans_fluxes[:, 1], label='rans')
+        plt.legend()
+        plt.title('Free Jet: Pulsed LES vs. Steady RANS Equiv. BCs')
+        plt.show()
+        # plot
+        plt.imshow(ransGrid_flux.T, extent=(self.gridInterp2D.xmin, self.gridInterp2D.xmax,
+                   self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
+        plt.colorbar()
+        plt.title('RANS - Scalar Axial Momentum Flux')
+        path = os.path.join(self.abs_path, 'RANS-flux-grid.png')
+        plt.savefig(path)
+        plt.clf()
 
         ##### SAVE DATA VISUALIZATION ######
         # phi grid plot
@@ -491,7 +549,7 @@ class RANSJet(FluentCase):
         plt.savefig(path)
         plt.clf()
         # phi difference plot
-        phiDiffGrid = ransGrid_phi - dnsGrid_phi
+        phiDiffGrid = ransGrid_phi - lesGrid_phi
         plt.imshow(phiDiffGrid.T, extent=(self.gridInterp2D.xmin, self.gridInterp2D.xmax,
                    self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
         plt.colorbar()
@@ -508,7 +566,7 @@ class RANSJet(FluentCase):
         plt.savefig(path)
         plt.clf()
         # uMag difference plot
-        uMagDiffGrid = ransGrid_uMag - dnsGrid_uMag
+        uMagDiffGrid = ransGrid_uMag - lesGrid_uMag
         plt.imshow(uMagDiffGrid.T, extent=(self.gridInterp2D.xmin, self.gridInterp2D.xmax,
                    self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
         plt.colorbar()

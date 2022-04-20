@@ -91,16 +91,16 @@ class RANS_k_eps(FluentCase):
     def _postProc(self):
         # residuals_dict = self.residuals_file_to_dict(self.datPath)
         dat = np.genfromtxt(self.datPath)
-        if dat[-1, 0] < 2000:
-            self.logger.error('LESS THAN 2000 ITERATIONS PREFORMED')
+        if dat[-1, 0] < 1000:
+            self.logger.error('LESS THAN 1000 ITERATIONS PREFORMED')
         rel_dat = dat[-2000:, 1:]
         saveTxt(self.abs_path, 'residual_avgs.txt', np.mean(rel_dat, axis=0))
         avg = np.mean(rel_dat)
-        path = os.path.join(self.abs_path, 'run.out')
+        path = os.path.join(self.abs_path, 'slurm.out')
         with open(path) as f:
             lines = f.readlines()
-        matches = fnmatch.filter(lines, 'real *m*s')
-        t_tot = None
+        matches = fnmatch.filter(lines, '*real*m*s*')
+        # t_tot = None
         for match in matches:
             try:
                 _, t_str = match.split()
