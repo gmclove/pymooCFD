@@ -114,15 +114,14 @@ class RANS_k_eps(FluentCase):
         self.f = [avg, t_tot]
         return self.f
 
-    def _solveDone(self):
-        print('solve done check')
-        if self.f is not None:
-            t_tot = self.f[2]
-            if t_tot < 100:
-                self.logger.error(f'{t_tot} is too small')
-                return False
-        else:
-            return super()._solveDone()
+    # def _solveDone(self):
+    #     print('solve done check')
+    #     if self.f is not None:
+    #         t_tot = self.f[2]
+    #         if t_tot < 100:
+    #             self.logger.error(f'{t_tot} is too small')
+    #             return False
+    #     return super()._solveDone()
 
     # @staticmethod
     # def residuals_file_to_dict(f_path):
