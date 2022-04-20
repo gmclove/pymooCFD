@@ -111,10 +111,16 @@ class RANS_k_eps(FluentCase):
                 t_tot = t_min * 60 + t_sec
             except AttributeError as err:
                 self.logger.error(err)
-        if t_tot < 100:
-            self.logger.error(f'{t_tot} is too small')
         self.f = [avg, t_tot]
         return self.f
+
+    def _solveDone(self):
+        t_tot = self.f[2]
+        if t_tot < 100:
+            self.logger.error(f'{t_tot} is too small')
+            return False
+        else:
+            return super()._solveDone()
 
     # @staticmethod
     # def residuals_file_to_dict(f_path):
