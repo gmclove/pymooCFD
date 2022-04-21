@@ -198,7 +198,8 @@ class PicklePath:
 
     @property
     def cp_path(self):
-        return os.path.join(self.abs_path, self.data_folder+'.checkpoint.npy')
+        return os.path.join(self.abs_path, self.__class__.__name__ +
+                            '.checkpoint.npy')
 
     @property
     def cp_rel_path(self):
