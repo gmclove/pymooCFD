@@ -38,7 +38,6 @@ class OscillCylinder(YALES2Case):
                          **kwargs
                          )
 
-
     @classmethod
     def parallelize(cls, cases):
         cls.parallelizeInit()
@@ -76,8 +75,8 @@ class OscillCylinder(YALES2Case):
     def _postProc(self):
         ####### EXTRACT VAR ########
         # Extract parameters for each individual
-        A_omega = self.x[0]
-        freq = self.x[1]
+        # A_omega = self.x[0]
+        # freq = self.x[1]
         ######## Compute Objectives ##########
         ### Objective 1: Drag on Cylinder ###
         U = 1
