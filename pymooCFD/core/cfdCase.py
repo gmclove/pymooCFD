@@ -80,7 +80,6 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         #    RESTART VARIABLES    #
         ###########################
         # self.complete = False
-        # self.parallelizeInit(self.externalSolver)
         self.setup_parallelize(self.externalSolver)
         self._x = x
 
@@ -111,7 +110,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         ####################
         #    Attributes    #
         ####################
-        self.setup_parallelize(self.externalSolver)
+        # self.setup_parallelize(self.externalSolver)
         self.restart = False
         self.validated = validated
         # Default Attributes

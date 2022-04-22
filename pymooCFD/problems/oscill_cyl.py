@@ -40,7 +40,7 @@ class OscillCylinder(YALES2Case):
 
     @classmethod
     def parallelize(cls, cases):
-        cls.parallelizeInit()
+        cls.setup_parallelize()
         for case in cases:
             case.preProc()
         print('PARALLELIZING . . .')
