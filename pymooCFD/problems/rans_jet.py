@@ -22,7 +22,8 @@ from pymooCFD.util.gridInterp import GridInterp2D, GridInterp3D, radialAvg
 
 
 class RANSJet(FluentCase):
-    base_case_path = 'base_cases/rans_jet-base'
+    base_case_path = os.path.join(os.path.dirname(__file__), 'base_cases',
+                                    'rans_jet-base')
     ###################################################
     #      High Quality Simulation Interpolation      #
     ###################################################
