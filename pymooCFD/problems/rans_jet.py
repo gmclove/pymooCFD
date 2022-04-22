@@ -23,7 +23,7 @@ from pymooCFD.util.gridInterp import GridInterp2D, GridInterp3D, radialAvg
 
 class RANSJet(FluentCase):
     base_case_path = os.path.join(os.path.dirname(__file__), 'base_cases',
-                                    'rans_jet-base')
+                                  'rans_jet-base')
     ###################################################
     #      High Quality Simulation Interpolation      #
     ###################################################
@@ -460,6 +460,7 @@ class RANSJet(FluentCase):
             self.datPath, 'Axial_Velocity')
         ransGrid_u_x = self.gridInterp2D.getInterpGrid(coor, dat)
         ransGrid_flux = ransGrid_phi * ransGrid_u_x
+        lesGrid_u_x = self.hqGrid_u_x
         lesGrid_flux = lesGrid_phi * lesGrid_u_x
         # average x-planes
         dx = 0.005

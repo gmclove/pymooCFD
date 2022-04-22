@@ -6,7 +6,8 @@ from pymooCFD.core.cfdCase import YALES2Case
 
 
 class OscillCylinder(YALES2Case):
-    base_case_path = os.path.join(os.path.dirname(__file__), 'base_cases', 'osc-cyl_base')
+    base_case_path = os.path.join(os.path.dirname(__file__), 'base_cases',
+                                  'osc-cyl_base')
     ####### Define Design Space #########
     n_var = 2
     var_labels = ['Amplitude [radians/s]', 'Frequency [cycles/s]']
@@ -22,6 +23,7 @@ class OscillCylinder(YALES2Case):
     n_constr = 0
     ##### Local Execution Command #####
     externalSolver = True
+    parallelize_preProc = False
     onlyParallelizeSolve = True
     nProc = 10
     procLim = 60
@@ -44,10 +46,11 @@ class OscillCylinder(YALES2Case):
         for case in cases:
             case.preProc()
         print('PARALLELIZING . . .')
-        for case in cases:
-            cls.pool.apply_async(case.solveAndPostProc, ())
-        cls.pool.close()
-        cls.pool.join()
+        with cls.Pool(cls.nTasks) as pool:
+            for case in cases:
+                pool.apply_async(case.solveAndPostProc, ())
+            pool.close()
+            pool.join()
 
     def solveAndPostProc(self):
         self.solve()
@@ -262,6 +265,7 @@ class OscillCylinder(YALES2Case):
         # gmsh.fltk.run()
         # This should be called when you are done using the Gmsh Python API:
         gmsh.finalize()
+
 
 BaseCase = OscillCylinder
 

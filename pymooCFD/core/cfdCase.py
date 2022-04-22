@@ -53,6 +53,9 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
     ##### External Solver #######
     externalSolver = False
     onlyParallelizeSolve = False
+    # parallelize_solve = True
+    parallelize_preProc = True
+    parallelize_postProc = True
     procLim = None
     nProc = None
     nTasks = None
@@ -169,6 +172,26 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
             cls.Pool = mp.Pool
             print('Setup multiprocessing pool: ', end='')
         print('number of tasks =', cls.nTasks)
+    #     if cls.parallelize_preProc and cls.parallelize_postProc:
+    #         def func(self):
+    #             self.preProc()
+    #             self.solve()
+    #             return self.postProc()
+    #     elif not cls.parallelize_preProc and not cls.parallelize_postProc:
+    #         def func(self):
+    #             self.solve()
+    #     elif cls.parallelize_preProc and not cls.parallelize_postProc:
+    #         def func(self):
+    #             self.preProc()
+    #             self.solve()
+    #     else:
+    #         def func(self):
+    #             self.solve()
+    #             return self.postProc()
+    #     cls.exec_parallel = func
+    #
+    # def exec_parallel(self):
+    #     self.solve()
 
     @classmethod
     def parallelize(cls, cases, externalSolver=None):
