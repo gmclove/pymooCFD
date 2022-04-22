@@ -2,44 +2,120 @@
 # @Date:   2021-12-10T11:22:40-05:00
 # @Last modified by:   glove
 # @Last modified time: 2021-12-14T15:45:19-05:00
-<<<<<<< HEAD
+
 # from pymoo.visualization.scatter import Scatter
 import numpy as np
-# import os
-
-
-dat = np.genfromtxt('residuals.dat')
-print(dat)
-print(dat[-1, 0])
-# if dat[-1, 0] < 2000:
-#     raise Exception
-avgs = []
-for col in dat.T[1:]:
-    avgs.append(np.mean(col))
-print(np.mean(avgs))
-print(np.mean(dat[:, 1:]))
-
-=======
+import os
 
 class A:
-    a = 1
-
     def __init__(self):
+        self.a = 1
+
+class B(A):
+    def __init__(self):
+        print(super().__dict__)
         self.b = 2
-        # self.externalSolver =
-inst = A()
-Cls = A
-print(Cls.__dict__)
-print(inst.__dict__)
-print(inst.__class__.__dict__)
-inst.__class__.__dict__ = inst.__class__.__dict__
-print(inst.__class__.__dict__)
+        print(super().__dict__)
+
+B()
+# import fnmatch
+# import os
+# path = os.path.join(os.getcwd(), 'slurm.out')
+# with open(path) as f:
+#     lines = f.readlines()
+# print(lines)
+# matches = fnmatch.filter(lines, '*real*m*s*')
+# print(matches)
+# t_tot = None
+# for match in matches:
+#     try:
+#         _, t_str = match.split()
+#         l_t_min = t_str.split('m')
+#         t_min = int(l_t_min[0])
+#         l_t_sec = l_t_min[-1].split('s')
+#         t_sec = float(l_t_sec[0])
+#         t_tot = t_min * 60 + t_sec
+#     except AttributeError as err:
+#         self.logger.error(err)
+# print(t_tot)
+
+# with open(path) as f:
+    # lines = f.readlines()
+# print(lines)
+# t = lines[1]
+# print(t)
+# _, t_str = lines[1].split()
+# print(t_str)
+# print(t_str.split('h', 'm', 's'))
+# if 'h' in t_str:
+#     l_t_hr = t_str.split('h')
+#     t_hr = int(l_t_hr[0])
+# else:
+#     t_hr = 0
+# print('t_hr:', t_hr)
+# if 'm' in t_str:
+# l_t_min = t_str.split('m')
+# print('l_t_min:', l_t_min)
+# t_min = int(l_t_min[0])
+# # else:
+# #     t_min = 0
+# print('t_min:', t_min)
+# # print(t_min[0])
+# l_t_sec = l_t_min[-1].split('s')
+# print(l_t_sec)
+# t_sec = float(l_t_sec[0])
+# print('t_sec:', t_sec)
+# # t_tot = t_hr*3600 + t_min*60 + t_sec
+# t_tot = t_min*60 + t_sec
+# print(t_tot)
+# print([int(c) for c in t])
+# print([int(c) for c in t if c.isdigit()])
+
+# dat = np.genfromtxt('residuals.dat')
+# print(dat)
+# print(dat[-1, 0])
+# # # if dat[-1, 0] < 2000:
+# # #     raise Exception
+# # avgs = []
+# # for col in dat.T[1:]:
+# #     avgs.append(np.mean(col))
+# # print(np.mean(avgs))
+# # print(np.mean(dat[:, 1:]))
+#
+# l1= [1,2,3]
+# l2 = [4,5,6]
+# # l = l1.copy()
+# # l = l.extend(l1, l2)
+# for i in l1+l2:
+#     print(i)
+
+# class A:
+#     a = 1
+#
+#     def __init__(self, c):
+#         self.b = 2
+#         print(self.__class__)
+#         if self.__class__ in c.__class__.mro():
+#             print('c is child of A')
+#         # self.externalSolver =
+#
+# class C:
+#     def __init__(self):
+#         print('init class C')
+#
+# c = C()
+# inst = A(c)
+# Cls = A
+# print(Cls.__dict__)
+# print(inst.__dict__)
+# print(inst.__class__.__dict__)
+# inst.__class__.__dict__ = inst.__class__.__dict__
+# print(inst.__class__.__dict__)
 
 
 # from pymoo.visualization.scatter import Scatter
 # import numpy as np
 # import os
->>>>>>> e5cab1f77b4578ddaad5cfcd097b366e5f34fd9c
 #
 # import gmsh
 #
