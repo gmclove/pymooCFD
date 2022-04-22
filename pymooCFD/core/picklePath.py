@@ -35,6 +35,7 @@ class PicklePath:
         if os.path.isdir(self.abs_path):
             try:
                 self.update_self()
+                self.load_sub_pickle_paths()
                 self.logger.info('RESTARTED FROM CHECKPOINT')
                 self.cp_init = True
                 return
@@ -54,13 +55,7 @@ class PicklePath:
             self.logger.info(
                 f'NEW - {self.rel_path} did not exist')
 
-        # Check for other PicklePath child class and load if found
-        for attr in self.__dict__:
-            try:
-                if self.__class__ in attr.__class__.mro():
-                    attr.update_self()
-            except AttributeError as err:
-                self.logger.error(err)
+        self.load_sub_pickle_paths()
 
         # for i, sub_dir in enumerate(sub_dirs):
         #     sub_dirs[i] = os.path.join(self.abs_path, sub_dir)
@@ -71,6 +66,15 @@ class PicklePath:
 
         # for path in sub_dirs:
         #     os.makedirs(path, exist_ok=True)
+    def load_sub_pickle_paths(self):
+        # Check for other PicklePath child class and load if found
+        for attr in self.__dict__:
+            try:
+                if self.__class__ in attr.__class__.mro():
+                    attr.update_self()
+            except AttributeError as err:
+                self.logger.error(err)
+
 
     def get_logger(self):
         name = '.'.join(os.path.normpath(self.rel_path).split(os.path.sep))

@@ -572,7 +572,7 @@ class OptRun(PicklePath):
         # caseCP = os.path.join(case_path, self.problem.BaseCase.__name__ +
         #                       '.checkpoint.npy')
         caseCP = os.path.join(case_path, self.problem.BaseCase.__name__ +
-        '.checkpoint.npy')
+                              '.checkpoint.npy')
         try:
             case, = np.load(caseCP, allow_pickle=True).flatten()
             return case
