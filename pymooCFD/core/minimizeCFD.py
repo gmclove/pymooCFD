@@ -1,7 +1,7 @@
 from pymooCFD.core.pymooBase import CFDGeneticProblem, CFDGeneticAlgorithm
 from pymooCFD.core.optRun import OptRun
 from pymooCFD.core.picklePath import PicklePath
-from pymooCFD.util.sysTools import yes_or_no
+from pymooCFD.util.sysTools import yes_or_no, emptyDir
 
 from pymoo.factory import get_sampling, get_crossover, get_mutation
 from pymoo.operators.mixed_variable_operator import MixedVariableSampling, MixedVariableMutation, MixedVariableCrossover
@@ -67,10 +67,10 @@ class MinimizeCFD(PicklePath):
             run_dir = 'run'+str(len(self.opt_runs)).zfill(2)
         run_path = os.path.join(self.abs_path, run_dir)
         if run_dir in os.listdir(self.abs_path):
-            question = 'Run directory already exists. Overwrite?'
+            question = '\n\tRun directory already exists. Overwrite?'
             yes = yes_or_no(question)
             if yes:
-                os.rmdir(run_path)
+                emptyDir(run_path)
         opt_run = OptRun(alg, prob, run_path=run_path)
         self.opt_runs.append(opt_run)
         self.save_self()
