@@ -98,6 +98,7 @@ class RANS_k_eps(FluentCase):
     def _postProc(self):
         # residuals_dict = self.residuals_file_to_dict(self.datPath)
         dat = np.genfromtxt(self.datPath)
+        print(len(dat))
         # PLOT
         its = np.arange(1, len(dat)+1)
         labels = ['continuity', 'x-velocity', 'y-velocity', 'z-velocity', 'k',
