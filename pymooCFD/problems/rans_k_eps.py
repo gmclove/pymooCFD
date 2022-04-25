@@ -1,6 +1,7 @@
 import fnmatch
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 
 from pymooCFD.core.cfdCase import FluentCase
 from pymooCFD.util.handleData import saveTxt
@@ -19,7 +20,7 @@ class RANS_k_eps(FluentCase):
     obj_labels = ['Average of Residuals', 'Wall Time']
     n_obj = 2
 
-    n_constr = 0
+    n_constr = 1
 
     externalSolver = True
     solverExecCmd = ['sbatch', '--wait', 'jobslurm.sh']
@@ -92,6 +93,21 @@ class RANS_k_eps(FluentCase):
     def _postProc(self):
         # residuals_dict = self.residuals_file_to_dict(self.datPath)
         dat = np.genfromtxt(self.datPath)
+        # PLOT
+        labels = ['continuity', 'x-velocity', 'y-velocity', 'z-velocity', 'k',
+                  'epsilon']
+        fig, ax = plt.subplots()
+        for i, col in enumerate(dat[:, 1:].T):
+            ax.plot(dat[:, 0], col, label=labels[i])
+        ax.set_title('Scaled Residuals')
+        ax.legend()
+        fig, ax = plt.subplots()
+        for i, col in enumerate(dat[-2000:, 1:].T):
+            ax.plot(dat[-2000:, 0], col, label=labels[i])
+        ax.set_title('Scaled Residuals: Last 2,000 Iterations')
+        ax.legend()
+        fig.savefig('residuals-final.png')
+
         if dat[-1, 0] < 1000:
             self.logger.error('LESS THAN 1000 ITERATIONS PREFORMED')
         rel_dat = dat[-2000:, 1:]
@@ -113,6 +129,7 @@ class RANS_k_eps(FluentCase):
             except AttributeError as err:
                 self.logger.error(err)
         self.f = [avg, t_tot]
+        self.g = avg - 1e-5
         return self.f
 
     # def _solveDone(self):
@@ -163,6 +180,7 @@ class RANS_k_eps_x4(RANS_k_eps):
             # AUTO-SAVE
             '/file/auto-save case-frequency if-case-is-modified',
             '/file/auto-save data-frequency 1000',
+            '/solve/monitors/residual/n-save 100000',
             ';DEFINE turbulence solver',
             '/define/models/viscous/ke-standard y',
             f'(rpsetvar\' kecmu {self.x[0]})',
