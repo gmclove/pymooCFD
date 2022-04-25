@@ -112,7 +112,7 @@ class RANS_k_eps(FluentCase):
         ax.legend()
         fig.savefig('residuals-final.png')
         # Objective 1: residuals average
-        if dat[-1, 0] < 1000:
+        if len(dat) < 1000:
             self.logger.error('LESS THAN 1000 ITERATIONS PREFORMED')
         rel_dat = dat[-2000:]
         saveTxt(self.abs_path, 'residual_avgs.txt', np.mean(rel_dat, axis=0))
