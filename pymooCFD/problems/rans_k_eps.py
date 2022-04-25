@@ -107,12 +107,15 @@ class RANS_k_eps(FluentCase):
             ax.plot(its, col, label=labels[i])
         ax.set_title('Scaled Residuals')
         ax.legend()
+        path = os.path.join(self.abs_path, 'residuals.png')
+        fig.savefig(path)
         fig, ax = plt.subplots()
         for i, col in enumerate(dat[-2000:].T):
             ax.plot(its[-2000:], col, label=labels[i])
         ax.set_title('Scaled Residuals: Last 2,000 Iterations')
         ax.legend()
-        fig.savefig('residuals-final.png')
+        path = os.path.join(self.abs_path, 'residuals-final.png')
+        fig.savefig(path)
         # Objective 1: residuals average
         if len(dat) < 1000:
             self.logger.error('LESS THAN 1000 ITERATIONS PREFORMED')
