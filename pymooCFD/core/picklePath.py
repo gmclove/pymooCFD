@@ -144,6 +144,7 @@ class PicklePath:
             loaded_self = self.load_self()
         if loaded_self is None:
             self.logger.error('FAILED: LOADING CHECKPOINT')
+            return
         self.update_warnings(loaded_self)
         loaded_self = self._update_filter(loaded_self)
         # UPDATE
