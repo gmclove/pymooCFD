@@ -12,6 +12,7 @@ import shutil
 # import shutil
 # import h5py
 # import matplotlib.pyplot as plt
+# from pymooCFD.core.meshStudy import MeshStudy
 from pymoo.visualization.scatter import Scatter
 from pymooCFD.util.sysTools import copy_and_overwrite, saveTxt
 from pymooCFD.core.picklePath import PicklePath
@@ -468,7 +469,8 @@ class OptRun(PicklePath):
         self.save_self()
         self.plotBndPtsObj()
         if do_mesh_study:
-            self.mesh_study(self.bnd_cases)
+            for case in self.bnd_cases:
+                case.mesh_study.run()
             self.save_self()
 
     def plotBndPtsObj(self):

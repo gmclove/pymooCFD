@@ -26,21 +26,21 @@ class MeshStudy:  # (CFDCase):
         # os.makedirs(self.folder,)
         self.logger = self.getLogger()
         self.base_case = cfd_case
-        self.cases = None #[]
+        self.cases = None  # []
         self.size_factors = size_factors
         self.logger.info('INITIALIZED: Mesh Study')
-
 
     def run(self):
         if self.size_factors is None:
             self.logger.error(
-                'EXITING MESH STUDY: Mesh Size Factors set to None. May be trying to do mesh study on a mesh study case.')
+                'EXITING MESH STUDY: Mesh Size Factors set to None.' +
+                'May be trying to do mesh study on a mesh study case.')
             return
         # if size_factors is None:
         #     size_factors = self.size_factors
         # if self.msCases is None:
         #     self.genmesh_study()
-        self.logger.info(f'MESH STUDY')
+        self.logger.info('MESH STUDY')
         if self.cases is None:
             self.logger.info('\tNo Mesh Cases Found: self.cases is None')
             self.logger.info(f'\t {self.size_factors}')
@@ -73,12 +73,13 @@ class MeshStudy:  # (CFDCase):
                         for case in self.cases])
         # Print
         with np.printoptions(suppress=True):
-            self.logger.info(
-                '\tMesh Size Factor | Number of Elements\n\t\t' + str(dat).replace('\n', '\n\t\t'))
+            self.logger.info('\tMesh Size Factor | Number of Elements\n\t\t' +
+                             str(dat).replace('\n', '\n\t\t'))
             saveTxt(self.folder, 'numElem-vs-size_factors.txt', dat)
 
         self.exec()
         self.plot()
+        return self.cases
 
     def gen(self):
         if self.size_factors is None:
@@ -89,7 +90,7 @@ class MeshStudy:  # (CFDCase):
         self.logger.info(f'\t\tFor Mesh Size Factors: {self.size_factors}')
         # Pre-Process
         study = []
-        var = []
+        # var = []
         self.cases = []
         for sf in self.size_factors:
             msCase = copy.deepcopy(self.base_case)
@@ -118,8 +119,8 @@ class MeshStudy:  # (CFDCase):
                         for case in self.cases])
         # Print
         with np.printoptions(suppress=True):
-            self.logger.info(
-                '\tMesh Size Factor | Number of Elements\n\t\t' + str(dat).replace('\n', '\n\t\t'))
+            self.logger.info('\tMesh Size Factor | Number of Elements\n\t\t' +
+                             str(dat).replace('\n', '\n\t\t'))
             saveTxt(self.folder, 'size_factors-vs-numElem.txt', dat)
 
         self.base_case.save_self()
@@ -191,7 +192,8 @@ class MeshStudy:  # (CFDCase):
 
             # Number of Elements vs Objective vs time
             plot = Scatter(title='Mesh Study: ' + tail, legend=True, grid=True,
-                           labels=['Number of Elements', obj_label, 'Solution Time [s]'],
+                           labels=['Number of Elements',
+                                   obj_label, 'Solution Time [s]'],
                            tight_layout=True, bbox_to_anchor=(1.05, 1.0)
                            )
             for i in range(len(a_numElem)):
@@ -236,7 +238,6 @@ class MeshStudy:  # (CFDCase):
         plot_logger.setLevel(config.PLOT_LOGGER_LEVEL)
         return logger
 
-
     @property
     def size_factors(self): return self._size_factors
 
@@ -255,7 +256,8 @@ class MeshStudy:  # (CFDCase):
             self._size_factors = size_factors
         else:
             prev_size_factors = [case.meshSF for case in self.cases]
-            self.logger.debug(f'Current Mesh Size Factors:\n\t{self.size_factors}')
+            self.logger.debug(
+                f'Current Mesh Size Factors:\n\t{self.size_factors}')
             self.logger.debug(
                 f'Previous Mesh Study Size Factors:\n\t{prev_size_factors}')
             if all(sf in prev_size_factors for sf in self.size_factors):
