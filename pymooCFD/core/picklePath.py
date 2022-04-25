@@ -33,13 +33,15 @@ class PicklePath:
         #########################
         self.cp_init = False
         if os.path.isdir(self.abs_path):
-            try:
+            # try:
+            if os.path.exists(self.cp_path):
                 self.update_self()
                 self.load_sub_pickle_paths()
                 self.logger.info('RESTARTED FROM CHECKPOINT')
                 self.cp_init = True
                 return
-            except FileNotFoundError:
+            # except FileNotFoundError:
+            else:
                 question = f'\n{self.rel_path} exists but {self.cp_rel_path} does not.\n\tEMPTY {self.rel_path} DIRECTORY?'
                 overwrite = yes_or_no(question)
                 if overwrite:
