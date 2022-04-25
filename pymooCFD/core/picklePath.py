@@ -68,13 +68,26 @@ class PicklePath:
         #     os.makedirs(path, exist_ok=True)
     def load_sub_pickle_paths(self):
         # Check for other PicklePath child class and load if found
-        for attr in self.__dict__:
+        for attr_key, attr_val in self.__dict__.items():
             try:
-                if self.__class__ in attr.__class__.mro():
-                    attr.update_self()
+                # print(attr_val.__class__.__mro__)
+                if isinstance(attr_val, list):
+                    print(attr_val)
+                    for i, item in enumerate(attr_val):
+                        # print(item.__class__.__mro__)
+                        print(__class__)
+                        print(item.__class__.mro())
+                        print(item.__class__.__mro__)
+                        if __class__ in item.__class__.mro(): # type(attr_val).mro(): #
+                            print(attr_key, i, item)
+                            print('!!!!!!!!!!!!!')
+                            self.logger.info(f'LOADING: {attr_key}[{i}] FROM {item.cp_path}')
+                            item.update_self()
+                if self.__class__ in attr_val.__class__.__mro__: # type(attr_val).mro(): #
+                    self.logger.info(f'LOADING: {attr_key} FROM {attr_val.cp_path}')
+                    attr_val.update_self()
             except AttributeError as err:
                 self.logger.error(err)
-
 
     def get_logger(self):
         name = '.'.join(os.path.normpath(self.rel_path).split(os.path.sep))
