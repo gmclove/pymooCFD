@@ -451,9 +451,9 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                 self.logger.warning(f'CONSTRAINT(S) CONTAINS NaN VALUE - {g}')
                 for const_i, const in enumerate(g):
                     if np.isnan(const):
-                        g[const_i] = np.ninf
+                        g[const_i] = np.NINF
                         self.logger.warning(
-                            f'\t Constraint {const_i}: {const} -> {np.ninf}')
+                            f'\t Constraint {const_i}: {const} -> {np.NINF}')
                         self._g = g
     ### Objectives ###
     @property
