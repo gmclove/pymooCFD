@@ -125,16 +125,19 @@ class RANS_k_eps(FluentCase):
             lines = f.readlines()
         matches = fnmatch.filter(lines, '*real*m*s*')
         # t_tot = None
-        for match in matches:
-            try:
-                _, t_str = match.split()
-                l_t_min = t_str.split('m')
-                t_min = int(l_t_min[0])
-                l_t_sec = l_t_min[-1].split('s')
-                t_sec = float(l_t_sec[0])
-                t_tot = t_min * 60 + t_sec
-            except AttributeError as err:
-                self.logger.error(err)
+        if matches:
+            for match in matches:
+                try:
+                    _, t_str = match.split()
+                    l_t_min = t_str.split('m')
+                    t_min = int(l_t_min[0])
+                    l_t_sec = l_t_min[-1].split('s')
+                    t_sec = float(l_t_sec[0])
+                    t_tot = t_min * 60 + t_sec
+                except AttributeError as err:
+                    self.logger.error(err)
+        else:
+            self.logger.error('NO MATCHES TO TIME STRING FOUND')
         self.f = [avg, t_tot]
         self.g = avg - 1e-5
         return self.f
