@@ -78,8 +78,13 @@ class MinimizeCFD(PicklePath):
 
         # self.algorithm = CFDAlgorithm(sampling, crossover, mutation)
     def run_case(self, case_dir, x, **kwargs):
-        path = os.path.join(self.abs_path, case_dir)
-        case = self.CFDCase(path, x, **kwargs)
+        case_path = os.path.join(self.abs_path, case_dir)
+        if case_path in os.listdir(self.abs_path):
+            question = '\n\tCase directory already exists. Overwrite?'
+            yes = yes_or_no(question)
+            if yes:
+                shutil.rmtree(case_path)
+        case = self.CFDCase(case_path, x, **kwargs)
         case.run()
         self.case_runs.append(case)
         self.save_self()

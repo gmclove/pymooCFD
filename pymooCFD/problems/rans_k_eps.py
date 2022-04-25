@@ -35,6 +35,8 @@ class RANS_k_eps(FluentCase):
                          *args, **kwargs)
 
     def _preProc(self):
+        if os.path.exists(self.datPath):
+            os.remove(self.datPath)
         self.input_lines_rw = [
             '/file/read rans_k-eps.cas.h5',
             ';DEFINE turbulence solver',
