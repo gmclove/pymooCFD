@@ -97,25 +97,27 @@ class RANS_k_eps(FluentCase):
         # residuals_dict = self.residuals_file_to_dict(self.datPath)
         dat = np.genfromtxt(self.datPath)
         # PLOT
+        its = np.arange(1, len(dat)+1)
         labels = ['continuity', 'x-velocity', 'y-velocity', 'z-velocity', 'k',
                   'epsilon']
         fig, ax = plt.subplots()
-        for i, col in enumerate(dat[:, 1:].T):
-            ax.plot(dat[:, 0], col, label=labels[i])
+        for i, col in enumerate(dat.T):
+            ax.plot(its, col, label=labels[i])
         ax.set_title('Scaled Residuals')
         ax.legend()
         fig, ax = plt.subplots()
-        for i, col in enumerate(dat[-2000:, 1:].T):
-            ax.plot(dat[-2000:, 0], col, label=labels[i])
+        for i, col in enumerate(dat[-2000:].T):
+            ax.plot(its[-2000:], col, label=labels[i])
         ax.set_title('Scaled Residuals: Last 2,000 Iterations')
         ax.legend()
         fig.savefig('residuals-final.png')
-
+        # Objective 1: residuals average
         if dat[-1, 0] < 1000:
             self.logger.error('LESS THAN 1000 ITERATIONS PREFORMED')
-        rel_dat = dat[-2000:, 1:]
+        rel_dat = dat[-2000:]
         saveTxt(self.abs_path, 'residual_avgs.txt', np.mean(rel_dat, axis=0))
         avg = np.mean(rel_dat)
+        # Objective 2: wall time
         path = os.path.join(self.abs_path, 'slurm.out')
         with open(path) as f:
             lines = f.readlines()
