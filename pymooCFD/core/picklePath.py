@@ -72,21 +72,16 @@ class PicklePath:
         # Check for other PicklePath child class and load if found
         for attr_key, attr_val in self.__dict__.items():
             try:
-                # print(attr_val.__class__.__mro__)
                 if isinstance(attr_val, list):
-                    print(attr_val)
                     for i, item in enumerate(attr_val):
-                        # print(item.__class__.__mro__)
-                        print(__class__)
-                        print(item.__class__.mro())
-                        print(item.__class__.__mro__)
-                        if __class__ in item.__class__.mro(): # type(attr_val).mro(): #
-                            print(attr_key, i, item)
-                            print('!!!!!!!!!!!!!')
-                            self.logger.info(f'LOADING: {attr_key}[{i}] FROM {item.cp_path}')
+                        if __class__ in item.__class__.mro():  # type(attr_val).mro(): #
+                            self.logger.info(
+                                f'LOADING: {attr_key}[{i}] FROM {item.cp_path}')
                             item.update_self()
-                if self.__class__ in attr_val.__class__.__mro__: # type(attr_val).mro(): #
-                    self.logger.info(f'LOADING: {attr_key} FROM {attr_val.cp_path}')
+                # type(attr_val).mro(): #
+                if self.__class__ in attr_val.__class__.__mro__:
+                    self.logger.info(
+                        f'LOADING: {attr_key} FROM {attr_val.cp_path}')
                     attr_val.update_self()
             except AttributeError as err:
                 self.logger.error(err)
