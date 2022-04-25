@@ -125,20 +125,25 @@ class PicklePath:
         self.logger.info('CHECKPOINT SAVED')
 
     def load_self(self):
-        loaded_self = self.loadNumpyFile(self.cp_path)
-        # logging
-        self.logger.info(f'\tCHECKPOINT LOADED: {self.cp_rel_path}')
-        self.logger.debug('\tRESTART DICTONARY')
-        for key, val in self.__dict__.items():
-            self.logger.debug(f'\t\t{key}: {val}')
-        self.logger.debug('\tCHECKPOINT DICTONARY')
-        for key, val in loaded_self.__dict__.items():
-            self.logger.debug(f'\t\t{key}: {val}')
-        return loaded_self
+        if os.path.exists(self.cp_path):
+            loaded_self = self.loadNumpyFile(self.cp_path)
+            # logging
+            self.logger.info(f'\tCHECKPOINT LOADED: {self.cp_rel_path}')
+            self.logger.debug('\tRESTART DICTONARY')
+            for key, val in self.__dict__.items():
+                self.logger.debug(f'\t\t{key}: {val}')
+            self.logger.debug('\tCHECKPOINT DICTONARY')
+            for key, val in loaded_self.__dict__.items():
+                self.logger.debug(f'\t\t{key}: {val}')
+            return loaded_self
+        else:
+            self.logger.error(f'CHECKPOINT NOT FOUND: {self.cp_path}')
 
     def update_self(self, loaded_self=None):
         if loaded_self is None:
             loaded_self = self.load_self()
+        if loaded_self is None:
+            self.logger.error('FAILED: LOADING CHECKPOINT')
         self.update_warnings(loaded_self)
         loaded_self = self._update_filter(loaded_self)
         # UPDATE
