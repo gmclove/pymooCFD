@@ -322,6 +322,36 @@ class OptRun(PicklePath):
     #     self.plotGen()
     #     return pop
 
+    def plotGens(self, gens, leg=True):
+        pops = [self.algorithm.history[gen - 1].pop for gen in gens]
+        ##############################
+        #    Parameter Space Plot    #
+        ##############################
+        var_plot = Scatter(title='Design Space',
+                           legend=leg,
+                           labels=self.problem.BaseCase.var_labels,
+                           #                figsize=(10,8)
+                           )
+        for pop_i, pop in enumerate(pops):
+            var_plot.add(pop.get('X'), label=f'GEN {gens[pop_i]}')
+        # save parameter space plot
+        var_plot.save(os.path.join(self.plotDir, f'gen{gens}_var_space.png'),
+                      dpi=100)
+        #############################
+        #   Objective Space Plot    #
+        #############################
+        obj_plot = Scatter(title='Objective Space',
+                           legend=leg,
+                           labels=self.problem.BaseCase.obj_labels
+                           )
+        for pop_i, pop in enumerate(pops):
+            obj_plot.add(pop.get('F'), label=f'GEN {gens[pop_i]}')
+        # save parameter space plot
+        obj_plot.save(os.path.join(self.plotDir, f'gen{gens}_obj_space.png'),
+                      dpi=100)
+
+        return var_plot, obj_plot
+
     def plotGen(self, gen=None, max_leg_len=10):
         if gen is None:
             gen = self.algorithm.n_gen
@@ -340,8 +370,8 @@ class OptRun(PicklePath):
         for ind_i, ind in enumerate(popX):
             var_plot.add(ind, label=f'IND {ind_i+1}')
         # save parameter space plot
-        var_plot.save(os.path.join(
-            self.plotDir, f'gen{gen}_var_space.png'), dpi=100)
+        var_plot.save(os.path.join(self.plotDir, f'gen{gen}_var_space.png'),
+                      dpi=100)
 
         #### Objective Space Plot ####
         popF = pop.get('F')
