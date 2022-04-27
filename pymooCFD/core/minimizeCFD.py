@@ -9,6 +9,7 @@ from pymoo.operators.mixed_variable_operator import MixedVariableSampling, Mixed
 import os
 import shutil
 
+
 class MinimizeCFD(PicklePath):
     def __init__(self, CFDCase,
                  # xl, xu,
@@ -18,11 +19,12 @@ class MinimizeCFD(PicklePath):
                  # **kwargs
                  ):
         if dir_path is None:
-            dir_path = 'optStudy-'+CFDCase.__name__
+            dir_path = 'optStudy-' + CFDCase.__name__
         ##########################
         #    RESET ATTRIBUTES    #
         ##########################
-        self.opt_runs = []  # OptRun(self.get_algorithm(), self.get_problem(), run_path='run00')]
+        # OptRun(self.get_algorithm(), self.get_problem(), run_path='run00')]
+        self.opt_runs = []
         self.case_runs = []
         self.CFDCase = CFDCase
         self.CFDGeneticAlgorithm = CFDGeneticAlgorithm
@@ -56,7 +58,8 @@ class MinimizeCFD(PicklePath):
             "real": get_mutation("real_pm", eta=3.0),
             "int": get_mutation("int_pm", eta=3.0)
         })
-        return self.CFDGeneticAlgorithm(sampling, crossover, mutation, **kwargs)
+        return self.CFDGeneticAlgorithm(sampling, crossover, mutation,
+                                        repair=self.CFDCase.repair, **kwargs)
 
     def new_run(self, alg, prob, run_dir=None):  # algorithm=None, problem=None,
         # if problem is None:
@@ -64,7 +67,7 @@ class MinimizeCFD(PicklePath):
         # if algorithm is None:
         #     algorithm = self.algorithm
         if run_dir is None:
-            run_dir = 'run'+str(len(self.opt_runs)).zfill(2)
+            run_dir = 'run' + str(len(self.opt_runs)).zfill(2)
         run_path = os.path.join(self.abs_path, run_dir)
         if run_dir in os.listdir(self.abs_path):
             question = '\n\tRun directory already exists. Overwrite?'

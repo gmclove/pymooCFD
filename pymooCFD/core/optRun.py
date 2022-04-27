@@ -335,7 +335,7 @@ class OptRun(PicklePath):
         for pop_i, pop in enumerate(pops):
             var_plot.add(pop.get('X'), label=f'GEN {gens[pop_i]}')
         # save parameter space plot
-        var_plot.save(os.path.join(self.plotDir, f'gen{gens}_var_space.png'),
+        var_plot.save(os.path.join(self.plotDir, f'gens_{gens}_var_space.png'),
                       dpi=100)
         #############################
         #   Objective Space Plot    #
@@ -347,7 +347,7 @@ class OptRun(PicklePath):
         for pop_i, pop in enumerate(pops):
             obj_plot.add(pop.get('F'), label=f'GEN {gens[pop_i]}')
         # save parameter space plot
-        obj_plot.save(os.path.join(self.plotDir, f'gen{gens}_obj_space.png'),
+        obj_plot.save(os.path.join(self.plotDir, f'gens_{gens}_obj_space.png'),
                       dpi=100)
 
         return var_plot, obj_plot
@@ -395,7 +395,7 @@ class OptRun(PicklePath):
         obj_labels = self.problem.BaseCase.obj_labels
         popX = self.algorithm.history[0].pop.get('X').astype(float)
         popF = self.algorithm.history[0].pop.get('F').astype(float)
-        mapPaths = []
+        map_paths = []
         plots = []
         for x_i, x in enumerate(popX.transpose()):
             for f_i, f in enumerate(popF.transpose()):
@@ -427,10 +427,10 @@ class OptRun(PicklePath):
                     "/", "|").replace('%', 'precentage').replace("\\", "|")
                 fName = f'{var_str}-vs-{obj_str}.png'
                 path = os.path.join(self.mapDir, fName)
-                mapPaths.append(path)
-                plot.save(path, dpi=100)
+                map_paths.append(path)
+                plot.save(path, dpi=150)
                 plots.append(plot)
-        return plots, mapPaths
+        return plots, map_paths
 
     ########################
     #    BOUNDARY CASES    #
