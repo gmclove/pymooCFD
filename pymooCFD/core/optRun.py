@@ -335,7 +335,7 @@ class OptRun(PicklePath):
         for pop_i, pop in enumerate(pops):
             var_plot.add(pop.get('X'), label=f'GEN {gens[pop_i]}')
         # save parameter space plot
-        var_plot.save(os.path.join(self.plotDir, f'gen{gens}_var_space.png'),
+        var_plot.save(os.path.join(self.plotDir, f'gens_{gens}_var_space.png'),
                       dpi=100)
         #############################
         #   Objective Space Plot    #
@@ -347,7 +347,7 @@ class OptRun(PicklePath):
         for pop_i, pop in enumerate(pops):
             obj_plot.add(pop.get('F'), label=f'GEN {gens[pop_i]}')
         # save parameter space plot
-        obj_plot.save(os.path.join(self.plotDir, f'gen{gens}_obj_space.png'),
+        obj_plot.save(os.path.join(self.plotDir, f'gens_{gens}_obj_space.png'),
                       dpi=100)
 
         return var_plot, obj_plot

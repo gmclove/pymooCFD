@@ -61,6 +61,8 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
     nTasks = None
     solverExecCmd = None
 
+    repair = None
+
     def __init__(self, case_path, x,
                  validated=False,
                  mesh_study=None,
