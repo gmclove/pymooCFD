@@ -1,10 +1,11 @@
 from pymooCFD.core.cfdCase import YALES2Case
+from pymooCFD.util.handleData import saveTxt
 
 import h5py
 import os
 import pandas as pd
 import pygmsh
-import gmsh
+# import gmsh
 import numpy as np
 import matplotlib.pyplot as plt
 from pymoo.core.repair import Repair
@@ -69,31 +70,100 @@ class RemoveBadPlacement(Repair):
 
 
 class Room2D_AP(YALES2Case):
-    n_var = 2
-    var_labels = ['x-location', 'y-location']
-    var_type = ['real', 'real']
-    xl = [0.5, 0.5]
-    xu = [3.5, 3.5]
+    base_case_path = os.path.join(os.path.dirname(__file__), 'base_cases',
+                                  '2D_room-ap-base')
+    n_var = 4
+    var_labels = ['x-Location [m]', 'y-Location [m]',
+                  'Direction', 'AP ACH [m^2/hr]']
+    var_type = ['real', 'real', 'int', 'real']
+    xl = [0.5, 0.5, 1, 0.5]
+    xu = [3.5, 3.5, 4, 6]
 
     n_obj = 2
-    obj_labels = ['ACH', 'Mean Exposure']
+    obj_labels = ['Subjects Mean Exposure', 'Room ACH [m^2/hr]']
+
+    n_constr = 0
 
     repair = RemoveBadPlacement()
 
+    externalSolver = True
+    procLim = 70
+    nProc = 10
+    solverExecCmd = ['mpirun', '-n', str(nProc), '2D_room']
+
     def __init__(self, case_path, x, meshSF=1, **kwargs):
         super().__init__(case_path, x, meshSF=meshSF,
+                         inputFile='2D_room.in',
                          meshFile='room_6P_ap.msh22',
-                         datFile=os.path.join('dump', 'temporal.h5'),
+                         datFile='temporal.h5',
                          **kwargs)
 
-    # def _preProc(self):
-    #     pass
+    def _preProc(self):
+        self.genMesh()
+        direct = self.x[2]
+        ap_ach = self.x[3]  # 0.0296
+        ap_l = 0.3
+        room_area = 16  # m^2
+        ap_speed = ap_ach * room_area / 3600 / ap_l
+        if direct == 1:
+            u_str = f'0. {ap_speed} 0.'
+            walls = 'x'
+            inlets = 'y'
+        elif direct == 2:
+            u_str = f'{ap_speed} 0. 0.'
+            walls = 'y'
+            inlets = 'x'
+        elif direct == 3:
+            u_str = f'0. -{ap_speed} 0.'
+            walls = 'x'
+            inlets = 'y'
+        elif direct == 4:
+            u_str = f'-{ap_speed} 0. 0.'
+            walls = 'y'
+            inlets = 'x'
+        else:
+            raise Exception(f'Can\'t handle direction parameter - {direct}')
+        in_lines = self.input_lines_rw
+        bnd_wall_ids = [f'unit1{walls}{surf}' for surf in range(2)]
+        bnd_inlet_ids = [f'unit1{inlets}{surf}' for surf in range(2)]
+        for id in bnd_wall_ids:
+            kw_lines = self.findKeywordLines(id, in_lines)
+            for line_i, _ in kw_lines:
+                del in_lines[line_i]
+            bnd_lines = [f"BOUNDARY {id} DESCRIPTION = 'ap-{id}'",
+                         f'BOUNDARY {id} TYPE = WALL']
+            in_lines.extend(bnd_lines)
+
+        for id in bnd_inlet_ids:
+            kw_lines = self.findKeywordLines(id, in_lines)
+            for line_i, _ in kw_lines:
+                del in_lines[line_i]
+            bnd_lines = [f"BOUNDARY {id} DESCRIPTION = 'ap-{id}'",
+                         f'BOUNDARY {id} TYPE = INLET',
+                         f'BOUNDARY {id} U = ' + u_str,
+                         f'BOUNDARY {id} Z = 0.0',
+                         f'BOUNDARY {id} PHI_NORMAL_FLUX = 0.0'
+                         ]
+            in_lines.extend(bnd_lines)
+        self.input_lines_rw = in_lines
+
+        # for line_i, line in lines:
+        #     in_lines[line_i] = ''
+        #     if 'DESCRIPTION' in line:
+        #         in_lines[line_i] = f"BOUNDARY {id} DESCRIPTION = 'ap-{id}'"
+        #     elif 'TYPE' in line:
+        #         in_lines[line_i] = f'BOUNDARY {id} TYPE = INLET'
+        #     elif 'U' in line:
+        #         in_lines[line_i] = f'BOUNDARY {id} U = '+u_str
+        #     elif 'Z' in line:
+        #         in_lines[line_i] = f'BOUNDARY {id} Z = 0.0'
+        #     elif 'PHI' in line:
+        #         in_lines[line_i] = f'BOUNDARY {id} PHI_NORMAL_FLUX = 0.0'
+        #     else:
+        #         in_lines[line_i] = ''
 
     def _postProc(self):
         with h5py.File(self.datPath, 'r') as f:
-            print(f['Datas'].keys())
-            print(f['Datas']['TIME'][:])
-            print(f['Datas']['TOTAL_TIME'][:])
             t = f['Datas']['TOTAL_TIME'][:]
             SP1 = f['Datas']['Surf_Int1'][:]
             SP2 = f['Datas']['Surf_Int2'][:]
@@ -108,29 +178,36 @@ class Room2D_AP(YALES2Case):
         t = t[mask]
         # dt = t[-1] - t_start
         SPs = [sp[mask] for sp in SPs]
-        t_wghts = [t[i] - t[i-1] for i in range(1, len(t))]
-        t_mid = [np.mean([t[i], t[i-1]]) for i in range(1, len(t))]
+        t_wghts = [t[i] - t[i - 1] for i in range(1, len(t))]
+        t_mid = [np.mean([t[i], t[i - 1]]) for i in range(1, len(t))]
+        emit_person = 3
         t_avgs = []
         for j, sp in enumerate(SPs):
-            p = j+1
-            if not p == 3:
+            p = j + 1
+            if not p == emit_person:
                 plt.plot(t, sp)
                 plt.title(f'Passive Scalar Surface Average - Person {p}')
                 plt.xlabel('Time [sec]')
                 plt.ylabel('Passive Scalar Surface Average [unitless]')
-                plt.savefig(f'sp-p{p}.png')
+                path = os.path.join(self.abs_path, f'sp-p{p}.png')
+                plt.savefig(path)
                 plt.clf()
-                sp_mid = [np.mean(np.abs([sp[i], sp[i-1]])) for i in range(1, len(sp))]
+                sp_mid = [np.mean(np.abs([sp[i], sp[i - 1]]))
+                          for i in range(1, len(sp))]
                 plt.plot(t_mid, sp_mid)
-                plt.title(f'Passive Scalar Surface Average - Person {p}: mid-points')
+                plt.title(
+                    f'Passive Scalar Surface Average - Person {p}: mid-points')
                 plt.xlabel('Time [sec]')
                 plt.ylabel('Passive Scalar Surface Average [unitless]')
-                plt.savefig(f'sp_mid-p{p}.png')
+                path = os.path.join(self.abs_path, f'sp_mid-p{p}.png')
+                plt.savefig(path)
                 plt.clf()
                 # plt.show()
                 t_avgs.append(np.average(sp_mid, weights=t_wghts))
+        saveTxt(self.abs_path, 'surf-avg-scalar.txt', t_avgs)
         tot_avg = np.mean(t_avgs)
-
+        ACH = 2 + self.x[3]
+        self.f = [tot_avg, ACH]
 
     def _genMesh(self):
         resolution = 0.01
@@ -242,8 +319,8 @@ class Room2D_AP(YALES2Case):
         model.add_physical(circle[3].curve_loop.curves, "P4")
         model.add_physical(circle[4].curve_loop.curves, "P5")
         model.add_physical(circle[5].curve_loop.curves, "P6")
-        print("LowerWall", channel_lines[1].points)
-        print("UpperWall", channel_lines[5].points)
+        # print("LowerWall", channel_lines[1].points)
+        # print("UpperWall", channel_lines[5].points)
         geometry.generate_mesh(dim=2)
         pygmsh.write(self.meshPath)
         # gmsh.write(self.meshPath)

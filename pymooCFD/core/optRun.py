@@ -395,7 +395,7 @@ class OptRun(PicklePath):
         obj_labels = self.problem.BaseCase.obj_labels
         popX = self.algorithm.history[0].pop.get('X').astype(float)
         popF = self.algorithm.history[0].pop.get('F').astype(float)
-        mapPaths = []
+        map_paths = []
         plots = []
         for x_i, x in enumerate(popX.transpose()):
             for f_i, f in enumerate(popF.transpose()):
@@ -427,10 +427,10 @@ class OptRun(PicklePath):
                     "/", "|").replace('%', 'precentage').replace("\\", "|")
                 fName = f'{var_str}-vs-{obj_str}.png'
                 path = os.path.join(self.mapDir, fName)
-                mapPaths.append(path)
-                plot.save(path, dpi=100)
+                map_paths.append(path)
+                plot.save(path, dpi=150)
                 plots.append(plot)
-        return plots, mapPaths
+        return plots, map_paths
 
     ########################
     #    BOUNDARY CASES    #

@@ -71,20 +71,39 @@ class PicklePath:
     def load_sub_pickle_paths(self):
         # Check for other PicklePath child class and load if found
         for attr_key, attr_val in self.__dict__.items():
+            # try:
+            # if isinstance(attr_val, list): # hasattr(attr_val, "__getitem__")
             try:
-                if isinstance(attr_val, list):
-                    for i, item in enumerate(attr_val):
-                        if __class__ in item.__class__.mro():  # type(attr_val).mro(): #
-                            self.logger.info(
-                                f'LOADING: {attr_key}[{i}] FROM {item.cp_path}')
-                            item.update_self()
-                # type(attr_val).mro(): #
-                if self.__class__ in attr_val.__class__.__mro__:
-                    self.logger.info(
-                        f'LOADING: {attr_key} FROM {attr_val.cp_path}')
-                    attr_val.update_self()
-            except AttributeError as err:
-                self.logger.error(err)
+                attr_val[:]
+                attr_is_subscriptable = True
+            except TypeError:
+                attr_is_subscriptable = False
+            if attr_is_subscriptable:
+                for i, item in enumerate(attr_val):
+                    self.loadIfPP(item)
+                    # if __class__ in item.__class__.mro():  # type(attr_val).mro(): #
+                    #     self.logger.info(
+                    #         f'LOADING: {attr_key}[{i}] FROM {item.cp_path}')
+                    #     item.update_self()
+            # type(attr_val).mro(): #
+            self.loadIfPP(attr_val)
+            # if __class__ in attr_val.__class__.mro():
+            #     self.logger.info(
+            #         f'LOADING: {attr_key} FROM {attr_val.cp_path}')
+            #     attr_val.update_self()
+            # except AttributeError as err:
+            #     self.logger.error(err)
+
+    def loadIfPP(self, inst):
+        # try:
+        #     inst.__class__.mro()
+        # except TypeError as err:
+        #     self.logger.error(err)
+        #     return
+        if inst.__class__ is not type and __class__ in inst.__class__.mro():
+            self.logger.info(
+                f'LOADING: {inst} FROM {inst.cp_path}')
+            inst.update_self()
 
     def get_logger(self):
         name = '.'.join(os.path.normpath(self.rel_path).split(os.path.sep))

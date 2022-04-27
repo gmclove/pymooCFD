@@ -47,8 +47,14 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
     ####### Define Objective Space ########
     obj_labels = None
     n_obj = None
-    ####### Define Constraints #########
+    ###########################
+    #    pymoo Constraints    #
+    ###########################
     n_constr = None
+    ######################
+    #    pymoo Repair    #
+    ######################
+    repair = None
 
     ##### External Solver #######
     externalSolver = False
@@ -61,7 +67,6 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
     nTasks = None
     solverExecCmd = None
 
-    repair = None
 
     def __init__(self, case_path, x,
                  validated=False,
@@ -233,6 +238,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                     self.f = None
         if self.f is None or not np.isfinite(np.sum(self.f)):
             self.restart = True
+            self.save_self()
             start = time.time()
             self._solve()
             end = time.time()
@@ -629,7 +635,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         if sum([len(kw_lines) for kw_lines in kw_lines_array]) > 0:
             def replace():
                 for kw_lines in kw_lines_array:
-                    for line_i, line in kw_lines:
+                    for line_i, _ in kw_lines:
                         file_lines[line_i] = newLine
                         if replaceOnce:
                             return
