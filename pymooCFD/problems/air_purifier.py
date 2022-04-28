@@ -3,7 +3,7 @@ from pymooCFD.util.handleData import saveTxt
 
 import h5py
 import os
-import pandas as pd
+import random
 import pygmsh
 # import gmsh
 import numpy as np
@@ -36,35 +36,49 @@ class RemoveBadPlacement(Repair):
         max_x, max_y = dom_dx + dom_x0 - wall_space_dx, dom_y0 + dom_dy - wall_space_dy
         person_space = r + spacing
 
-        rm_inds = []
-        for i in range(len(pop)):
-            x = pop[i].X
-            x_coor, y_coor = x[0], x[1]
-            if x_coor < min_x:
-                rm_inds.append(i)
-                continue
-            if x_coor > max_x:
-                rm_inds.append(i)
-                continue
-            if y_coor < min_y:
-                rm_inds.append(i)
-                continue
-            if y_coor > max_y:
-                rm_inds.append(i)
-                continue
+        # rm_inds = []
+        # for i in range(len(pop)):
+            # x = pop[i].X
+        X = pop.get('X')
+        for ind, x in enumerate(X):
+            x[0], x[1] = x[0], x[1]
+            if x[0] < min_x:
+                x[0] = min_x
+                # rm_inds.append(i)
+                # continue
+            if x[0] > max_x:
+                x[0] = max_x
+                # rm_inds.append(i)
+                # continue
+            if x[1] < min_y:
+                x[1] = min_y
+                # rm_inds.append(i)
+                # continue
+            if x[1] > max_y:
+                x[1] = max_y
+                # rm_inds.append(i)
+                # continue
             for cir_cent in centers:
                 cir_cx = cir_cent[0]
                 cir_cy = cir_cent[1]
                 x_max, x_min = cir_cx + person_space, cir_cx - person_space
                 y_max, y_min = cir_cy + person_space, cir_cy - person_space
-                if x_coor < x_max and x_coor > x_min:
-                    rm_inds.append(i)
-                    break
-                if y_coor < y_max and y_coor > y_min:
-                    rm_inds.append(i)
-                    break
-        X = pop.get('X')
-        X = [x for i, x in enumerate(X) if i not in rm_inds]
+                x_new = [x_min, x_max]
+                y_new = [y_min, y_max]
+                if x[0] < x_max and x[0] > x_min:
+                    x[0] = random.choice(x_new)
+                if x[1] < y_max and x[1] > y_min:
+                    x[1] = random.choice(y_new)
+                    # rm_inds.append(i)
+                    # break
+                # print('cir_cent:', cir_cent)
+                # print('x_max:', x_max)
+                # print('x_min:', x_min)
+                # print('y_min:', y_min)
+                # print('y_max:', y_max)
+            X[ind] = x
+        # X = pop.get('X')
+        # X = [x for i, x in enumerate(X) if i not in rm_inds]
         pop.set('X', X)
         return pop
 
@@ -90,6 +104,7 @@ class Room2D_AP(YALES2Case):
     procLim = 70
     nProc = 10
     solverExecCmd = ['mpirun', '-n', str(nProc), '2D_room']
+    onlyParallelizeSolve = True
 
     def __init__(self, case_path, x, meshSF=1, **kwargs):
         super().__init__(case_path, x, meshSF=meshSF,

@@ -338,6 +338,12 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
     ##########################
     ### Case File Paths ###
     @property
+    def plots_path(self):
+        path = os.path.join(self.abs_path, 'plots')
+        os.makedirs(path, exist_ok=True)
+        return path
+
+    @property
     def inputPath(self):
         if self.inputFile is None:
             return None
@@ -365,9 +371,9 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         else:
             return os.path.join(self.abs_path, self.jobFile)
 
-    @property
-    def mesh_studyDir(self):
-        return os.path.join(self.abs_path, 'mesh_study')
+    # @property
+    # def mesh_studyDir(self):
+    #     return os.path.join(self.abs_path, 'mesh_study')
 
     ### Job Lines ###
     @property

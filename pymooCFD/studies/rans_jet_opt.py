@@ -24,7 +24,7 @@ def exec_study():
     xl = [0.005, 0.1]  # lower limits of parameters/variables
     xu = [0.04, 0.4]  # upper limits of variables
     if not study.opt_runs:
-        alg = study.get_algorithm()
+        alg = study.get_algorithm(n_gen=20, pop_size=30, n_offsprings=8)
         prob = study.get_problem(xl, xu)
         opt_run = study.new_run(alg, prob)
     else:
