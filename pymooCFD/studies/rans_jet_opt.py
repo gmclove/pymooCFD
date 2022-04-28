@@ -1,13 +1,13 @@
-from pymooCFD.problems.rans_jet import RANSJet
+from pymooCFD.problems.rans_jet import RANSJet as BaseCase
 from pymooCFD.core.minimizeCFD import MinimizeCFD
 from pymooCFD.core.pymooBase import CFDTestProblem
 import os
 
 
 def exec_test(**kwargs):
-    study = MinimizeCFD(RANSJet, CFDGeneticProblem=CFDTestProblem)
+    study = MinimizeCFD(BaeCase, CFDGeneticProblem=CFDTestProblem)
     path = os.path.join(study.abs_path, 'RANS_equiv_BCs')
-    RANSJet(path, [0.02, 0.2]).run()
+    BaseCase(path, [0.02, 0.2]).run()
     alg = study.get_algorithm(n_gen=2, pop_size=3, n_offsprings=2)
     xl = [0.005, 0.1]  # lower limits of parameters/variables
     xu = [0.04, 0.4]  # upper limits of variables
@@ -20,7 +20,7 @@ def exec_test(**kwargs):
 
 
 def exec_study():
-    study = MinimizeCFD(RANSJet)
+    study = MinimizeCFD(BaseCase)
     xl = [0.005, 0.1]  # lower limits of parameters/variables
     xu = [0.04, 0.4]  # upper limits of variables
     if not study.opt_runs:
