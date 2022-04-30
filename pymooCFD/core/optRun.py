@@ -354,7 +354,7 @@ class OptRun(PicklePath):
 
     def plotGen(self, gen=None, max_leg_len=10):
         if gen is None:
-            gen = self.algorithm.callback.gen
+            gen = len(self.algorithm.history)  # self.algorithm.callback.gen
         pop = self.algorithm.history[gen - 1].pop
         if len(pop) <= max_leg_len:
             leg = True
