@@ -329,9 +329,13 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         if self.meshSF is None:
             self.logger.warning(
                 'self.genMesh() called but self.meshPath is None')
-        else:
-            self._genMesh()
-            self.logger.info('MESH GENERATED - Using self._genMesh()')
+        self.logger.info('GENERATING MESH . . .')
+        start = time.time()
+        self._genMesh()
+        end = time.time()
+        dt = end - start
+        self.logger.info('MESH GENERATED - Using self._genMesh()')
+        self.logger.info(f'\tMesh Generation Time: {dt} seconds')
 
     ##########################
     #    CLASS PROPERTIES    #
