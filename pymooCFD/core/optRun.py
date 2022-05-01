@@ -374,7 +374,11 @@ class OptRun(PicklePath):
 
     def plotGen(self, gen=None, **kwargs):
         if gen is None:
+<<<<<<< HEAD
             gen = self.algorithm.callback.gen
+=======
+            gen = len(self.algorithm.history)  # self.algorithm.callback.gen
+>>>>>>> 2739e60f0e8c73bc0591ec80dd8bf7be8fa337ed
         pop = self.algorithm.history[gen - 1].pop
         popX = pop.get('X')
         pt_labels = ['IND ' + i + 1 for i in range(len(popX))]
