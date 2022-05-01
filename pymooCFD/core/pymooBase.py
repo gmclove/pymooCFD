@@ -1,3 +1,4 @@
+from pymoo.core.problem import ElementwiseProblem, dask_parallelized_eval
 import numpy as np
 import os
 
@@ -107,7 +108,6 @@ class CFDGeneticProblem(Problem):
         self.gen1Pop = None
         self.validated = False
 
-
     def _evaluate(self, X, out, *args, **kwargs):
         # run_path = kwargs.get('run_path')
         # gen = kwargs.get('gen')
@@ -158,6 +158,71 @@ class CFDTestProblem(CFDGeneticProblem):
         out['F'] = F
         out['G'] = G
 
+'''
+def solve_postProc_eval(problem, x, out, args, kwargs):
+    problem._evaluate(x, out, *args, **kwargs)
+    out_to_ndarray(out)
+    check(problem, x, out)
+    return out
+
+def elementwise_eval(problem, x, out, args, kwargs):
+    problem._evaluate(x, out, *args, **kwargs)
+    out_to_ndarray(out)
+    check(problem, x, out)
+    return out
+'''
+def starmap_parallelized_solve_eval(func_elementwise_eval, problem, X, out, eval_paths, *args, **kwargs):
+    cases = [problem.CFDCase(eval_paths[x_i], x) for x_i, x in X]
+    for case in cases:
+        case.preProc()
+    starmap = problem.runner
+    # for case in cases:
+    #     case.postProc()
+    params = [(problem, x, dict(out), args, kwargs) for x in X]
+    return list(starmap(func_elementwise_eval, params))
+
+from dask.distributed import Client
+from multiprocessing.pool import ThreadPool
+import random
+class CFDProblem(ElementwiseProblem):
+    def __init__(self, CFDCase, runner=Client, func_eval=starmap_parallelized_solve_eval, **kwargs):
+        if CFDCase.externalSolver:
+            runner = ThreadPool(CFDCase.nTasks).starmap
+        else:
+            runner = runner()
+            func_eval = dask_parallelize_eval
+        super().__init__(func_eval=func_eval, runner=runner, **kwargs)
+        self.CFDCase = CFDCase
+
+    def _evaluate(self, x, out, path, *args, **kwargs):
+        case = self.CFDCase(path, x, **kwargs)
+        case.run()
+        out['F'] = case.f
+        out['G'] = case.g
+
+class PlaceAP_Problem(CFDProblem):
+    def __init__(**kwargs):
+        super().__init__(**kwargs)
+        spacing = 0.3
+        centers = [[1.25, 1, 0], [2.75, 1, 0],
+                   [1.25, 2, 0], [2.75, 2, 0],
+                   [1.25, 3, 0], [2.75, 3, 0]]
+        centers = np.array(centers)
+        subj_r = 0.123
+        # subj_x_coor = np.unique(centers[:,0])
+        # subj_y_coor = np.unique(centers[:, 1])
+        x_gaps = [[0+spacing, 1.25-spacing] , [1.25+spacing, 2.75 - spacing],
+                    [2.75+spacing, 4-spacing]]
+        y_gaps = [[0+spacing, 1-spacing], [1+spacing, 2-spacing],
+                    [2+spacing, 3-spacing], [3+spacing, 4-spacing]]
+        x_coors = [random.uniform(x_gap[0], x_gap[1]) for x_gap in x_gaps]
+        x_coor = random.choice(x_coors)
+        # gaps = [[c + spacing for c in centers]
+        # gaps = []
+        # for c in centers:
+        #     gaps.append(c - spacing)
+        #     gaps.append(c + spacing)
+
 ###################
 #    ALGORITHM    #
 ###################
@@ -205,7 +270,6 @@ def get_CFDGeneticAlgorithm(GeneticAlgorithm):
             # self.seed = 1
             # self.return_least_infeasible = True
             # self.verbose = True
-
 
     return CFDGeneticAlgorithm
 
