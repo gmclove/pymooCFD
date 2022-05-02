@@ -113,7 +113,8 @@ class Room2D_AP(YALES2Case):
     externalSolver = True
     procLim = 70
     nProc = 10
-    solverExecCmd = ['mpirun', '-n', str(nProc), '2D_room']
+    # solverExecCmd = ['mpirun', '-n', str(nProc), '2D_room']
+    solverExecCmd = ['sbatch', '--wait', 'jobslurm.sh']
     onlyParallelizeSolve = True
 
     def __init__(self, case_path, x, meshSF=1, **kwargs):
@@ -121,6 +122,7 @@ class Room2D_AP(YALES2Case):
                          inputFile='2D_room.in',
                          meshFile='room_6P_ap.msh22',
                          datFile='temporal.h5',
+                         jobFile='jobslurm.sh',
                          **kwargs)
 
     def _preProc(self):
@@ -171,6 +173,21 @@ class Room2D_AP(YALES2Case):
                          ]
             in_lines.extend(bnd_lines)
         self.input_lines_rw = in_lines
+
+
+        self.job_lines_rw = [
+            '#!/bin/bash',
+            "#SBATCH --partition=ib --constraint='ib&haswell_1'",
+            '#SBATCH --cpus-per-task=1',
+            '#SBATCH --ntasks=20',
+            '#SBATCH --time=00:30:00',
+            '#SBATCH --mem-per-cpu=2G',
+            '#SBATCH --job-name=ap_room',
+            '#SBATCH --output=slurm.out',
+            'y2',
+            'cd $SLURM_SUBMIT_DIR',
+            'mpirun 2D_room'
+            ]
 
         # for line_i, line in lines:
         #     in_lines[line_i] = ''
@@ -416,11 +433,12 @@ class Room2D_2AP(Room2D_AP):
     repair = RemoveBadPlacement_AP2()
 
     # externalSolver = True
-    # procLim = 70
-    # nProc = 10
-    # solverExecCmd = ['mpirun', '-n', str(nProc), '2D_room']
+    procLim = 70
+    nProc = 10
+    solverExecCmd = ['mpirun', '-n', str(nProc), '2D_room']
+    # solverExecCmd = ['sbatch', '--wait', 'jobslurm.sh']
     # onlyParallelizeSolve = True
-    nTasks = 7
+    # nTasks = 7
 
     def _preProc(self):
         ap_ach = self.x[6]
