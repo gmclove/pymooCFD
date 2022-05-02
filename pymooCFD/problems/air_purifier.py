@@ -398,7 +398,7 @@ class RemoveBadPlacement_AP2(RemoveBadPlacement):
 class Room2D_2AP(Room2D_AP):
     n_var = 7
     var_labels = ['AP1 x-Location [m]', 'AP1 y-Location [m]',
-                    'AP2 x-location [m]', 'AP2 y-location [m]',
+                  'AP2 x-location [m]', 'AP2 y-location [m]',
                   'AP1 Direction', 'AP2 Direction',
                   'AP ACH [m^2/hr]']
     var_type = ['real', 'real',

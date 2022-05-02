@@ -24,8 +24,10 @@ class MinimizeCFD(PicklePath):
         #    RESET ATTRIBUTES    #
         ##########################
         # OptRun(self.get_algorithm(), self.get_problem(), run_path='run00')]
-        self.opt_runs = []
-        self.case_runs = []
+        self.opt_runs = {}
+        self.case_runs = {}
+        # self.opt_runs = []
+        # self.case_runs = []
         self.CFDCase = CFDCase
         self.CFDGeneticAlgorithm = CFDGeneticAlgorithm
         self.CFDGeneticProblem = CFDGeneticProblem
@@ -69,26 +71,38 @@ class MinimizeCFD(PicklePath):
         if run_dir is None:
             run_dir = 'run' + str(len(self.opt_runs)).zfill(2)
         run_path = os.path.join(self.abs_path, run_dir)
-        if run_dir in os.listdir(self.abs_path):
-            question = '\n\tRun directory already exists. Overwrite?'
-            yes = yes_or_no(question)
-            if yes:
-                shutil.rmtree(run_path)
+        if run_dir in self.opt_runs.keys():
+            if run_dir in os.listdir(self.abs_path):
+                question = '\n\tRun directory already exists. Overwrite?'
+                yes = yes_or_no(question)
+                if yes:
+                    shutil.rmtree(run_path)
+            else:
+                question = '\n\tRun in study.opt_runs but run directory does not exists. Continue?'
+                yes = yes_or_no(question)
+                if not yes:
+                    exit()
         opt_run = OptRun(alg, prob, run_path=run_path)
-        self.opt_runs.append(opt_run)
+        self.opt_runs[run_dir] = opt_run
         self.save_self()
         return opt_run
 
         # self.algorithm = CFDAlgorithm(sampling, crossover, mutation)
     def run_case(self, case_dir, x, **kwargs):
         case_path = os.path.join(self.abs_path, case_dir)
-        if case_path in os.listdir(self.abs_path):
-            question = '\n\tCase directory already exists. Overwrite?'
-            yes = yes_or_no(question)
-            if yes:
-                shutil.rmtree(case_path)
+        if case_dir in self.case_runs.keys():
+            if case_dir in os.listdir(self.abs_path):
+                question = '\n\tRun directory already exists. Overwrite?'
+                yes = yes_or_no(question)
+                if yes:
+                    shutil.rmtree(case_path)
+            else:
+                question = '\n\tRun in study.opt_runs but run directory does not exists. Continue?'
+                yes = yes_or_no(question)
+                if not yes:
+                    exit()
         case = self.CFDCase(case_path, x, **kwargs)
         case.run()
-        self.case_runs.append(case)
+        self.case_runs[case_dir] = case
         self.save_self()
         return case

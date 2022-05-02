@@ -3,7 +3,7 @@ from pymooCFD.core.minimizeCFD import MinimizeCFD
 from pymooCFD.problems.air_purifier import Room2D_AP as BaseCase
 
 def main():
-    #exec_test()
+    # exec_test()
     # exec_study()
 
     study = MinimizeCFD(BaseCase)
