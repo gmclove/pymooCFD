@@ -213,6 +213,7 @@ class OptRun(PicklePath):
             self.algorithm.off = None
             self.save_self()
             self.plotGen()
+            self.plotOpt()
             if gen == 1:
                 self.gen1_pop = eval_pop
                 self.map_gen1()
@@ -392,7 +393,31 @@ class OptRun(PicklePath):
                                     pt_labels=pt_labels,
                                     **kwargs)
         self.logger.info(
-            f'PLOTTED: Generation {gen} Design and Objective Spaces')
+            f'PLOTTED: Generation {gen} - Design and Objective Spaces')
+        return var_plot, obj_plot
+
+    def plotOpt(self, gen=None, **kwargs):
+        if gen is None:
+            gen = len(self.algorithm.history)
+        pop = self.algorithm.history[gen - 1].opt
+        popX = pop.get('X')
+        pt_labels = ['OPT ' + i + 1 for i in range(len(popX))]
+        var_plot = self.plotScatter(popX, title=f'Optimum After {gen} Generations - Design Space',
+                                    labels=self.problem.BaseCase.var_labels,
+                                    dir_path=self.plotDir,
+                                    fname=f'opt_gen{gen}_var_space.png',
+                                    pt_labels=pt_labels,
+                                    s=30,
+                                    **kwargs)
+        obj_plot = self.plotScatter(popX, title=f'Generation {gen} Objective Space',
+                                    labels=self.problem.BaseCase.obj_labels,
+                                    dir_path=self.plotDir,
+                                    fname=f'gen{gen}_obj_space.png',
+                                    pt_labels=pt_labels,
+                                    s=30,
+                                    **kwargs)
+        self.logger.info(
+            f'PLOTTED: Optimum after {gen} Generations - Design and Objective Spaces')
         return var_plot, obj_plot
         # if gen is None:
         #     gen = self.algorithm.n_gen
