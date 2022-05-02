@@ -1,4 +1,4 @@
-from pymooCFD.studies.rans_jet_opt import exec_test, exec_study, BaseCase, MinimizeCFD
+from pymooCFD.studies.rans_jet_opt_x3 import exec_test, exec_study, BaseCase, MinimizeCFD
 
 
 def main():
