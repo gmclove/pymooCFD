@@ -94,6 +94,7 @@ class CFDGeneticProblem(Problem):
                 len(xu) == len(BaseCase.var_labels) and
                 len(BaseCase.var_labels) == BaseCase.n_var
                 ):
+            print(BaseCase.__dict__)
             raise Exception("Design Space Definition Incorrect")
         super().__init__(n_var=BaseCase.n_var,
                          n_obj=BaseCase.n_obj,
@@ -106,7 +107,6 @@ class CFDGeneticProblem(Problem):
         self.BaseCase = BaseCase
         self.gen1Pop = None
         self.validated = False
-
 
     def _evaluate(self, X, out, *args, **kwargs):
         # run_path = kwargs.get('run_path')
@@ -205,7 +205,6 @@ def get_CFDGeneticAlgorithm(GeneticAlgorithm):
             # self.seed = 1
             # self.return_least_infeasible = True
             # self.verbose = True
-
 
     return CFDGeneticAlgorithm
 
