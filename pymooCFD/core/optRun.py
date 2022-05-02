@@ -400,7 +400,7 @@ class OptRun(PicklePath):
 
     # def plotPop(self, pop, title):
 
-    def plotOpt(self, gen=None, max_opt_len=20, **kwargs):
+    def plotOpt(self, gen=None, max_opt_len=20, legend=True, **kwargs):
         if gen is None:
             gen = len(self.algorithm.history)
         pop = self.algorithm.history[gen - 1].opt
@@ -413,15 +413,13 @@ class OptRun(PicklePath):
                                     labels=self.problem.BaseCase.var_labels,
                                     dir_path=self.plotDir,
                                     fname=f'opt_gen{gen}_var_space.png',
-                                    pt_labels=pt_labels,
-                                    s=10,
+                                    pt_labels=pt_labels, legend=legend, s=10,
                                     **kwargs)
         obj_plot = self.plotScatter(popF, title=f'Optimum After {gen} Generations - Objective Space',
                                     labels=self.problem.BaseCase.obj_labels,
                                     dir_path=self.plotDir,
                                     fname=f'opt_gen{gen}_obj_space.png',
-                                    pt_labels=pt_labels,
-                                    s=30,
+                                    pt_labels=pt_labels, legend=legend, s=20,
                                     **kwargs)
         self.logger.info(
             f'PLOTTED: Optimum after {gen} Generations - Design and Objective Spaces')
@@ -585,7 +583,7 @@ class OptRun(PicklePath):
     #             'SKIPPED: GENERATE CORNER CASES - call self.genCornerCases() directly to create new corner cases')
     #     self.problem.BaseCase.parallelize(self.cornerCases)
 
-    def plotScatter(self, points, title=None, ax_labels='f',
+    def plotScatter(self, points, title=None, ax_labels='f', legend=None,
                     pt_labels=None, max_leg_len=10, max_ax_label_len=20,
                     dir_path=None, fname=None, dpi=100, **kwargs):
         leg, labs, tit = False, 'f', None
@@ -616,6 +614,8 @@ class OptRun(PicklePath):
         else:
             if all(len(label) <= max_ax_label_len for label in ax_labels):
                 labs = ax_labels
+        if legend is not None:
+            leg = legend
 
         plot = Scatter(title=tit,
                        legend=leg,
@@ -695,7 +695,8 @@ class OptRun(PicklePath):
         bndPts = self.getBndPts(n_pts=n_pts, getDiags=getDiags)
         dirs = []
         for pt in bndPts:
-            with np.printoptions(precision=3, suppress=True, formatter={'all': lambda x: '%.3g' % x}):
+            with np.printoptions(precision=3, suppress=True,
+                                 formatter={'all': lambda x: '%.3g' % x}):
                 caseName = str(pt).replace(
                     '[', '').replace(']', '').replace(' ', '_')
             dirs.append(os.path.join(self.abs_path,

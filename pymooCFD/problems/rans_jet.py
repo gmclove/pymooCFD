@@ -484,7 +484,8 @@ class RANSJet(FluentCase):
         plt.clf()
         # plot
         plt.imshow(ransGrid_flux.T, extent=(self.gridInterp2D.xmin, self.gridInterp2D.xmax,
-                                            self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
+                                            self.gridInterp2D.ymin, self.gridInterp2D.ymax),
+                   origin='lower')
         plt.colorbar()
         plt.title('RANS - Scalar Axial Momentum Flux')
         path = os.path.join(self.abs_path, 'RANS-flux-grid.png')
