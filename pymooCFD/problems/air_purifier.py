@@ -184,7 +184,7 @@ class Room2D_AP(YALES2Case):
             '#SBATCH --mem-per-cpu=2G',
             '#SBATCH --job-name=ap_room',
             '#SBATCH --output=slurm.out',
-            'y2',
+            'module use $HOME/yales2/modules && module load $(cd $HOME/yales2/modules; ls)',
             'cd $SLURM_SUBMIT_DIR',
             'mpirun 2D_room'
             ]
