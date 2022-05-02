@@ -420,7 +420,7 @@ class Room2D_2AP(Room2D_AP):
     # nProc = 10
     # solverExecCmd = ['mpirun', '-n', str(nProc), '2D_room']
     # onlyParallelizeSolve = True
-    nTasks = 1
+    nTasks = 7
 
     def _preProc(self):
         ap_ach = self.x[6]
