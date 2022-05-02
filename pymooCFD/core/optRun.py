@@ -4,6 +4,7 @@
 # @Last modified time: 2021-12-16T09:28:45-05:00
 # import time
 import os
+import random
 import glob
 import numpy as np
 import shutil
@@ -378,6 +379,7 @@ class OptRun(PicklePath):
             gen = len(self.algorithm.history)  # self.algorithm.callback.gen
         pop = self.algorithm.history[gen - 1].pop
         popX = pop.get('X')
+        popF = pop.get('F')
         pt_labels = ['IND ' + i + 1 for i in range(len(popX))]
         var_plot = self.plotScatter(popX, title=f'Generation {gen} Design Space',
                                     labels=self.problem.BaseCase.var_labels,
@@ -386,7 +388,7 @@ class OptRun(PicklePath):
                                     pt_labels=pt_labels,
                                     **kwargs)
 
-        obj_plot = self.plotScatter(popX, title=f'Generation {gen} Objective Space',
+        obj_plot = self.plotScatter(popF, title=f'Generation {gen} Objective Space',
                                     labels=self.problem.BaseCase.obj_labels,
                                     dir_path=self.plotDir,
                                     fname=f'gen{gen}_obj_space.png',
@@ -396,23 +398,28 @@ class OptRun(PicklePath):
             f'PLOTTED: Generation {gen} - Design and Objective Spaces')
         return var_plot, obj_plot
 
-    def plotOpt(self, gen=None, **kwargs):
+    # def plotPop(self, pop, title):
+
+    def plotOpt(self, gen=None, max_opt_len=20, **kwargs):
         if gen is None:
             gen = len(self.algorithm.history)
         pop = self.algorithm.history[gen - 1].opt
+        if max_opt_len is not None:
+            pop = random.sample(pop, max_opt_len)
         popX = pop.get('X')
+        popF = pop.get('F')
         pt_labels = ['OPT ' + i + 1 for i in range(len(popX))]
         var_plot = self.plotScatter(popX, title=f'Optimum After {gen} Generations - Design Space',
                                     labels=self.problem.BaseCase.var_labels,
                                     dir_path=self.plotDir,
                                     fname=f'opt_gen{gen}_var_space.png',
                                     pt_labels=pt_labels,
-                                    s=30,
+                                    s=10,
                                     **kwargs)
-        obj_plot = self.plotScatter(popX, title=f'Generation {gen} Objective Space',
+        obj_plot = self.plotScatter(popF, title=f'Optimum After {gen} Generations - Objective Space',
                                     labels=self.problem.BaseCase.obj_labels,
                                     dir_path=self.plotDir,
-                                    fname=f'gen{gen}_obj_space.png',
+                                    fname=f'opt_gen{gen}_obj_space.png',
                                     pt_labels=pt_labels,
                                     s=30,
                                     **kwargs)

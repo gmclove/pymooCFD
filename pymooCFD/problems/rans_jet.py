@@ -478,11 +478,13 @@ class RANSJet(FluentCase):
         plt.plot(les_fluxes[:, 0], les_fluxes[:, 1], label='les')
         plt.plot(rans_fluxes[:, 0], rans_fluxes[:, 1], label='rans')
         plt.legend()
-        plt.title('Free Jet: Pulsed LES vs. Steady RANS Equiv. BCs')
-        plt.show()
+        plt.title('Free Jet: Pulsed LES vs. Steady RANS w/ Optimized BCs')
+        path = os.path.join(self.abs_path, 'RANS-v-LES-flux.png')
+        plt.savefig(path)
+        plt.clf()
         # plot
         plt.imshow(ransGrid_flux.T, extent=(self.gridInterp2D.xmin, self.gridInterp2D.xmax,
-                   self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
+                                            self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
         plt.colorbar()
         plt.title('RANS - Scalar Axial Momentum Flux')
         path = os.path.join(self.abs_path, 'RANS-flux-grid.png')
@@ -492,7 +494,7 @@ class RANSJet(FluentCase):
         ##### SAVE DATA VISUALIZATION ######
         # phi grid plot
         plt.imshow(ransGrid_phi.T, extent=(self.gridInterp2D.xmin, self.gridInterp2D.xmax,
-                   self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
+                                           self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
         plt.colorbar()
         plt.title('RANS - Mass Fraction of Scalar')
         path = os.path.join(self.abs_path, 'RANS-phi-grid.png')
@@ -501,15 +503,15 @@ class RANSJet(FluentCase):
         # phi difference plot
         phiDiffGrid = ransGrid_phi - lesGrid_phi
         plt.imshow(phiDiffGrid.T, extent=(self.gridInterp2D.xmin, self.gridInterp2D.xmax,
-                   self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
+                                          self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
         plt.colorbar()
-        plt.title('RANS DNS Difference - Mass Fraction of Scalar')
+        plt.title('RANS LES Difference - Mass Fraction of Scalar')
         path = os.path.join(self.abs_path, 'diff-phi-grid.png')
         plt.savefig(path)
         plt.clf()
         # uMag grid plot
         plt.imshow(ransGrid_uMag.T, extent=(self.gridInterp2D.xmin, self.gridInterp2D.xmax,
-                   self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
+                                            self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
         plt.colorbar()
         plt.title('RANS - Velocity Magnitude')
         path = os.path.join(self.abs_path, 'RANS-uMag-grid.png')
@@ -518,9 +520,9 @@ class RANSJet(FluentCase):
         # uMag difference plot
         uMagDiffGrid = ransGrid_uMag - lesGrid_uMag
         plt.imshow(uMagDiffGrid.T, extent=(self.gridInterp2D.xmin, self.gridInterp2D.xmax,
-                   self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
+                                           self.gridInterp2D.ymin, self.gridInterp2D.ymax), origin='lower')
         plt.colorbar()
-        plt.title('RANS DNS Difference - Velocity Magnitude')
+        plt.title('RANS LES Difference - Velocity Magnitude')
         path = os.path.join(self.abs_path, 'diff-uMag-grid.png')
         plt.savefig(path)
         plt.clf()
