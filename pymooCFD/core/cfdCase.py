@@ -67,7 +67,6 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
     nTasks = None
     solverExecCmd = None
 
-
     def __init__(self, case_path, x,
                  validated=False,
                  mesh_study=None,
@@ -335,7 +334,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         end = time.time()
         dt = end - start
         self.logger.info('MESH GENERATED - Using self._genMesh()')
-        self.logger.info(f'\tMesh Generation Time: {dt} seconds')
+        self.logger.info(f'\tMesh Generation Time: {int(dt)} seconds')
 
     ##########################
     #    CLASS PROPERTIES    #

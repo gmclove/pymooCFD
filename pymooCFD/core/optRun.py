@@ -4,6 +4,7 @@
 # @Last modified time: 2021-12-16T09:28:45-05:00
 # import time
 import os
+import random
 import glob
 import numpy as np
 import shutil
@@ -170,6 +171,10 @@ class OptRun(PicklePath):
                 eval_pop = self.algorithm.off
             gen = self.algorithm.callback.gen
             self.logger.info(f'\tGEN: {gen}')
+            if delPrevGen and not gen == 1:
+                direct = os.path.join(
+                    self.abs_path, f'gen{gen}')
+                shutil.rmtree(direct)
             gen_path = os.path.join(self.abs_path, f'gen{gen}')
             X = eval_pop.get('X')
             ind_paths = [os.path.join(
@@ -209,13 +214,10 @@ class OptRun(PicklePath):
             self.algorithm.off = None
             self.save_self()
             self.plotGen()
+            self.plotOpt()
             if gen == 1:
                 self.gen1_pop = eval_pop
                 self.map_gen1()
-            if delPrevGen and not gen == 1:
-                direct = os.path.join(
-                    self.abs_path, f'gen{gen}')
-                shutil.rmtree(direct)
         # obtain the result objective from the algorithm
         res = self.algorithm.result()
         # calculate a hash to show that all executions end with the same result
@@ -377,6 +379,7 @@ class OptRun(PicklePath):
             gen = len(self.algorithm.history)  # self.algorithm.callback.gen
         pop = self.algorithm.history[gen - 1].pop
         popX = pop.get('X')
+        popF = pop.get('F')
         pt_labels = ['IND ' + i + 1 for i in range(len(popX))]
         var_plot = self.plotScatter(popX, title=f'Generation {gen} Design Space',
                                     labels=self.problem.BaseCase.var_labels,
@@ -385,14 +388,41 @@ class OptRun(PicklePath):
                                     pt_labels=pt_labels,
                                     **kwargs)
 
-        obj_plot = self.plotScatter(popX, title=f'Generation {gen} Objective Space',
+        obj_plot = self.plotScatter(popF, title=f'Generation {gen} Objective Space',
                                     labels=self.problem.BaseCase.obj_labels,
                                     dir_path=self.plotDir,
                                     fname=f'gen{gen}_obj_space.png',
                                     pt_labels=pt_labels,
                                     **kwargs)
         self.logger.info(
-            f'PLOTTED: Generation {gen} Design and Objective Spaces')
+            f'PLOTTED: Generation {gen} - Design and Objective Spaces')
+        return var_plot, obj_plot
+
+    # def plotPop(self, pop, title):
+
+    def plotOpt(self, gen=None, max_opt_len=20, legend=True, **kwargs):
+        if gen is None:
+            gen = len(self.algorithm.history)
+        pop = self.algorithm.history[gen - 1].opt
+        if max_opt_len is not None:
+            pop = random.sample(pop, max_opt_len)
+        popX = pop.get('X')
+        popF = pop.get('F')
+        pt_labels = ['OPT ' + i + 1 for i in range(len(popX))]
+        var_plot = self.plotScatter(popX, title=f'Optimum After {gen} Generations - Design Space',
+                                    labels=self.problem.BaseCase.var_labels,
+                                    dir_path=self.plotDir,
+                                    fname=f'opt_gen{gen}_var_space.png',
+                                    pt_labels=pt_labels, legend=legend, s=10,
+                                    **kwargs)
+        obj_plot = self.plotScatter(popF, title=f'Optimum After {gen} Generations - Objective Space',
+                                    labels=self.problem.BaseCase.obj_labels,
+                                    dir_path=self.plotDir,
+                                    fname=f'opt_gen{gen}_obj_space.png',
+                                    pt_labels=pt_labels, legend=legend, s=20,
+                                    **kwargs)
+        self.logger.info(
+            f'PLOTTED: Optimum after {gen} Generations - Design and Objective Spaces')
         return var_plot, obj_plot
         # if gen is None:
         #     gen = self.algorithm.n_gen
@@ -553,7 +583,7 @@ class OptRun(PicklePath):
     #             'SKIPPED: GENERATE CORNER CASES - call self.genCornerCases() directly to create new corner cases')
     #     self.problem.BaseCase.parallelize(self.cornerCases)
 
-    def plotScatter(self, points, title=None, ax_labels='f',
+    def plotScatter(self, points, title=None, ax_labels='f', legend=None,
                     pt_labels=None, max_leg_len=10, max_ax_label_len=20,
                     dir_path=None, fname=None, dpi=100, **kwargs):
         leg, labs, tit = False, 'f', None
@@ -584,6 +614,8 @@ class OptRun(PicklePath):
         else:
             if all(len(label) <= max_ax_label_len for label in ax_labels):
                 labs = ax_labels
+        if legend is not None:
+            leg = legend
 
         plot = Scatter(title=tit,
                        legend=leg,
@@ -663,7 +695,8 @@ class OptRun(PicklePath):
         bndPts = self.getBndPts(n_pts=n_pts, getDiags=getDiags)
         dirs = []
         for pt in bndPts:
-            with np.printoptions(precision=3, suppress=True, formatter={'all': lambda x: '%.3g' % x}):
+            with np.printoptions(precision=3, suppress=True,
+                                 formatter={'all': lambda x: '%.3g' % x}):
                 caseName = str(pt).replace(
                     '[', '').replace(']', '').replace(' ', '_')
             dirs.append(os.path.join(self.abs_path,
