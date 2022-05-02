@@ -198,13 +198,33 @@ def full_eval(problem, x, out, path, args, kwargs):
     check(problem, x, out)
     return out
 
-def starmap_parallelized_solve_eval(func_elementwise_eval, problem, X, out, eval_paths, *args, **kwargs):
-    cases = [problem.CFDCase(eval_paths[x_i], x) for x_i, x in X]
-    for case in cases:
+# FULL POP PARALLELIZED EVALUATIION
+def starmap_solve_postProc_eval(func_elementwise_eval, problem, X, out,
+                                eval_paths, *args, **kwargs):
+    problem.eval_cases = [problem.CFDCase(eval_paths[x_i], x) for x_i, x in X]
+    for case in problem.eval_cases:
         case.preProc()
     starmap = problem.runner
-    # for case in cases:
-    #     case.postProc()
+    params = [(problem, x, dict(out), args, kwargs) for x in X]
+    return list(starmap(func_elementwise_eval, params))
+
+def dask_solve_postProc_eval(func_elementwise_eval, problem, X, out,
+                                eval_paths, *args, **kwargs):
+    # problem.eval_cases = [problem.CFDCase(eval_paths[x_i], x) for x_i, x in X]
+    problem.eval_cases = problem.genCFDCases()
+    for case in problem.eval_cases:
+        case.preProc()
+    starmap = problem.runner
+    params = [(problem, x, dict(out), args, kwargs) for x in X]
+    return list(starmap(func_elementwise_eval, params))
+
+def dask_solve_postProc_eval(func_elementwise_eval, problem, X, out,
+                                eval_paths, *args, **kwargs):
+    # problem.eval_cases = [problem.CFDCase(eval_paths[x_i], x) for x_i, x in X]
+    problem.eval_cases = problem.genCFDCases()
+    for case in problem.eval_cases:
+        case.preProc()
+    starmap = problem.runner
     params = [(problem, x, dict(out), args, kwargs) for x in X]
     return list(starmap(func_elementwise_eval, params))
 
@@ -214,18 +234,24 @@ import random
 class CFDProblem(ElementwiseProblem):
     def __init__(self, CFDCase, runner=Client, func_eval=starmap_parallelized_solve_eval, **kwargs):
         if CFDCase.externalSolver:
+            # create thread pool of job monitors
             runner = ThreadPool(CFDCase.nTasks).starmap
         else:
+            # create distributed computing for parallelizing python code
             runner = Client()
             func_eval = dask_parallelize_eval
+            func_elementwise_eval =
         super().__init__(func_eval=func_eval, runner=runner, **kwargs)
         self.CFDCase = CFDCase
+        self.eval_cases = None
 
-    def _evaluate(self, x, out, path, *args, **kwargs):
-        case = self.CFDCase(path, x, **kwargs)
-        case.run()
-        out['F'] = case.f
-        out['G'] = case.g
+    def genCases(self, X, eval_paths):
+        return [self.CFDCase(eval_paths[x_i], x) for x_i, x in X]
+    # def _evaluate(self, x, out, path, *args, **kwargs):
+    #     case = self.CFDCase(path, x, **kwargs)
+    #     case.run()
+    #     out['F'] = case.f
+    #     out['G'] = case.g
 
 class PlaceAP_Problem(CFDProblem):
     def __init__(**kwargs):
