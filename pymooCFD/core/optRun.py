@@ -4,6 +4,8 @@
 # @Last modified time: 2021-12-16T09:28:45-05:00
 # import time
 import os
+import random
+import glob
 import numpy as np
 import shutil
 # import subprocess
@@ -11,7 +13,7 @@ import shutil
 # import multiprocessing as mp
 # import shutil
 # import h5py
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 # from pymooCFD.core.meshStudy import MeshStudy
 from pymoo.visualization.scatter import Scatter
 from pymooCFD.util.sysTools import copy_and_overwrite, saveTxt
@@ -169,6 +171,16 @@ class OptRun(PicklePath):
                 eval_pop = self.algorithm.off
             gen = self.algorithm.callback.gen
             self.logger.info(f'\tGEN: {gen}')
+            # DELETE PREV. GEN
+            prevGen = gen - 1
+            if delPrevGen and prevGen != 1:
+                direct = os.path.join(
+                    self.abs_path, f'gen{gen}')
+                try:
+                    shutil.rmtree(direct)
+                except FileNotFoundError as err:
+                    self.logger.error('Previous generation file not found')
+                    self.logger.error(err)
             gen_path = os.path.join(self.abs_path, f'gen{gen}')
             X = eval_pop.get('X')
             ind_paths = [os.path.join(
@@ -208,13 +220,11 @@ class OptRun(PicklePath):
             self.algorithm.off = None
             self.save_self()
             self.plotGen()
+            self.plotOpt()
+            self.plotConv()
             if gen == 1:
                 self.gen1_pop = eval_pop
                 self.map_gen1()
-            if delPrevGen and not gen == 1:
-                direct = os.path.join(
-                    self.abs_path, f'gen{gen}')
-                shutil.rmtree(direct)
         # obtain the result objective from the algorithm
         res = self.algorithm.result()
         # calculate a hash to show that all executions end with the same result
@@ -322,71 +332,199 @@ class OptRun(PicklePath):
     #     self.plotGen()
     #     return pop
 
-    def plotGens(self, gens, leg=True):
+    def plotGens(self, gens, **kwargs):
         pops = [self.algorithm.history[gen - 1].pop for gen in gens]
-        ##############################
-        #    Parameter Space Plot    #
-        ##############################
-        var_plot = Scatter(title='Design Space',
-                           legend=leg,
-                           labels=self.problem.BaseCase.var_labels,
-                           #                figsize=(10,8)
-                           )
-        for pop_i, pop in enumerate(pops):
-            var_plot.add(pop.get('X'), label=f'GEN {gens[pop_i]}')
-        # save parameter space plot
-        var_plot.save(os.path.join(self.plotDir, f'gens_{gens}_var_space.png'),
-                      dpi=100)
-        #############################
-        #   Objective Space Plot    #
-        #############################
-        obj_plot = Scatter(title='Objective Space',
-                           legend=leg,
-                           labels=self.problem.BaseCase.obj_labels
-                           )
-        for pop_i, pop in enumerate(pops):
-            obj_plot.add(pop.get('F'), label=f'GEN {gens[pop_i]}')
-        # save parameter space plot
-        obj_plot.save(os.path.join(self.plotDir, f'gens_{gens}_obj_space.png'),
-                      dpi=100)
+        popsX = [pop.get('X') for pop in pops]
+        popsF = [pop.get('F') for pop in pops]
+        gen_labels = [f'GEN {gen}' for gen in gens]
+        var_plot = self.plotScatter(popsX, title='Design Space',
+                                    ax_labels=self.problem.BaseCase.var_labels,
+                                    dir_path=self.plotDir,
+                                    fname=f'gens_{gens}_var_space.png',
+                                    pt_labels=gen_labels,
+                                    **kwargs)
 
+        obj_plot = self.plotScatter(popsF, title='Objective Space',
+                                    ax_labels=self.problem.BaseCase.obj_labels,
+                                    dir_path=self.plotDir,
+                                    fname=f'gen_{gens}_obj_space.png',
+                                    pt_labels=gen_labels,
+                                    **kwargs)
         return var_plot, obj_plot
 
-    def plotGen(self, gen=None, max_leg_len=10):
+        # pops = [self.algorithm.history[gen - 1].pop for gen in gens]
+        # ##############################
+        # #    Parameter Space Plot    #
+        # ##############################
+        # var_plot = Scatter(title='Design Space',
+        #                    legend=leg,
+        #                    labels=self.problem.BaseCase.var_labels,
+        #                    #                figsize=(10,8)
+        #                    )
+        # for pop_i, pop in enumerate(pops):
+        #     var_plot.add(pop.get('X'), label=f'GEN {gens[pop_i]}')
+        # # save parameter space plot
+        # var_plot.save(os.path.join(self.plotDir, f'gens_{gens}_var_space.png'),
+        #               dpi=100)
+        # #############################
+        # #   Objective Space Plot    #
+        # #############################
+        # obj_plot = Scatter(title='Objective Space',
+        #                    legend=leg,
+        #                    labels=self.problem.BaseCase.obj_labels
+        #                    )
+        # for pop_i, pop in enumerate(pops):
+        #     obj_plot.add(pop.get('F'), label=f'GEN {gens[pop_i]}')
+        # # save parameter space plot
+        # obj_plot.save(os.path.join(self.plotDir, f'gens_{gens}_obj_space.png'),
+        #               dpi=100)
+        #
+        # return var_plot, obj_plot
+
+    def plotGen(self, gen=None, **kwargs):
         if gen is None:
-            gen = self.algorithm.n_gen
+            gen = len(self.algorithm.history)  # self.algorithm.callback.gen
         pop = self.algorithm.history[gen - 1].pop
-        if len(pop) <= max_leg_len:
-            leg = True
-        else:
-            leg = False
-        #### Parameter Space Plot ####
         popX = pop.get('X')
-        var_plot = Scatter(title=f'Generation {gen} Design Space',
-                           legend=leg,
-                           labels=self.problem.BaseCase.var_labels,
-                           #                figsize=(10,8)
-                           )
-        for ind_i, ind in enumerate(popX):
-            var_plot.add(ind, label=f'IND {ind_i+1}')
-        # save parameter space plot
-        var_plot.save(os.path.join(self.plotDir, f'gen{gen}_var_space.png'),
-                      dpi=100)
-
-        #### Objective Space Plot ####
         popF = pop.get('F')
-        obj_plot = Scatter(title=f'Generation {gen} Objective Space',
-                           legend=leg,
-                           labels=self.problem.BaseCase.obj_labels
-                           )
-        for ind_i, ind in enumerate(popF):
-            obj_plot.add(ind, label=f'IND {ind_i+1}')
-        # save parameter space plot
-        obj_plot.save(os.path.join(
-            self.plotDir, f'gen{gen}_obj_space.png'), dpi=100)
+        pt_labels = ['IND ' + str(i + 1) for i in range(len(popX))]
+        var_plot = self.plotScatter(popX, title=f'Generation {gen} Design Space',
+                                    labels=self.problem.BaseCase.var_labels,
+                                    dir_path=self.plotDir,
+                                    fname=f'gen{gen}_var_space.png',
+                                    pt_labels=pt_labels,
+                                    **kwargs)
+
+        obj_plot = self.plotScatter(popF, title=f'Generation {gen} Objective Space',
+                                    labels=self.problem.BaseCase.obj_labels,
+                                    dir_path=self.plotDir,
+                                    fname=f'gen{gen}_obj_space.png',
+                                    pt_labels=pt_labels,
+                                    **kwargs)
         self.logger.info(
-            f'PLOTTED: Generation {gen} Design and Objective Spaces')
+            f'PLOTTED: Generation {gen} - Design and Objective Spaces')
         return var_plot, obj_plot
+
+    # def plotPop(self, pop, title):
+    def plotConv(self, gen=None, **kwargs):
+        if gen is None:
+            gen = len(self.algorithm.history)
+        hist = self.algorithm.history
+        n_evals = [alg.evaluator.n_eval for alg in hist]
+        # n_gen = [alg.n_gen for alg in hist]
+        # CALCULATE MEAN OPTIMUM FOR EACH GENERATION
+        opt_avg = []
+        for h in hist:
+            F_opt = np.array([o.F for o in h.opt])
+            F_avg = np.mean(F_opt, axis=0)
+            opt_avg.append(F_avg)
+        opt_avg = np.array(opt_avg)
+        # MEAN OPTIMUM
+        for obj_i in range(self.problem.BaseCase.n_obj):
+            opt_obj = opt_avg[:, obj_i]
+            avg_opt_conv_plot = fig, ax = plt.subplots()
+            ax.plot(n_evals, opt_obj, "--", **kwargs)
+            fig.suptitle('Convergence of Mean Optimum')
+            ax.set_title(f'Objective {obj_i+1}: {self.problem.BaseCase.obj_labels[obj_i]}')
+            ax.set_xlabel('Number of Evaluations')
+            ax.set_ylabel('Mean of Optimum')
+            fig.savefig(os.path.join(self.plotDir, f'mean_opt_convergence-obj{obj_i}'))
+        # BEST OPTIMUM
+        opt = np.array([alg.opt[0].F for alg in hist])
+        # n_gen = [alg.n_gen for alg in hist]
+        for obj_i in range(len(opt[0])):
+            opt_obj = opt[:, obj_i]
+            opt_conv_plot = fig, ax = plt.subplots()
+            ax.plot(n_evals, opt_obj, "--", **kwargs)
+            fig.suptitle('Convergence of Optimum')
+            ax.set_title(f'Objective {obj_i+1}: {self.problem.BaseCase.obj_labels[obj_i]}')
+            ax.set_xlabel('Number of Evaluations')
+            # plt.plot(n_gen, opt_obj, "--")
+            # plt.xlabel('Number of Generations')
+            ax.set_ylabel('Optimum')
+            fig.savefig(os.path.join(self.plotDir, f'opt_convergence-obj{obj_i}'))
+
+        return opt_conv_plot, avg_opt_conv_plot
+
+    def plotOpt(self, gen=None, max_opt_len=20, legend=True, **kwargs):
+        if gen is None:
+            gen = len(self.algorithm.history)
+        pop = self.algorithm.history[gen - 1].opt
+        if max_opt_len is not None:
+            pop = random.sample(pop, max_opt_len)
+        popX = pop.get('X')
+        popF = pop.get('F')
+        pt_labels = ['OPT ' + str(i + 1) for i in range(len(popX))]
+        var_plot = self.plotScatter(popX, title=f'Optimum After {gen} Generations - Design Space',
+                                    labels=self.problem.BaseCase.var_labels,
+                                    dir_path=self.plotDir,
+                                    fname=f'opt_gen{gen}_var_space.png',
+                                    pt_labels=pt_labels, legend=legend, s=10,
+                                    **kwargs)
+        obj_plot = self.plotScatter(popF, title=f'Optimum After {gen} Generations - Objective Space',
+                                    labels=self.problem.BaseCase.obj_labels,
+                                    dir_path=self.plotDir,
+                                    fname=f'opt_gen{gen}_obj_space.png',
+                                    pt_labels=pt_labels, legend=legend, s=20,
+                                    **kwargs)
+        for i, txt in enumerate(pt_labels):
+            var_plot.ax.annotate(txt, popX[i])
+            obj_plot.ax.annotate(txt, popF[i])
+        self.logger.info(
+            f'PLOTTED: Optimum after {gen} Generations - Design and Objective Spaces')
+        return var_plot, obj_plot
+        # if gen is None:
+        #     gen = self.algorithm.n_gen
+        # pop = self.algorithm.history[gen - 1].pop
+        # # legend display
+        # var_leg, obj_leg = False, False
+        # var_title, obj_title = None, None
+        # var_labels, obj_labels = 'x', 'f'
+        # if self.problem.BaseCase.n_var <= 3:
+        #     if len(pop) <= max_leg_len:
+        #         var_leg = True
+        #     var_title = f'Generation {gen} Design Space'
+        #     if all(len(label) <= 20
+        #            for label in self.problem.BaseCase.var_labels):
+        #         var_labels = self.problem.BaseCase.var_labels
+        #
+        # if self.problem.BaseCase.n_obj <= 3:
+        #     if len(pop) <= max_leg_len:
+        #         obj_leg = True
+        #     obj_title = f'Generation {gen} Objective Space'
+        #     if all(len(label) <= 20
+        #            for label in self.problem.BaseCase.obj_labels):
+        #         var_labels = self.problem.BaseCase.obj_labels
+        #
+        # #### Parameter Space Plot ####
+        # popX = pop.get('X')
+        # var_plot = Scatter(title=var_title,
+        #                    legend=var_leg,
+        #                    labels=var_labels,
+        #                    tight_layout=True
+        #                    #                figsize=(10,8)
+        #                    )
+        # for ind_i, ind in enumerate(popX):
+        #     var_plot.add(ind, label=f'IND {ind_i+1}')
+        # # save parameter space plot
+        # var_plot.save(os.path.join(self.plotDir, f'gen{gen}_var_space.png'),
+        #               dpi=100)
+        #
+        # #### Objective Space Plot ####
+        # popF = pop.get('F')
+        # obj_plot = Scatter(title=obj_title,
+        #                    legend=obj_leg,
+        #                    labels=obj_labels,
+        #                    tight_layout=True
+        #                    )
+        # for ind_i, ind in enumerate(popF):
+        #     obj_plot.add(ind, label=f'IND {ind_i+1}')
+        # # save parameter space plot
+        # obj_plot.save(os.path.join(
+        #     self.plotDir, f'gen{gen}_obj_space.png'), dpi=100)
+        # self.logger.info(
+        #     f'PLOTTED: Generation {gen} Design and Objective Spaces')
+        # return var_plot, obj_plot
 
     def map_gen1(self):
         ##### Variable vs. Objective Plots ######
@@ -422,9 +560,9 @@ class OptRun(PicklePath):
                     plot.ax.plot(xy[:, 0], xy[:, 1], label=label, c=c[d - 1])
                 plot.do()
                 var_str = var_labels[x_i].replace(" ", "_").replace(
-                    "/", "|").replace('%', 'precentage').replace("\\", "|")
+                    "/", "|").replace('%', 'percentage').replace("\\", "|")
                 obj_str = obj_labels[f_i].replace(" ", "_").replace(
-                    "/", "|").replace('%', 'precentage').replace("\\", "|")
+                    "/", "|").replace('%', 'percentage').replace("\\", "|")
                 fName = f'{var_str}-vs-{obj_str}.png'
                 path = os.path.join(self.mapDir, fName)
                 map_paths.append(path)
@@ -494,44 +632,120 @@ class OptRun(PicklePath):
     #             'SKIPPED: GENERATE CORNER CASES - call self.genCornerCases() directly to create new corner cases')
     #     self.problem.BaseCase.parallelize(self.cornerCases)
 
-    def run_bnd_cases(self, n_pts=2, getDiags=False, do_mesh_study=False):
-        self.problem.BaseCase.parallelize(self.bnd_cases)
-        self.save_self()
-        self.plotBndPtsObj()
-        if do_mesh_study:
-            for case in self.bnd_cases:
-                case.mesh_study.run()
-            self.save_self()
+    def plotScatter(self, points, title=None, ax_labels='f', legend=None,
+                    pt_labels=None, max_leg_len=10, max_ax_label_len=20,
+                    dir_path=None, fname=None, dpi=100, **kwargs):
+        leg, labs, tit = False, 'f', None
+        points = np.array(points)
+        # print(points.shape)
+        if pt_labels is None:
+            pt_labels = [str(i) for i in range(len(points))]
+        assert len(pt_labels) == len(points)
+        if dir_path is None:
+            dir_path = self.plotDir
+        if fname is None:
+            search_str = os.path.join(dir_path, 'space_plot-*.png')
+            ents = [ent for ent in glob.glob(
+                search_str) if os.path.isfile(ent)].sort()
+            if ents:
+                s = ents[-1]
+                n_new = str(int(
+                    s.replace('space_plot-', '').replace('.png', ''))
+                    + 1).zfill(2)
+            else:
+                n_new = '00'
+            fname = 'space_plot-' + n_new + '.png'
+        if points.shape[-1] <= 3:
+            tit = title
+            if points.shape[0] <= max_leg_len:
+                leg = True
+            labs = ax_labels
+        else:
+            if all(len(label) <= max_ax_label_len for label in ax_labels):
+                labs = ax_labels
+        if legend is not None:
+            leg = legend
 
-    def plotBndPtsObj(self):
-        plot = Scatter(title='Objective Space: Boundary Cases',
-                       legend=True, labels=self.problem.BaseCase.obj_labels)
-        F = np.array([case.f for case in self.bnd_cases])
-        for obj in F:
-            plot.add(obj, label=self.getPointLabel(obj))
-        path = os.path.join(self.abs_path, 'boundary-cases',
-                            'bndPts_plot-objSpace.png')
-        plot.save(path, dpi=100)
-
-    def plotBndPts(self):
-        plot = Scatter(title='Design Space: Boundary Cases',
-                       legend=True,
-                       labels=self.problem.BaseCase.var_labels
-                       # grid=True
+        plot = Scatter(title=tit,
+                       legend=leg,
+                       labels=labs,
+                       tight_layout=True,
+                       **kwargs
                        )
+        for pt_i, pt in enumerate(points):
+            plot.add(pt, label=pt_labels[pt_i])
+        plot.save(os.path.join(dir_path, fname), dpi=dpi)
+        return plot
+
+    def plotBndPts(self, **kwargs):
         bndPts = np.array([case.x for case in self.bnd_cases])
-        for var in bndPts:
-            plot.add(var, label=self.getPointLabel(var))
-        path = os.path.join(self.abs_path, 'boundary-cases',
-                            'bndPts_plot-varSpace.png')
-        plot.save(path, dpi=100)
+        pt_labels = [self.getPointLabel(pt) for pt in bndPts]
+        plot = self.plotScatter(bndPts, title='Design Space: Boundary Cases',
+                                ax_labels=self.problem.BaseCase.var_labels,
+                                dir_path=self.bndCasesDir,
+                                fname='bndPts_plot-varSpace.png',
+                                pt_labels=pt_labels,
+                                **kwargs)
+
+        # var_leg, var_title, var_labels = False, None, 'f'
+        #
+        # if self.problem.BaseCase.n_var <= 3:
+        #     if len(self.bnd_cases) <= max_leg_len:
+        #         var_leg = True
+        #     var_title = 'Design Space: Boundary Cases'
+        #     if all(len(label) <= 20
+        #            for label in self.problem.BaseCase.var_labels):
+        #         var_labels = self.problem.BaseCase.var_labels
+        # plot = Scatter(title='Design Space: Boundary Cases',
+        #                legend=True,
+        #                labels=self.problem.BaseCase.var_labels
+        #                # grid=True
+        #                )
+        # bndPts = np.array([case.x for case in self.bnd_cases])
+        # for var in bndPts:
+        #     plot.add(var, label=self.getPointLabel(var))
+        # path = os.path.join(self.abs_path, 'boundary-cases',
+        #                     'bndPts_plot-varSpace.png')
+        # plot.save(path, dpi=100)
+        return plot
+
+    def plotBndPtsObj(self, **kwargs):
+        bndObjs = np.array([case.f for case in self.bnd_cases])
+        pt_labels = [self.getPointLabel(pt) for pt in bndObjs]
+        plot = self.plotScatter(bndObjs, title='Objective Space: Boundary Cases',
+                                ax_labels=self.problem.BaseCase.obj_labels,
+                                dir_path=self.bndCasesDir,
+                                fname='bndPts_plot-objSpace.png',
+                                pt_labels=pt_labels,
+                                **kwargs)
+        # legend display
+        # obj_leg, obj_title, obj_labels = False, None, 'f'
+        #
+        # if self.problem.BaseCase.n_obj <= 3:
+        #     if len(self.bnd_cases) <= max_leg_len:
+        #         obj_leg = True
+        #     obj_title = 'Objective Space: Boundary Cases'
+        #     if all(len(label) <= 20
+        #            for label in self.problem.BaseCase.obj_labels):
+        #         obj_labels = self.problem.BaseCase.obj_labels
+        #
+        # plot = Scatter(title=obj_title,
+        #                legend=obj_leg, labels=obj_labels, tight_layout=True)
+        # F = np.array([case.f for case in self.bnd_cases])
+        # for obj in F:
+        #     plot.add(obj, label=self.getPointLabel(obj))
+        # path = os.path.join(self.abs_path, 'boundary-cases',
+        #                     'bndPts_plot-objSpace.png')
+        # plot.save(path, dpi=100)
+        return plot
 
     def gen_bnd_cases(self, n_pts=2, getDiags=False):
         self.logger.info('GENERATING BOUNDARY CASES')
         bndPts = self.getBndPts(n_pts=n_pts, getDiags=getDiags)
         dirs = []
         for pt in bndPts:
-            with np.printoptions(precision=3, suppress=True, formatter={'all': lambda x: '%.3g' % x}):
+            with np.printoptions(precision=3, suppress=True,
+                                 formatter={'all': lambda x: '%.3g' % x}):
                 caseName = str(pt).replace(
                     '[', '').replace(']', '').replace(' ', '_')
             dirs.append(os.path.join(self.abs_path,
@@ -564,6 +778,15 @@ class OptRun(PicklePath):
         pts = np.array(pts)
         pts = np.unique(pts, axis=0)
         return pts
+
+    def run_bnd_cases(self, n_pts=2, getDiags=False, do_mesh_study=False):
+        self.problem.BaseCase.parallelize(self.bnd_cases)
+        self.save_self()
+        self.plotBndPtsObj()
+        if do_mesh_study:
+            for case in self.bnd_cases:
+                case.mesh_study.run()
+            self.save_self()
 
     ########################
     #    HELPER METHODS    #
@@ -629,6 +852,17 @@ class OptRun(PicklePath):
     #####################
     #     PROPERTIES    #
     #####################
+    # @property
+    # def plots_path(self):
+    #     path = os.path.join(self.abs_path, 'plots')
+    #     os.makedirs(path, exist_ok=True)
+    #     return path
+    @property
+    def bndCasesDir(self):
+        plotDir = os.path.join(self.abs_path, 'boundary-cases')
+        os.makedirs(plotDir, exist_ok=True)
+        return plotDir
+
     @property
     def plotDir(self):
         plotDir = os.path.join(self.abs_path, 'plots')

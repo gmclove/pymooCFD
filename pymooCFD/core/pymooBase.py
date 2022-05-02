@@ -96,6 +96,7 @@ class CFDGeneticProblem(Problem):
                 len(xu) == len(BaseCase.var_labels) and
                 len(BaseCase.var_labels) == BaseCase.n_var
                 ):
+            print(BaseCase.__dict__)
             raise Exception("Design Space Definition Incorrect")
         super().__init__(n_var=BaseCase.n_var,
                          n_obj=BaseCase.n_obj,
