@@ -76,7 +76,7 @@ class PicklePath:
             try:
                 attr_val[:]
                 attr_is_subscriptable = True
-            except TypeError:
+            except (TypeError, IndexError):
                 attr_is_subscriptable = False
             if attr_is_subscriptable:
                 for i, item in enumerate(attr_val):
