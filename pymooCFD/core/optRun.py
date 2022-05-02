@@ -170,6 +170,10 @@ class OptRun(PicklePath):
                 eval_pop = self.algorithm.off
             gen = self.algorithm.callback.gen
             self.logger.info(f'\tGEN: {gen}')
+            if delPrevGen and not gen == 1:
+                direct = os.path.join(
+                    self.abs_path, f'gen{gen}')
+                shutil.rmtree(direct)
             gen_path = os.path.join(self.abs_path, f'gen{gen}')
             X = eval_pop.get('X')
             ind_paths = [os.path.join(
@@ -212,10 +216,6 @@ class OptRun(PicklePath):
             if gen == 1:
                 self.gen1_pop = eval_pop
                 self.map_gen1()
-            if delPrevGen and not gen == 1:
-                direct = os.path.join(
-                    self.abs_path, f'gen{gen}')
-                shutil.rmtree(direct)
         # obtain the result objective from the algorithm
         res = self.algorithm.result()
         # calculate a hash to show that all executions end with the same result
