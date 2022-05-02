@@ -13,7 +13,7 @@ import shutil
 # import multiprocessing as mp
 # import shutil
 # import h5py
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 # from pymooCFD.core.meshStudy import MeshStudy
 from pymoo.visualization.scatter import Scatter
 from pymooCFD.util.sysTools import copy_and_overwrite, saveTxt
@@ -221,6 +221,7 @@ class OptRun(PicklePath):
             self.save_self()
             self.plotGen()
             self.plotOpt()
+            self.plotConv()
             if gen == 1:
                 self.gen1_pop = eval_pop
                 self.map_gen1()
@@ -386,7 +387,7 @@ class OptRun(PicklePath):
         pop = self.algorithm.history[gen - 1].pop
         popX = pop.get('X')
         popF = pop.get('F')
-        pt_labels = ['IND ' + i + 1 for i in range(len(popX))]
+        pt_labels = ['IND ' + str(i + 1) for i in range(len(popX))]
         var_plot = self.plotScatter(popX, title=f'Generation {gen} Design Space',
                                     labels=self.problem.BaseCase.var_labels,
                                     dir_path=self.plotDir,
@@ -405,6 +406,45 @@ class OptRun(PicklePath):
         return var_plot, obj_plot
 
     # def plotPop(self, pop, title):
+    def plotConv(self, gen=None, **kwargs):
+        if gen is None:
+            gen = len(self.algorithm.history)
+        hist = self.algorithm.history
+        n_evals = [alg.evaluator.n_eval for alg in hist]
+        # n_gen = [alg.n_gen for alg in hist]
+        # CALCULATE MEAN OPTIMUM FOR EACH GENERATION
+        opt_avg = []
+        for h in hist:
+            F_opt = np.array([o.F for o in h.opt])
+            F_avg = np.mean(F_opt, axis=0)
+            opt_avg.append(F_avg)
+        opt_avg = np.array(opt_avg)
+        # MEAN OPTIMUM
+        for obj_i in range(self.problem.BaseCase.n_obj):
+            opt_obj = opt_avg[:, obj_i]
+            avg_opt_conv_plot = fig, ax = plt.subplots()
+            ax.plot(n_evals, opt_obj, "--", **kwargs)
+            fig.suptitle('Convergence of Mean Optimum')
+            ax.set_title(f'Objective {obj_i+1}: {self.problem.BaseCase.obj_labels[obj_i]}')
+            ax.set_xlabel('Number of Evaluations')
+            ax.set_ylabel('Mean of Optimum')
+            fig.savefig(os.path.join(self.plotDir, f'mean_opt_convergence-obj{obj_i}'))
+        # BEST OPTIMUM
+        opt = np.array([alg.opt[0].F for alg in hist])
+        # n_gen = [alg.n_gen for alg in hist]
+        for obj_i in range(len(opt[0])):
+            opt_obj = opt[:, obj_i]
+            opt_conv_plot = fig, ax = plt.subplots()
+            ax.plot(n_evals, opt_obj, "--", **kwargs)
+            fig.suptitle('Convergence of Optimum')
+            ax.set_title(f'Objective {obj_i+1}: {self.problem.BaseCase.obj_labels[obj_i]}')
+            ax.set_xlabel('Number of Evaluations')
+            # plt.plot(n_gen, opt_obj, "--")
+            # plt.xlabel('Number of Generations')
+            ax.set_ylabel('Optimum')
+            fig.savefig(os.path.join(self.plotDir, f'opt_convergence-obj{obj_i}'))
+
+        return opt_conv_plot, avg_opt_conv_plot
 
     def plotOpt(self, gen=None, max_opt_len=20, legend=True, **kwargs):
         if gen is None:
@@ -414,7 +454,7 @@ class OptRun(PicklePath):
             pop = random.sample(pop, max_opt_len)
         popX = pop.get('X')
         popF = pop.get('F')
-        pt_labels = ['OPT ' + i + 1 for i in range(len(popX))]
+        pt_labels = ['OPT ' + str(i + 1) for i in range(len(popX))]
         var_plot = self.plotScatter(popX, title=f'Optimum After {gen} Generations - Design Space',
                                     labels=self.problem.BaseCase.var_labels,
                                     dir_path=self.plotDir,
@@ -427,6 +467,9 @@ class OptRun(PicklePath):
                                     fname=f'opt_gen{gen}_obj_space.png',
                                     pt_labels=pt_labels, legend=legend, s=20,
                                     **kwargs)
+        for i, txt in enumerate(pt_labels):
+            var_plot.ax.annotate(txt, popX[i])
+            obj_plot.ax.annotate(txt, popF[i])
         self.logger.info(
             f'PLOTTED: Optimum after {gen} Generations - Design and Objective Spaces')
         return var_plot, obj_plot

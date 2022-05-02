@@ -21,8 +21,8 @@ def exec_test(**kwargs):
 
 def exec_study():
     study = MinimizeCFD(BaseCase)
-    xl = [0.005, 0.1, 0.5]  # lower limits of parameters/variables
-    xu = [0.04, 0.4, 1.5]  # upper limits of variables
+    xl = [0.002, 0.1, 0.5]  # lower limits of parameters/variables
+    xu = [0.04, 0.6, 1.5]  # upper limits of variables
     if not study.opt_runs:
         alg = study.get_algorithm(n_gen=35, pop_size=30, n_offsprings=8)
         prob = study.get_problem(xl, xu)

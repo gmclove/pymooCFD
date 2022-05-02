@@ -1,3 +1,3 @@
 #!/bin/bash
 source activate pymooCFD
-python $1 > opt.$$.out
+python -u $1 > opt.$$.out
