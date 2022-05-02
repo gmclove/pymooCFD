@@ -3,9 +3,10 @@ from pymooCFD.core.minimizeCFD import MinimizeCFD
 
 
 def main():
-    exec_test()
+    # exec_test()
     # exec_study()
-    # study = MinimizeCFD(BaseCase)
+    study = MinimizeCFD(BaseCase)
+    study.opt_runs[0].run()
 
 
 if __name__ == '__main__':

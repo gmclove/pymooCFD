@@ -11,6 +11,41 @@ import matplotlib.pyplot as plt
 from pymoo.core.repair import Repair
 
 
+import numpy as np
+# from pymooCFD.core.pymooBase import CFDGeneticProblem
+#
+# class Place_AP_Problem(CFDGeneticProblem):
+#     def __init__(self, CFDCase, n_APs=2, **kwargs):
+#         super().__init__(CFDCase, **kwargs)
+#         self.n_APs = n_APs
+#         self.
+#         self.gaps =
+#         self.ALPHABET = [c for c in string.ascii_lowercase]
+#
+#     def _evaluate(self, x, out, *args, **kwargs):
+#         n_a, n_b = 0, 0
+#         for c in x[0]:
+#             if c == 'a':
+#                 n_a += 1
+#             elif c == 'b':
+#                 n_b += 1
+#
+#         out["F"] = np.array([- n_a, - n_b], dtype=float)
+#
+# from pymoo.core.sampling import Sampling
+#
+# class MySampling(Sampling):
+#
+#     def _do(self, problem, n_samples, **kwargs):
+#         X = np.full((n_samples, 1), None, dtype=object)
+#
+#         for i in range(n_samples):
+#             X[i, 0] = "".join([np.random.choice(problem.ALPHABET) for _ in range(problem.n_characters)])
+#
+#         return X
+#
+
+
 class RemoveBadPlacement(Repair):
     @staticmethod
     def moveAP(x_coor, y_coor):

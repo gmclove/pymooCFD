@@ -171,10 +171,16 @@ class OptRun(PicklePath):
                 eval_pop = self.algorithm.off
             gen = self.algorithm.callback.gen
             self.logger.info(f'\tGEN: {gen}')
-            if delPrevGen and not gen == 1:
+            # DELETE PREV. GEN
+            prevGen = gen - 1
+            if delPrevGen and prevGen != 1:
                 direct = os.path.join(
                     self.abs_path, f'gen{gen}')
-                shutil.rmtree(direct)
+                try:
+                    shutil.rmtree(direct)
+                except FileNotFoundError as err:
+                    self.logger.error('Previous generation file not found')
+                    self.logger.error(err)
             gen_path = os.path.join(self.abs_path, f'gen{gen}')
             X = eval_pop.get('X')
             ind_paths = [os.path.join(
