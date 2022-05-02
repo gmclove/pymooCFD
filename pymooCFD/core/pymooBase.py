@@ -1,4 +1,5 @@
-from pymoo.core.problem import ElementwiseProblem, dask_parallelized_eval
+from pymoo.core.problem import ElementwiseProblem, dask_parallelize_eval, \
+                    check, out_to_ndarray, elementwise_eval
 import numpy as np
 import os
 
@@ -171,6 +172,31 @@ def elementwise_eval(problem, x, out, args, kwargs):
     check(problem, x, out)
     return out
 '''
+def solve_postProc_eval(problem, x, out, path, args, kwargs):
+    case = problem.CFDCase(path, x, **kwargs)
+    case.solve()
+    case.postProc()
+    out['F'] = case.f
+    out['G'] = case.g
+    out_to_ndarray(out)
+    check(problem, x, out)
+    return out
+
+def solve_eval(problem, x, out, path, args, kwargs):
+    case = problem.CFDCase(path, x, **kwargs)
+    case.solve()
+    case.postProc()
+    return out
+
+def full_eval(problem, x, out, path, args, kwargs):
+    case = problem.CFDCase(path, x, **kwargs)
+    case.run()
+    out['F'] = case.f
+    out['G'] = case.g
+    out_to_ndarray(out)
+    check(problem, x, out)
+    return out
+
 def starmap_parallelized_solve_eval(func_elementwise_eval, problem, X, out, eval_paths, *args, **kwargs):
     cases = [problem.CFDCase(eval_paths[x_i], x) for x_i, x in X]
     for case in cases:
@@ -189,7 +215,7 @@ class CFDProblem(ElementwiseProblem):
         if CFDCase.externalSolver:
             runner = ThreadPool(CFDCase.nTasks).starmap
         else:
-            runner = runner()
+            runner = Client()
             func_eval = dask_parallelize_eval
         super().__init__(func_eval=func_eval, runner=runner, **kwargs)
         self.CFDCase = CFDCase
