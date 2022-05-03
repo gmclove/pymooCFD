@@ -271,5 +271,5 @@ BaseCase = OscillCylinder
 
 
 class OscillCylinder_SLURM(OscillCylinder):
-    solverExecCmd = ['sbatch', '--wait', 'joblslurm.sh']
+    solverExecCmd = ['sbatch', '--wait', 'jobslurm.sh']
     nTasks = 20
