@@ -180,7 +180,7 @@ class Room2D_AP(YALES2Case):
             "#SBATCH --partition=ib --constraint='ib&haswell_1'",
             '#SBATCH --cpus-per-task=1',
             '#SBATCH --ntasks=20',
-            '#SBATCH --time=00:30:00',
+            '#SBATCH --time=30:00:00',
             '#SBATCH --mem-per-cpu=2G',
             '#SBATCH --job-name=ap_room',
             '#SBATCH --output=slurm.out',
