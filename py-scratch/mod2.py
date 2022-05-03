@@ -5,7 +5,13 @@ def log():
     logger = logging.getLogger('mod1.mod2')
     print(logger.hasHandlers())
     print(logger.handlers)
-    logger.propogate = False
+    print(logger.propagate)
+
+    # STREAM
+    if not logger.hasHandlers():
+        streamHandler = logging.StreamHandler()  # sys.stdout)
+        # streamHandler.setFormatter(formatter)
+        logger.addHandler(streamHandler)
 
     # FILE
     fileHandler = logging.FileHandler('mod2.log')
@@ -15,10 +21,5 @@ def log():
     # FILTER
     # filt = DispNameFilter(self.optName)
     # logger.addFilter(filt)
-
-    # STREAM
-    streamHandler = logging.StreamHandler()  # sys.stdout)
-    # streamHandler.setFormatter(formatter)
-    logger.addHandler(streamHandler)
 
     logger.error('MOD2 TEST')

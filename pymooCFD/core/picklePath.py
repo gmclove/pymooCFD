@@ -108,10 +108,11 @@ class PicklePath:
     def get_logger(self):
         name = '.'.join(os.path.normpath(self.rel_path).split(os.path.sep))
         logger = logging.getLogger(name)
-        # logger.propagate = False
         logger.setLevel(self.log_level)
+        # logger.propagate = False
         # if logger.handlers:
         #     logger.handlers.clear()
+
         # FORMATTER
         formatter = MultiLineFormatter(
             '%(asctime)s :: %(levelname)-8s :: %(name)s :: %(message)s',
