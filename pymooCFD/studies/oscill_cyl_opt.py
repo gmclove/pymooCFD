@@ -18,7 +18,7 @@ def exec_test():
     # opt_run.run_bnd_cases()
     opt_run.run()
 
-def exec():
+def exec_study():
     study = MinimizeCFD(BaseCase)
     study.new_case('oscill_cyl_f-Strouhal')
     run_dir = 'test_run'
