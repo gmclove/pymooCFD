@@ -634,7 +634,8 @@ class OptRun(PicklePath):
 
     def plotScatter(self, points, title=None, ax_labels='f', legend=None,
                     pt_labels=None, max_leg_len=10, max_ax_label_len=20,
-                    dir_path=None, fname=None, dpi=100, **kwargs):
+                    dir_path=None, fname=None, dpi=100, tight_layout=True,
+                    **kwargs):
         leg, labs, tit = False, 'f', None
         points = np.array(points)
         # print(points.shape)
@@ -655,7 +656,8 @@ class OptRun(PicklePath):
             else:
                 n_new = '00'
             fname = 'space_plot-' + n_new + '.png'
-        if points.shape[-1] <= 3:
+        n_axes = points.shape[-1]
+        if n_axes <= 3:
             tit = title
             if points.shape[0] <= max_leg_len:
                 leg = True
@@ -663,13 +665,19 @@ class OptRun(PicklePath):
         else:
             if all(len(label) <= max_ax_label_len for label in ax_labels):
                 labs = ax_labels
+            if 'figsize' in kwargs:
+                figsize = kwargs.pop('figsize')
+            else:
+                x_SF, y_SF = 8/3, 6/3
+                figsize = (n_axes*x_SF, n_axes*y_SF)
         if legend is not None:
             leg = legend
 
         plot = Scatter(title=tit,
                        legend=leg,
                        labels=labs,
-                       tight_layout=True,
+                       figsize=figsize,
+                       tight_layout=tight_layout,
                        **kwargs
                        )
         for pt_i, pt in enumerate(points):
