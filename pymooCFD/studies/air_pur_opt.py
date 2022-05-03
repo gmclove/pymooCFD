@@ -5,7 +5,7 @@ from pymooCFD.core.minimizeCFD import MinimizeCFD
 def exec_test(**kwargs):
     study = MinimizeCFD(BaseCase)
     test_run_dir = 'test_run'
-    if test_run_dir in study.opt_runs.keys():
+    if test_run_dir in study.opt_runs:
         opt_run = study.opt_runs[test_run_dir]
     else:
         xl = [0.5, 0.5, 1, 0.5]
@@ -21,7 +21,7 @@ def exec_test(**kwargs):
 def exec_study(**kwargs):
     study = MinimizeCFD(BaseCase)
     run_dir = 'default_run'
-    if run_dir in study.opt_runs.keys():
+    if run_dir in study.opt_runs:
         opt_run = study.opt_runs[run_dir]
     else:
         xl = [0.5, 0.5, 1, 0.5]
