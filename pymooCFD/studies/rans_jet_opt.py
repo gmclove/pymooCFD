@@ -18,7 +18,7 @@ def exec_test(**kwargs):
         opt_run = study.new_run(alg, prob, run_dir=run_dir, **kwargs)
     opt_run.test_case.run()
     opt_run.test_case.mesh_study.run()
-    opt_run.run_bnd_cases()
+    opt_run.run_bnd_cases(doMeshStudy=True)
     opt_run.run()
 
 

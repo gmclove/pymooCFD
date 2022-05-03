@@ -116,7 +116,7 @@ class PicklePath:
         # FORMATTER
         formatter = MultiLineFormatter(
             '%(asctime)s :: %(levelname)-8s :: %(name)s :: %(message)s',
-            "%m-%d %H:%M:%S")
+            "%m-%d %H:%M")
 
         # STREAM
         if not logger.hasHandlers():

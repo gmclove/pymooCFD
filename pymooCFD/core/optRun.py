@@ -446,12 +446,13 @@ class OptRun(PicklePath):
 
         return opt_conv_plot, avg_opt_conv_plot
 
+
     def plotOpt(self, gen=None, max_opt_len=20, legend=True, **kwargs):
         if gen is None:
             gen = len(self.algorithm.history)
         pop = self.algorithm.history[gen - 1].opt
-        if max_opt_len is not None:
-            pop = random.sample(pop, max_opt_len)
+    #     if max_opt_len is not None:
+    #         pop = random.sample(list(pop), max_opt_len)
         popX = pop.get('X')
         popF = pop.get('F')
         pt_labels = ['OPT ' + str(i + 1) for i in range(len(popX))]
@@ -467,9 +468,17 @@ class OptRun(PicklePath):
                                     fname=f'opt_gen{gen}_obj_space.png',
                                     pt_labels=pt_labels, legend=legend, s=20,
                                     **kwargs)
-        for i, txt in enumerate(pt_labels):
-            var_plot.ax.annotate(txt, popX[i])
-            obj_plot.ax.annotate(txt, popF[i])
+    #     var_plot.do()
+    #     obj_plot.do()
+    #     print(var_plot.ax)
+    #     print(var_plot.ax.flatten())
+    #     for i, txt in enumerate(pt_labels):
+    #         for ax in var_plot.ax.flatten():
+    #             print(ax)
+    #             print(popX[i])
+    #             ax.annotate(txt, popX[i])
+    #         for ax in obj_plot.ax.flatten():
+    #             ax.annotate(txt, popF[i])
         self.logger.info(
             f'PLOTTED: Optimum after {gen} Generations - Design and Objective Spaces')
         return var_plot, obj_plot
@@ -658,6 +667,7 @@ class OptRun(PicklePath):
             fname = 'space_plot-' + n_new + '.png'
         n_axes = points.shape[-1]
         if n_axes <= 3:
+            figsize = kwargs.pop('figsize', (8, 6))
             tit = title
             if points.shape[0] <= max_leg_len:
                 leg = True
@@ -668,7 +678,7 @@ class OptRun(PicklePath):
             if 'figsize' in kwargs:
                 figsize = kwargs.pop('figsize')
             else:
-                x_SF, y_SF = 8/3, 6/3
+                x_SF, y_SF = 8/2.5, 6/2.5
                 figsize = (n_axes*x_SF, n_axes*y_SF)
         if legend is not None:
             leg = legend
