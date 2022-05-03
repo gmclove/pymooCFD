@@ -389,14 +389,14 @@ class OptRun(PicklePath):
         popF = pop.get('F')
         pt_labels = ['IND ' + str(i + 1) for i in range(len(popX))]
         var_plot = self.plotScatter(popX, title=f'Generation {gen} Design Space',
-                                    labels=self.problem.BaseCase.var_labels,
+                                    ax_labels=self.problem.BaseCase.var_labels,
                                     dir_path=self.plotDir,
                                     fname=f'gen{gen}_var_space.png',
                                     pt_labels=pt_labels,
                                     **kwargs)
 
         obj_plot = self.plotScatter(popF, title=f'Generation {gen} Objective Space',
-                                    labels=self.problem.BaseCase.obj_labels,
+                                    ax_labels=self.problem.BaseCase.obj_labels,
                                     dir_path=self.plotDir,
                                     fname=f'gen{gen}_obj_space.png',
                                     pt_labels=pt_labels,
@@ -456,13 +456,13 @@ class OptRun(PicklePath):
         popF = pop.get('F')
         pt_labels = ['OPT ' + str(i + 1) for i in range(len(popX))]
         var_plot = self.plotScatter(popX, title=f'Optimum After {gen} Generations - Design Space',
-                                    labels=self.problem.BaseCase.var_labels,
+                                    ax_labels=self.problem.BaseCase.var_labels,
                                     dir_path=self.plotDir,
                                     fname=f'opt_gen{gen}_var_space.png',
                                     pt_labels=pt_labels, legend=legend, s=10,
                                     **kwargs)
         obj_plot = self.plotScatter(popF, title=f'Optimum After {gen} Generations - Objective Space',
-                                    labels=self.problem.BaseCase.obj_labels,
+                                    ax_labels=self.problem.BaseCase.obj_labels,
                                     dir_path=self.plotDir,
                                     fname=f'opt_gen{gen}_obj_space.png',
                                     pt_labels=pt_labels, legend=legend, s=20,
