@@ -108,29 +108,29 @@ class PicklePath:
     def get_logger(self):
         name = '.'.join(os.path.normpath(self.rel_path).split(os.path.sep))
         logger = logging.getLogger(name)
-        logger.propagate = False
+        # logger.propagate = False
         logger.setLevel(self.log_level)
-        if logger.handlers:
-            logger.handlers.clear()
-
+        # if logger.handlers:
+        #     logger.handlers.clear()
         # FORMATTER
         formatter = MultiLineFormatter(
             '%(asctime)s :: %(levelname)-8s :: %(name)s :: %(message)s',
             "%m-%d %H:%M:%S")
 
+        # STREAM
+        if not logger.hasHandlers():
+            streamHandler = logging.StreamHandler()  # sys.stdout)
+            streamHandler.setFormatter(formatter)
+            logger.addHandler(streamHandler)
+
         # FILE
         fileHandler = logging.FileHandler(self.log_path)
-        logger.addHandler(fileHandler)
         fileHandler.setFormatter(formatter)
+        logger.addHandler(fileHandler)
 
         # FILTER
         # filt = DispNameFilter(self.optName)
         # logger.addFilter(filt)
-
-        # STREAM
-        streamHandler = logging.StreamHandler()  # sys.stdout)
-        logger.addHandler(streamHandler)
-        streamHandler.setFormatter(formatter)
 
         return logger
 
