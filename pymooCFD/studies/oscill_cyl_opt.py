@@ -20,7 +20,7 @@ def exec_test():
 
 def exec():
     study = MinimizeCFD(BaseCase)
-    study.new_case('oscill_cyl_f=Strouhal')
+    study.new_case('oscill_cyl_f-Strouhal')
     run_dir = 'test_run'
     if run_dir in study.opt_runs:
         opt_run = study.opt_runs[run_dir]
@@ -28,7 +28,7 @@ def exec():
         xl = [0.1, 0.2]  # lower limits of parameters/variables
         xu = [10, 1]  # upper limits of variables
         prob = study.get_problem(xl, xu)
-        alg = study.get_algorithm(n_gen=25, pop_size=50,
+        alg = study.get_algorithm(n_gen=35, pop_size=50,
                                   n_offsprings=15)
         opt_run = study.new_run(alg, prob, run_dir=run_dir)
     opt_run.test_case.run()

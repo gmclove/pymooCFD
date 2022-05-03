@@ -1,4 +1,4 @@
-from pymooCFD.studies.oscill_cyl_opt import exec_test, exec_study, BaseCase, MinimizeCFD
+from pymooCFD.studies.oscill_cyl_SLURM_opt import exec_test, exec_study, BaseCase, MinimizeCFD
 
 
 def main():
