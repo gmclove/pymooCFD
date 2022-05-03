@@ -28,7 +28,7 @@ def exec_study(**kwargs):
         xu = [3.5, 3.5, 4, 6]
         alg = study.get_algorithm(n_gen=20, pop_size=50, n_offsprings=7, **kwargs)
         prob = study.get_problem(xl, xu, **kwargs)
-        opt_run = study.new_run(alg, prob, **kwargs)
+        opt_run = study.new_run(alg, prob, run_dir=run_dir, **kwargs)
     # opt_run.run_test_case()
     # opt_run.run_bnd_cases()
     opt_run.run()
