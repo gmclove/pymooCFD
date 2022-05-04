@@ -2,7 +2,7 @@ from pymooCFD.studies.oscill_cyl_opt import exec_test, exec_study, BaseCase, Min
 
 
 def main():
-    exec_test()
+    # exec_test()
     exec_study()
     # study = MinimizeCFD(BaseCase)
     # xl = [0.2, 0.1]  # lower limits of parameters/variables

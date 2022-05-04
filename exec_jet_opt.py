@@ -1,7 +1,7 @@
 from pymooCFD.studies.rans_jet_opt import exec_test, exec_study, BaseCase, MinimizeCFD
 
 def main():
-    exec_test()
+    # exec_test()
     exec_study()
     # study = MinimizeCFD(BaseCase)
     # xl = [0.002, 0.1]  # lower limits of parameters/variables
