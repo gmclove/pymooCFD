@@ -1,7 +1,6 @@
 from pymooCFD.problems.rans_jet import RANSJet as BaseCase
 from pymooCFD.core.minimizeCFD import MinimizeCFD
 # from pymooCFD.core.pymooBase import CFDTestProblem
-import os
 
 
 def exec_test(**kwargs):
@@ -25,7 +24,7 @@ def exec_test(**kwargs):
 def exec_study(**kwargs):
     study = MinimizeCFD(BaseCase)
     run_dir = 'default_run'
-    if run_dir in study.opt_runs.keys():
+    if run_dir in study.opt_runs:
         opt_run = study.opt_runs[run_dir]
     else:
         xl = [0.002, 0.1]  # lower limits of parameters/variables
