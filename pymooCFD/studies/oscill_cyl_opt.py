@@ -1,9 +1,9 @@
 from pymooCFD.core.minimizeCFD import MinimizeCFD
 from pymooCFD.problems.oscill_cyl import OscillCylinder as BaseCase
-from pymooCFD.core.pymooBase import CFDTestProblem
+# from pymooCFD.core.pymooBase import CFDTestProblem
 
 def exec_test():
-    study = MinimizeCFD(BaseCase, CFDGeneticProblem=CFDTestProblem)
+    study = MinimizeCFD(BaseCase)
     run_dir = 'test_run'
     if run_dir in study.opt_runs:
         opt_run = study.opt_runs[run_dir]
