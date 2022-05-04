@@ -2,13 +2,13 @@
 # @Date:   2021-12-14T16:02:45-05:00
 # @Last modified by:   glove
 # @Last modified time: 2021-12-15T16:36:54-05:00
-from pymooCFD.problems.rans_k_eps import RANS_k_eps
+from pymooCFD.problems.rans_k_eps import RANS_k_eps as BaseCase
 from pymooCFD.core.minimizeCFD import MinimizeCFD
-from pymooCFD.core.pymooBase import CFDTestProblem
+# from pymooCFD.core.pymooBase import CFDTestProblem
 
 
 def exec_test():
-    study = MinimizeCFD(RANS_k_eps, CFDGeneticProblem=CFDTestProblem)
+    study = MinimizeCFD(BaseCase) #, CFDGeneticProblem=CFDTestProblem)
     # if study.opt_runs:
     #     opt_run = study.opt_runs[0]
     # else:
@@ -25,7 +25,7 @@ def exec_test():
 
 
 def exec_study():
-    study = MinimizeCFD(RANS_k_eps)
+    study = MinimizeCFD(BaseCase)
     # if study.opt_runs:
     #     opt_run = study.opt_runs[0]
     # else:
