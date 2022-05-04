@@ -21,7 +21,7 @@ def exec_test():
 def exec_study():
     study = MinimizeCFD(BaseCase)
     study.new_case('oscill_cyl_f=Strouhal')
-    run_dir = 'test_run'
+    run_dir = 'default_run'
     if run_dir in study.opt_runs:
         opt_run = study.opt_runs[run_dir]
     else:
