@@ -158,11 +158,12 @@ class PicklePath:
         if loaded_self is None:
             loaded_self = self.load_self()
         if loaded_self is None:
-            self.logger.error('FAILED UPDATE SELF: CHECKPOINT IS None')
+            self.logger.error('FAILED UPDATE SELF: LOADED CHECKPOINT is None')
             return
         self.update_warnings(loaded_self)
         loaded_self = self._update_filter(loaded_self)
-        # UPDATE
+        # UPDATE: only instance dictonary
+        # class dictionary/code changes between checkpoints will be reflected
         self.__dict__.update(loaded_self.__dict__)
         # log
         self.logger.debug('\tUPDATED DICTONARY')

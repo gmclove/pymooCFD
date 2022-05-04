@@ -89,6 +89,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         #    RESTART VARIABLES    #
         ###########################
         # self.complete = False
+        # self.externalSolver = self.externalSolver
         self.setup_parallelize(self.externalSolver)
         self._x = x
 
@@ -224,6 +225,8 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                 pool.join()
 
     def solve(self):
+        if not hasattr(self, 'Pool'):
+            self.setup_parallelize(self.externalSolver)
         if self.f is None or not np.isfinite(np.sum(self.f)):
             # try to prevent re-run if execution done
             if self._solveDone() and self.restart:
