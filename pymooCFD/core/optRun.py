@@ -173,7 +173,7 @@ class OptRun(PicklePath):
             self.logger.info(f'\tGEN: {gen}')
             # DELETE PREV. GEN
             prevGen = gen - 1
-            if delPrevGen and prevGen != 1:
+            if delPrevGen and prevGen > 1:
                 direct = os.path.join(
                     self.abs_path, f'gen{prevGen}')
                 try:
@@ -469,6 +469,22 @@ class OptRun(PicklePath):
                                     fname=f'opt_gen{gen}_obj_space.png',
                                     pt_labels=pt_labels, legend=legend, s=20,
                                     **kwargs)
+        # all_markers = {
+        #     '.': 'point', ',': 'pixel', 'o': 'circle', 'v': 'triangle_down',
+        #     '^': 'triangle_up', '<': 'triangle_left', '>': 'triangle_right',
+        #     '1': 'tri_down', '2': 'tri_up', '3': 'tri_left', '4': 'tri_right',
+        #     '8': 'octagon', 's': 'square', 'p': 'pentagon', '*': 'star',
+        #     'h': 'hexagon1', 'H': 'hexagon2', '+': 'plus', 'x': 'x',
+        #     'D': 'diamond', 'd': 'thin_diamond', '|': 'vline', '_': 'hline',
+        #     'P': 'plus_filled', 'X': 'x_filled', 0: 'tickleft', 1: 'tickright',
+        #     2: 'tickup', 3: 'tickdown', 4: 'caretleft', 5: 'caretright',
+        #     6: 'caretup', 7: 'caretdown', 8: 'caretleftbase',
+        #     9: 'caretrightbase', 10: 'caretupbase'}
+        # all_markers = list(all_markers)
+        # n_pts = len(pop)
+        # while len(all_markers) < n_pts:
+        #     all_markers += all_markers
+        # markers = [m for i, m in enumerate(all_markers) if i < n_pts]
     #     var_plot.do()
     #     obj_plot.do()
     #     print(var_plot.ax)
@@ -645,6 +661,7 @@ class OptRun(PicklePath):
     def plotScatter(self, points, title=None, ax_labels='f', legend=None,
                     pt_labels=None, max_leg_len=10, max_ax_label_len=20,
                     dir_path=None, fname=None, dpi=100, tight_layout=True,
+                    dif_markers=True,
                     **kwargs):
         leg, labs, tit = False, 'f', None
         points = np.array(points)
@@ -681,6 +698,24 @@ class OptRun(PicklePath):
             else:
                 x_SF, y_SF = 8/2.5, 6/2.5
                 figsize = (n_axes*x_SF, n_axes*y_SF)
+        if dif_markers:
+            all_markers = {
+                '.': 'point', ',': 'pixel', 'o': 'circle', 'v': 'triangle_down',
+                '^': 'triangle_up', '<': 'triangle_left', '>': 'triangle_right',
+                '1': 'tri_down', '2': 'tri_up', '3': 'tri_left', '4': 'tri_right',
+                '8': 'octagon', 's': 'square', 'p': 'pentagon', '*': 'star',
+                'h': 'hexagon1', 'H': 'hexagon2', '+': 'plus', 'x': 'x',
+                'D': 'diamond', 'd': 'thin_diamond', '|': 'vline', '_': 'hline',
+                'P': 'plus_filled', 'X': 'x_filled', 0: 'tickleft', 1: 'tickright',
+                2: 'tickup', 3: 'tickdown', 4: 'caretleft', 5: 'caretright',
+                6: 'caretup', 7: 'caretdown', 8: 'caretleftbase',
+                9: 'caretrightbase', 10: 'caretupbase'}
+            n_pts = len(points)
+            while len(all_markers) < n_pts:
+                all_markers += all_markers
+            markers = [m for i, m in enumerate(all_markers) if i < len(pop)]
+        else:
+            markers = ['o' for _ in range(n_pts)]
         if legend is not None:
             leg = legend
 
@@ -691,8 +726,9 @@ class OptRun(PicklePath):
                        tight_layout=tight_layout,
                        **kwargs
                        )
+
         for pt_i, pt in enumerate(points):
-            plot.add(pt, label=pt_labels[pt_i])
+            plot.add(pt, label=pt_labels[pt_i], marker=markers[pt_i])
         plot.save(os.path.join(dir_path, fname), dpi=dpi)
         return plot
 
