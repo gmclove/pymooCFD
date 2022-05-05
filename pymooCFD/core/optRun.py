@@ -667,9 +667,10 @@ class OptRun(PicklePath):
                     **kwargs):
         leg, labs, tit = False, 'f', None
         points = np.array(points)
+        n_pts = len(points)
         # print(points.shape)
         if pt_labels is None:
-            pt_labels = [str(i) for i in range(len(points))]
+            pt_labels = [str(i) for i in range(n_pts)]
         assert len(pt_labels) == len(points)
         if dir_path is None:
             dir_path = self.plotDir
@@ -712,7 +713,6 @@ class OptRun(PicklePath):
                 2: 'tickup', 3: 'tickdown', 4: 'caretleft', 5: 'caretright',
                 6: 'caretup', 7: 'caretdown', 8: 'caretleftbase',
                 9: 'caretrightbase', 10: 'caretupbase'}
-            n_pts = len(points)
             while len(all_markers) < n_pts:
                 all_markers += all_markers
             markers = [m for i, m in enumerate(all_markers) if i < len(pop)]
