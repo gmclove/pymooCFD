@@ -175,7 +175,7 @@ class OptRun(PicklePath):
             prevGen = gen - 1
             if delPrevGen and prevGen != 1:
                 direct = os.path.join(
-                    self.abs_path, f'gen{gen}')
+                    self.abs_path, f'gen{prevGen}')
                 try:
                     shutil.rmtree(direct)
                 except FileNotFoundError as err:
