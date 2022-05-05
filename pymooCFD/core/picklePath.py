@@ -74,11 +74,12 @@ class PicklePath:
             # try:
             # if isinstance(attr_val, list): # hasattr(attr_val, "__getitem__")
             try:
-                attr_val[:]
-                attr_is_subscriptable = True
-            except (TypeError, IndexError):
-                attr_is_subscriptable = False
-            if attr_is_subscriptable:
+                iter(attr_val)
+            except TypeError:  #, IndexError):
+                attr_is_iterable = False
+            else:
+                attr_is_iterable = True
+            if attr_is_iterable:
                 for i, item in enumerate(attr_val):
                     self.loadIfPP(item)
                     # if __class__ in item.__class__.mro():  # type(attr_val).mro(): #
@@ -245,7 +246,7 @@ class PicklePath:
     def is_pickle_path(inst):
         if inst.__class__ is not type and __class__ in inst.__class__.mro():
             return True
-            
+
     @staticmethod
     def loadNumpyFile(path):
         if not path.endswith('.npy'):
