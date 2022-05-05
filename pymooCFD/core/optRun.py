@@ -461,12 +461,14 @@ class OptRun(PicklePath):
                                     ax_labels=self.problem.BaseCase.var_labels,
                                     dir_path=self.plotDir,
                                     fname=f'opt_gen{gen}_var_space.png',
+                                    dif_markers=True,
                                     pt_labels=pt_labels, legend=legend, s=10,
                                     **kwargs)
         obj_plot = self.plotScatter(popF, title=f'Optimum After {gen} Generations - Objective Space',
                                     ax_labels=self.problem.BaseCase.obj_labels,
                                     dir_path=self.plotDir,
                                     fname=f'opt_gen{gen}_obj_space.png',
+                                    dif_markers=True,
                                     pt_labels=pt_labels, legend=legend, s=20,
                                     **kwargs)
         # all_markers = {
@@ -661,7 +663,7 @@ class OptRun(PicklePath):
     def plotScatter(self, points, title=None, ax_labels='f', legend=None,
                     pt_labels=None, max_leg_len=10, max_ax_label_len=20,
                     dir_path=None, fname=None, dpi=100, tight_layout=True,
-                    dif_markers=True,
+                    dif_markers=False,
                     **kwargs):
         leg, labs, tit = False, 'f', None
         points = np.array(points)
