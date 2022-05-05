@@ -93,6 +93,32 @@ class PicklePath:
             #     attr_val.update_self()
             # except AttributeError as err:
             #     self.logger.error(err)
+    def save_sub_pickle_paths(self):
+        # Check for other PicklePath child class and load if found
+        for attr_key, attr_val in self.__dict__.items():
+            # try:
+            # if isinstance(attr_val, list): # hasattr(attr_val, "__getitem__")
+            try:
+                attr_val[:]
+                attr_is_subscriptable = True
+            except (TypeError, IndexError):
+                attr_is_subscriptable = False
+            if attr_is_subscriptable:
+                for i, item in enumerate(attr_val):
+                    self.saveIfPP(item)
+                    # if __class__ in item.__class__.mro():  # type(attr_val).mro(): #
+                    #     self.logger.info(
+                    #         f'LOADING: {attr_key}[{i}] FROM {item.cp_path}')
+                    #     item.update_self()
+            # type(attr_val).mro(): #
+            self.saveIfPP(attr_val)
+            # if __class__ in attr_val.__class__.mro():
+            #     self.logger.info(
+            #         f'LOADING: {attr_key} FROM {attr_val.cp_path}')
+            #     attr_val.update_self()
+            # except AttributeError as err:
+            #     self.logger.error(err)
+
 
     def loadIfPP(self, inst):
         # try:
@@ -100,10 +126,21 @@ class PicklePath:
         # except TypeError as err:
         #     self.logger.error(err)
         #     return
-        if inst.__class__ is not type and __class__ in inst.__class__.mro():
+        if self.is_pickle_path(inst):
             self.logger.info(
                 f'LOADING: {inst} FROM {inst.cp_path}')
             inst.update_self()
+
+    def saveIfPP(self, inst):
+        # try:
+        #     inst.__class__.mro()
+        # except TypeError as err:
+        #     self.logger.error(err)
+        #     return
+        if self.is_pickle_path(inst):
+            self.logger.info(
+                f'SAVING: {inst} TO {inst.cp_path}')
+            inst.save_self()
 
     def get_logger(self):
         name = '.'.join(os.path.normpath(self.rel_path).split(os.path.sep))
@@ -137,6 +174,7 @@ class PicklePath:
 
     def save_self(self):
         self.saveNumpyFile(self.cp_path, self)
+        self.save_sub_pickle_paths()
         self.logger.info('CHECKPOINT SAVED')
 
     def load_self(self):
@@ -203,6 +241,11 @@ class PicklePath:
     def _update_filter(self, loaded_self):
         return loaded_self
 
+    @staticmethod
+    def is_pickle_path(inst):
+        if inst.__class__ is not type and __class__ in inst.__class__.mro():
+            return True
+            
     @staticmethod
     def loadNumpyFile(path):
         if not path.endswith('.npy'):

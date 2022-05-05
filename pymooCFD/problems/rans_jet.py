@@ -13,6 +13,7 @@
 import gmsh
 import math
 from pymooCFD.core.cfdCase import FluentCase
+from pymooCFD.util.handleData import saveTxt
 import matplotlib.pyplot as plt
 import os
 import numpy as np
@@ -454,6 +455,14 @@ class RANSJet(FluentCase):
 
         obj = [phi_meanDiff, uMag_meanDiff]
         self.f = obj
+
+        # Reynolds number
+        mouthD, breath_vel = self.x[0], self.x[1]
+        mu = 1.7894e-05 # kg/(m.s)
+        rho = 1.225 # kg/m^3
+        nu = mu/rho
+        Re = breath_vel*mouthD/nu
+        saveTxt(self.abs_path, 'Re.txt', Re)
 
         ##### Flux ###########
         coor, dat = self.gridInterp2D.getCGNSData(

@@ -29,7 +29,7 @@ def exec_study(**kwargs):
     else:
         xl = [0.002, 0.1]  # lower limits of parameters/variables
         xu = [0.04, 0.6]  # upper limits of variables
-        alg = study.get_algorithm(n_gen=35, pop_size=30, n_offsprings=8)
+        alg = study.get_algorithm(n_gen=35, pop_size=50, n_offsprings=8)
         prob = study.get_problem(xl, xu)
         opt_run = study.new_run(alg, prob, run_dir, **kwargs)
     opt_run.test_case.run()
