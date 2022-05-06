@@ -494,6 +494,54 @@ class Room2D_2AP(Room2D_AP):
         ap_preProc(ap1_direct, 1)
         ap_preProc(ap2_direct, 2)
 
+    def _postProc(self):
+        with h5py.File(self.datPath, 'r') as f:
+            t = f['Datas']['TOTAL_TIME'][:]
+            SP1 = f['Datas']['Surf_Int1'][:]
+            SP2 = f['Datas']['Surf_Int2'][:]
+            SP3 = f['Datas']['Surf_Int3'][:]
+            SP4 = f['Datas']['Surf_Int4'][:]
+            SP5 = f['Datas']['Surf_Int5'][:]
+            SP6 = f['Datas']['Surf_Int6'][:]
+        # tot_dt = t[-1] - t[0]
+        SPs = [SP1, SP2, SP3, SP4, SP5, SP6]
+        t_start = 1800
+        mask = np.where(t > t_start)
+        t = t[mask]
+        # dt = t[-1] - t_start
+        SPs = [sp[mask] for sp in SPs]
+        t_wghts = [t[i] - t[i - 1] for i in range(1, len(t))]
+        t_mid = [np.mean([t[i], t[i - 1]]) for i in range(1, len(t))]
+        emit_person = 3
+        t_avgs = []
+        for j, sp in enumerate(SPs):
+            p = j + 1
+            if not p == emit_person:
+                plt.plot(t, sp)
+                plt.title(f'Passive Scalar Surface Average - Person {p}')
+                plt.xlabel('Time [sec]')
+                plt.ylabel('Passive Scalar Surface Average [unitless]')
+                path = os.path.join(self.abs_path, f'sp-p{p}.png')
+                plt.savefig(path)
+                plt.clf()
+                sp_mid = [np.mean(np.abs([sp[i], sp[i - 1]]))
+                          for i in range(1, len(sp))]
+                plt.plot(t_mid, sp_mid)
+                plt.title(
+                    f'Passive Scalar Surface Average - Person {p}: mid-points')
+                plt.xlabel('Time [sec]')
+                plt.ylabel('Passive Scalar Surface Average [unitless]')
+                path = os.path.join(self.abs_path, f'sp_mid-p{p}.png')
+                plt.savefig(path)
+                plt.clf()
+                # plt.show()
+                t_avgs.append(np.average(sp_mid, weights=t_wghts))
+        saveTxt(self.abs_path, 'surf-avg-scalar.txt', t_avgs)
+        tot_avg = np.mean(t_avgs)
+        ACH = 2 + self.x[6]
+        self.f = [ACH, tot_avg]
+        return self.f
+
     def _genMesh(self):
         resolution = 0.01
         coarsening = 2
