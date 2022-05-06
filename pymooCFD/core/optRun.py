@@ -671,7 +671,7 @@ class OptRun(PicklePath):
         # print(points.shape)
         if pt_labels is None:
             pt_labels = [str(i) for i in range(n_pts)]
-        assert len(pt_labels) == len(points)
+        assert len(pt_labels) == n_pts
         if dir_path is None:
             dir_path = self.plotDir
         if fname is None:
@@ -715,7 +715,7 @@ class OptRun(PicklePath):
                 9: 'caretrightbase', 10: 'caretupbase'}
             while len(all_markers) < n_pts:
                 all_markers += all_markers
-            markers = [m for i, m in enumerate(all_markers) if i < len(pop)]
+            markers = [m for i, m in enumerate(all_markers) if i < n_pts]
         else:
             markers = ['o' for _ in range(n_pts)]
         if legend is not None:
