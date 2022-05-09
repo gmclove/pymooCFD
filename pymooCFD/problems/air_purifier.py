@@ -377,9 +377,9 @@ class RemoveBadPlacement_AP2(RemoveBadPlacement):
 
         def is_overlapping(x):
             x_overlap, y_overlap = True, True
-            if abs(x[2] - x[0]) >= spacing:
+            if abs(x[2] - x[0]) >= spacing + 0.1:
                 x_overlap = False
-            if abs(x[3] - x[1]) >= spacing:
+            if abs(x[3] - x[1]) >= spacing + 0.1:
                 y_overlap = False
             return bool(x_overlap and y_overlap)
         # move ap1 away from stationary obstacles
