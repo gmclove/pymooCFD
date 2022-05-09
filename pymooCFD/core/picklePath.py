@@ -73,7 +73,6 @@ class PicklePath:
         for attr_key, attr_val in self.__dict__.items():
             # try:
             # if isinstance(attr_val, list): # hasattr(attr_val, "__getitem__")
-<<<<<<< HEAD
             if self.is_iterable(attr_val):
                 # if (isinstance(attr_val, list) or
                 #     isinstance(attr_val, set) or
@@ -89,21 +88,6 @@ class PicklePath:
                     # self.logger.warning('Unknown Iterable Object')
                     # self.logger.warning(f'ITEMS INSIDE ITERABLE ATTRIBUTE NOT LOADED - {attr_key} : {attr_val}')
 
-=======
-            try:
-                iter(attr_val)
-            except TypeError:  # , IndexError):
-                attr_is_iterable = False
-            else:
-                attr_is_iterable = True
-            if attr_is_iterable:
-                for i, item in enumerate(attr_val):
-                    self.loadIfPP(item)
-                    # if __class__ in item.__class__.mro():  # type(attr_val).mro(): #
-                    #     self.logger.info(
-                    #         f'LOADING: {attr_key}[{i}] FROM {item.cp_path}')
-                    #     item.update_self()
->>>>>>> e54a84a09deaede5d98b11ac0d9b64f22402fefe
             # type(attr_val).mro(): #
             self.loadIfPP(attr_val)
             # if __class__ in attr_val.__class__.mro():
