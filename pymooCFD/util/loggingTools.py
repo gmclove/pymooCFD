@@ -14,14 +14,15 @@ class MultiLineFormatter(logging.Formatter):
         """
         Override format function
         """
-        if record.levelno == logging.WARNING:
-            record.msg = '\033[93m%s\033[0m' % record.msg
-        elif record.levelno == logging.ERROR:
-            record.msg = '\033[91m%s\033[0m' % record.msg
         msg = logging.Formatter.format(self, record)
         if record.message != "":
             parts = msg.split(record.message)
             msg = msg.replace('\n', '\n' + parts[0])
+
+        if record.levelno == logging.WARNING:
+            msg = '\033[93m%s\033[0m' % msg
+        elif record.levelno == logging.ERROR:
+            msg = '\033[91m%s\033[0m' % msg
 
         return msg
 #
@@ -56,6 +57,7 @@ class MultiLineFormatter(logging.Formatter):
 #         formatter = logging.Formatter(log_fmt)
 #         return formatter.format(record)
 
+
 class DispNameFilter(logging.Filter):
     """
     This is a filter which injects contextual information into the log.
@@ -63,6 +65,7 @@ class DispNameFilter(logging.Filter):
     Rather than use actual contextual information, we just use random
     data in this demo.
     """
+
     def __init__(self, dispName, name=''):
         self.dispName = dispName
         super().__init__(name=name)
@@ -70,7 +73,6 @@ class DispNameFilter(logging.Filter):
     def filter(self, record):
         record.msg = f'{self.dispName} :: {record.msg}'
         return True
-
 
 
 # from colorlog import ColoredFormatter

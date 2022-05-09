@@ -1,6 +1,7 @@
 import pprint
 import logging
 import os
+import sys
 import numpy as np
 import shutil
 from deepdiff import DeepDiff
@@ -54,8 +55,7 @@ class PicklePath:
         else:
             os.makedirs(self.abs_path)
             # self.logger = self.get_logger()
-            self.logger.info(
-                f'NEW - {self.rel_path} did not exist')
+            self.logger.info(f'NEW - {self.rel_path} did not exist')
 
         self.load_sub_pickle_paths()
 
@@ -75,7 +75,7 @@ class PicklePath:
             # if isinstance(attr_val, list): # hasattr(attr_val, "__getitem__")
             try:
                 iter(attr_val)
-            except TypeError:  #, IndexError):
+            except TypeError:  # , IndexError):
                 attr_is_iterable = False
             else:
                 attr_is_iterable = True
@@ -94,6 +94,7 @@ class PicklePath:
             #     attr_val.update_self()
             # except AttributeError as err:
             #     self.logger.error(err)
+
     def save_sub_pickle_paths(self):
         # Check for other PicklePath child class and load if found
         for attr_key, attr_val in self.__dict__.items():
@@ -120,7 +121,6 @@ class PicklePath:
             #     attr_val.update_self()
             # except AttributeError as err:
             #     self.logger.error(err)
-
 
     def loadIfPP(self, inst):
         # try:
@@ -156,6 +156,16 @@ class PicklePath:
         formatter = MultiLineFormatter(
             '%(asctime)s :: %(levelname)-8s :: %(name)s :: %(message)s',
             "%m-%d %H:%M")
+
+        def handle_exception(exc_type, exc_value, exc_traceback):
+            if issubclass(exc_type, KeyboardInterrupt):
+                sys.__excepthook__(exc_type, exc_value, exc_traceback)
+                return
+
+            logger.critical("Uncaught exception", exc_info=(exc_type, exc_value,
+                                                            exc_traceback))
+
+        sys.excepthook = handle_exception
 
         # STREAM
         if not logger.hasHandlers():
