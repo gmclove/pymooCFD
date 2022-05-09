@@ -447,6 +447,7 @@ class OptRun(PicklePath):
         return opt_conv_plot, avg_opt_conv_plot
 
 
+
     def plotOpt(self, gen=None, max_opt_len=20, legend=True, **kwargs):
         if gen is None:
             gen = len(self.algorithm.history)
@@ -461,15 +462,16 @@ class OptRun(PicklePath):
                                     ax_labels=self.problem.BaseCase.var_labels,
                                     dir_path=self.plotDir,
                                     fname=f'opt_gen{gen}_var_space.png',
-                                    dif_markers=True,
-                                    pt_labels=pt_labels, legend=legend, s=10,
+                                    dif_markers=True, max_leg_len=20,
+                                    pt_labels=pt_labels, s=10,
                                     **kwargs)
         obj_plot = self.plotScatter(popF, title=f'Optimum After {gen} Generations - Objective Space',
                                     ax_labels=self.problem.BaseCase.obj_labels,
                                     dir_path=self.plotDir,
                                     fname=f'opt_gen{gen}_obj_space.png',
-                                    dif_markers=True,
-                                    pt_labels=pt_labels, legend=legend, s=20,
+                                    dif_markers=True, max_leg_len=20,
+                                    pt_labels=pt_labels, s=20,
+
                                     **kwargs)
         # all_markers = {
         #     '.': 'point', ',': 'pixel', 'o': 'circle', 'v': 'triangle_down',
@@ -660,7 +662,7 @@ class OptRun(PicklePath):
     #             'SKIPPED: GENERATE CORNER CASES - call self.genCornerCases() directly to create new corner cases')
     #     self.problem.BaseCase.parallelize(self.cornerCases)
 
-    def plotScatter(self, points, title=None, ax_labels='f', legend=None,
+    def plotScatter(self, points, title=None, ax_labels='f',
                     pt_labels=None, max_leg_len=10, max_ax_label_len=20,
                     dir_path=None, fname=None, dpi=100, tight_layout=True,
                     dif_markers=False,
@@ -718,8 +720,8 @@ class OptRun(PicklePath):
             markers = [m for i, m in enumerate(all_markers) if i < n_pts]
         else:
             markers = ['o' for _ in range(n_pts)]
-        if legend is not None:
-            leg = legend
+        # if legend is not None:
+        #     leg = legend
 
         plot = Scatter(title=tit,
                        legend=leg,
@@ -741,7 +743,7 @@ class OptRun(PicklePath):
                                 ax_labels=self.problem.BaseCase.var_labels,
                                 dir_path=self.bndCasesDir,
                                 fname='bndPts_plot-varSpace.png',
-                                pt_labels=pt_labels,
+                                pt_labels=pt_labels, dif_markers=True, s=20,
                                 **kwargs)
 
         # var_leg, var_title, var_labels = False, None, 'f'
@@ -773,7 +775,7 @@ class OptRun(PicklePath):
                                 ax_labels=self.problem.BaseCase.obj_labels,
                                 dir_path=self.bndCasesDir,
                                 fname='bndPts_plot-objSpace.png',
-                                pt_labels=pt_labels,
+                                pt_labels=pt_labels, dif_markers=True, s=20,
                                 **kwargs)
         # legend display
         # obj_leg, obj_title, obj_labels = False, None, 'f'
