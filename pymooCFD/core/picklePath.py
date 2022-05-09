@@ -1,6 +1,7 @@
 import pprint
 import logging
 import os
+import sys
 import numpy as np
 import shutil
 from deepdiff import DeepDiff
@@ -54,8 +55,7 @@ class PicklePath:
         else:
             os.makedirs(self.abs_path)
             # self.logger = self.get_logger()
-            self.logger.info(
-                f'NEW - {self.rel_path} did not exist')
+            self.logger.info(f'NEW - {self.rel_path} did not exist')
 
         self.load_sub_pickle_paths()
 
@@ -73,6 +73,7 @@ class PicklePath:
         for attr_key, attr_val in self.__dict__.items():
             # try:
             # if isinstance(attr_val, list): # hasattr(attr_val, "__getitem__")
+<<<<<<< HEAD
             if self.is_iterable(attr_val):
                 # if (isinstance(attr_val, list) or
                 #     isinstance(attr_val, set) or
@@ -88,6 +89,21 @@ class PicklePath:
                     # self.logger.warning('Unknown Iterable Object')
                     # self.logger.warning(f'ITEMS INSIDE ITERABLE ATTRIBUTE NOT LOADED - {attr_key} : {attr_val}')
 
+=======
+            try:
+                iter(attr_val)
+            except TypeError:  # , IndexError):
+                attr_is_iterable = False
+            else:
+                attr_is_iterable = True
+            if attr_is_iterable:
+                for i, item in enumerate(attr_val):
+                    self.loadIfPP(item)
+                    # if __class__ in item.__class__.mro():  # type(attr_val).mro(): #
+                    #     self.logger.info(
+                    #         f'LOADING: {attr_key}[{i}] FROM {item.cp_path}')
+                    #     item.update_self()
+>>>>>>> e54a84a09deaede5d98b11ac0d9b64f22402fefe
             # type(attr_val).mro(): #
             self.loadIfPP(attr_val)
             # if __class__ in attr_val.__class__.mro():
@@ -96,6 +112,7 @@ class PicklePath:
             #     attr_val.update_self()
             # except AttributeError as err:
             #     self.logger.error(err)
+
     def save_sub_pickle_paths(self):
         # Check for other PicklePath child class and load if found
         for attr_key, attr_val in self.__dict__.items():
@@ -130,7 +147,6 @@ class PicklePath:
             # except AttributeError as err:
             #     self.logger.error(err)
 
-
     def loadIfPP(self, inst):
         if self.is_pickle_path(inst):
             self.logger.info(
@@ -160,6 +176,16 @@ class PicklePath:
         formatter = MultiLineFormatter(
             '%(asctime)s :: %(levelname)-8s :: %(name)s :: %(message)s',
             "%m-%d %H:%M")
+
+        def handle_exception(exc_type, exc_value, exc_traceback):
+            if issubclass(exc_type, KeyboardInterrupt):
+                sys.__excepthook__(exc_type, exc_value, exc_traceback)
+                return
+
+            logger.critical("Uncaught exception", exc_info=(exc_type, exc_value,
+                                                            exc_traceback))
+
+        sys.excepthook = handle_exception
 
         # STREAM
         if not logger.hasHandlers():
