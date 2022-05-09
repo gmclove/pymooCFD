@@ -46,20 +46,27 @@ class MinimizeCFD(PicklePath):
         return self.CFDGeneticProblem(self.CFDCase, xl, xu, **kwargs)
 
     def get_algorithm(self, **kwargs):
-        sampling = MixedVariableSampling(self.CFDCase.var_type, {
-            "real": get_sampling("real_lhs"),  # "real_random"),
-            "int": get_sampling("int_random")
-        })
-
-        crossover = MixedVariableCrossover(self.CFDCase.var_type, {
-            "real": get_crossover("real_sbx", prob=1.0, eta=3.0),
-            "int": get_crossover("int_sbx", prob=1.0, eta=3.0)
-        })
-
-        mutation = MixedVariableMutation(self.CFDCase.var_type, {
-            "real": get_mutation("real_pm", eta=3.0),
-            "int": get_mutation("int_pm", eta=3.0)
-        })
+        if 'sampling' not in kwargs:
+            sampling = MixedVariableSampling(self.CFDCase.var_type, {
+                "real": get_sampling("real_lhs"),  # "real_random"),
+                "int": get_sampling("int_random")
+            })
+        else:
+            sampling = kwargs.pop('sampling')
+        if 'crossover' not in kwargs:
+            crossover = MixedVariableCrossover(self.CFDCase.var_type, {
+                "real": get_crossover("real_sbx", prob=1.0, eta=3.0),
+                "int": get_crossover("int_sbx", prob=1.0, eta=3.0)
+            })
+        else:
+            crossover = kwargs.pop('crossover')
+        if 'mutation' not in kwargs:
+            mutation = MixedVariableMutation(self.CFDCase.var_type, {
+                "real": get_mutation("real_pm", eta=3.0),
+                "int": get_mutation("int_pm", eta=3.0)
+            })
+        else:
+            mutation = kwargs.pop('mutation')
         return self.CFDGeneticAlgorithm(sampling, crossover, mutation,
                                         repair=self.CFDCase.repair, **kwargs)
 

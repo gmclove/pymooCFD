@@ -145,7 +145,7 @@ class PicklePath:
         #     return
         if self.is_pickle_path(inst):
             self.logger.info(
-                f'SAVING: {inst} TO {inst.cp_path}')
+                f'SAVING: {inst} TO {os.path.relpath(inst.cp_path)}')
             inst.save_self()
 
     def get_logger(self):
