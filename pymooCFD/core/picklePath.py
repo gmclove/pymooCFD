@@ -73,19 +73,21 @@ class PicklePath:
         for attr_key, attr_val in self.__dict__.items():
             # try:
             # if isinstance(attr_val, list): # hasattr(attr_val, "__getitem__")
-            try:
-                iter(attr_val)
-            except TypeError:  #, IndexError):
-                attr_is_iterable = False
-            else:
-                attr_is_iterable = True
-            if attr_is_iterable:
-                for i, item in enumerate(attr_val):
-                    self.loadIfPP(item)
-                    # if __class__ in item.__class__.mro():  # type(attr_val).mro(): #
-                    #     self.logger.info(
-                    #         f'LOADING: {attr_key}[{i}] FROM {item.cp_path}')
-                    #     item.update_self()
+            if self.is_iterable(attr_val):
+                # if (isinstance(attr_val, list) or
+                #     isinstance(attr_val, set) or
+                #     isinstance(attr_val, tuple)):
+                #     for item in attr_val:
+                #         self.loadIfPP(item)
+                if isinstance(attr_val, dict):
+                    for key, val in attr_val.items():
+                        self.loadIfPP(val)
+                else:
+                    for item in attr_val:
+                        self.loadIfPP(item)
+                    # self.logger.warning('Unknown Iterable Object')
+                    # self.logger.warning(f'ITEMS INSIDE ITERABLE ATTRIBUTE NOT LOADED - {attr_key} : {attr_val}')
+
             # type(attr_val).mro(): #
             self.loadIfPP(attr_val)
             # if __class__ in attr_val.__class__.mro():
@@ -99,15 +101,22 @@ class PicklePath:
         for attr_key, attr_val in self.__dict__.items():
             # try:
             # if isinstance(attr_val, list): # hasattr(attr_val, "__getitem__")
-            try:
-                iter(attr_val)
-            except TypeError:
-                attr_is_iterable = False
-            else:
-                attr_is_iterable = True
-            if attr_is_iterable:
-                for i, item in enumerate(attr_val):
-                    self.saveIfPP(item)
+            # print(attr_key, ':', attr_val)
+            # print(self.is_iterable(attr_val))
+            if self.is_iterable(attr_val):
+                # if (isinstance(attr_val, list) or
+                #     isinstance(attr_val, set) or
+                #     isinstance(attr_val, tuple)):
+                #     for item in attr_val:
+                #         self.saveIfPP(item)
+                if isinstance(attr_val, dict):
+                    for key, val in attr_val.items():
+                        self.saveIfPP(val)
+                else:
+                    for item in attr_val:
+                        self.saveIfPP(item)
+                    # self.logger.warning('Unknown Iterable Object')
+                    # self.logger.warning(f'ITEMS INSIDE ITERABLE ATTRIBUTE NOT SAVED - {attr_key} : {attr_val}')
                     # if __class__ in item.__class__.mro():  # type(attr_val).mro(): #
                     #     self.logger.info(
                     #         f'LOADING: {attr_key}[{i}] FROM {item.cp_path}')
@@ -123,11 +132,6 @@ class PicklePath:
 
 
     def loadIfPP(self, inst):
-        # try:
-        #     inst.__class__.mro()
-        # except TypeError as err:
-        #     self.logger.error(err)
-        #     return
         if self.is_pickle_path(inst):
             self.logger.info(
                 f'LOADING: {inst} FROM {inst.cp_path}')
@@ -242,6 +246,15 @@ class PicklePath:
 
     def _update_filter(self, loaded_self):
         return loaded_self
+
+    @staticmethod
+    def is_iterable(obj):
+        try:
+            iter(obj)
+        except TypeError:
+            return False
+        else:
+            return True
 
     @staticmethod
     def is_pickle_path(inst):
