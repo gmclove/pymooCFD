@@ -452,8 +452,7 @@ class OptRun(PicklePath):
         if gen is None:
             gen = len(self.algorithm.history)
         pop = self.algorithm.history[gen - 1].opt
-        if (max_opt_len is not None and
-            max_opt_len < len(pop)):
+        if (max_opt_len is not None and max_opt_len < len(pop)):
                 pop = pop[random.sample(range(len(pop)), max_opt_len)]
         popX = pop.get('X')
         popF = pop.get('F')
