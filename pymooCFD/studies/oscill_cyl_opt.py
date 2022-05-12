@@ -33,5 +33,6 @@ def exec_study():
         opt_run = study.new_run(alg, prob, run_dir=run_dir)
     opt_run.test_case.run()
     opt_run.test_case.mesh_study.run()
-    opt_run.run_bnd_cases(n_pts=3, doMeshStudy=True)
+    opt_run.gen_bnd_cases(n_pts=3, getDiags=True)
+    opt_run.run_bnd_cases(do_mesh_study=True)
     opt_run.run()
