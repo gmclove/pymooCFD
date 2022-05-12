@@ -38,7 +38,8 @@ class OscillCylinder(YALES2Case):
                          jobFile='jobslurm.sh',
                          inputFile='2D_cylinder.in',
                          meshSF=meshSF,
-                         mesh_study=MeshStudy(self, size_factors=[1.0, 1.3, 1.5, 2.0, 3.0, 4.0, 5.0])
+                         mesh_study=MeshStudy(self,
+                             size_factors=[1.0, 1.3, 1.5, 2.0, 3.0, 4.0, 5.0]),
                          **kwargs
                          )
 
