@@ -201,21 +201,8 @@ class OptRun(PicklePath):
 
             # save top {n_opt} optimal evaluated cases in pf directory
             # compGen = gen
-            for off_i, off in enumerate(self.algorithm.off):
-                for opt_i, opt in enumerate(self.algorithm.opt[:self.n_opt]):
-                    if np.array_equal(off.X, opt.X):
-                        opt_folder = f'opt{opt_i+1}'
-                        optDir = os.path.join(self.pfDir, opt_folder)
-                        ind_folder = f'ind{off_i+1}'
-                        offDir = os.path.join(
-                            self.abs_path, f'gen{gen}', ind_folder)
-                        self.logger.info(
-                            f'\tUpdating Pareto front folder: {ind_folder} -> {opt_folder}')
-                        try:
-                            copy_and_overwrite(offDir, optDir)
-                        except FileNotFoundError as err:
-                            self.logger.error(str(err))
-                            self.logger.warning('SKIPPED: UPDATE PARETO FRONT')
+            self.update_pareto_front_folder(self.algorithm.off,
+                                            self.algorithm.opt, gen)
             # do some more things, printing, logging, storing or even modifying the algorithm object
             self.algorithm.off = None
             self.save_self()
@@ -231,6 +218,22 @@ class OptRun(PicklePath):
         self.logger.info(f'hash {res.F.sum()}')
         # self.save_self()
 
+    def update_pareto_front_folder(self, offspring, optimum, gen):
+        for off_i, off in enumerate(offspring):
+            for opt_i, opt in enumerate(optimum[:self.n_opt]):
+                if np.array_equal(off.X, opt.X):
+                    opt_folder = f'opt{opt_i+1}'
+                    optDir = os.path.join(self.pfDir, opt_folder)
+                    ind_folder = f'ind{off_i+1}'
+                    offDir = os.path.join(
+                        self.abs_path, f'gen{gen}', ind_folder)
+                    self.logger.info(
+                        f'\tUpdating Pareto front folder: {ind_folder} -> {opt_folder}')
+                    try:
+                        copy_and_overwrite(offDir, optDir)
+                    except FileNotFoundError as err:
+                        self.logger.error(str(err))
+                        self.logger.warning('SKIPPED: UPDATE PARETO FRONT')
     # def execGen1(self):
     #     self.algorithm.termination = termination_from_tuple(('n_gen', 1))
     #     # no checkpoint saved before evaluation
@@ -425,10 +428,12 @@ class OptRun(PicklePath):
             avg_opt_conv_plot = fig, ax = plt.subplots()
             ax.plot(n_evals, opt_obj, "--", **kwargs)
             fig.suptitle('Convergence of Mean Optimum')
-            ax.set_title(f'Objective {obj_i+1}: {self.problem.BaseCase.obj_labels[obj_i]}')
+            ax.set_title(
+                f'Objective {obj_i+1}: {self.problem.BaseCase.obj_labels[obj_i]}')
             ax.set_xlabel('Number of Evaluations')
             ax.set_ylabel('Mean of Optimum')
-            fig.savefig(os.path.join(self.plotDir, f'mean_opt_convergence-obj{obj_i}'))
+            fig.savefig(os.path.join(
+                self.plotDir, f'mean_opt_convergence-obj{obj_i}'))
         # BEST OPTIMUM
         opt = np.array([alg.opt[0].F for alg in hist])
         # n_gen = [alg.n_gen for alg in hist]
@@ -437,23 +442,23 @@ class OptRun(PicklePath):
             opt_conv_plot = fig, ax = plt.subplots()
             ax.plot(n_evals, opt_obj, "--", **kwargs)
             fig.suptitle('Convergence of Optimum')
-            ax.set_title(f'Objective {obj_i+1}: {self.problem.BaseCase.obj_labels[obj_i]}')
+            ax.set_title(
+                f'Objective {obj_i+1}: {self.problem.BaseCase.obj_labels[obj_i]}')
             ax.set_xlabel('Number of Evaluations')
             # plt.plot(n_gen, opt_obj, "--")
             # plt.xlabel('Number of Generations')
             ax.set_ylabel('Optimum')
-            fig.savefig(os.path.join(self.plotDir, f'opt_convergence-obj{obj_i}'))
+            fig.savefig(os.path.join(
+                self.plotDir, f'opt_convergence-obj{obj_i}'))
 
         return opt_conv_plot, avg_opt_conv_plot
-
-
 
     def plotOpt(self, gen=None, max_opt_len=20, legend=True, **kwargs):
         if gen is None:
             gen = len(self.algorithm.history)
         pop = self.algorithm.history[gen - 1].opt
         if (max_opt_len is not None and max_opt_len < len(pop)):
-                pop = pop[random.sample(range(len(pop)), max_opt_len)]
+            pop = pop[random.sample(range(len(pop)), max_opt_len)]
         popX = pop.get('X')
         popF = pop.get('F')
         pt_labels = ['OPT ' + str(i + 1) for i in range(len(popX))]
@@ -700,8 +705,8 @@ class OptRun(PicklePath):
             if 'figsize' in kwargs:
                 figsize = kwargs.pop('figsize')
             else:
-                x_SF, y_SF = 8/2.5, 6/2.5
-                figsize = (n_axes*x_SF, n_axes*y_SF)
+                x_SF, y_SF = 8 / 2.5, 6 / 2.5
+                figsize = (n_axes * x_SF, n_axes * y_SF)
         if dif_markers:
             all_markers = {
                 '.': 'point', ',': 'pixel', 'o': 'circle', 'v': 'triangle_down',
