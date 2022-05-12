@@ -78,8 +78,6 @@ class OptRun(PicklePath):
         self.save_self()
         # self.save_self()
 
-
-
     def run(self, delPrevGen=True):
         self.logger.info('STARTING: OPTIMIZATION ALGORITHM RUN')
         self.algorithm.save_history = True
@@ -292,35 +290,6 @@ class OptRun(PicklePath):
                                     **kwargs)
         return var_plot, obj_plot
 
-        # pops = [self.algorithm.history[gen - 1].pop for gen in gens]
-        # ##############################
-        # #    Parameter Space Plot    #
-        # ##############################
-        # var_plot = Scatter(title='Design Space',
-        #                    legend=leg,
-        #                    labels=self.problem.BaseCase.var_labels,
-        #                    #                figsize=(10,8)
-        #                    )
-        # for pop_i, pop in enumerate(pops):
-        #     var_plot.add(pop.get('X'), label=f'GEN {gens[pop_i]}')
-        # # save parameter space plot
-        # var_plot.save(os.path.join(self.plotDir, f'gens_{gens}_var_space.png'),
-        #               dpi=100)
-        # #############################
-        # #   Objective Space Plot    #
-        # #############################
-        # obj_plot = Scatter(title='Objective Space',
-        #                    legend=leg,
-        #                    labels=self.problem.BaseCase.obj_labels
-        #                    )
-        # for pop_i, pop in enumerate(pops):
-        #     obj_plot.add(pop.get('F'), label=f'GEN {gens[pop_i]}')
-        # # save parameter space plot
-        # obj_plot.save(os.path.join(self.plotDir, f'gens_{gens}_obj_space.png'),
-        #               dpi=100)
-        #
-        # return var_plot, obj_plot
-
     def plotGen(self, gen=None, **kwargs):
         if gen is None:
             gen = len(self.algorithm.history)  # self.algorithm.callback.gen
@@ -414,88 +383,10 @@ class OptRun(PicklePath):
                                     pt_labels=pt_labels, s=20,
 
                                     **kwargs)
-        # all_markers = {
-        #     '.': 'point', ',': 'pixel', 'o': 'circle', 'v': 'triangle_down',
-        #     '^': 'triangle_up', '<': 'triangle_left', '>': 'triangle_right',
-        #     '1': 'tri_down', '2': 'tri_up', '3': 'tri_left', '4': 'tri_right',
-        #     '8': 'octagon', 's': 'square', 'p': 'pentagon', '*': 'star',
-        #     'h': 'hexagon1', 'H': 'hexagon2', '+': 'plus', 'x': 'x',
-        #     'D': 'diamond', 'd': 'thin_diamond', '|': 'vline', '_': 'hline',
-        #     'P': 'plus_filled', 'X': 'x_filled', 0: 'tickleft', 1: 'tickright',
-        #     2: 'tickup', 3: 'tickdown', 4: 'caretleft', 5: 'caretright',
-        #     6: 'caretup', 7: 'caretdown', 8: 'caretleftbase',
-        #     9: 'caretrightbase', 10: 'caretupbase'}
-        # all_markers = list(all_markers)
-        # n_pts = len(pop)
-        # while len(all_markers) < n_pts:
-        #     all_markers += all_markers
-        # markers = [m for i, m in enumerate(all_markers) if i < n_pts]
-    #     var_plot.do()
-    #     obj_plot.do()
-    #     print(var_plot.ax)
-    #     print(var_plot.ax.flatten())
-    #     for i, txt in enumerate(pt_labels):
-    #         for ax in var_plot.ax.flatten():
-    #             print(ax)
-    #             print(popX[i])
-    #             ax.annotate(txt, popX[i])
-    #         for ax in obj_plot.ax.flatten():
-    #             ax.annotate(txt, popF[i])
         self.logger.info(
             f'PLOTTED: Optimum after {gen} Generations - Design and Objective Spaces')
         return var_plot, obj_plot
-        # if gen is None:
-        #     gen = self.algorithm.n_gen
-        # pop = self.algorithm.history[gen - 1].pop
-        # # legend display
-        # var_leg, obj_leg = False, False
-        # var_title, obj_title = None, None
-        # var_labels, obj_labels = 'x', 'f'
-        # if self.problem.BaseCase.n_var <= 3:
-        #     if len(pop) <= max_leg_len:
-        #         var_leg = True
-        #     var_title = f'Generation {gen} Design Space'
-        #     if all(len(label) <= 20
-        #            for label in self.problem.BaseCase.var_labels):
-        #         var_labels = self.problem.BaseCase.var_labels
-        #
-        # if self.problem.BaseCase.n_obj <= 3:
-        #     if len(pop) <= max_leg_len:
-        #         obj_leg = True
-        #     obj_title = f'Generation {gen} Objective Space'
-        #     if all(len(label) <= 20
-        #            for label in self.problem.BaseCase.obj_labels):
-        #         var_labels = self.problem.BaseCase.obj_labels
-        #
-        # #### Parameter Space Plot ####
-        # popX = pop.get('X')
-        # var_plot = Scatter(title=var_title,
-        #                    legend=var_leg,
-        #                    labels=var_labels,
-        #                    tight_layout=True
-        #                    #                figsize=(10,8)
-        #                    )
-        # for ind_i, ind in enumerate(popX):
-        #     var_plot.add(ind, label=f'IND {ind_i+1}')
-        # # save parameter space plot
-        # var_plot.save(os.path.join(self.plotDir, f'gen{gen}_var_space.png'),
-        #               dpi=100)
-        #
-        # #### Objective Space Plot ####
-        # popF = pop.get('F')
-        # obj_plot = Scatter(title=obj_title,
-        #                    legend=obj_leg,
-        #                    labels=obj_labels,
-        #                    tight_layout=True
-        #                    )
-        # for ind_i, ind in enumerate(popF):
-        #     obj_plot.add(ind, label=f'IND {ind_i+1}')
-        # # save parameter space plot
-        # obj_plot.save(os.path.join(
-        #     self.plotDir, f'gen{gen}_obj_space.png'), dpi=100)
-        # self.logger.info(
-        #     f'PLOTTED: Generation {gen} Design and Objective Spaces')
-        # return var_plot, obj_plot
+
 
     def map_gen1(self):
         ##### Variable vs. Objective Plots ######
@@ -562,46 +453,6 @@ class OptRun(PicklePath):
         self.logger.info('Limit Permutations: ')
         self.logger.info(lim_perms)
         return lim_perms
-
-    # def genCornerCases(self):
-    #     lim_perms = self.getLimPerms()
-    #     with np.printoptions(precision=3, suppress=True):
-    #         cornerCases = []
-    #         for perm in lim_perms:
-    #             with np.printoptions(precision=3, suppress=True, formatter={'all': lambda x: '%.3g' % x}):
-    #                 caseName = str(perm).replace(
-    #                     '[', '').replace(']', '').replace(' ', '_')
-    #             cornerCaseDir = os.path.join(
-    #                 self.abs_path, 'corner-cases', caseName)
-    #             cornerCase = self.problem.BaseCase(cornerCaseDir, perm)
-    #             cornerCases.append(cornerCase)
-    #     self.cornerCases = cornerCases
-    #
-    # def runCornerCases(self):
-    #     '''
-    #     Finds binary permutations of limits and runs these cases.
-    #
-    #     runCornerCases(alg)
-    #     -------------------
-    #     Running these simulations during the optimization studies pre-processing
-    #     provides insight into what is happening at the most extreme limits of the
-    #     parameter space.
-    #
-    #     These simulations may provide insight into whether the user should expand
-    #     or restrict the parameter space. They may reveal that the model becomes
-    #     non-physical in these extreme cases.
-    #
-    #     Exploring the entire parameter space becomes important expecially in
-    #     optimization studies with geometric parameters. This is due to the
-    #     automated meshing introducting more variablility into the CFD case
-    #     workflow.
-    #     '''
-    #     if self.cornerCases is None:
-    #         self.genCornerCases()
-    #     else:
-    #         self.logger.warning(
-    #             'SKIPPED: GENERATE CORNER CASES - call self.genCornerCases() directly to create new corner cases')
-    #     self.problem.BaseCase.parallelize(self.cornerCases)
 
     def plotScatter(self, points, title=None, ax_labels='f',
                     pt_labels=None, max_leg_len=10, max_ax_label_len=20,

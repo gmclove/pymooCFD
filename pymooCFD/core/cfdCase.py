@@ -83,7 +83,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                  ):
         if len(x) != self.n_var:
             raise Exception(f'input x must be of length {self.n_var}')
-        self.meshSF = kwargs.get('meshSF', 1)
+        self.meshSF = kwargs.pop('meshSF', 1)
         self.validated = validated
         ###########################
         #    RESTART VARIABLES    #
@@ -124,8 +124,8 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         self.restart = False
         self.validated = validated
         # Default Attributes
-        if mesh_study is None:
-            self.mesh_study = MeshStudy(self)
+        meshSFs = kwargs.pop('meshSFs')
+        self.mesh_study = MeshStudy(self, size_factors=meshSFs)
         # os.makedirs(self.basecase_path, exist_ok=True)
         # Using kwargs (not an option with labels as class variables)
         # self.var_labels = kwargs.get('var_labels')
@@ -506,6 +506,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                             f'\t Objective {obj_i}: {obj} -> {np.inf}')
                         self._f = f
 
+    # OVERWRITE of PicklePath method
     def _update_filter(self, loaded_self):
         if np.array_equal(self._x, loaded_self._x):
             if loaded_self.meshSF != self.meshSF:
@@ -532,62 +533,6 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
             else:
                 self.logger.exception(
                     'GIVEN PARAMETERS DO NOT MATCH CHECKPOINT PARAMETERS.')
-
-    # def update_self(self):
-    #     cp = self.load_self()
-    #     # print(cp._x)
-    #     if np.array_equal(self._x, cp._x):
-    #         if self.abs_path != cp.abs_path:
-    #             self.logger.warning(
-    #                 'CASE DIRECTORY CHANGED BETWEEN CHECKPOINTS')
-    #             self.logger.debug(str(cp.rel_path) + ' -> ' + str(self.rel_path))
-    #         if cp.cp_path != self.cp_path:
-    #             self.logger.warning(f'{cp.cp_path} != {self.cp_path}')
-    #         if cp.meshSF != self.meshSF:
-    #             self.logger.warning(f'{cp.meshSF} != {self.meshSF}')
-    #             self.logger.warning(
-    #                 'Running genMesh() to reflect change in mesh size factor')
-    #             self.numElem = None
-    #             self.genMesh()
-    #             # cp.meshSF = self.meshSF
-    #             self.logger.info(
-    #                 'Mesh size factor changed, mesh generated, self.f and self.numElem set to None')
-    #             cp.f = None
-    #         cp.abs_path = self.abs_path
-    #         # cp.cp_path = self.cp_path
-    #         # cp.mesh_studyDir = self.mesh_studyDir
-    #         # cp.meshSFs = self.meshSFs
-    #         cp.base_case_path = self.base_case_path
-    #         # cp.logger = self.getLogger()
-    #         self.update_self(loaded_self=cp)
-    #         self.logger.info(f'CHECKPOINT LOADED - {self.cp_rel_path}')
-    #     else:
-    #         self.logger.info(f'Given Parameters: {self._x}')
-    #         self.logger.info(f'Checkpoint Parameters: {cp._x}')
-    #         question = f'\nCASE PARAMETERS DO NOT MATCH.\nOVERWRITE {self.rel_path}?'
-    #         overwrite = yes_or_no(question)
-    #         if overwrite:
-    #             shutil.rmtree(self.abs_path)
-    #             self.__init__(self.abs_path, self.x)
-    #         else:
-    #             self.logger.exception(
-    #                 'GIVEN PARAMETERS DO NOT MATCH CHECKPOINT PARAMETERS.')
-        # del_keys = []
-        # for cp_key in cp.__dict__:
-        #     if cp_key in self.__dict__:
-        #         print(cp_key, 'in self.__dict__')
-        #         print(self.__dict__[cp_key])
-        #         print(cp.__dict__[cp_key])
-        #         print(f'Updating - {cp_key}: {cp.__dict__[cp_key]} -> {self.__dict__[cp_key]}')
-        #         del_keys.append(cp_key)
-        #         del cp.__dict__[cp_key]
-        # for key in del_keys:
-        #     del cp.__dict__[key]
-        # print('self.__dict__', self.__dict__)
-        # print()
-        # print('cp.__dict__', cp.__dict__)
-        # cp.__dict__.update(self.__dict__)
-        # Directory Name Changes
 
     ########################
     #    HELPER METHODS    #
@@ -663,29 +608,6 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                 file_lines[kw_line_i] = marker + kw_line
         return file_lines
 
-        # @run_once# import functools
-    # def run_once(f):
-    #     """Runs a function (successfully) only once.
-    #     The running can be reset by setting the `has_run` attribute to False
-    #     """
-    #     @functools.wraps(f)
-    #     def wrapper(*args, **kwargs):
-    #         if not wrapper.complete:
-    #             result = f(*args, **kwargs)
-    #             wrapper.complete = True
-    #             return result
-    #     wrapper.complete = False
-    #     return wrapper
-    #
-    # def calltracker(func):
-    #     @functools.wraps(func)
-    #     def wrapper(*args, **kwargs):
-    #         result = func(*args, **kwargs)
-    #         wrapper.complete = True
-    #         return result
-    #     wrapper.complete = False
-    #     return wrapper
-
     ########################
     #    DUNDER METHODS    #
     ########################
@@ -695,25 +617,6 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
             s += f' | Objectives: {self._f}'
         return s
 
-    # __repr__ = __str__
-
-    # def __deepcopy__(self, memo):
-    #     # shutil.copytree(self.base_case_path, self.abs_path, dirs_exist_ok=True)
-    #     # print('COPIED:', self.base_case_path, '->', self.abs_path)
-    #     cls = self.__class__
-    #     result = cls.__new__(cls)
-    #     memo[id(self)] = result
-    #     for k, v in self.__dict__.items():
-    #         setattr(result, k, copy.deepcopy(v, memo))
-    #     return result
-
-    # Calling destructor
-    # def __del__(self):
-    #     # self.save_self()
-    #     # shutil.rmtree(caseDir)
-    #     self.logger.info('EXITED')
-    #     print('EXITED:', self.abs_path)
-
     # ==========================================================================
     # TO BE OVERWRITTEN
     # ==========================================================================
@@ -722,10 +625,6 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
 
     def _preProc_restart(self):
         self._preProc()
-        # pass
-
-    # def _pySolve(self):
-    #     pass
 
     def _solve(self):
         self.logger.error(
@@ -745,6 +644,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
 
     def _getVar(self, x):
         return x
+
 
 
 class YALES2Case(CFDCase):

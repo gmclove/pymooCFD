@@ -14,20 +14,24 @@ from pymoo.visualization.scatter import Scatter
 
 from pymooCFD.util.loggingTools import MultiLineFormatter
 from pymooCFD.util.handleData import saveTxt
+from pymooCFD.core.picklePath import PicklePath
 
 
-class MeshStudy:  # (CFDCase):
+class MeshStudy(PicklePath):  # (CFDCase):
     def __init__(self, cfd_case,
-                 size_factors=np.around(np.arange(0.5, 1.5, 0.1), decimals=2)
+                 size_factors=None
                  ):
-        super().__init__()
+        super().__init__(os.path.join(cfd_case.abs_path, 'mesh_study'))
+        if size_factors is None:
+            self.size_factors = np.around(np.arange(0.5, 1.5, 0.1), decimals=2)
+        else:
+            self.size_factors = size_factors
         self.folder = os.path.join(cfd_case.abs_path, 'mesh_study')
         os.makedirs(self.folder, exist_ok=True)
         # os.makedirs(self.folder,)
         self.logger = self.getLogger()
         self.base_case = cfd_case
         self.cases = None  # []
-        self.size_factors = size_factors
         self.logger.info('INITIALIZED: Mesh Study')
 
     def run(self):
