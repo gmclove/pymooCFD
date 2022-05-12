@@ -49,50 +49,7 @@ class OptRun(PicklePath):
         #######################################
         #    ATTRIBUTES NEEDED FOR RESTART    #
         #######################################
-        # if not restart:
-        # if os.path.exists(self.optDatDir):
-        #     if os.path.exists(self.cp_path):
-        #         self.loadCP()
-        #         self.logger.info('RESTARTED FROM', self.cp_path)
-        #         return
-        #     else:
-        #         question = f'{self.cp_path} does not exist.\nOVERWRITE {self.optDatDir}?'
-        #         overwrite = yes_or_no(question)
-        #         if overwrite:
-        #             os.removedirs(self.optDatDir)
-        #             os.makedirs(optDatDir, exist_ok=True)
-        #         else:
-        #             question = f'{self.cp_path} does not exist.\n?'
-        #             overwrite = yes_or_no(question)
 
-        # if os.path.isdir(self.optDatDir):
-        #     try:
-        #         self.loadCP()
-        #         self.logger.info('RESTARTED FROM CHECKPOINT')
-        #         return
-        #     except FileNotFoundError:
-        #         question = f'\n{self.cp_path} does not exist.\nEMPTY {self.optDatDir} DIRECTORY?'
-        #         overwrite = yes_or_no(question)
-        #         if overwrite:
-        #             shutil.rmtree(self.optDatDir)
-        #             os.mkdir(self.optDatDir)
-        #             self.logger.info(f'EMPTIED - {self.optDatDir}')
-        #         else:
-        #             self.logger.info(f'KEEPING FILES - {self.optDatDir}')
-        #         self.logger.info('RE-INITIALIZING OPTIMIZATION ALGORITHM')
-        # else:
-        #     os.makedirs(self.optDatDir)
-        #     self.logger.info(
-        #         f'NEW OPTIMIZATION STUDY - {self.optDatDir} did not exist')
-        # except FileNotFoundError:
-        #     print('OVERRIDE OPTIMIZATION STUDY -')
-        #     print('\t{self.cp_path} already exists but {self.cpPath} does not')
-        #     self.copy()
-        # else:
-        #     os.makedirs(caseDir, exist_ok=True)
-        #     self.logger = self.getLogger()
-        #     self.logger.info(f'NEW CASE - {caseDir} did not exist')
-        #     self.copy()
         #############################
         #    Required Attributes    #
         #############################
@@ -121,27 +78,7 @@ class OptRun(PicklePath):
         self.save_self()
         # self.save_self()
 
-    # def newAlg(self):
-    #     self.logger.info('INITIALIZING NEW OPTIMIZATION AlGORITHM')
-    #     # archive/empty previous runs data directory
-    #     # emptyDir(self.optDatDir)
-    #     self.algorithm.setup(self.problem,
-    #                          seed=self.algorithm.seed,
-    #                          verbose=self.algorithm.verbose,
-    #                          save_history=self.algorithm.save_history,
-    #                          return_least_infeasible=self.algorithm.return_least_infeasible
-    #                          )
-    #     self.algorithm.callback.__init__()
-    #     self.save_self()
-    #
-    # def initAlg(self):
-    #     if self.algorithm.is_initialized:
-    #         self.loadCP()
-    #         self.logger.info(f'Loaded Algorithm Checkpoint: {self.algorithm}')
-    #         self.logger.info(
-    #             f'\tLast checkpoint at generation {self.algorithm.callback.gen}')
-    #     else:
-    #         self.newAlg()
+
 
     def run(self, delPrevGen=True):
         self.logger.info('STARTING: OPTIMIZATION ALGORITHM RUN')
@@ -842,7 +779,7 @@ class OptRun(PicklePath):
         pts = np.unique(pts, axis=0)
         return pts
 
-    def run_bnd_cases(self, n_pts=2, getDiags=False, do_mesh_study=False):
+    def run_bnd_cases(self, do_mesh_study=False):
         self.problem.BaseCase.parallelize(self.bnd_cases)
         self.save_self()
         self.plotBndPtsObj()
