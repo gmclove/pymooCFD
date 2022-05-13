@@ -9,7 +9,7 @@ def exec_test():
     if run_dir in study.opt_runs:
         opt_run = study.opt_runs[run_dir]
     else:
-        xl = [0.1, 0.2]  # lower limits of parameters/variables
+        xl = [0.1, 0.05]  # lower limits of parameters/variables
         xu = [10, 1]  # upper limits of variables
         prob = study.get_problem(xl, xu)
         alg = study.get_algorithm(n_gen=2, pop_size=3,
@@ -27,7 +27,7 @@ def exec_study():
     if run_dir in study.opt_runs:
         opt_run = study.opt_runs[run_dir]
     else:
-        xl = [0.1, 0.2]  # lower limits of parameters/variables
+        xl = [0.1, 0.05]  # lower limits of parameters/variables
         xu = [10, 1]  # upper limits of variables
         prob = study.get_problem(xl, xu)
         alg = study.get_algorithm(n_gen=35, pop_size=50,
