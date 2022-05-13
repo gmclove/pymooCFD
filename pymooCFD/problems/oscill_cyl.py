@@ -317,7 +317,7 @@ class OscillCylinder_Re500_SLURM(OscillCylinder_Re500):
     nTasks = 20
 
 
-class OscillCylinderSOO_SLURM(OscillCylinder_SLURM):
+class OscillCylinder_SOO_SLURM(OscillCylinder_SLURM):
     ####### Define Objective Space ########
     obj_labels = ['Change in Coefficient of Drag [%]']
     n_obj = 1
