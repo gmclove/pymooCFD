@@ -31,7 +31,7 @@ def exec_study(**kwargs):
         x_max = y_max = 3.7
         xl = [x_min, y_min, x_min, y_min, 1, 1, 0.5]
         xu = [x_max, y_max, x_max, y_max, 4, 4, 6]
-        alg = study.get_algorithm(n_gen=20, pop_size=50, n_offsprings=7,
+        alg = study.get_algorithm(n_gen=35, pop_size=50, n_offsprings=7,
                                   **kwargs)
         prob = study.get_problem(xl, xu, **kwargs)
         opt_run = study.new_run(alg, prob, run_dir=run_dir, **kwargs)

@@ -146,6 +146,7 @@ class OptRun(PicklePath):
             self.plotGen()
             self.plotOpt()
             self.plotConv()
+            self.plotAllOpt()
             if gen == 1:
                 self.gen1_pop = eval_pop
                 self.map_gen1()
@@ -390,7 +391,7 @@ class OptRun(PicklePath):
 
         return opt_conv_plot, avg_opt_conv_plot
 
-    def plotOpt(self, gen=None, max_opt_len=20, legend=True, **kwargs):
+    def plotOpt(self, gen=None, max_opt_len=20, **kwargs):
         if gen is None:
             gen = len(self.algorithm.history)
         pop = self.algorithm.history[gen - 1].opt
@@ -399,103 +400,46 @@ class OptRun(PicklePath):
         popX = pop.get('X')
         popF = pop.get('F')
         pt_labels = ['OPT ' + str(i + 1) for i in range(len(popX))]
+        var_plot = self.plotScatter(popX, title=f'Top 20 Optimum After {gen} Generations - Design Space',
+                                    ax_labels=self.problem.BaseCase.var_labels,
+                                    dir_path=self.plotDir,
+                                    fname=f'top20_opt_gen{gen}_var_space.png',
+                                    dif_markers=True, max_leg_len=20,
+                                    pt_labels=pt_labels, s=10,
+                                    **kwargs)
+        obj_plot = self.plotScatter(popF, title=f'Top 20 Optimum After {gen} Generations - Objective Space',
+                                    ax_labels=self.problem.BaseCase.obj_labels,
+                                    dir_path=self.plotDir,
+                                    fname=f'top20_opt_gen{gen}_obj_space.png',
+                                    dif_markers=True, max_leg_len=20,
+                                    pt_labels=pt_labels, s=20,
+                                    **kwargs)
+        self.logger.info(
+            f'PLOTTED: Optimum after {gen} Generations - Design and Objective Spaces')
+        return var_plot, obj_plot
+
+    def plotAllOpt(self, gen=None, **kwargs):
+        if gen is None:
+            gen = len(self.algorithm.history)
+        pop = self.algorithm.history[gen - 1].opt
+        popX = pop.get('X')
+        popF = pop.get('F')
+        pt_labels = ['OPT ' + str(i + 1) for i in range(len(popX))]
         var_plot = self.plotScatter(popX, title=f'Optimum After {gen} Generations - Design Space',
                                     ax_labels=self.problem.BaseCase.var_labels,
                                     dir_path=self.plotDir,
                                     fname=f'opt_gen{gen}_var_space.png',
-                                    dif_markers=True, max_leg_len=20,
-                                    pt_labels=pt_labels, s=10,
+                                    dif_markers=True, pt_labels=pt_labels, s=10,
                                     **kwargs)
         obj_plot = self.plotScatter(popF, title=f'Optimum After {gen} Generations - Objective Space',
                                     ax_labels=self.problem.BaseCase.obj_labels,
                                     dir_path=self.plotDir,
                                     fname=f'opt_gen{gen}_obj_space.png',
-                                    dif_markers=True, max_leg_len=20,
-                                    pt_labels=pt_labels, s=20,
-
+                                    dif_markers=True, pt_labels=pt_labels, s=20,
                                     **kwargs)
-        # all_markers = {
-        #     '.': 'point', ',': 'pixel', 'o': 'circle', 'v': 'triangle_down',
-        #     '^': 'triangle_up', '<': 'triangle_left', '>': 'triangle_right',
-        #     '1': 'tri_down', '2': 'tri_up', '3': 'tri_left', '4': 'tri_right',
-        #     '8': 'octagon', 's': 'square', 'p': 'pentagon', '*': 'star',
-        #     'h': 'hexagon1', 'H': 'hexagon2', '+': 'plus', 'x': 'x',
-        #     'D': 'diamond', 'd': 'thin_diamond', '|': 'vline', '_': 'hline',
-        #     'P': 'plus_filled', 'X': 'x_filled', 0: 'tickleft', 1: 'tickright',
-        #     2: 'tickup', 3: 'tickdown', 4: 'caretleft', 5: 'caretright',
-        #     6: 'caretup', 7: 'caretdown', 8: 'caretleftbase',
-        #     9: 'caretrightbase', 10: 'caretupbase'}
-        # all_markers = list(all_markers)
-        # n_pts = len(pop)
-        # while len(all_markers) < n_pts:
-        #     all_markers += all_markers
-        # markers = [m for i, m in enumerate(all_markers) if i < n_pts]
-    #     var_plot.do()
-    #     obj_plot.do()
-    #     print(var_plot.ax)
-    #     print(var_plot.ax.flatten())
-    #     for i, txt in enumerate(pt_labels):
-    #         for ax in var_plot.ax.flatten():
-    #             print(ax)
-    #             print(popX[i])
-    #             ax.annotate(txt, popX[i])
-    #         for ax in obj_plot.ax.flatten():
-    #             ax.annotate(txt, popF[i])
         self.logger.info(
             f'PLOTTED: Optimum after {gen} Generations - Design and Objective Spaces')
         return var_plot, obj_plot
-        # if gen is None:
-        #     gen = self.algorithm.n_gen
-        # pop = self.algorithm.history[gen - 1].pop
-        # # legend display
-        # var_leg, obj_leg = False, False
-        # var_title, obj_title = None, None
-        # var_labels, obj_labels = 'x', 'f'
-        # if self.problem.BaseCase.n_var <= 3:
-        #     if len(pop) <= max_leg_len:
-        #         var_leg = True
-        #     var_title = f'Generation {gen} Design Space'
-        #     if all(len(label) <= 20
-        #            for label in self.problem.BaseCase.var_labels):
-        #         var_labels = self.problem.BaseCase.var_labels
-        #
-        # if self.problem.BaseCase.n_obj <= 3:
-        #     if len(pop) <= max_leg_len:
-        #         obj_leg = True
-        #     obj_title = f'Generation {gen} Objective Space'
-        #     if all(len(label) <= 20
-        #            for label in self.problem.BaseCase.obj_labels):
-        #         var_labels = self.problem.BaseCase.obj_labels
-        #
-        # #### Parameter Space Plot ####
-        # popX = pop.get('X')
-        # var_plot = Scatter(title=var_title,
-        #                    legend=var_leg,
-        #                    labels=var_labels,
-        #                    tight_layout=True
-        #                    #                figsize=(10,8)
-        #                    )
-        # for ind_i, ind in enumerate(popX):
-        #     var_plot.add(ind, label=f'IND {ind_i+1}')
-        # # save parameter space plot
-        # var_plot.save(os.path.join(self.plotDir, f'gen{gen}_var_space.png'),
-        #               dpi=100)
-        #
-        # #### Objective Space Plot ####
-        # popF = pop.get('F')
-        # obj_plot = Scatter(title=obj_title,
-        #                    legend=obj_leg,
-        #                    labels=obj_labels,
-        #                    tight_layout=True
-        #                    )
-        # for ind_i, ind in enumerate(popF):
-        #     obj_plot.add(ind, label=f'IND {ind_i+1}')
-        # # save parameter space plot
-        # obj_plot.save(os.path.join(
-        #     self.plotDir, f'gen{gen}_obj_space.png'), dpi=100)
-        # self.logger.info(
-        #     f'PLOTTED: Generation {gen} Design and Objective Spaces')
-        # return var_plot, obj_plot
 
     def map_gen1(self):
         ##### Variable vs. Objective Plots ######

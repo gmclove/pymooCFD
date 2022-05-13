@@ -1,4 +1,5 @@
 from pymooCFD.util.handleData import findKeywordLine
+import numpy as np
 import os
 import re
 from glob import glob
@@ -70,3 +71,20 @@ def getWallTime(caseDir):
         print('no wall clock time found')
         wall_time = None
     return wall_time
+
+
+def getY2LineData(path):
+    with open(path, 'r') as f:
+        lines = f.readlines()
+    lines = lines[1:]
+    line_dat = []
+    t_step_dat = []
+    for i, line in enumerate(lines):
+        if line[0] == '&':
+            line_dat.append(t_step_dat)
+            t_step_dat = []
+        else:
+            t_step_dat.append(np.fromstring(line, sep=' ', dtype=np.float64))
+    line_dat = np.array(line_dat)
+    t = np.array([t_step[0][1] for t_step in line_dat])
+    return line_dat, t
