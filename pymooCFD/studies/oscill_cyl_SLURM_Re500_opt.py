@@ -1,6 +1,7 @@
 from pymooCFD.core.minimizeCFD import MinimizeCFD
-from pymooCFD.problems.oscill_cyl import OscillCylinder_SLURM_Re500 as BaseCase
+from pymooCFD.problems.oscill_cyl import OscillCylinder_Re500_SLURM as BaseCase
 # from pymooCFD.core.pymooBase import CFDTestProblem
+
 
 def exec_test():
     study = MinimizeCFD(BaseCase) #, CFDGeneticProblem=CFDTestProblem)
@@ -17,6 +18,7 @@ def exec_test():
     opt_run.test_case.run()
     # opt_run.run_bnd_cases()
     opt_run.run()
+
 
 def exec_study():
     study = MinimizeCFD(BaseCase)

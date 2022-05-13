@@ -1,4 +1,4 @@
-from pymooCFD.studies.oscill_cyl_SLURM_Re500_opt import exec_test, exec_study, \
+from pymooCFD.studies.oscill_cyl_Re500_SLURM_opt import exec_test, exec_study, \
                                                         BaseCase, MinimizeCFD
 
 
