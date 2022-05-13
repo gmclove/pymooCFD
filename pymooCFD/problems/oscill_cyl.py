@@ -276,3 +276,12 @@ BaseCase = OscillCylinder
 class OscillCylinder_SLURM(OscillCylinder):
     solverExecCmd = ['sbatch', '--wait', 'jobslurm.sh']
     nTasks = 20
+
+
+class OscillCylinder_Re500(OscillCylinder):
+    base_case_path = os.path.join(os.path.dirname(__file__), 'base_cases',
+                                  'osc-cyl_base-Re500')
+
+class OscillCylinder_SLURM_Re500(OscillCylinder_SLURM):
+    base_case_path = os.path.join(os.path.dirname(__file__), 'base_cases',
+                                  'osc-cyl_base-Re500')
