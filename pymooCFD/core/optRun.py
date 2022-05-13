@@ -589,7 +589,7 @@ class OptRun(PicklePath):
                 x_SF, y_SF = 8 / 2.5, 6 / 2.5
                 figsize = (n_axes * x_SF, n_axes * y_SF)
         if dif_markers:
-            all_markers = {
+            all_markers = list({
                 '.': 'point', ',': 'pixel', 'o': 'circle', 'v': 'triangle_down',
                 '^': 'triangle_up', '<': 'triangle_left', '>': 'triangle_right',
                 '1': 'tri_down', '2': 'tri_up', '3': 'tri_left', '4': 'tri_right',
@@ -599,10 +599,11 @@ class OptRun(PicklePath):
                 'P': 'plus_filled', 'X': 'x_filled', 0: 'tickleft', 1: 'tickright',
                 2: 'tickup', 3: 'tickdown', 4: 'caretleft', 5: 'caretright',
                 6: 'caretup', 7: 'caretdown', 8: 'caretleftbase',
-                9: 'caretrightbase', 10: 'caretupbase'}
-            while len(all_markers) < n_pts:
-                all_markers += all_markers
-            markers = [m for i, m in enumerate(all_markers) if i < n_pts]
+                9: 'caretrightbase', 10: 'caretupbase'})
+            concat_markers = all_markers
+            while len(concat_markers) < n_pts:
+                concat_markers += all_markers
+            markers = [m for i, m in enumerate(concat_markers) if i < n_pts]
         else:
             markers = ['o' for _ in range(n_pts)]
         # if legend is not None:
