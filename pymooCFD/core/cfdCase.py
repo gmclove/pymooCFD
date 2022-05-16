@@ -489,6 +489,8 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
                 f = np.array([f])
             path = os.path.join(self.abs_path, 'obj.txt')
             np.savetxt(path, f)
+            self._f = f
+            # check for None or nan values, change those values to infinity
             if None in f:
                 self.logger.warning(f'OBJECTIVE CONTAINS None VALUE - {f}')
                 for obj_i, obj in enumerate(f):
