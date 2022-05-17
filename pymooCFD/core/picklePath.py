@@ -228,7 +228,10 @@ class PicklePath:
     def update_warnings(self, loaded_self=None):
         if loaded_self is None:
             loaded_self = self.load_self()
-        diff = DeepDiff(self, loaded_self)
+        try:
+            diff = DeepDiff(self, loaded_self)
+        except TypeError:
+            diff = ''
         pp = pprint.PrettyPrinter(width=41, indent=4)  # ,compact=True)
         if diff:
             self.logger.warning(pp.pformat(diff))
