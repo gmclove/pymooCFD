@@ -37,7 +37,7 @@ class PicklePath:
             # try:
             if os.path.exists(self.cp_path):
                 self.update_self()
-                self.load_sub_pickle_paths()
+                # self.load_sub_pickle_paths()
                 self.logger.info('RESTARTED FROM CHECKPOINT')
                 self.cp_init = True
                 return
@@ -219,6 +219,7 @@ class PicklePath:
         # UPDATE: only instance dictonary
         # class dictionary/code changes between checkpoints will be reflected
         self.__dict__.update(loaded_self.__dict__)
+        self.load_sub_pickle_paths()
         # log
         self.logger.debug('\tUPDATED DICTONARY')
         for key, val in self.__dict__.items():
@@ -229,7 +230,8 @@ class PicklePath:
             loaded_self = self.load_self()
         diff = DeepDiff(self, loaded_self)
         pp = pprint.PrettyPrinter(width=41, indent=4)  # ,compact=True)
-        self.logger.warning(pp.pformat(diff))
+        if diff:
+            self.logger.warning(pp.pformat(diff))
         # for key, val in self.__dict__.items():
         #     if key in loaded_self.__dict__:
         #         loaded_val = loaded_self.__dict__[key]
