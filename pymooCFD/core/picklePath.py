@@ -12,7 +12,7 @@ from pymooCFD.util.sysTools import yes_or_no
 
 
 class PicklePath:
-    def __init__(self, dir_path=None, sub_dirs=[], log_level=logging.DEBUG):
+    def __init__(self, dir_path=None, log_level=logging.DEBUG): # sub_dirs=[]
         if dir_path is None:
             dir_path = self.__class__.__name__
         self.abs_path = os.path.abspath(dir_path)
@@ -97,9 +97,11 @@ class PicklePath:
             # except AttributeError as err:
             #     self.logger.error(err)
 
-    def save_sub_pickle_paths(self):
+    def save_sub_pickle_paths(self, obj=None):
+        if obj is None:
+            obj = self
         # Check for other PicklePath child class and load if found
-        for attr_key, attr_val in self.__dict__.items():
+        for attr_key, attr_val in obj.__dict__.items():
             # try:
             # if isinstance(attr_val, list): # hasattr(attr_val, "__getitem__")
             # print(attr_key, ':', attr_val)
@@ -189,8 +191,9 @@ class PicklePath:
         return logger
 
     def save_self(self):
-        self.saveNumpyFile(self.cp_path, self)
-        self.save_sub_pickle_paths()
+        filtered_self = self._save_filter()
+        self.saveNumpyFile(self.cp_path, filtered_self)
+        self.save_sub_pickle_paths(filtered_self)
         self.logger.info('CHECKPOINT SAVED')
 
     def load_self(self):
@@ -261,6 +264,9 @@ class PicklePath:
 
     def _update_filter(self, loaded_self):
         return loaded_self
+
+    def _save_filter(self):
+        return self
 
     @staticmethod
     def is_iterable(obj):

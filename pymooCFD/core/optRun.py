@@ -22,7 +22,7 @@ from pymooCFD.core.picklePath import PicklePath
 
 class OptRun(PicklePath):
     def __init__(self, algorithm, problem,
-                 run_path='run-defualt',
+                 run_path='default_run',
                  n_opt=100,
                  # restart=True,
                  # optDatDir='opt_run',

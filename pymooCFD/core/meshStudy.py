@@ -14,20 +14,23 @@ from pymoo.visualization.scatter import Scatter
 
 from pymooCFD.util.loggingTools import MultiLineFormatter
 from pymooCFD.util.handleData import saveTxt
+from pymooCFD.core.picklePath import PicklePath
 
 
-class MeshStudy:  # (CFDCase):
+class MeshStudy(PicklePath):  # (CFDCase):
     def __init__(self, cfd_case,
                  size_factors=np.around(np.arange(0.5, 1.5, 0.1), decimals=2)
                  ):
-        super().__init__()
-        self.folder = os.path.join(cfd_case.abs_path, 'mesh_study')
-        os.makedirs(self.folder, exist_ok=True)
+        path = os.path.join(cfd_case.abs_path, 'mesh_study')
+        self.folder = path
         # os.makedirs(self.folder,)
-        self.logger = self.getLogger()
+        # self.logger = self.getLogger()
         self.base_case = cfd_case
         self.cases = None  # []
-        self.size_factors = size_factors
+        self.size_factors = np.array(size_factors)
+        super().__init__(dir_path=path)
+        if self.cp_init:
+            return
         self.logger.info('INITIALIZED: Mesh Study')
 
     def run(self):
@@ -98,7 +101,7 @@ class MeshStudy:  # (CFDCase):
             fName = f'meshSF-{sf}'
             path = os.path.join(self.folder, fName)
             self.logger.info(f'\t\tInitializing {path} . . .')
-            msCase.__init__(path, self.base_case.x, meshSF=sf)
+            msCase.__init__(path, self.base_case.x, meshSF=sf, meshSFs=None)
             msCase.mesh_study = None
             if msCase.meshSF != sf or msCase.numElem is None:
                 # only pre-processing needed is generating mesh
@@ -207,36 +210,40 @@ class MeshStudy:  # (CFDCase):
             plot.save(fPath, dpi=100)
         self.base_case.save_self()
 
+    def _save_filter(self):
+        obj = copy.deepcopy(self)
+        del obj.__dict__['base_case']
+        return obj
     ################
     #    LOGGER    #
     ################
-    def getLogger(self):
-        _, tail = os.path.split(self.folder)
-        # Get Child Logger using hierarchical "dot" convention
-        logger = logging.getLogger(__name__ + '.' + self.folder)
-        logger.setLevel(config.CFD_CASE_LOGGER_LEVEL)
-        # Filters
-        # Filters added to logger do not propogate up logger hierarchy
-        # Filters added to handlers do propogate
-        # filt = DispNameFilter(self.abs_path)
-        # logger.addFilter(filt)
-        # File Handle
-        logFile = os.path.join(self.folder, f'{tail}.log')
-        fileHandler = logging.FileHandler(logFile)
-        logger.addHandler(fileHandler)
-        # Stream Handler
-        # parent root logger takes care of stream display
-        # Formatter
-        formatter = MultiLineFormatter(
-            '%(asctime)s :: %(levelname)-8s :: %(name)s :: %(message)s')
-        fileHandler.setFormatter(formatter)
-        # Initial Message
-        logger.info('-' * 30)
-        logger.info('LOGGER INITIALIZED')
-        # Plot logger
-        plot_logger = logging.getLogger(Scatter.__name__)
-        plot_logger.setLevel(config.PLOT_LOGGER_LEVEL)
-        return logger
+    # def getLogger(self):
+    #     _, tail = os.path.split(self.folder)
+    #     # Get Child Logger using hierarchical "dot" convention
+    #     logger = logging.getLogger(__name__ + '.' + self.folder)
+    #     logger.setLevel(config.CFD_CASE_LOGGER_LEVEL)
+    #     # Filters
+    #     # Filters added to logger do not propogate up logger hierarchy
+    #     # Filters added to handlers do propogate
+    #     # filt = DispNameFilter(self.abs_path)
+    #     # logger.addFilter(filt)
+    #     # File Handle
+    #     logFile = os.path.join(self.folder, f'{tail}.log')
+    #     fileHandler = logging.FileHandler(logFile)
+    #     logger.addHandler(fileHandler)
+    #     # Stream Handler
+    #     # parent root logger takes care of stream display
+    #     # Formatter
+    #     formatter = MultiLineFormatter(
+    #         '%(asctime)s :: %(levelname)-8s :: %(name)s :: %(message)s')
+    #     fileHandler.setFormatter(formatter)
+    #     # Initial Message
+    #     logger.info('-' * 30)
+    #     logger.info('LOGGER INITIALIZED')
+    #     # Plot logger
+    #     plot_logger = logging.getLogger(Scatter.__name__)
+    #     plot_logger.setLevel(config.PLOT_LOGGER_LEVEL)
+    #     return logger
 
     @property
     def size_factors(self): return self._size_factors

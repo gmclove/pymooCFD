@@ -70,6 +70,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
     def __init__(self, case_path, x,
                  validated=False,
                  mesh_study=None,
+                 meshSFs=[5.0, 4.0, 3.0, 2.0, 1.2, 1.0, 0.8],
                  # externalSolver=False,
                  # var_labels=None, obj_labels=None,
                  meshFile=None,  # meshLines = None,
@@ -92,6 +93,7 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         # self.externalSolver = self.externalSolver
         self.setup_parallelize(self.externalSolver)
         self._x = x
+        self._f = None
 
         #####################################
         #    CHECKPOINT/PICKLE PATH INIT    #
@@ -125,7 +127,12 @@ class CFDCase(PicklePath):  # (PreProcCase, PostProcCase)
         self.validated = validated
         # Default Attributes
         if mesh_study is None:
-            self.mesh_study = MeshStudy(self)
+            if meshSFs is None:
+                self.mesh_study = None
+            else:
+                self.mesh_study = MeshStudy(self, size_factors=meshSFs)
+        else:
+            self.mesh_study = mesh_study
         # os.makedirs(self.basecase_path, exist_ok=True)
         # Using kwargs (not an option with labels as class variables)
         # self.var_labels = kwargs.get('var_labels')
