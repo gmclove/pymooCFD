@@ -22,7 +22,7 @@ from pymooCFD.core.picklePath import PicklePath
 
 class OptRun(PicklePath):
     def __init__(self, algorithm, problem,
-                 run_path='run-defualt',
+                 run_path='default_run',
                  n_opt=100,
                  # restart=True,
                  # optDatDir='opt_run',
@@ -147,6 +147,8 @@ class OptRun(PicklePath):
             self.plotOpt()
             self.plotConv()
             self.plotAllOpt()
+            self.plotGens()
+
             if gen == 1:
                 self.gen1_pop = eval_pop
                 self.map_gen1()
@@ -273,7 +275,9 @@ class OptRun(PicklePath):
     #     self.plotGen()
     #     return pop
 
-    def plotGens(self, gens, **kwargs):
+    def plotGens(self, gens=None, **kwargs):
+        if gens is None:
+            gens = range(1, len(self.algorithm.history) + 1)
         pops = [self.algorithm.history[gen - 1].pop for gen in gens]
         popsX = [pop.get('X') for pop in pops]
         popsF = [pop.get('F') for pop in pops]
