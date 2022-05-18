@@ -380,21 +380,19 @@ class OptRun(PicklePath):
             ax.set_ylabel('Mean of Optimum')
             fig.savefig(os.path.join(
                 self.plotDir, f'conv_mean_opt-obj{obj_i}'))
-        # BEST OPTIMUM
-        opt = np.array([alg.opt[0].F for alg in hist])
-        # n_gen = [alg.n_gen for alg in hist]
-        for obj_i in range(len(opt[0])):
-            opt_obj = opt[:, obj_i]
+        if self.problem.n_obj == 1:
+            # SINGLE OPTIMUM
+            opt = np.array([alg.opt[0].F for alg in hist])
+            # n_gen = [alg.n_gen for alg in hist]
+            opt = opt[:]
             fig, ax = plt.subplots()
             plots.append(fig)
-            ax.plot(n_evals, opt_obj, "--", **kwargs)
-            fig.suptitle('Convergence of Best Ranking Optimum')
-            ax.set_title(
-                f'Objective {obj_i+1}: {self.problem.BaseCase.obj_labels[obj_i]}')
+            ax.plot(n_evals, opt, "--", **kwargs)
+            fig.suptitle('Convergence of Optimum')
+            ax.set_title(self.problem.BaseCase.obj_labels[0])
             ax.set_xlabel('Number of Evaluations')
-            ax.set_ylabel('Optimum Rank #1')
-            fig.savefig(os.path.join(
-                self.plotDir, f'conv_opt-obj{obj_i}'))
+            ax.set_ylabel('Optimum')
+            fig.savefig(os.path.join(self.plotDir, f'conv_opt'))
         # HYPERVOLUME
         gen1_F = self.algorithm.history[0].pop.get('F')
         ref_pt = []
