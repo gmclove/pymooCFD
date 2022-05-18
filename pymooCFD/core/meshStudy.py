@@ -135,6 +135,7 @@ class MeshStudy:  # (CFDCase):
         self.base_case.save_self()
 
     def plot(self):
+        plots = []
         self.logger.info('\tPLOTTING MESH STUDY')
         _, tail = os.path.split(self.base_case.abs_path)
         a_numElem = np.array([case.numElem for case in self.cases])
@@ -147,6 +148,7 @@ class MeshStudy:  # (CFDCase):
                        labels=['Number of Elements', 'Solution Time [s]'],
                        tight_layout=True
                        )
+        plots.append(plot)
         for i in range(len(a_numElem)):
             pt = np.array([a_numElem[i], solnTimes[i]])
             plot.add(pt, label=a_sf[i], marker='o', linestyle="-")
@@ -163,6 +165,7 @@ class MeshStudy:  # (CFDCase):
                            labels=['Number of Elements', obj_label],
                            tight_layout=True
                            )
+            plots.append(plot)
             for i in range(len(a_numElem)):
                 pt = np.array([a_numElem[i], msObj[i, obj_i]])
                 plot.add(pt, label=a_sf[i], marker='o', linestyle="-")
@@ -179,6 +182,7 @@ class MeshStudy:  # (CFDCase):
                            labels=['Solution Time [s]', obj_label],
                            tight_layout=True
                            )
+            plots.append(plot)
             for i in range(len(a_numElem)):
                 pt = np.array([solnTimes[i], msObj[i, obj_i]])
                 plot.add(pt, label=a_sf[i], marker='o', linestyle="-")
@@ -196,6 +200,7 @@ class MeshStudy:  # (CFDCase):
                                    obj_label, 'Solution Time [s]'],
                            tight_layout=True, bbox_to_anchor=(1.05, 1.0)
                            )
+            plots.append(plot)
             for i in range(len(a_numElem)):
                 pt = np.array([a_numElem[i], msObj[i, obj_i], solnTimes[i]])
                 plot.add(pt, label=a_sf[i], marker='o', linestyle="-")
@@ -206,6 +211,7 @@ class MeshStudy:  # (CFDCase):
             fPath = os.path.join(self.folder, fName)
             plot.save(fPath, dpi=200)
         self.base_case.save_self()
+        return plots
 
     ################
     #    LOGGER    #
