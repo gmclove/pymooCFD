@@ -207,7 +207,7 @@ class MeshStudy(PicklePath):  # (CFDCase):
                            bbox_to_anchor=(1.01, 1.0))
             fName = f'ms_plot-{tail}-numElem_v_obj{obj_i}_v_time.png'
             fPath = os.path.join(self.folder, fName)
-            plot.save(fPath, dpi=100)
+            plot.save(fPath, dpi=200)
         self.base_case.save_self()
 
     def _save_filter(self):

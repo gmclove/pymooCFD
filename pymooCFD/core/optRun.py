@@ -16,6 +16,8 @@ import shutil
 import matplotlib.pyplot as plt
 # from pymooCFD.core.meshStudy import MeshStudy
 from pymoo.visualization.scatter import Scatter
+from pymoo.factory import get_performance_indicator
+
 from pymooCFD.util.sysTools import copy_and_overwrite, saveTxt
 from pymooCFD.core.picklePath import PicklePath
 
@@ -147,6 +149,8 @@ class OptRun(PicklePath):
             self.plotOpt()
             self.plotConv()
             self.plotAllOpt()
+            self.plotGens()
+
             if gen == 1:
                 self.gen1_pop = eval_pop
                 self.map_gen1()
@@ -273,7 +277,9 @@ class OptRun(PicklePath):
     #     self.plotGen()
     #     return pop
 
-    def plotGens(self, gens, **kwargs):
+    def plotGens(self, gens=None, **kwargs):
+        if gens is None:
+            gens = range(1, len(self.algorithm.history) + 1)
         pops = [self.algorithm.history[gen - 1].pop for gen in gens]
         popsX = [pop.get('X') for pop in pops]
         popsF = [pop.get('F') for pop in pops]
@@ -329,14 +335,14 @@ class OptRun(PicklePath):
         popX = pop.get('X')
         popF = pop.get('F')
         pt_labels = ['IND ' + str(i + 1) for i in range(len(popX))]
-        var_plot = self.plotScatter(popX, title=f'Generation {gen} Design Space',
+        var_plot = self.plotScatter(popX, title=f'Generation {gen} - Design Space',
                                     ax_labels=self.problem.BaseCase.var_labels,
                                     dir_path=self.plotDir,
                                     fname=f'gen{gen}_var_space.png',
                                     pt_labels=pt_labels,
                                     **kwargs)
 
-        obj_plot = self.plotScatter(popF, title=f'Generation {gen} Objective Space',
+        obj_plot = self.plotScatter(popF, title=f'Generation {gen} - Objective Space',
                                     ax_labels=self.problem.BaseCase.obj_labels,
                                     dir_path=self.plotDir,
                                     fname=f'gen{gen}_obj_space.png',
@@ -348,6 +354,7 @@ class OptRun(PicklePath):
 
     # def plotPop(self, pop, title):
     def plotConv(self, gen=None, **kwargs):
+        plots = []
         if gen is None:
             gen = len(self.algorithm.history)
         hist = self.algorithm.history
@@ -363,7 +370,8 @@ class OptRun(PicklePath):
         # MEAN OPTIMUM
         for obj_i in range(self.problem.BaseCase.n_obj):
             opt_obj = opt_avg[:, obj_i]
-            avg_opt_conv_plot = fig, ax = plt.subplots()
+            fig, ax = plt.subplots()
+            plots.append(fig)
             ax.plot(n_evals, opt_obj, "--", **kwargs)
             fig.suptitle('Convergence of Mean Optimum')
             ax.set_title(
@@ -371,25 +379,58 @@ class OptRun(PicklePath):
             ax.set_xlabel('Number of Evaluations')
             ax.set_ylabel('Mean of Optimum')
             fig.savefig(os.path.join(
-                self.plotDir, f'mean_opt_convergence-obj{obj_i}'))
+                self.plotDir, f'conv_mean_opt-obj{obj_i}'))
         # BEST OPTIMUM
         opt = np.array([alg.opt[0].F for alg in hist])
         # n_gen = [alg.n_gen for alg in hist]
         for obj_i in range(len(opt[0])):
             opt_obj = opt[:, obj_i]
-            opt_conv_plot = fig, ax = plt.subplots()
+            fig, ax = plt.subplots()
+            plots.append(fig)
             ax.plot(n_evals, opt_obj, "--", **kwargs)
-            fig.suptitle('Convergence of Optimum')
+            fig.suptitle('Convergence of Best Ranking Optimum')
             ax.set_title(
                 f'Objective {obj_i+1}: {self.problem.BaseCase.obj_labels[obj_i]}')
             ax.set_xlabel('Number of Evaluations')
-            # plt.plot(n_gen, opt_obj, "--")
-            # plt.xlabel('Number of Generations')
-            ax.set_ylabel('Optimum')
+            ax.set_ylabel('Optimum Rank #1')
             fig.savefig(os.path.join(
-                self.plotDir, f'opt_convergence-obj{obj_i}'))
+                self.plotDir, f'conv_opt-obj{obj_i}'))
+        # HYPERVOLUME
+        gen1_F = self.algorithm.pop.get('F')
+        ref_pt = []
+        for obj_i, objs in enumerate(gen1_F.T):
+            ref_pt.append((max(objs)-min(objs))/2)
+        ref_pt = np.array(ref_pt)
+        calc_hv = get_performance_indicator("hv", ref_point=ref_pt)
+        init_hv = calc_hv.do(gen1_F)
+        hvs = []
+        hvs_norm = []
+        for alg in self.algorithm.history:
+            F = alg.pop.get('F')
+            hv = calc_hv.do(F)
+            hvs.append(hv)
+            hvs_norm.append((hv - init_hv)/init_hv)
+        # plot
+        ref_pt_str = np.array2string(ref_pt, precision=3)
+        fig, ax = plt.subplots()
+        plots.append(fig)
+        ax.plot(n_evals, hvs, "--", **kwargs)
+        fig.suptitle('Convergence of Hypervolume')
+        ax.set_title(f'Reference Point: {ref_pt_str}')
+        ax.set_xlabel('Number of Evaluations')
+        ax.set_ylabel('Hypervolume')
+        fig.savefig(os.path.join(self.plotDir, 'conv_hv'))
+        # plot
+        fig, ax = plt.subplots()
+        plots.append(fig)
+        ax.plot(n_evals, hvs_norm, "--", **kwargs)
+        fig.suptitle('Convergence of Hypervolume')
+        ax.set_title(f'Reference Point: {ref_pt_str}')
+        ax.set_xlabel('Number of Evaluations')
+        ax.set_ylabel('Normalized Hypervolume')
+        fig.savefig(os.path.join(self.plotDir, 'conv_hv_norm'))
 
-        return opt_conv_plot, avg_opt_conv_plot
+        return plots
 
     def plotOpt(self, gen=None, max_opt_len=20, **kwargs):
         if gen is None:
@@ -400,17 +441,17 @@ class OptRun(PicklePath):
         popX = pop.get('X')
         popF = pop.get('F')
         pt_labels = ['OPT ' + str(i + 1) for i in range(len(popX))]
-        var_plot = self.plotScatter(popX, title=f'Top 20 Optimum After {gen} Generations - Design Space',
+        var_plot = self.plotScatter(popX, title=f'20 Optimum After {gen} Generations - Design Space',
                                     ax_labels=self.problem.BaseCase.var_labels,
                                     dir_path=self.plotDir,
-                                    fname=f'top20_opt_gen{gen}_var_space.png',
+                                    fname=f'20_opt_gen{gen}_var_space.png',
                                     dif_markers=True, max_leg_len=20,
                                     pt_labels=pt_labels, s=10,
                                     **kwargs)
-        obj_plot = self.plotScatter(popF, title=f'Top 20 Optimum After {gen} Generations - Objective Space',
+        obj_plot = self.plotScatter(popF, title=f'20 Optimum After {gen} Generations - Objective Space',
                                     ax_labels=self.problem.BaseCase.obj_labels,
                                     dir_path=self.plotDir,
-                                    fname=f'top20_opt_gen{gen}_obj_space.png',
+                                    fname=f'20_opt_gen{gen}_obj_space.png',
                                     dif_markers=True, max_leg_len=20,
                                     pt_labels=pt_labels, s=20,
                                     **kwargs)
@@ -481,7 +522,7 @@ class OptRun(PicklePath):
                 fName = f'{var_str}-vs-{obj_str}.png'
                 path = os.path.join(self.mapDir, fName)
                 map_paths.append(path)
-                plot.save(path, dpi=150)
+                plot.save(path, dpi=200)
                 plots.append(plot)
         return plots, map_paths
 
@@ -549,7 +590,7 @@ class OptRun(PicklePath):
 
     def plotScatter(self, points, title=None, ax_labels='f',
                     pt_labels=None, max_leg_len=10, max_ax_label_len=20,
-                    dir_path=None, fname=None, dpi=100, tight_layout=True,
+                    dir_path=None, fname=None, dpi=200, tight_layout=True,
                     dif_markers=False,
                     **kwargs):
         leg, labs, tit = False, 'f', None
