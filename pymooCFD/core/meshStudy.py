@@ -210,7 +210,7 @@ class MeshStudy:  # (CFDCase):
             fName = f'ms_plot-{tail}-numElem_v_obj{obj_i}_v_time.png'
             fPath = os.path.join(self.folder, fName)
             plot.save(fPath, dpi=200)
-        self.base_case.save_self()
+        # self.base_case.save_self()
         return plots
 
     ################
