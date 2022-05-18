@@ -396,7 +396,7 @@ class OptRun(PicklePath):
             fig.savefig(os.path.join(
                 self.plotDir, f'conv_opt-obj{obj_i}'))
         # HYPERVOLUME
-        gen1_F = self.algorithm.pop.get('F')
+        gen1_F = self.algorithm.history[0].pop.get('F')
         ref_pt = []
         for obj_i, objs in enumerate(gen1_F.T):
             ref_pt.append((max(objs)-min(objs))/2)
