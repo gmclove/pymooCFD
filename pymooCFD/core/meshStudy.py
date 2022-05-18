@@ -159,6 +159,7 @@ class MeshStudy:  # (CFDCase):
         fName = f'ms_plot-{tail}-numElem_v_time.png'
         fPath = os.path.join(self.folder, fName)
         plot.save(fPath, dpi=100)
+        # OBJECTIVES
         for obj_i, obj_label in enumerate(self.base_case.obj_labels):
             # Number of elements vs Objective
             plot = Scatter(title='Mesh Study: ' + tail, legend=True, grid=True,
