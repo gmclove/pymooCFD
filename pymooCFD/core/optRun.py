@@ -399,7 +399,8 @@ class OptRun(PicklePath):
         gen1_F = self.algorithm.history[0].pop.get('F')
         ref_pt = []
         for obj_i, objs in enumerate(gen1_F.T):
-            ref_pt.append((max(objs)-min(objs))/2)
+            ref_pt.append(np.mean(objs))
+            # ref_pt.append((max(objs)-min(objs))/2)
         ref_pt = np.array(ref_pt)
         calc_hv = get_performance_indicator("hv", ref_point=ref_pt)
         init_hv = calc_hv.do(gen1_F)
