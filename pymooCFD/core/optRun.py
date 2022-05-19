@@ -69,7 +69,8 @@ class OptRun(PicklePath):
 
         self.algorithm = algorithm
         self.problem = problem
-        self.gen_bnd_cases()
+        # self.gen_bnd_cases()
+        self.bnd_cases = None
         self.gen_test_case()
 
         ###################################
@@ -765,6 +766,8 @@ class OptRun(PicklePath):
         return pts
 
     def run_bnd_cases(self, do_mesh_study=False):
+        if self.bnd_cases is None:
+            self.gen_bnd_cases()
         self.problem.BaseCase.parallelize(self.bnd_cases)
         self.save_self()
         self.plotBndPtsObj()
