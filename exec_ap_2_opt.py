@@ -16,7 +16,7 @@ def main():
     # opt_run = study.new_run(alg, prob)
     opt_run = study.opt_runs['run02']
     opt_run.algorithm.has_terminated = False
-    opt_run.algorithm.termination = get_termination('n_gen', 50)
+    opt_run.algorithm.termination = get_termination('n_gen', 70)
     # print(opt_run.n_opt)
     # opt_run.run_test_case()
     # opt_run.run_bnd_cases()

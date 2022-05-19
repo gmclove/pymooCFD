@@ -294,7 +294,7 @@ class OptRun(PicklePath):
         obj_plot = self.plotScatter(popsF, title='Objective Space',
                                     ax_labels=self.problem.BaseCase.obj_labels,
                                     dir_path=self.plotDir,
-                                    fname=f'gen_{gens}_obj_space.png',
+                                    fname=f'gens_{gens}_obj_space.png',
                                     pt_labels=gen_labels,
                                     **kwargs)
         return var_plot, obj_plot
