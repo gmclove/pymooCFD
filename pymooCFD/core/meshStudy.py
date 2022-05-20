@@ -158,7 +158,7 @@ class MeshStudy:  # (CFDCase):
         # plot.ax.get_legend().set_title('Mesh Size Factors')
         fName = f'ms_plot-{tail}-numElem_v_time.png'
         fPath = os.path.join(self.folder, fName)
-        plot.save(fPath, dpi=100)
+        plot.save(fPath, dpi=200)
         # OBJECTIVES
         for obj_i, obj_label in enumerate(self.base_case.obj_labels):
             # Number of elements vs Objective
@@ -176,7 +176,7 @@ class MeshStudy:  # (CFDCase):
                            bbox_to_anchor=(1.01, 1.0))
             fName = f'ms_plot-{tail}-obj{obj_i}.png'
             fPath = os.path.join(self.folder, fName)
-            plot.save(fPath, dpi=100)
+            plot.save(fPath, dpi=200)
 
             # Time vs Objective
             plot = Scatter(title='Mesh Study: ' + tail, legend=True, grid=True,
@@ -193,7 +193,7 @@ class MeshStudy:  # (CFDCase):
             # plot.ax.get_legend().set_title('Mesh Size Factors')
             fName = f'ms_plot-{tail}-solnTime_v_obj{obj_i}.png'
             fPath = os.path.join(self.folder, fName)
-            plot.save(fPath, dpi=100)
+            plot.save(fPath, dpi=200)
 
             # Number of Elements vs Objective vs time
             plot = Scatter(title='Mesh Study: ' + tail, legend=True, grid=True,
