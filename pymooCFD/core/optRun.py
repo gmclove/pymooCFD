@@ -590,7 +590,7 @@ class OptRun(PicklePath):
 
     def plotScatter(self, points, title=None, ax_labels='f',
                     pt_labels=None, max_leg_len=10, max_ax_label_len=20,
-                    dir_path=None, fname=None, dpi=200, tight_layout=True,
+                    dir_path=None, fname=None, dpi=250, tight_layout=True,
                     dif_markers=False,
                     **kwargs):
         leg, labs, tit = False, 'f', None
