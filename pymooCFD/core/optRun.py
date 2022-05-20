@@ -13,6 +13,8 @@ import shutil
 # import multiprocessing as mp
 # import shutil
 # import h5py
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 # from pymooCFD.core.meshStudy import MeshStudy
 from pymoo.visualization.scatter import Scatter
