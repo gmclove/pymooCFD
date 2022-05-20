@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def get_coeff_and_NN(x_min, x_max, x_tot, NN_init=100, coef_init=1.001):
     max_it = 40
     it = 0
