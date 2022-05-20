@@ -444,14 +444,14 @@ class OptRun(PicklePath):
         popX = pop.get('X')
         popF = pop.get('F')
         pt_labels = ['OPT ' + str(i + 1) for i in I]
-        var_plot = self.plotScatter(popX, title=f'20 Optimum After {gen} Generations - Design Space',
+        var_plot = self.plotScatter(popX, title=f'20 Random Optimum After {gen} Generations - Design Space',
                                     ax_labels=self.problem.BaseCase.var_labels,
                                     dir_path=self.plotDir,
                                     fname=f'20_opt_gen{gen}_var_space.png',
                                     dif_markers=True, max_leg_len=20,
                                     pt_labels=pt_labels, s=10,
                                     **kwargs)
-        obj_plot = self.plotScatter(popF, title=f'20 Optimum After {gen} Generations - Objective Space',
+        obj_plot = self.plotScatter(popF, title=f'20 Random Optimum After {gen} Generations - Objective Space',
                                     ax_labels=self.problem.BaseCase.obj_labels,
                                     dir_path=self.plotDir,
                                     fname=f'20_opt_gen{gen}_obj_space.png',
