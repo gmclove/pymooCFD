@@ -437,10 +437,13 @@ class OptRun(PicklePath):
             gen = len(self.algorithm.history)
         pop = self.algorithm.history[gen - 1].opt
         if (max_opt_len is not None and max_opt_len < len(pop)):
-            pop = pop[random.sample(range(len(pop)), max_opt_len)]
+            I = random.sample(range(len(pop)), max_opt_len)
+            pop = pop[I]
+        else:
+            I = range(len(pop))
         popX = pop.get('X')
         popF = pop.get('F')
-        pt_labels = ['OPT ' + str(i + 1) for i in range(len(popX))]
+        pt_labels = ['OPT ' + str(i + 1) for i in I]
         var_plot = self.plotScatter(popX, title=f'20 Optimum After {gen} Generations - Design Space',
                                     ax_labels=self.problem.BaseCase.var_labels,
                                     dir_path=self.plotDir,
