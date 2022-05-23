@@ -458,8 +458,8 @@ class RANSJet(FluentCase):
 
         # Reynolds number
         mouthD, breath_vel = self.x[0], self.x[1]
-        mu = 1.7894e-05 # kg/(m.s)
-        rho = 1.225 # kg/m^3
+        mu = 1.7894e-05  # kg/(m.s)
+        rho = 1.225  # kg/m^3
         nu = mu/rho
         Re = breath_vel*mouthD/nu
         saveTxt(self.abs_path, 'Re.txt', Re)
@@ -491,7 +491,7 @@ class RANSJet(FluentCase):
         plt.xlabel('x-Location [m]')
         plt.ylabel('yz-Plane Scalar Flux [m/s]')
         path = os.path.join(self.abs_path, 'RANS-v-LES-flux.png')
-        plt.savefig(path, bbox_inches="tight")
+        plt.savefig(path, bbox_inches="tight", dpi=250)
         plt.clf()
         # plot
         plt.imshow(ransGrid_flux.T, extent=(self.gridInterp2D.xmin, self.gridInterp2D.xmax,
@@ -502,7 +502,7 @@ class RANSJet(FluentCase):
         plt.xlabel('x-Location [m]')
         plt.ylabel('y-Location [m]')
         path = os.path.join(self.abs_path, 'RANS-flux-grid.png')
-        plt.savefig(path)
+        plt.savefig(path, dpi=250)
         plt.clf()
 
         ##### SAVE DATA VISUALIZATION ######
@@ -514,7 +514,7 @@ class RANSJet(FluentCase):
         plt.xlabel('x-Location [m]')
         plt.ylabel('y-Location [m]')
         path = os.path.join(self.abs_path, 'RANS-phi-grid.png')
-        plt.savefig(path)
+        plt.savefig(path, dpi=250)
         plt.clf()
         # phi difference plot
         phiDiffGrid = ransGrid_phi - lesGrid_phi
@@ -525,7 +525,7 @@ class RANSJet(FluentCase):
         plt.xlabel('x-Location [m]')
         plt.ylabel('y-Location [m]')
         path = os.path.join(self.abs_path, 'diff-phi-grid.png')
-        plt.savefig(path)
+        plt.savefig(path, dpi=250)
         plt.clf()
         # uMag grid plot
         plt.imshow(ransGrid_uMag.T, extent=(self.gridInterp2D.xmin, self.gridInterp2D.xmax,
@@ -535,7 +535,7 @@ class RANSJet(FluentCase):
         plt.xlabel('x-Location [m]')
         plt.ylabel('y-Location [m]')
         path = os.path.join(self.abs_path, 'RANS-uMag-grid.png')
-        plt.savefig(path)
+        plt.savefig(path, dpi=250)
         plt.clf()
         # uMag difference plot
         uMagDiffGrid = ransGrid_uMag - lesGrid_uMag
@@ -546,7 +546,7 @@ class RANSJet(FluentCase):
         plt.ylabel('y-Location [m]')
         plt.title('RANS LES Difference - Velocity Magnitude')
         path = os.path.join(self.abs_path, 'diff-uMag-grid.png')
-        plt.savefig(path)
+        plt.savefig(path, dpi=250)
         plt.clf()
 
 
