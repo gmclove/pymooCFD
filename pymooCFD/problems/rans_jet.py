@@ -491,7 +491,7 @@ class RANSJet(FluentCase):
         plt.xlabel('x-Location [m]')
         plt.ylabel('yz-Plane Scalar Flux [m/s]')
         path = os.path.join(self.abs_path, 'RANS-v-LES-flux.png')
-        plt.savefig(path)
+        plt.savefig(path, bbox_inches="tight")
         plt.clf()
         # plot
         plt.imshow(ransGrid_flux.T, extent=(self.gridInterp2D.xmin, self.gridInterp2D.xmax,
