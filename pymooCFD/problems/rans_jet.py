@@ -484,6 +484,8 @@ class RANSJet(FluentCase):
             x = i * dx + x0
             avg = np.mean(col)
             les_fluxes[i] = [x, avg]
+
+        # plot flux
         plt.plot(les_fluxes[:, 0], les_fluxes[:, 1], label='LES')
         plt.plot(rans_fluxes[:, 0], rans_fluxes[:, 1], label='RANS')
         plt.legend()
@@ -491,6 +493,19 @@ class RANSJet(FluentCase):
         plt.xlabel('x-Location [m]')
         plt.ylabel('yz-Plane Scalar Flux [m/s]')
         path = os.path.join(self.abs_path, 'RANS-v-LES-flux.png')
+        plt.savefig(path, bbox_inches="tight", dpi=250)
+        plt.clf()
+        # plot flux
+        norm_val = min(les_fluxes[:, 1])
+        les_fluxes_norm = (les_fluxes[:, 1] - norm_val) / norm_val
+        rans_fluxes_norm = (rans_fluxes[:, 1] - norm_val) / norm_val
+        plt.plot(les_fluxes[:, 0], les_fluxes_norm, label='LES')
+        plt.plot(rans_fluxes[:, 0], rans_fluxes_norm, label='RANS')
+        plt.legend()
+        plt.title('Free Jet: Pulsed LES vs. Steady RANS w/ Optimized BCs')
+        plt.xlabel('x-Location [m]')
+        plt.ylabel('Normalized yz-Plane Scalar Flux')
+        path = os.path.join(self.abs_path, 'RANS-v-LES-flux_norm.png')
         plt.savefig(path, bbox_inches="tight", dpi=250)
         plt.clf()
         # plot
