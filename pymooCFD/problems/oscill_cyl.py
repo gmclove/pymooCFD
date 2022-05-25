@@ -1,6 +1,7 @@
 import gmsh
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 
 from pymooCFD.core.cfdCase import YALES2Case
 from pymooCFD.core.meshStudy import MeshStudy
@@ -86,6 +87,7 @@ class OscillCylinder(YALES2Case):
         # freq = self.x[1]
         ######## Compute Objectives ##########
         ### Objective 1: Drag on Cylinder ###
+        C_drag_noOsc = 1.363317903314267276
         U = 1
         rho = 1
         D = 1  # [m] cylinder diameter
@@ -96,18 +98,39 @@ class OscillCylinder(YALES2Case):
         # DRAG: x-direction integrals
         F_P1, = data[mask, 4]
         F_S1, = data[mask, 6]
-        F_drag = np.mean(F_P1 - F_S1)
+        # calculate
+        F_drag = F_P1 - F_S1
+        F_drag_avg = np.mean(F_drag)
         C_drag = F_drag / ((1 / 2) * rho * U**2 * D**2)
-        C_drag_noOsc = 1.363317903314267276
-        prec_change = ((C_drag - C_drag_noOsc) / C_drag_noOsc) * 100
+        C_drag_avg = F_drag_avg / ((1 / 2) * rho * U**2 * D**2)
+        prec_change = ((C_drag_avg - C_drag_noOsc) / C_drag_noOsc) * 100
 
         ### Objective 2 ###
         # Objective 2: Power consumed by rotating cylinder
         res_torque = data[mask, 9]
-        abs_mean_res_torque = np.mean(abs(res_torque))
-        F_res = abs_mean_res_torque * D / 2
+        F_res, = res_torque * D / 2
+        F_res_avg = np.mean(abs(F_res))
 
-        self.f = [prec_change, F_res]
+        self.f = [prec_change, F_res_avg]
+
+        t, = data[mask, 3]
+        # Plots
+        plt.plot(t, C_drag)
+        plt.title('Coefficient of Drag on Oscillating Cylinder')
+        plt.xlabel('Time [s]')
+        plt.ylabel('Coefficient of Drag')
+        path = os.path.join(self.abs_path, 'C_d-t.png')
+        plt.savefig(path, dpi=250)
+        plt.clf()
+
+        # abs_mean_res_torque = np.mean(abs(res_torque))
+        # F_res = abs_mean_res_torque * D / 2
+        plt.plot(t, F_res)
+        plt.title('Resistive Force on Oscillating Cylinder')
+        plt.xlabel('Time [s]')
+        plt.ylabel('Resistive Force [N]')
+        path = os.path.join(self.abs_path, 'F_res-t.png')
+        plt.savefig(path, dpi=250)
 
     def _genMesh(self):
         projName = '2D_cylinder'
@@ -290,6 +313,7 @@ class OscillCylinder_Re500(OscillCylinder):
         # freq = self.x[1]
         ######## Compute Objectives ##########
         ### Objective 1: Drag on Cylinder ###
+        C_drag_noOsc = 1.451893683272913238
         U = 1
         rho = 1
         D = 1  # [m] cylinder diameter
@@ -300,18 +324,37 @@ class OscillCylinder_Re500(OscillCylinder):
         # DRAG: x-direction integrals
         F_P1, = data[mask, 4]
         F_S1, = data[mask, 6]
-        F_drag = np.mean(F_P1 - F_S1)
+        # calculate
+        F_drag = F_P1 - F_S1
+        F_drag_avg = np.mean(F_drag)
         C_drag = F_drag / ((1 / 2) * rho * U**2 * D**2)
-        C_drag_noOsc = 1.451893683272913238
-        prec_change = ((C_drag - C_drag_noOsc) / C_drag_noOsc) * 100
+        C_drag_avg = F_drag_avg / ((1 / 2) * rho * U**2 * D**2)
+        prec_change = ((C_drag_avg - C_drag_noOsc) / C_drag_noOsc) * 100
 
         ### Objective 2 ###
         # Objective 2: Power consumed by rotating cylinder
         res_torque = data[mask, 9]
-        abs_mean_res_torque = np.mean(abs(res_torque))
-        F_res = abs_mean_res_torque * D / 2
+        F_res, = res_torque * D / 2
+        F_res_avg = np.mean(abs(F_res))
 
-        self.f = [prec_change, F_res]
+        self.f = [prec_change, F_res_avg]
+
+        t, = data[mask, 3]
+        # Plots
+        plt.plot(t, C_drag)
+        plt.title('Coefficient of Drag on Oscillating Cylinder')
+        plt.xlabel('Time [s]')
+        plt.ylabel('Coefficient of Drag')
+        path = os.path.join(self.abs_path, 'C_d-t.png')
+        plt.savefig(path, dpi=250)
+        plt.clf()
+
+        plt.plot(t, F_res)
+        plt.title('Resistive Force on Oscillating Cylinder')
+        plt.xlabel('Time [s]')
+        plt.ylabel('Resistive Force [N]')
+        path = os.path.join(self.abs_path, 'F_res-t.png')
+        plt.savefig(path, dpi=250)
 
 
 class OscillCylinder_Re500_SLURM(OscillCylinder_Re500):
@@ -330,6 +373,7 @@ class OscillCylinder_SOO_SLURM(OscillCylinder_SLURM):
     def _postProc(self):
         ######## Compute Objectives ##########
         ### Objective 1: Drag on Cylinder ###
+        C_drag_noOsc = 1.363317903314267276
         U = 1
         rho = 1
         D = 1  # [m] cylinder diameter
@@ -340,9 +384,10 @@ class OscillCylinder_SOO_SLURM(OscillCylinder_SLURM):
         # DRAG: x-direction integrals
         F_P1, = data[mask, 4]
         F_S1, = data[mask, 6]
-        F_drag = np.mean(F_P1 - F_S1)
+        F_drag = F_P1 - F_S1
+        F_drag_avg = np.mean(F_drag)
         C_drag = F_drag / ((1 / 2) * rho * U**2 * D**2)
-        C_drag_noOsc = 1.363317903314267276
-        prec_change = ((C_drag - C_drag_noOsc) / C_drag_noOsc) * 100
+        C_drag_avg = F_drag_avg / ((1 / 2) * rho * U**2 * D**2)
+        prec_change = ((C_drag_avg - C_drag_noOsc) / C_drag_noOsc) * 100
 
         self.f = prec_change
