@@ -202,7 +202,7 @@ class OscillCylinder(YALES2Case):
         len_top = abs(bnds_top[1][0] - bnds_top[0][0])
         bnds_bot = gmsh.model.getParametrizationBounds(1, l_bot)
         len_bot = abs(bnds_bot[1][0] - bnds_bot[0][0])
-        
+
         # def get_coeff_and_NN(x_min, x_max, x_tot, NN_init=100, coef_init=1.001):
         #     max_it = 40
         #     it = 0
@@ -276,12 +276,13 @@ BaseCase = OscillCylinder
 
 class OscillCylinder_SLURM(OscillCylinder):
     solverExecCmd = ['sbatch', '--wait', 'jobslurm.sh']
-    nTasks = 20
+    nTasks = 10
 
 
 class OscillCylinder_Re500(OscillCylinder):
     base_case_path = os.path.join(os.path.dirname(__file__), 'base_cases',
                                   'osc-cyl_base-Re500')
+
     def _postProc(self):
         ####### EXTRACT VAR ########
         # Extract parameters for each individual
@@ -315,7 +316,7 @@ class OscillCylinder_Re500(OscillCylinder):
 
 class OscillCylinder_Re500_SLURM(OscillCylinder_Re500):
     solverExecCmd = ['sbatch', '--wait', 'jobslurm.sh']
-    nTasks = 20
+    nTasks = 10
 
 
 class OscillCylinder_SOO_SLURM(OscillCylinder_SLURM):
