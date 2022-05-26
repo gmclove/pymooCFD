@@ -189,9 +189,12 @@ class PicklePath:
         return logger
 
     def save_self(self):
-        self.saveNumpyFile(self.cp_path, self)
+        if os.path.isdir(self.abs_path):
+            self.saveNumpyFile(self.cp_path, self)
+            self.logger.info('CHECKPOINT SAVED')
+        else:
+            self.logger.warning('FAILED: SAVING CHECKPOINT - directory does not exist')
         self.save_sub_pickle_paths()
-        self.logger.info('CHECKPOINT SAVED')
 
     def load_self(self):
         if os.path.exists(self.cp_path):
