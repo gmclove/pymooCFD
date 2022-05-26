@@ -415,6 +415,10 @@ class OptRun(PicklePath):
             hv = calc_hv.do(F)
             hvs.append(hv)
             hvs_norm.append((hv - init_hv)/init_hv)
+        pop_size = self.algorithm.pop_size
+        n_offsprings = self.algorithm.n_offsprings
+        evals2gen = lambda x: (x-pop_size)/n_offsprings + 1
+        gen2evals = lambda x: pop_size + n_offsprings*(x - 1)
         # plot
         ref_pt_str = np.array2string(ref_pt, precision=3)
         fig, ax = plt.subplots()
@@ -424,6 +428,9 @@ class OptRun(PicklePath):
         ax.set_title(f'Reference Point: {ref_pt_str}')
         ax.set_xlabel('Number of Evaluations')
         ax.set_ylabel('Hypervolume')
+        ax2 = ax.secondary_xaxis('top', functions=(evals2gen, gen2evals))
+        ax2.set_xlabel('Number of Generations')
+        fig.tight_layout()
         fig.savefig(os.path.join(self.plotDir, 'conv_hv'))
         # plot
         fig, ax = plt.subplots()
@@ -433,6 +440,9 @@ class OptRun(PicklePath):
         ax.set_title(f'Reference Point: {ref_pt_str}')
         ax.set_xlabel('Number of Evaluations')
         ax.set_ylabel('Normalized Hypervolume')
+        ax2 = ax.secondary_xaxis('top', functions=(evals2gen, gen2evals))
+        ax2.set_xlabel('Number of Generations')
+        fig.tight_layout()
         fig.savefig(os.path.join(self.plotDir, 'conv_hv_norm'))
 
         return plots
