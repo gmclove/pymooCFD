@@ -385,7 +385,7 @@ class OptRun(PicklePath):
             ax.set_xlabel('Number of Evaluations')
             ax.set_ylabel('Mean of Optimum')
             fig.savefig(os.path.join(
-                self.plotDir, f'conv_mean_opt-obj{obj_i}'))
+                self.plotDir, f'conv_mean_opt-obj{obj_i}'), dpi=200)
         if self.problem.n_obj == 1:
             # SINGLE OPTIMUM
             opt = np.array([alg.opt[0].F for alg in hist])
@@ -398,7 +398,7 @@ class OptRun(PicklePath):
             ax.set_title(self.problem.BaseCase.obj_labels[0])
             ax.set_xlabel('Number of Evaluations')
             ax.set_ylabel('Optimum')
-            fig.savefig(os.path.join(self.plotDir, f'conv_opt'))
+            fig.savefig(os.path.join(self.plotDir, f'conv_opt'), dpi=200)
         # HYPERVOLUME
         gen1_F = self.algorithm.history[0].pop.get('F')
         ref_pt = []
@@ -431,7 +431,7 @@ class OptRun(PicklePath):
         ax2 = ax.secondary_xaxis('top', functions=(evals2gen, gen2evals))
         ax2.set_xlabel('Number of Generations')
         fig.tight_layout()
-        fig.savefig(os.path.join(self.plotDir, 'conv_hv'))
+        fig.savefig(os.path.join(self.plotDir, 'conv_hv'), dpi=200)
         # plot
         fig, ax = plt.subplots()
         plots.append(fig)
@@ -443,7 +443,7 @@ class OptRun(PicklePath):
         ax2 = ax.secondary_xaxis('top', functions=(evals2gen, gen2evals))
         ax2.set_xlabel('Number of Generations')
         fig.tight_layout()
-        fig.savefig(os.path.join(self.plotDir, 'conv_hv_norm'))
+        fig.savefig(os.path.join(self.plotDir, 'conv_hv_norm'), dpi=200)
 
         return plots
 
@@ -540,7 +540,7 @@ class OptRun(PicklePath):
                 fName = f'{var_str}-vs-{obj_str}.png'
                 path = os.path.join(self.mapDir, fName)
                 map_paths.append(path)
-                plot.save(path, dpi=200)
+                plot.save(path, dpi=250)
                 plots.append(plot)
         return plots, map_paths
 
