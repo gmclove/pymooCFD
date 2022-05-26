@@ -27,6 +27,7 @@ from pymooCFD.core.picklePath import PicklePath
 class OptRun(PicklePath):
     def __init__(self, algorithm, problem,
                  run_path='default_run',
+                 n_gen_plot=10,
                  n_opt=100,
                  # restart=True,
                  # optDatDir='opt_run',
@@ -41,6 +42,7 @@ class OptRun(PicklePath):
         #####################################
         ### Optimization Pre/Post Processing ###
         self.n_opt = int(n_opt)
+        self.n_gen_plot = int(n_gen_plot)
         ##########################
         #    Pickle Path Init    #
         ##########################
@@ -153,7 +155,8 @@ class OptRun(PicklePath):
             self.plotConv()
             self.plotAllOpt()
             self.plotGens()
-
+            if gen % self.n_gen_plot == 0:
+                self.plotGens(gens=range(gen-self.n_gen_plot+1, gen+1))
             if gen == 1:
                 self.gen1_pop = eval_pop
                 self.map_gen1()
