@@ -1,3 +1,5 @@
+from pymoo.core.repair import Repair
+import matplotlib.pyplot as plt
 from pymooCFD.core.cfdCase import YALES2Case
 from pymooCFD.util.handleData import saveTxt
 
@@ -9,11 +11,8 @@ import pygmsh
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-from pymoo.core.repair import Repair
 
 
-import numpy as np
 # from pymooCFD.core.pymooBase import CFDGeneticProblem
 #
 # class Place_AP_Problem(CFDGeneticProblem):
@@ -60,8 +59,8 @@ class RemoveBadPlacement(Repair):
         r = 0.125
         ap_l = [0.3, 0.3]
         # spacing = ap_l[0]
-        wall_space_dx = ap_l[0] # + spacing
-        wall_space_dy = ap_l[1] # + spacing
+        wall_space_dx = ap_l[0]  # + spacing
+        wall_space_dy = ap_l[1]  # + spacing
         min_x, min_y = dom_x0 + wall_space_dx, dom_y0 + wall_space_dy
         max_x, max_y = dom_dx + dom_x0 - wall_space_dx, dom_y0 + dom_dy - wall_space_dy
         person_space_x, person_space_y = r + ap_l[0], r + ap_l[1]
@@ -176,7 +175,6 @@ class Room2D_AP(YALES2Case):
             in_lines.extend(bnd_lines)
         self.input_lines_rw = in_lines
 
-
         self.job_lines_rw = [
             '#!/bin/bash',
             "#SBATCH --partition=ib --constraint='ib&haswell_1'",
@@ -189,7 +187,7 @@ class Room2D_AP(YALES2Case):
             'module use $HOME/yales2/modules && module load $(cd $HOME/yales2/modules; ls)',
             'cd $SLURM_SUBMIT_DIR',
             'mpirun 2D_room'
-            ]
+        ]
 
         # for line_i, line in lines:
         #     in_lines[line_i] = ''
@@ -366,6 +364,8 @@ class Room2D_AP(YALES2Case):
         model.add_physical(circle[5].curve_loop.curves, "P6")
         # print("LowerWall", channel_lines[1].points)
         # print("UpperWall", channel_lines[5].points)
+        def fun(dim, tag, x, y, z, lc): return lc * self.meshSF
+        geometry.set_mesh_size_callback(fun, ignore_other_mesh_sizes=False)
         geometry.generate_mesh(dim=2)
         pygmsh.write(self.meshPath)
         # gmsh.write(self.meshPath)
@@ -466,7 +466,8 @@ class Room2D_2AP(Room2D_AP):
                 walls = 'y'
                 inlets = 'x'
             else:
-                raise Exception(f'Can\'t handle AP direction parameter - {direct}')
+                raise Exception(
+                    f'Can\'t handle AP direction parameter - {direct}')
             in_lines = self.input_lines_rw
             bnd_wall_ids = [f'unit{unit}{walls}{surf}' for surf in range(2)]
             bnd_inlet_ids = [f'unit{unit}{inlets}{surf}' for surf in range(2)]
