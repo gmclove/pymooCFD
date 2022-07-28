@@ -364,8 +364,10 @@ class Room2D_AP(YALES2Case):
         model.add_physical(circle[5].curve_loop.curves, "P6")
         # print("LowerWall", channel_lines[1].points)
         # print("UpperWall", channel_lines[5].points)
-        def fun(dim, tag, x, y, z, lc): return lc * self.meshSF
-        geometry.set_mesh_size_callback(fun, ignore_other_mesh_sizes=False)
+
+        # def fun(dim, tag, x, y, z): return resolution * self.meshSF
+        # geometry.set_mesh_size_callback(fun, ignore_other_mesh_sizes=False)
+
         geometry.generate_mesh(dim=2)
         pygmsh.write(self.meshPath)
         # gmsh.write(self.meshPath)
