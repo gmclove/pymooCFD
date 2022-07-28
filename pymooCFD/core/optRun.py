@@ -14,6 +14,18 @@ import shutil
 # import shutil
 # import h5py
 import matplotlib
+SMALL_SIZE = 14
+MEDIUM_SIZE = 18
+BIGGER_SIZE = 22
+matplotlib.rc('font', size=SMALL_SIZE)          # controls default text sizes
+matplotlib.rc('axes', titlesize=BIGGER_SIZE)     # fontsize of the axes title
+matplotlib.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+matplotlib.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+matplotlib.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+matplotlib.rc('legend', title_fontsize=MEDIUM_SIZE, fontsize=SMALL_SIZE)    # legend fontsize
+# matplotlib.rc('legend_title', fontsize=MEDIUM_SIZE)    # legend title fontsize
+matplotlib.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 # from pymooCFD.core.meshStudy import MeshStudy
@@ -465,6 +477,7 @@ class OptRun(PicklePath):
                                     fname=f'20_opt_gen{gen}_var_space.png',
                                     dif_markers=True, max_leg_len=20,
                                     pt_labels=pt_labels, s=10,
+                                    figsize=(8, 8),
                                     **kwargs)
         obj_plot = self.plotScatter(popF, title=f'20 Random Optimum After {gen} Generations - Objective Space',
                                     ax_labels=self.problem.BaseCase.obj_labels,
@@ -472,7 +485,14 @@ class OptRun(PicklePath):
                                     fname=f'20_opt_gen{gen}_obj_space.png',
                                     dif_markers=True, max_leg_len=20,
                                     pt_labels=pt_labels, s=20,
+                                    figsize=(8, 8),
                                     **kwargs)
+        fnames = [f'20_opt_gen{gen}_var_space.png',
+                    f'20_opt_gen{gen}_obj_space.png']
+        for i, plot in enumerate([var_plot, obj_plot]):
+            plot.ax.legend(ncol=1, loc='upper left', bbox_to_anchor=(1.01, 1))
+            path = os.path.join(self.plotDir, fnames[i])
+            plot.save(path, dpi=300)
         self.logger.info(
             f'PLOTTED: Optimum after {gen} Generations - Design and Objective Spaces')
         return var_plot, obj_plot

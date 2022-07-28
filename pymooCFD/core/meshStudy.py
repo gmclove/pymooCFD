@@ -11,6 +11,18 @@ import copy
 import numpy as np
 
 from pymoo.visualization.scatter import Scatter
+import matplotlib
+SMALL_SIZE = 14
+MEDIUM_SIZE = 18
+BIGGER_SIZE = 22
+matplotlib.rc('font', size=SMALL_SIZE)          # controls default text sizes
+matplotlib.rc('axes', titlesize=BIGGER_SIZE)     # fontsize of the axes title
+matplotlib.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+matplotlib.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+matplotlib.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+matplotlib.rc('legend', title_fontsize=MEDIUM_SIZE, fontsize=MEDIUM_SIZE)    # legend fontsize
+# matplotlib.rc('legend_title', fontsize=MEDIUM_SIZE)    # legend title fontsize
+matplotlib.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 from pymooCFD.util.loggingTools import MultiLineFormatter
 from pymooCFD.util.handleData import saveTxt
