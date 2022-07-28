@@ -214,6 +214,10 @@ class MeshStudy(PicklePath):  # (CFDCase):
         obj = copy.deepcopy(self)
         del obj.__dict__['base_case']
         return obj
+
+    # def _update_filter(self, loaded_self):
+    #     del loaded_self.__dict__['base_case']
+    #     return loaded_self
     ################
     #    LOGGER    #
     ################
