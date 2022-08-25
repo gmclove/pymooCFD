@@ -6,18 +6,70 @@
 # from pymoo.visualization.scatter import Scatter
 import numpy as np
 import os
+import multiprocessing as mp
 
 class A:
     def __init__(self):
         self.a = 1
 
 class B(A):
+    nTasks = 1
+    nProc = 1
+    procLim = 1
     def __init__(self):
         print(super().__dict__)
         self.b = 2
         print(super().__dict__)
 
-B()
+    @classmethod
+    def setup_parallelize(cls, externalSolver):
+        if cls.nTasks is None:
+            if cls.nProc is not None and cls.nProc is not None:
+                cls.nTasks = int(cls.procLim / cls.nProc)
+            else:
+                pass
+                # cls.nTasks = config.MP_POOL_NTASKS_MAX
+        if externalSolver:
+            assert cls.solverExecCmd is not None
+            assert cls.nTasks is not None
+            cls._solve = cls.solveExternal
+            cls.Pool = mp.pool.ThreadPool
+            print('Setup thread pool: ', end='')
+        else:
+            cls._solve = cls._solve
+            cls.Pool = mp.Pool
+            print('Setup multiprocessing pool: ', end='')
+        print('number of tasks =', cls.nTasks)
+
+
+    @classmethod
+    def parallelize(cls, cases, externalSolver=None):
+        if externalSolver is None:
+            externalSolver = cls.externalSolver
+        cls.setup_parallelize(externalSolver)
+        # cls.logger.info('PARALLELIZING . . .')
+        with cls.Pool(cls.nTasks) as pool:
+            if cls.onlyParallelizeSolve:
+                for case in cases:
+                    case.preProc()
+                print('PARALLELIZING . . .')
+                for case in cases:
+                    pool.apply_async(case.solve, ())
+                pool.close()
+                pool.join()
+                for case in cases:
+                    case.postProc()
+            else:
+                print('PARALLELIZING . . .')
+                for case in cases:
+                    pool.apply_async(case.run, ())
+                pool.close()
+                pool.join()
+
+b = B()
+
+import numpy as np
+np.save('scratch', b)
 # import fnmatch
 # import os
 # path = os.path.join(os.getcwd(), 'slurm.out')

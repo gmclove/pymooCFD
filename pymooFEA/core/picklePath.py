@@ -81,15 +81,15 @@ class PicklePath:
                 #         self.loadIfPP(item)
                 if isinstance(attr_val, dict):
                     for key, val in attr_val.items():
-                        self.loadIfPP(val)
+                        self.load_if_pp(val)
                 else:
                     for item in attr_val:
-                        self.loadIfPP(item)
+                        self.load_if_pp(item)
                     # self.logger.warning('Unknown Iterable Object')
                     # self.logger.warning(f'ITEMS INSIDE ITERABLE ATTRIBUTE NOT LOADED - {attr_key} : {attr_val}')
 
             # type(attr_val).mro(): #
-            self.loadIfPP(attr_val)
+            self.load_if_pp(attr_val)
             # if __class__ in attr_val.__class__.mro():
             #     self.logger.info(
             #         f'LOADING: {attr_key} FROM {attr_val.cp_path}')
@@ -112,10 +112,10 @@ class PicklePath:
                 #         self.saveIfPP(item)
                 if isinstance(attr_val, dict):
                     for key, val in attr_val.items():
-                        self.saveIfPP(val)
+                        self.save_if_pp(val)
                 else:
                     for item in attr_val:
-                        self.saveIfPP(item)
+                        self.save_if_pp(item)
                     # self.logger.warning('Unknown Iterable Object')
                     # self.logger.warning(f'ITEMS INSIDE ITERABLE ATTRIBUTE NOT SAVED - {attr_key} : {attr_val}')
                     # if __class__ in item.__class__.mro():  # type(attr_val).mro(): #
@@ -123,7 +123,7 @@ class PicklePath:
                     #         f'LOADING: {attr_key}[{i}] FROM {item.cp_path}')
                     #     item.update_self()
             # type(attr_val).mro(): #
-            self.saveIfPP(attr_val)
+            self.save_if_pp(attr_val)
             # if __class__ in attr_val.__class__.mro():
             #     self.logger.info(
             #         f'LOADING: {attr_key} FROM {attr_val.cp_path}')
@@ -131,18 +131,13 @@ class PicklePath:
             # except AttributeError as err:
             #     self.logger.error(err)
 
-    def loadIfPP(self, inst):
+    def load_if_pp(self, inst):
         if self.is_pickle_path(inst):
             self.logger.info(
                 f'LOADING: {inst} FROM {inst.cp_path}')
             inst.update_self()
 
-    def saveIfPP(self, inst):
-        # try:
-        #     inst.__class__.mro()
-        # except TypeError as err:
-        #     self.logger.error(err)
-        #     return
+    def save_if_pp(self, inst):
         if self.is_pickle_path(inst):
             self.logger.info(
                 f'SAVING: {inst} TO {os.path.relpath(inst.cp_path)}')
@@ -190,10 +185,10 @@ class PicklePath:
 
     def save_self(self):
         if os.path.isdir(self.abs_path):
-            print(self)
-            for attr in self.__dict__:
-                print(attr)
-            self.saveNumpyFile(self.cp_path, self)
+            # print(self)
+            # for attr in self.__dict__:
+            #     print(attr)
+            self.saveNumpyFile(self.cp_path, self) # !!!!!!!!!!!!!! UNCOMMENT
             self.logger.info('CHECKPOINT SAVED')
         else:
             self.logger.warning('FAILED: SAVING CHECKPOINT - directory does not exist')

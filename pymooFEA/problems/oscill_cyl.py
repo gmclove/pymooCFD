@@ -259,7 +259,8 @@ class OscillCylinder(YALES2Case):
 
         len_quarter_cyl = 2 * np.pi * cylR / 4
         NN_quarter_cyl = int(len_quarter_cyl / x_min)
-        cyl_tags = [15, 17, 22, 23]
+        cyl_tags = [11, 18, 19, 13] #[15, 17, 22, 23]
+        # gmsh.fltk.run()
         for tag in cyl_tags:
             gmsh.model.mesh.setTransfiniteCurve(tag, NN_quarter_cyl)
         # Set minimum and maximum mesh size
