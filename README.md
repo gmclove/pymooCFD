@@ -1,7 +1,7 @@
 # pymooCFD
 ## About
 <!-- This platform was developed as part of my research as a masters student at the University of Vermont.  -->
-This platform provides an interface between the multi-objective optimization library, pymoo, and computational fluid dynamic (CFD) modeling software. The aim of this project was to provide users with minimal background in coding the ability to conduct optimization studies on CFD models in  a timely manner.
+This platform provides an interface between the multi-objective optimization library, pymoo, and computational fluid dynamic (CFD) modeling software. The aim of this project is to provide users with minimal background in coding the ability to conduct optimization studies on CFD models in  a timely manner.
 
 A user that knows the command line interface (CLI) of their modeling software (or can run a script trace of the GUI) can create custom methods for pre- and post-processing (*_preProc*/*_postProc*) . If geometric optimization is needed, a custom method for geometric construction and meshing can be created (*_genMesh*). Scripted meshing schemes also allow for the use of the platform's automated mesh studies. Additionally, due to the computational demand of turbulence modeling an interface for custom parallelization of computational resources is featured. This allows for ease of scaling from local machines to high performance computing clusters.
 
